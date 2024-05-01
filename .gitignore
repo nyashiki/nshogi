@@ -1,0 +1,15 @@
+# Artifacts
+build
+*.so*
+*.a
+libnshogi_test*
+
+# llvm-cov
+cov_html/
+default.profraw
+default.profdata
+
+# bench
+bench.txt
+perf.data
+perf.data.old

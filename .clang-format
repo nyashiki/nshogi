@@ -1,0 +1,11 @@
+BasedOnStyle: LLVM
+AccessModifierOffset: -3
+IndentWidth: 4
+TabWidth: 4
+BreakBeforeBraces: Custom
+BraceWrapping:
+    AfterFunction: false
+AllowShortFunctionsOnASingleLine: false
+PointerAlignment: Left
+Language: Cpp
+Standard: c++20
