@@ -211,7 +211,8 @@ class State {
         uint8_t StepScore = 0;
 
         bitboard::Bitboard SlideresBB =
-            getBitboard<C, PTK_Bishop>() | getBitboard<C, PTK_ProBishop>() | getBitboard<C, PTK_Rook>() | getBitboard<C, PTK_ProRook>();
+            (getBitboard<PTK_Bishop>() | getBitboard<PTK_ProBishop>() | getBitboard<PTK_Rook>() | getBitboard<PTK_ProRook>())
+            & getBitboard<C>();
 
         bitboard::Bitboard StepsBB = getBitboard<C>() ^ getBitboard<C, PTK_King>() ^ SlideresBB;
 
@@ -249,24 +250,24 @@ class State {
         bitboard::Bitboard StepAttackBB = bitboard::Bitboard::ZeroBB();
 
         // North attacks.
-        bitboard::Bitboard NorthAttackCandidateBB =
-            (C == Black)? (getBitboard<Black, PTK_Pawn>()      |
-                           getBitboard<Black, PTK_Silver>()    |
-                           getBitboard<Black, PTK_Gold>()      |
-                           getBitboard<Black, PTK_King>()      |
-                           getBitboard<Black, PTK_ProPawn>()   |
-                           getBitboard<Black, PTK_ProLance>()  |
-                           getBitboard<Black, PTK_ProKnight>() |
-                           getBitboard<Black, PTK_ProSilver>() |
-                           getBitboard<Black, PTK_ProBishop>())
+        bitboard::Bitboard NorthAttackCandidateBB = getBitboard<C>() &
+            ((C == Black)? (getBitboard<PTK_Pawn>()      |
+                            getBitboard<PTK_Silver>()    |
+                            getBitboard<PTK_Gold>()      |
+                            getBitboard<PTK_King>()      |
+                            getBitboard<PTK_ProPawn>()   |
+                            getBitboard<PTK_ProLance>()  |
+                            getBitboard<PTK_ProKnight>() |
+                            getBitboard<PTK_ProSilver>() |
+                            getBitboard<PTK_ProBishop>())
 
-                        : (getBitboard<White, PTK_Gold>()      |
-                           getBitboard<White, PTK_King>()      |
-                           getBitboard<White, PTK_ProPawn>()   |
-                           getBitboard<White, PTK_ProLance>()  |
-                           getBitboard<White, PTK_ProKnight>() |
-                           getBitboard<White, PTK_ProSilver>() |
-                           getBitboard<White, PTK_ProBishop>());
+                        : (getBitboard<PTK_Gold>()      |
+                           getBitboard<PTK_King>()      |
+                           getBitboard<PTK_ProPawn>()   |
+                           getBitboard<PTK_ProLance>()  |
+                           getBitboard<PTK_ProKnight>() |
+                           getBitboard<PTK_ProSilver>() |
+                           getBitboard<PTK_ProBishop>()));
 
         if (ExcludeSq != SqInvalid) {
             NorthAttackCandidateBB &= ~bitboard::SquareBB[ExcludeSq];
@@ -275,18 +276,19 @@ class State {
         StepAttackBB |= (NorthAttackCandidateBB & ~bitboard::RankBB[RankA]).getLeftShiftEpi64<1>();
 
         // NorthEast attacks and NorthWest attacks.
-        bitboard::Bitboard NorthEastAndNorthWestAttackCandidateBB =
-            (C == Black) ? (getBitboard<Black, PTK_Silver>()    |
-                            getBitboard<Black, PTK_Gold>()      |
-                            getBitboard<Black, PTK_King>()      |
-                            getBitboard<Black, PTK_ProPawn>()   |
-                            getBitboard<Black, PTK_ProLance>()  |
-                            getBitboard<Black, PTK_ProKnight>() |
-                            getBitboard<Black, PTK_ProSilver>() |
-                            getBitboard<Black, PTK_ProRook>())
+        bitboard::Bitboard NorthEastAndNorthWestAttackCandidateBB = getBitboard<C>() &
+            ((C == Black) ? (getBitboard<PTK_Silver>()    |
+                             getBitboard<PTK_Gold>()      |
+                             getBitboard<PTK_King>()      |
+                             getBitboard<PTK_ProPawn>()   |
+                             getBitboard<PTK_ProLance>()  |
+                             getBitboard<PTK_ProKnight>() |
+                             getBitboard<PTK_ProSilver>() |
+                             getBitboard<PTK_ProRook>())
 
-                         : (getBitboard<White, PTK_King>() |
-                            getBitboard<White, PTK_Silver>() | getBitboard<White, PTK_ProRook>());
+                         : (getBitboard<PTK_King>()  |
+                            getBitboard<PTK_Silver>() |
+                            getBitboard<PTK_ProRook>()));
 
         if (ExcludeSq != SqInvalid) {
             NorthEastAndNorthWestAttackCandidateBB &= ~bitboard::SquareBB[ExcludeSq];
@@ -296,22 +298,22 @@ class State {
         StepAttackBB |= (NorthEastAndNorthWestAttackCandidateBB & ~bitboard::RankBB[RankA] & ~bitboard::FileBB[File9]).getLeftShiftSi128<10>();
 
         // East attacks and West attacks.
-        bitboard::Bitboard EastAndWestAttackCandidateBB =
-            (C == Black) ? (getBitboard<Black, PTK_Gold>()      |
-                            getBitboard<Black, PTK_King>()      |
-                            getBitboard<Black, PTK_ProPawn>()   |
-                            getBitboard<Black, PTK_ProLance>()  |
-                            getBitboard<Black, PTK_ProKnight>() |
-                            getBitboard<Black, PTK_ProSilver>() |
-                            getBitboard<Black, PTK_ProBishop>())
+        bitboard::Bitboard EastAndWestAttackCandidateBB = getBitboard<C>() &
+            ((C == Black) ? (getBitboard<PTK_Gold>()      |
+                             getBitboard<PTK_King>()      |
+                             getBitboard<PTK_ProPawn>()   |
+                             getBitboard<PTK_ProLance>()  |
+                             getBitboard<PTK_ProKnight>() |
+                             getBitboard<PTK_ProSilver>() |
+                             getBitboard<PTK_ProBishop>())
 
-                         : (getBitboard<White, PTK_Gold>()      |
-                            getBitboard<White, PTK_King>()      |
-                            getBitboard<White, PTK_ProPawn>()   |
-                            getBitboard<White, PTK_ProLance>()  |
-                            getBitboard<White, PTK_ProKnight>() |
-                            getBitboard<White, PTK_ProSilver>() |
-                            getBitboard<White, PTK_ProBishop>());
+                         : (getBitboard<PTK_Gold>()      |
+                            getBitboard<PTK_King>()      |
+                            getBitboard<PTK_ProPawn>()   |
+                            getBitboard<PTK_ProLance>()  |
+                            getBitboard<PTK_ProKnight>() |
+                            getBitboard<PTK_ProSilver>() |
+                            getBitboard<PTK_ProBishop>()));
 
         if (ExcludeSq != SqInvalid) {
             EastAndWestAttackCandidateBB &= ~bitboard::SquareBB[ExcludeSq];
@@ -321,19 +323,19 @@ class State {
         StepAttackBB |= (EastAndWestAttackCandidateBB & ~bitboard::FileBB[File9]).getLeftShiftSi128<9>();
 
         // SouthEast attacks and SouthWest attacks.
-        bitboard::Bitboard SouthEastAndSouthWestAttackCandidateBB =
-            (C == Black)? (getBitboard<Black, PTK_King>()   |
-                           getBitboard<Black, PTK_Silver>() |
-                           getBitboard<Black, PTK_ProRook>())
+        bitboard::Bitboard SouthEastAndSouthWestAttackCandidateBB = getBitboard<C>() &
+            ((C == Black)? (getBitboard<PTK_King>()   |
+                            getBitboard<PTK_Silver>() |
+                            getBitboard<PTK_ProRook>())
 
-                        : (getBitboard<White, PTK_Silver>()    |
-                           getBitboard<White, PTK_Gold>()      |
-                           getBitboard<White, PTK_King>()      |
-                           getBitboard<White, PTK_ProPawn>()   |
-                           getBitboard<White, PTK_ProLance>()  |
-                           getBitboard<White, PTK_ProKnight>() |
-                           getBitboard<White, PTK_ProSilver>() |
-                           getBitboard<White, PTK_ProRook>());
+                        : (getBitboard<PTK_Silver>()    |
+                           getBitboard<PTK_Gold>()      |
+                           getBitboard<PTK_King>()      |
+                           getBitboard<PTK_ProPawn>()   |
+                           getBitboard<PTK_ProLance>()  |
+                           getBitboard<PTK_ProKnight>() |
+                           getBitboard<PTK_ProSilver>() |
+                           getBitboard<PTK_ProRook>()));
 
         if (ExcludeSq != SqInvalid) {
             SouthEastAndSouthWestAttackCandidateBB &= ~bitboard::SquareBB[ExcludeSq];
@@ -343,24 +345,24 @@ class State {
         StepAttackBB |= (SouthEastAndSouthWestAttackCandidateBB & ~bitboard::RankBB[RankI] & ~bitboard::FileBB[File9]).getLeftShiftSi128<8>();
 
         // South attacks.
-        bitboard::Bitboard SouthAttackCandidateBB =
-            (C == Black)? (getBitboard<Black, PTK_Gold>()      |
-                           getBitboard<Black, PTK_King>()      |
-                           getBitboard<Black, PTK_ProPawn>()   |
-                           getBitboard<Black, PTK_ProLance>()  |
-                           getBitboard<Black, PTK_ProKnight>() |
-                           getBitboard<Black, PTK_ProSilver>() |
-                           getBitboard<Black, PTK_ProBishop>())
+        bitboard::Bitboard SouthAttackCandidateBB = getBitboard<C>() &
+            ((C == Black)? (getBitboard<PTK_Gold>()      |
+                            getBitboard<PTK_King>()      |
+                            getBitboard<PTK_ProPawn>()   |
+                            getBitboard<PTK_ProLance>()  |
+                            getBitboard<PTK_ProKnight>() |
+                            getBitboard<PTK_ProSilver>() |
+                            getBitboard<PTK_ProBishop>())
 
-                        : (getBitboard<White, PTK_Pawn>()      |
-                           getBitboard<White, PTK_Silver>()    |
-                           getBitboard<White, PTK_Gold>()      |
-                           getBitboard<White, PTK_King>()      |
-                           getBitboard<White, PTK_ProPawn>()   |
-                           getBitboard<White, PTK_ProLance>()  |
-                           getBitboard<White, PTK_ProKnight>() |
-                           getBitboard<White, PTK_ProSilver>() |
-                           getBitboard<White, PTK_ProBishop>());
+                        : (getBitboard<PTK_Pawn>()      |
+                           getBitboard<PTK_Silver>()    |
+                           getBitboard<PTK_Gold>()      |
+                           getBitboard<PTK_King>()      |
+                           getBitboard<PTK_ProPawn>()   |
+                           getBitboard<PTK_ProLance>()  |
+                           getBitboard<PTK_ProKnight>() |
+                           getBitboard<PTK_ProSilver>() |
+                           getBitboard<PTK_ProBishop>()));
 
         if (ExcludeSq != SqInvalid) {
             SouthAttackCandidateBB &= ~bitboard::SquareBB[ExcludeSq];
@@ -398,9 +400,9 @@ class State {
         bitboard::Bitboard SliderAttackBB = bitboard::Bitboard::ZeroBB();
 
         // Bishops.
-        const bitboard::Bitboard BishopBB =
-            (ExcludeSq == SqInvalid)? (getBitboard<C, PTK_Bishop>() | getBitboard<C, PTK_ProBishop>())
-                                    : ((getBitboard<C, PTK_Bishop>() | getBitboard<C, PTK_ProBishop>()) & ~bitboard::SquareBB[ExcludeSq]);
+        const bitboard::Bitboard BishopBB = getBitboard<C>() &
+            ((ExcludeSq == SqInvalid)? (getBitboard<PTK_Bishop>() | getBitboard<PTK_ProBishop>())
+                                     : ((getBitboard<PTK_Bishop>() | getBitboard<PTK_ProBishop>()) & ~bitboard::SquareBB[ExcludeSq]));
 
         const bitboard::Bitboard NotRankABB = ~bitboard::RankBB[RankA];
         const bitboard::Bitboard NotRankIBB = ~bitboard::RankBB[RankI];
@@ -467,13 +469,13 @@ class State {
             // clang-format on
         }
 
-        const bitboard::Bitboard RookBB =
-            (ExcludeSq == SqInvalid)? (getBitboard<C, PTK_Rook>() | getBitboard<C, PTK_ProRook>())
-                                    : ((getBitboard<C, PTK_Rook>() | getBitboard<C, PTK_ProRook>()) & ~bitboard::SquareBB[ExcludeSq]);
+        const bitboard::Bitboard RookBB = getBitboard<C>() &
+            ((ExcludeSq == SqInvalid)? (getBitboard<PTK_Rook>() | getBitboard<PTK_ProRook>())
+                                    : ((getBitboard<PTK_Rook>() | getBitboard<PTK_ProRook>()) & ~bitboard::SquareBB[ExcludeSq]));
 
-        const bitboard::Bitboard LanceBB =
-            (ExcludeSq == SqInvalid)? getBitboard<C, PTK_Lance>()
-                                    : (getBitboard<C, PTK_Lance>() & ~bitboard::SquareBB[ExcludeSq]);
+        const bitboard::Bitboard LanceBB = getBitboard<C>() &
+            ((ExcludeSq == SqInvalid)? getBitboard<PTK_Lance>()
+                                    : (getBitboard<PTK_Lance>() & ~bitboard::SquareBB[ExcludeSq]));
 
         const bitboard::Bitboard ForwardBB  = (C == Black)? (RookBB | LanceBB) : RookBB;
         const bitboard::Bitboard BackwardBB = (C == White)? (RookBB | LanceBB) : RookBB;
