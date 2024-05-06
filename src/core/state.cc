@@ -308,64 +308,19 @@ State::setDefendingOpponentSliderBB(StepHelper* SHelper,
                                     const bitboard::Bitboard& OccupiedBB) {
     SHelper->DefendingOpponentSliderBB[C].clear();
 
-    // Searching for a blocker for a lance.
-    {
-        BitIterator It(getBitboard<~C, PTK_Lance>());
-        while (!It.end()) {
-            Square Sq = It.next();
-            // SHelper->DefendingOpponentSliderBB[C] |=
-            //     bitboard::getLanceAttackBB<C>(getKingSquare<C>(), OccupiedBB) &
-            //     bitboard::getLanceAttackBB<~C>(Sq, OccupiedBB) &
-            //     getBitboard<C>();
-            SHelper->DefendingOpponentSliderBB[C] |=
-                bitboard::getLanceAttackBB<C>(getKingSquare<C>(), OccupiedBB) &
-                bitboard::getLanceAttackBB<~C>(Sq, OccupiedBB);
-        }
-    }
+    BitIterator It(
+        ((getBitboard<PTK_Lance>() & bitboard::getForwardBB<C>(getKingSquare<C>()))
+         | ((getBitboard<PTK_Bishop>() | getBitboard<PTK_ProBishop>()) & bitboard::getDiagBB(getKingSquare<C>()))
+         | ((getBitboard<PTK_Rook>() | getBitboard<PTK_ProRook>()) & bitboard::getCrossBB(getKingSquare<C>())))
+        & getBitboard<~C>());
 
-    // Searching for a blocker for a bishop.
-    {
-        BitIterator It(getBitboard<~C, PTK_Bishop>() |
-                       getBitboard<~C, PTK_ProBishop>());
-        while (!It.end()) {
-            const Square Sq = It.next();
+    while (!It.end()) {
+        Square Sq = It.next();
+        const bitboard::Bitboard BetweenOccupiedBB =
+            bitboard::getBetweenBB(Sq, getKingSquare<C>()) & OccupiedBB;
 
-            // const bitboard::Bitboard PossiblyDefender =
-            //     bitboard::getBishopAttackBB<PTK_Bishop>(getKingSquare<C>(),
-            //                                             OccupiedBB) &
-            //     bitboard::getBishopAttackBB<PTK_Bishop>(Sq, OccupiedBB) &
-            //     getBitboard<C>() & bitboard::LineBB[Sq][getKingSquare<C>()];
-
-            const bitboard::Bitboard PossiblyDefender =
-                bitboard::getBishopAttackBB<PTK_Bishop>(getKingSquare<C>(),
-                                                        OccupiedBB) &
-                bitboard::getBishopAttackBB<PTK_Bishop>(Sq, OccupiedBB) &
-                bitboard::LineBB[Sq][getKingSquare<C>()];
-
-            SHelper->DefendingOpponentSliderBB[C] |= PossiblyDefender;
-        }
-    }
-
-    // Searching for a blocker for a rook.
-    {
-        BitIterator It(getBitboard<~C, PTK_Rook>() |
-                       getBitboard<~C, PTK_ProRook>());
-        while (!It.end()) {
-            const Square Sq = It.next();
-
-            // const bitboard::Bitboard PossiblyDefender =
-            //     bitboard::getRookAttackBB<PTK_Rook>(getKingSquare<C>(),
-            //                                         OccupiedBB) &
-            //     bitboard::getRookAttackBB<PTK_Rook>(Sq, OccupiedBB) &
-            //     getBitboard<C>() & bitboard::LineBB[Sq][getKingSquare<C>()];
-
-            const bitboard::Bitboard PossiblyDefender =
-                bitboard::getRookAttackBB<PTK_Rook>(getKingSquare<C>(),
-                                                    OccupiedBB) &
-                bitboard::getRookAttackBB<PTK_Rook>(Sq, OccupiedBB) &
-                bitboard::LineBB[Sq][getKingSquare<C>()];
-
-            SHelper->DefendingOpponentSliderBB[C] |= PossiblyDefender;
+        if (!BetweenOccupiedBB.isZero() && BetweenOccupiedBB.popCount() == 1) {
+            SHelper->DefendingOpponentSliderBB[C].toggleBit(BetweenOccupiedBB.getOne());
         }
     }
 }
