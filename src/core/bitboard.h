@@ -58,6 +58,10 @@ extern const Bitboard PromotableBB[NumColors];
 extern Bitboard LineBB[NumSquares][NumSquares];
 extern Bitboard DirectionBB[11 + NorthNorthWest + 1][NumSquares];
 extern Bitboard BetweenBB[NumSquares][NumSquares];
+extern Bitboard DiagBB[NumSquares];
+extern Bitboard CrossBB[NumSquares];
+extern Bitboard ForwardBB[NumSquares];
+extern Bitboard BackwardBB[NumSquares];
 
 struct alignas(16) Bitboard {
     constexpr Bitboard() {
@@ -509,6 +513,23 @@ inline bool isAttacked(const Bitboard& AttackBB, const Bitboard& ExistBB) {
 
 inline Bitboard getBetweenBB(Square Sq1, Square Sq2) {
     return BetweenBB[Sq1][Sq2];
+}
+
+inline Bitboard getDiagBB(Square Sq) {
+    return DiagBB[Sq];
+}
+
+inline Bitboard getCrossBB(Square Sq) {
+    return CrossBB[Sq];
+}
+
+template <Color C>
+inline Bitboard getForwardBB(Square Sq) {
+    if constexpr (C == Black) {
+        return ForwardBB[Sq];
+    } else {
+        return BackwardBB[Sq];
+    }
 }
 
 void initializeBitboards();

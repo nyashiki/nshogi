@@ -97,6 +97,10 @@ constexpr Bitboard PromotableBB[NumColors] = {
 Bitboard LineBB[NumSquares][NumSquares];
 Bitboard DirectionBB[11 + NorthNorthWest + 1][NumSquares];
 Bitboard BetweenBB[NumSquares][NumSquares];
+Bitboard DiagBB[NumSquares];
+Bitboard CrossBB[NumSquares];
+Bitboard ForwardBB[NumSquares];
+Bitboard BackwardBB[NumSquares];
 
 namespace {
 
@@ -886,6 +890,81 @@ void initializeBetweenBB() {
     }
 }
 
+void initializeDiagBB() {
+    std::memset(static_cast<void*>(DiagBB), 0, sizeof(DiagBB));
+
+    for (Square Sq1 : Squares) {
+        for (Square Sq2 : Squares) {
+            if (Sq1 == Sq2) {
+                continue;
+            }
+
+            const auto Direction = SquareDirection[(std::size_t)Sq1][(std::size_t)Sq2];
+
+            if (Direction == NorthWest || Direction == NorthEast
+                || Direction == SouthWest || Direction == SouthEast) {
+                DiagBB[Sq1].toggleBit(Sq2);
+            }
+        }
+    }
+}
+
+void initializeCrossBB() {
+    std::memset(static_cast<void*>(CrossBB), 0, sizeof(CrossBB));
+
+    for (Square Sq1 : Squares) {
+        for (Square Sq2 : Squares) {
+            if (Sq1 == Sq2) {
+                continue;
+            }
+
+            const auto Direction = SquareDirection[(std::size_t)Sq1][(std::size_t)Sq2];
+
+            if (Direction == North || Direction == East
+                || Direction == South || Direction == West) {
+                CrossBB[Sq1].toggleBit(Sq2);
+            }
+        }
+    }
+}
+
+void initializeForwardBB() {
+    std::memset(static_cast<void*>(ForwardBB), 0, sizeof(ForwardBB));
+
+    for (Square Sq1 : Squares) {
+        for (Square Sq2 : Squares) {
+            if (Sq1 == Sq2) {
+                continue;
+            }
+
+            const auto Direction = SquareDirection[(std::size_t)Sq1][(std::size_t)Sq2];
+
+            if (Direction == North) {
+                ForwardBB[Sq1].toggleBit(Sq2);
+            }
+        }
+    }
+}
+
+void initializeBackwardBB() {
+    std::memset(static_cast<void*>(BackwardBB), 0, sizeof(BackwardBB));
+
+    for (Square Sq1 : Squares) {
+        for (Square Sq2 : Squares) {
+            if (Sq1 == Sq2) {
+                continue;
+            }
+
+            const auto Direction = SquareDirection[(std::size_t)Sq1][(std::size_t)Sq2];
+
+            if (Direction == South) {
+                BackwardBB[Sq1].toggleBit(Sq2);
+            }
+        }
+    }
+}
+
+
 } // namespace
 
 void initializeBitboards() {
@@ -912,6 +991,10 @@ void initializeBitboards() {
     initializeLineBB();
     initializeDirectionBB();
     initializeBetweenBB();
+    initializeDiagBB();
+    initializeCrossBB();
+    initializeForwardBB();
+    initializeBackwardBB();
 }
 
 } // namespace bitboard
