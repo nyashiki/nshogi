@@ -334,36 +334,38 @@ inline void State::setCheckerBB(StepHelper* SHelper,
     SHelper->CheckerBB.clear();
 
     SHelper->CheckerBB |= bitboard::getAttackBB<C, PTK_Pawn>(KingSq) &
-                          getBitboard<~C, PTK_Pawn>();
+                          getBitboard<PTK_Pawn>();
     SHelper->CheckerBB |= bitboard::getAttackBB<C, PTK_Knight>(KingSq) &
-                          getBitboard<~C, PTK_Knight>();
+                          getBitboard<PTK_Knight>();
     SHelper->CheckerBB |= bitboard::getAttackBB<C, PTK_Silver>(KingSq) &
-                          getBitboard<~C, PTK_Silver>();
+                          getBitboard<PTK_Silver>();
     SHelper->CheckerBB |= bitboard::getAttackBB<C, PTK_Gold>(KingSq) &
-                          getBitboard<~C, PTK_Gold>();
+                          getBitboard<PTK_Gold>();
     SHelper->CheckerBB |= bitboard::getAttackBB<C, PTK_ProPawn>(KingSq) &
-                          getBitboard<~C, PTK_ProPawn>();
+                          getBitboard<PTK_ProPawn>();
     SHelper->CheckerBB |= bitboard::getAttackBB<C, PTK_ProLance>(KingSq) &
-                          getBitboard<~C, PTK_ProLance>();
+                          getBitboard<PTK_ProLance>();
     SHelper->CheckerBB |= bitboard::getAttackBB<C, PTK_ProKnight>(KingSq) &
-                          getBitboard<~C, PTK_ProKnight>();
+                          getBitboard<PTK_ProKnight>();
     SHelper->CheckerBB |= bitboard::getAttackBB<C, PTK_ProSilver>(KingSq) &
-                          getBitboard<~C, PTK_ProSilver>();
+                          getBitboard<PTK_ProSilver>();
 
     SHelper->CheckerBB |= bitboard::getLanceAttackBB<C>(KingSq, OccupiedBB) &
-                          getBitboard<~C, PTK_Lance>();
+                          getBitboard<PTK_Lance>();
     SHelper->CheckerBB |=
         bitboard::getBishopAttackBB<PTK_Bishop>(KingSq, OccupiedBB) &
-        getBitboard<~C, PTK_Bishop>();
+        getBitboard<PTK_Bishop>();
     SHelper->CheckerBB |=
         bitboard::getBishopAttackBB<PTK_ProBishop>(KingSq, OccupiedBB) &
-        getBitboard<~C, PTK_ProBishop>();
+        getBitboard<PTK_ProBishop>();
     SHelper->CheckerBB |=
         bitboard::getRookAttackBB<PTK_Rook>(KingSq, OccupiedBB) &
-        getBitboard<~C, PTK_Rook>();
+        getBitboard<PTK_Rook>();
     SHelper->CheckerBB |=
         bitboard::getRookAttackBB<PTK_ProRook>(KingSq, OccupiedBB) &
-        getBitboard<~C, PTK_ProRook>();
+        getBitboard<PTK_ProRook>();
+
+    SHelper->CheckerBB &= getBitboard<~C>();
 }
 
 bool State::canDeclare() const {
