@@ -239,16 +239,16 @@ static constexpr auto DirectionDataInternal = []() ->
             } else if (F1 == F2) {
                 Directions[(std::size_t)Sq1][(std::size_t)Sq2] = Comp? South : North;
                 SerializedDirections[(std::size_t)Sq1][(std::size_t)Sq2] = Comp? 4 : 0;
-            } else if (Sq2 == Sq1 + NorthNorthEast) {
+            } else if (Sq2 == Sq1 + NorthNorthEast && F1 != File1) {
                 Directions[(std::size_t)Sq1][(std::size_t)Sq2] = NorthNorthEast;
                 SerializedDirections[(std::size_t)Sq1][(std::size_t)Sq2] = 8;
-            } else if (Sq2 == Sq1 + NorthNorthWest) {
+            } else if (Sq2 == Sq1 + NorthNorthWest && F1 != File9) {
                 Directions[(std::size_t)Sq1][(std::size_t)Sq2] = NorthNorthWest;
                 SerializedDirections[(std::size_t)Sq1][(std::size_t)Sq2] = 9;
-            } else if (Sq2 == Sq1 + SouthSouthEast) {
+            } else if (Sq2 == Sq1 + SouthSouthEast && F1 != File1) {
                 Directions[(std::size_t)Sq1][(std::size_t)Sq2] = SouthSouthEast;
                 SerializedDirections[(std::size_t)Sq1][(std::size_t)Sq2] = 10;
-            } else if (Sq2 == Sq1 + SouthSouthWest) {
+            } else if (Sq2 == Sq1 + SouthSouthWest && F1 != File9) {
                 Directions[(std::size_t)Sq1][(std::size_t)Sq2] = SouthSouthWest;
                 SerializedDirections[(std::size_t)Sq1][(std::size_t)Sq2] = 11;
             } else if ((int)F1 - (int)F2 == (int)R1 - (int)R2) {
