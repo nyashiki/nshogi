@@ -42,12 +42,12 @@ class State {
     }
 
     template <Color C>
-    inline constexpr const bitboard::Bitboard& getBitboard() const {
+    inline constexpr const bitboard::Bitboard getBitboard() const {
         return Helper.ColorBB[C];
     }
 
     template <PieceTypeKind Type>
-    inline constexpr const bitboard::Bitboard& getBitboard() const {
+    inline constexpr const bitboard::Bitboard getBitboard() const {
         return Helper.TypeBB[Type];
     }
 
@@ -56,7 +56,7 @@ class State {
         return Helper.ColorBB[C] & Helper.TypeBB[Type];
     }
 
-    inline const bitboard::Bitboard& getBitboard(Color C) const {
+    inline const bitboard::Bitboard getBitboard(Color C) const {
         return Helper.ColorBB[C];
     }
 
@@ -69,7 +69,7 @@ class State {
         return Helper.ColorBB[C] & Helper.TypeBB[Type];
     }
 
-    inline const bitboard::Bitboard& getCheckerBB() const {
+    inline const bitboard::Bitboard getCheckerBB() const {
         return Helper.getCurrentStepHelper().CheckerBB;
     }
 
@@ -241,7 +241,7 @@ class State {
     bool canDeclare() const;
 
     template <Color C>
-    inline constexpr const bitboard::Bitboard& getDefendingOpponentSliderBB() const {
+    inline constexpr const bitboard::Bitboard getDefendingOpponentSliderBB() const {
         return Helper.getCurrentStepHelper().DefendingOpponentSliderBB[C];
     }
 

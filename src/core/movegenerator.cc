@@ -491,10 +491,6 @@ inline Move32* generateDroppingMovesImpl(const State& S, Move32* List,
             Square To = ToBB.popOne();
             assert(checkRange(To));
 
-            // The piece type knight cannot be placed on the second-furthermost
-            // squares. if (KnightExists) {
-            //     *List++ = Move32::droppingMove(To, PTK_Knight);
-            // }
             if (LanceExists) {
                 *List++ = Move32::droppingMove(To, PTK_Lance);
             }
@@ -520,14 +516,6 @@ inline Move32* generateDroppingMovesImpl(const State& S, Move32* List,
             Square To = ToBB.popOne();
             assert(checkRange(To));
 
-            // The piece type knight or lance cannot be
-            // placed on the second-furthermost squares.
-            // if (KnightExists) {
-            //     *List++ = Move32::droppingMove(To, PTK_Knight);
-            // }
-            // if (LanceExists) {
-            //     *List++ = Move32::droppingMove(To, PTK_Lance);
-            // }
             if (SilverExists) {
                 *List++ = Move32::droppingMove(To, PTK_Silver);
             }
@@ -1151,9 +1139,9 @@ inline Move32* generatePossiblyLegalMovesImpl(const State& S, Move32* Moves,
 
 template <Color C, bool WilyPromote>
 inline Move32* generatePossiblyLegalMovesImpl(const State& S, Move32* Moves) {
-    const Bitboard& CheckerBB = S.getCheckerBB();
-    const Bitboard& BlackBB = S.getBitboard<Black>();
-    const Bitboard& WhiteBB = S.getBitboard<White>();
+    const Bitboard CheckerBB = S.getCheckerBB();
+    const Bitboard BlackBB = S.getBitboard<Black>();
+    const Bitboard WhiteBB = S.getBitboard<White>();
     const Bitboard OccupiedBB = BlackBB | WhiteBB;
 
     if constexpr (C == Black) {
@@ -1179,19 +1167,19 @@ inline Move32* generatePossiblyLegalMovesImpl(const State& S, Move32* Moves) {
 
 template <Color C, bool WilyPromote>
 inline Move32* generatePossiblyLegalCheckMovesImpl(const State& S, Move32* Moves) {
-    const Bitboard& BlackBB = S.getBitboard<Black>();
-    const Bitboard& WhiteBB = S.getBitboard<White>();
+    const Bitboard BlackBB = S.getBitboard<Black>();
+    const Bitboard WhiteBB = S.getBitboard<White>();
     const Bitboard OccupiedBB = BlackBB | WhiteBB;
     const Bitboard EmptyBB = ~OccupiedBB;
-    const Bitboard& CheckerBB = S.getCheckerBB();
-    const Bitboard& PinnedBB = S.getDefendingOpponentSliderBB<~C>();
+    const Bitboard CheckerBB = S.getCheckerBB();
+    const Bitboard PinnedBB = S.getDefendingOpponentSliderBB<~C>();
     const Bitboard NoPinnedBB = ~PinnedBB;
     const Square MyKingSq = S.getKingSquare<C>();
     const Square OpKingSq = S.getKingSquare<~C>();
 
     if (CheckerBB.popCount() >= 2) {
         if (PinnedBB.isSet(S.getKingSquare<C>())) {
-            const Bitboard& KingLineBB = LineBB[MyKingSq][OpKingSq];
+            const Bitboard KingLineBB = LineBB[MyKingSq][OpKingSq];
             const Bitboard UnpinEmptyBB = EmptyBB & ~KingLineBB;
             const Bitboard UnpinCaptureBB = S.getBitboard<~C>() & ~KingLineBB;
 
@@ -1216,11 +1204,11 @@ inline Move32* generatePossiblyLegalCheckMovesImpl(const State& S, Move32* Moves
 
         // Capturing moves.
 
-        const Bitboard& CheckerMyKingBetweenBB = BetweenBB[CheckerSq][MyKingSq];
+        const Bitboard CheckerMyKingBetweenBB = BetweenBB[CheckerSq][MyKingSq];
 
         if (PinnedExists) {
             if (PinnedBB.isSet(MyKingSq)) {
-                const Bitboard& KingLineBB = LineBB[MyKingSq][OpKingSq];
+                const Bitboard KingLineBB = LineBB[MyKingSq][OpKingSq];
                 const Bitboard UnpinEmptyBB = EmptyBB & ~KingLineBB;
                 const Bitboard UnpinCaptureBB = S.getBitboard<~C>() & ~KingLineBB;
 
@@ -1323,9 +1311,9 @@ MoveList MoveGenerator::generatePossiblyLegalEvasionMoves(const State& S) {
 template <Color C, bool WilyPromote>
 MoveList MoveGenerator::generatePossiblyLegalEvasionMoves(const State& S) {
     MoveList List;
-    const Bitboard& CheckerBB = S.getCheckerBB();
-    const Bitboard& MyBB = S.getBitboard<C>();
-    const Bitboard& OpponentBB = S.getBitboard<~C>();
+    const Bitboard CheckerBB = S.getCheckerBB();
+    const Bitboard MyBB = S.getBitboard<C>();
+    const Bitboard OpponentBB = S.getBitboard<~C>();
     const Bitboard OccupiedBB = MyBB | OpponentBB;
 
     List.Tail = generatePossiblyLegalEvasionMovesImpl<C, WilyPromote>(S, List.Tail, CheckerBB, OpponentBB, OccupiedBB);
