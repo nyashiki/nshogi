@@ -698,6 +698,36 @@ inline Move32* generateOnBoardOneStepNoPromoteCheckMovesImpl(const State& S, con
     return Moves;
 }
 
+template<Color C, bool Capture, bool Pinned>
+inline Move32* generateOnBoardOneStepNoPromoteCheckGoldKindsMovesImpl(const State& S, const Square OpKingSq, Move32* Moves, const Bitboard& TargetBB, const Bitboard& SourceFilter) {
+    Bitboard FromBB = S.getBitboard<C>() & SourceFilter
+                        & (S.getBitboard<PTK_Gold>() | S.getBitboard<PTK_ProPawn>()
+                            | S.getBitboard<PTK_ProLance>() | S.getBitboard<PTK_ProKnight>() | S.getBitboard<PTK_ProSilver>());
+
+    while (!FromBB.isZero()) {
+        const Square From = FromBB.popOne();
+        const PieceTypeKind Type = getPieceType(S.getPosition().pieceOn(From));
+
+        Bitboard TargetBB2 = (Pinned? (~LineBB[From][OpKingSq] | getAttackBB<~C, PTK_Gold>(OpKingSq))
+                                      : getAttackBB<~C, PTK_Gold>(OpKingSq))
+                             & getAttackBB<C, PTK_Gold>(From) & TargetBB;
+
+        while (!TargetBB2.isZero()) {
+            const Square To = TargetBB2.popOne();
+
+            if constexpr (Capture) {
+                const PieceTypeKind CaptureType =
+                    getPieceType(S.getPosition().pieceOn(To));
+                *Moves++ = Move32::boardMove(From, To, Type, CaptureType);
+            } else {
+                *Moves++ = Move32::boardMove(From, To, Type);
+            }
+        }
+    }
+
+    return Moves;
+}
+
 template<Color C, bool Capture, bool WilyPromote, bool Pinned>
 inline Move32* generateOnBoardLanceNoPromoteCheckMovesImpl(const State& S, const Square OpKingSq, Move32* Moves, const Bitboard& TargetBB, const Bitboard& OccupiedBB, const Bitboard& SourceFilter) {
     constexpr PieceTypeKind Type = PTK_Lance;
@@ -997,12 +1027,8 @@ inline Move32* generateOnBoardOneStepMovesImpl(const State& S, Move32* Moves,
     Moves = generateOnBoardOneStepPawnMovesImpl<C, Capture, WilyPromote>(S, Moves, TargetSquares);
     Moves = generateOnBoardOneStepMovesImpl<C, PTK_Knight, Capture>(S, Moves, TargetSquares);
     Moves = generateOnBoardOneStepMovesImpl<C, PTK_Silver, Capture>(S, Moves, TargetSquares);
-    Moves = generateOnBoardOneStepMovesImpl<C, PTK_Gold, Capture>(S, Moves, TargetSquares);
     Moves = generateOnBoardOneStepMovesImpl<C, PTK_King, Capture>(S, Moves, TargetSquares);
-    Moves = generateOnBoardOneStepMovesImpl<C, PTK_ProPawn, Capture>(S, Moves, TargetSquares);
-    Moves = generateOnBoardOneStepMovesImpl<C, PTK_ProLance, Capture>(S, Moves, TargetSquares);
-    Moves = generateOnBoardOneStepMovesImpl<C, PTK_ProKnight, Capture>(S, Moves, TargetSquares);
-    Moves = generateOnBoardOneStepMovesImpl<C, PTK_ProSilver, Capture>(S, Moves, TargetSquares);
+    Moves = generateOnBoardOneStepGoldKindsMovesImpl<C, Capture>(S, Moves, TargetSquares);
 
     return Moves;
 }
@@ -1016,11 +1042,7 @@ inline Move32* generateOnBoardOneStepCheckMovesImpl(const State& S, Move32* Move
     Moves = generateOnBoardOneStepNoPromoteCheckMovesImpl<C, PTK_Pawn, Capture, Pinned, WilyPromote>(S, OpKingSq, Moves, TargetBB, FromMask);
     Moves = generateOnBoardOneStepNoPromoteCheckMovesImpl<C, PTK_Knight, Capture, Pinned, WilyPromote>(S, OpKingSq, Moves, TargetBB, FromMask);
     Moves = generateOnBoardOneStepNoPromoteCheckMovesImpl<C, PTK_Silver, Capture, Pinned, WilyPromote>(S, OpKingSq, Moves, TargetBB, FromMask);
-    Moves = generateOnBoardOneStepNoPromoteCheckMovesImpl<C, PTK_Gold, Capture, Pinned, WilyPromote>(S, OpKingSq, Moves, TargetBB, FromMask);
-    Moves = generateOnBoardOneStepNoPromoteCheckMovesImpl<C, PTK_ProPawn, Capture, Pinned, WilyPromote>(S, OpKingSq, Moves, TargetBB, FromMask);
-    Moves = generateOnBoardOneStepNoPromoteCheckMovesImpl<C, PTK_ProLance, Capture, Pinned, WilyPromote>(S, OpKingSq, Moves, TargetBB, FromMask);
-    Moves = generateOnBoardOneStepNoPromoteCheckMovesImpl<C, PTK_ProKnight, Capture, Pinned, WilyPromote>(S, OpKingSq, Moves, TargetBB, FromMask);
-    Moves = generateOnBoardOneStepNoPromoteCheckMovesImpl<C, PTK_ProSilver, Capture, Pinned, WilyPromote>(S, OpKingSq, Moves, TargetBB, FromMask);
+    Moves = generateOnBoardOneStepNoPromoteCheckGoldKindsMovesImpl<C, Capture, Pinned>(S, OpKingSq, Moves, TargetBB, FromMask);
 
     Moves = generateOnBoardOneStepPromoteCheckMovesImpl<C, PTK_Pawn, Capture, Pinned>(S, OpKingSq, Moves, TargetBB, FromMask);
     Moves = generateOnBoardOneStepPromoteCheckMovesImpl<C, PTK_Knight, Capture, Pinned>(S, OpKingSq, Moves, TargetBB, FromMask);
@@ -1081,11 +1103,7 @@ inline Move32* generatePossiblyLegalEvasionMovesImpl(const State& S, Move32* Mov
     Moves = generateOnBoardOneStepPawnMovesImpl<C, true, WilyPromote>(S, Moves, CheckerBB);
     Moves = generateOnBoardOneStepMovesImpl<C, PTK_Knight, true>(S, Moves, CheckerBB);
     Moves = generateOnBoardOneStepMovesImpl<C, PTK_Silver, true>(S, Moves, CheckerBB);
-    Moves = generateOnBoardOneStepMovesImpl<C, PTK_Gold, true>(S, Moves, CheckerBB);
-    Moves = generateOnBoardOneStepMovesImpl<C, PTK_ProPawn, true>(S, Moves, CheckerBB);
-    Moves = generateOnBoardOneStepMovesImpl<C, PTK_ProLance, true>(S, Moves, CheckerBB);
-    Moves = generateOnBoardOneStepMovesImpl<C, PTK_ProKnight, true>(S, Moves, CheckerBB);
-    Moves = generateOnBoardOneStepMovesImpl<C, PTK_ProSilver, true>(S, Moves, CheckerBB);
+    Moves = generateOnBoardOneStepGoldKindsMovesImpl<C, true>(S, Moves, CheckerBB);
 
     Moves = generateOnBoardSliderMovesImpl<C, true, WilyPromote>(S, Moves, CheckerBB,
                                                             OccupiedBB);
