@@ -1,6 +1,5 @@
 #include "state.h"
 #include "bitboard.h"
-#include "bititerator.h"
 #include "position.h"
 #include "squareiterator.h"
 #include "statehelper.h"
@@ -308,14 +307,14 @@ State::setDefendingOpponentSliderBB(StepHelper* SHelper,
                                     const bitboard::Bitboard& OccupiedBB) {
     SHelper->DefendingOpponentSliderBB[C].clear();
 
-    BitIterator It(
+    bitboard::Bitboard Candidates =
         ((getBitboard<PTK_Lance>() & bitboard::getForwardBB<C>(getKingSquare<C>()))
          | ((getBitboard<PTK_Bishop>() | getBitboard<PTK_ProBishop>()) & bitboard::getDiagBB(getKingSquare<C>()))
          | ((getBitboard<PTK_Rook>() | getBitboard<PTK_ProRook>()) & bitboard::getCrossBB(getKingSquare<C>())))
-        & getBitboard<~C>());
+        & getBitboard<~C>();
 
-    while (!It.end()) {
-        Square Sq = It.next();
+    while (!Candidates.isZero()) {
+        Square Sq = Candidates.popOne();
         const bitboard::Bitboard BetweenOccupiedBB =
             bitboard::getBetweenBB(Sq, getKingSquare<C>()) & OccupiedBB;
 
