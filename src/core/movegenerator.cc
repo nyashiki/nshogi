@@ -1263,7 +1263,7 @@ inline Move32* generateLegalMovesImpl(const State& S, Move32* Moves) {
     Move32* Writer = MovesHead;
 
     while (Reader != Moves) {
-        if (S.isLegal<C>(*Reader)) {
+        if (!S.isSuicideMove<C>(*Reader)) {
             *Writer = *Reader;
             ++Writer;
         }

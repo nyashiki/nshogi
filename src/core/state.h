@@ -109,22 +109,22 @@ class State {
 
     // Helper functions.
 
-    template <Color C> inline bool isLegal(const Move32& Move) const {
+    template <Color C> inline bool isSuicideMove(const Move32& Move) const {
         assert(Move.drop() ||
                getPieceType(Pos.pieceOn(Move.from())) == Move.pieceType());
 
         if (Move.drop()) {
-            return true;
+            return false;
         }
 
-        return isLegalImpl<C>(Move);
+        return isSuicideMoveImpl<C>(Move);
     }
 
-    inline bool isLegal(const Move32& Move) const {
+    inline bool isSuicideMove(const Move32& Move) const {
         if (getPosition().sideToMove() == Black) {
-            return isLegal<Black>(Move);
+            return isSuicideMove<Black>(Move);
         } else {
-            return isLegal<White>(Move);
+            return isSuicideMove<White>(Move);
         }
     }
 
@@ -637,11 +637,11 @@ class State {
     void setCheckerBB(StepHelper* SHelper,
                       const bitboard::Bitboard& OccupiedBB);
 
-    template <Color C> inline bool isLegalImpl(const Move32& Move) const {
+    template <Color C> inline bool isSuicideMoveImpl(const Move32& Move) const {
         if (Move.pieceType() == PTK_King) {
             // When moving the king, the square moving onto
             // must be not attacked by opponent pieces.
-            return !isAttacked<C>(Move.to(), Move.from());
+            return isAttacked<C>(Move.to(), Move.from());
         }
 
         // Here, we check the other pieces (i.e., excluding king) moves.
@@ -652,12 +652,12 @@ class State {
         const Square From = Move.from();
         if (!getDefendingOpponentSliderBB<C>().isSet(From)) {
             // This piece is irrelevant defending an opponent slider attack.
-            return true;
+            return false;
         }
 
         // Now, this piece is defending opponent slider attacks.
         // Therefore this piece must go onto a square on the same line.
-        return utils::isSameLine(From, Move.to(), getKingSquare<C>());
+        return !utils::isSameLine(From, Move.to(), getKingSquare<C>());
     }
 
     friend class StateBuilder;
