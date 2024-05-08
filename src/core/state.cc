@@ -319,7 +319,7 @@ State::setDefendingOpponentSliderBB(StepHelper* SHelper,
             bitboard::getBetweenBB(Sq, getKingSquare<C>()) & OccupiedBB;
 
         if (!BetweenOccupiedBB.isZero() && BetweenOccupiedBB.popCount() == 1) {
-            SHelper->DefendingOpponentSliderBB[C].toggleBit(BetweenOccupiedBB.getOne());
+            SHelper->DefendingOpponentSliderBB[C] |= BetweenOccupiedBB;
         }
     }
 }
