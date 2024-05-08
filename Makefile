@@ -214,7 +214,7 @@ install-python: python
 
 .PHONY: runbench
 runbench: bench
-	perf record ./$(BENCH_TARGET)
+	perf record -a --call-graph dwarf -F 49 -- ./$(BENCH_TARGET)
 	perf report > bench.txt
 
 .PHONY: llvm-cov
