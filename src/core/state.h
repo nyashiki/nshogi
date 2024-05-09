@@ -629,13 +629,12 @@ class State {
     Hash<uint64_t> HashValue;
     StateHelper Helper;
 
-    template <Color C>
+    template <Color C, bool UpdateCheckerBySliders>
     void setDefendingOpponentSliderBB(StepHelper* SHelper,
                                       const bitboard::Bitboard& OccupiedBB);
 
     template <Color C>
-    void setCheckerBB(StepHelper* SHelper,
-                      const bitboard::Bitboard& OccupiedBB);
+    void setCheckerBB(StepHelper* SHelper);
 
     template <Color C> inline bool isSuicideMoveImpl(const Move32& Move) const {
         if (Move.pieceType() == PTK_King) {

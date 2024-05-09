@@ -151,11 +151,10 @@ inline void State::doMove(const Move32& Move) {
     const bitboard::Bitboard OccupiedBB =
         getBitboard<Black>() | getBitboard<White>();
 
-    setDefendingOpponentSliderBB<Black>(CurrentStepHelper, OccupiedBB);
-    setDefendingOpponentSliderBB<White>(CurrentStepHelper, OccupiedBB);
-
     // Update opponent's CheckerBB as it will be the opponent's turn next.
-    setCheckerBB<~C>(CurrentStepHelper, OccupiedBB);
+    setCheckerBB<~C>(CurrentStepHelper);
+    setDefendingOpponentSliderBB<C, false>(CurrentStepHelper, OccupiedBB);
+    setDefendingOpponentSliderBB<~C, true>(CurrentStepHelper, OccupiedBB);
 
     const StepHelper& PrevStepHelper = Helper.getStepHelper(Helper.Ply - 1);
     if (!CurrentStepHelper->CheckerBB.isZero()) {
@@ -280,13 +279,15 @@ void State::refresh() {
     // Non-trivial bitboards.
     const bitboard::Bitboard OccupiedBB =
         getBitboard<Black>() | getBitboard<White>();
-    setDefendingOpponentSliderBB<Black>(CurrentStepHelper, OccupiedBB);
-    setDefendingOpponentSliderBB<White>(CurrentStepHelper, OccupiedBB);
 
     if (getPosition().sideToMove() == Black) {
-        setCheckerBB<Black>(CurrentStepHelper, OccupiedBB);
+        setCheckerBB<Black>(CurrentStepHelper);
+        setDefendingOpponentSliderBB<Black, true>(CurrentStepHelper, OccupiedBB);
+        setDefendingOpponentSliderBB<White, false>(CurrentStepHelper, OccupiedBB);
     } else {
-        setCheckerBB<White>(CurrentStepHelper, OccupiedBB);
+        setCheckerBB<White>(CurrentStepHelper);
+        setDefendingOpponentSliderBB<Black, false>(CurrentStepHelper, OccupiedBB);
+        setDefendingOpponentSliderBB<White, true>(CurrentStepHelper, OccupiedBB);
     }
 
     HashValue.refresh(getPosition());
@@ -301,7 +302,7 @@ void State::refresh() {
     }
 }
 
-template <Color C>
+template <Color C, bool UpdateCheckerBySliders>
 inline void
 State::setDefendingOpponentSliderBB(StepHelper* SHelper,
                                     const bitboard::Bitboard& OccupiedBB) {
@@ -318,15 +319,18 @@ State::setDefendingOpponentSliderBB(StepHelper* SHelper,
         const bitboard::Bitboard BetweenOccupiedBB =
             bitboard::getBetweenBB(Sq, getKingSquare<C>()) & OccupiedBB;
 
-        if (!BetweenOccupiedBB.isZero() && BetweenOccupiedBB.popCount() == 1) {
+        if (BetweenOccupiedBB.isZero()) {
+            if constexpr (UpdateCheckerBySliders) {
+                SHelper->CheckerBB |= bitboard::SquareBB[Sq];
+            }
+        } else if (BetweenOccupiedBB.popCount() == 1) {
             SHelper->DefendingOpponentSliderBB[C] |= BetweenOccupiedBB;
         }
     }
 }
 
 template <Color C>
-inline void State::setCheckerBB(StepHelper* SHelper,
-                                const bitboard::Bitboard& OccupiedBB) {
+inline void State::setCheckerBB(StepHelper* SHelper) {
     const Square KingSq = getKingSquare<C>();
     assert(checkRange(KingSq));
 
@@ -339,30 +343,11 @@ inline void State::setCheckerBB(StepHelper* SHelper,
     SHelper->CheckerBB |= bitboard::getAttackBB<C, PTK_Silver>(KingSq) &
                           getBitboard<PTK_Silver>();
     SHelper->CheckerBB |= bitboard::getAttackBB<C, PTK_Gold>(KingSq) &
-                          getBitboard<PTK_Gold>();
-    SHelper->CheckerBB |= bitboard::getAttackBB<C, PTK_ProPawn>(KingSq) &
-                          getBitboard<PTK_ProPawn>();
-    SHelper->CheckerBB |= bitboard::getAttackBB<C, PTK_ProLance>(KingSq) &
-                          getBitboard<PTK_ProLance>();
-    SHelper->CheckerBB |= bitboard::getAttackBB<C, PTK_ProKnight>(KingSq) &
-                          getBitboard<PTK_ProKnight>();
-    SHelper->CheckerBB |= bitboard::getAttackBB<C, PTK_ProSilver>(KingSq) &
-                          getBitboard<PTK_ProSilver>();
-
-    SHelper->CheckerBB |= bitboard::getLanceAttackBB<C>(KingSq, OccupiedBB) &
-                          getBitboard<PTK_Lance>();
-    SHelper->CheckerBB |=
-        bitboard::getBishopAttackBB<PTK_Bishop>(KingSq, OccupiedBB) &
-        getBitboard<PTK_Bishop>();
-    SHelper->CheckerBB |=
-        bitboard::getBishopAttackBB<PTK_ProBishop>(KingSq, OccupiedBB) &
-        getBitboard<PTK_ProBishop>();
-    SHelper->CheckerBB |=
-        bitboard::getRookAttackBB<PTK_Rook>(KingSq, OccupiedBB) &
-        getBitboard<PTK_Rook>();
-    SHelper->CheckerBB |=
-        bitboard::getRookAttackBB<PTK_ProRook>(KingSq, OccupiedBB) &
-        getBitboard<PTK_ProRook>();
+                          (getBitboard<PTK_Gold>() | getBitboard<PTK_ProPawn>()
+                           | getBitboard<PTK_ProLance>() | getBitboard<PTK_ProKnight>()
+                           | getBitboard<PTK_ProSilver>());
+    SHelper->CheckerBB |= bitboard::getAttackBB<C, PTK_King>(KingSq) &
+                          (getBitboard<PTK_ProBishop>() | getBitboard<PTK_ProRook>());
 
     SHelper->CheckerBB &= getBitboard<~C>();
 }
@@ -374,13 +359,6 @@ bool State::canDeclare() const {
         return canDeclareImpl<White>(*this);
     }
 }
-
-template void
-State::setDefendingOpponentSliderBB<Black>(StepHelper* SHelper,
-                                           const bitboard::Bitboard&);
-template void
-State::setDefendingOpponentSliderBB<White>(StepHelper* SHelper,
-                                           const bitboard::Bitboard&);
 
 } // namespace core
 } // namespace nshogi
