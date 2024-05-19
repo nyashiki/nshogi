@@ -407,6 +407,10 @@ struct Move32 {
         return C_ == 0;
     }
 
+    constexpr bool isWin() const {
+        return C_ == MoveWin().value();
+    }
+
     constexpr bool isInvalid() const {
         return C_ == MoveInvalid().value();
     }
