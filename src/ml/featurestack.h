@@ -150,11 +150,23 @@ struct FeatureStack {
 
 template<FeatureType... FeatureTypes>
 struct FeatureStackComptime : FeatureStack {
-    FeatureStackComptime(const core::State& State, const core::StateConfig& Config) {
+    FeatureStackComptime(const core::State& State, const core::StateConfig& Config)
+        : Features(sizeof...(FeatureTypes)) {
         if (State.getPosition().sideToMove() == core::Black) {
-            process<core::Black, FeatureTypes...>(State, Config, Features);
+            process<core::Black, FeatureTypes...>(State, Config, Features.data());
         } else {
-            process<core::White, FeatureTypes...>(State, Config, Features);
+            process<core::White, FeatureTypes...>(State, Config, Features.data());
+        }
+    }
+
+    FeatureStackComptime(const FeatureStackComptime&) = delete;
+    FeatureStackComptime(FeatureStackComptime&& FSC) noexcept
+        : Features(std::move(FSC.Features)) {
+    }
+
+    FeatureStackComptime& operator=(FeatureStackComptime&& FSC) noexcept {
+        if (this != &FSC) {
+            Features = std::move(FSC.Features);
         }
     }
 
@@ -189,7 +201,7 @@ struct FeatureStackComptime : FeatureStack {
     }
 
     const FeatureBitboard* data() const {
-        return Features;
+        return Features.data();
     }
 
     static constexpr std::size_t size() {
@@ -418,7 +430,7 @@ struct FeatureStackComptime : FeatureStack {
         process<C, TailType...>(State, Config, FB + 1);
     }
 
-    FeatureBitboard Features[sizeof...(FeatureTypes)];
+    std::vector<FeatureBitboard> Features;
 };
 
 struct FeatureStackRuntime : FeatureStack {
