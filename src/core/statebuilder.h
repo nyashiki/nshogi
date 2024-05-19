@@ -3,7 +3,7 @@
 
 #include "state.h"
 #include "types.h"
-#include <initializer_list>
+#include <memory>
 #include <utility>
 
 namespace nshogi {

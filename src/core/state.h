@@ -1,6 +1,8 @@
 #ifndef NSHOGI_CORE_STATE_H
 #define NSHOGI_CORE_STATE_H
 
+#include <memory>
+
 #include <cassert>
 #include <cstdint>
 
