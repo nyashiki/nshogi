@@ -48,6 +48,10 @@ bool canDeclareImpl(const State& S) {
 State::State(const Position& P) : Pos(P), Helper(P) {
 }
 
+State::State(const Position& P, uint16_t Ply) : Pos(P), Helper(P) {
+    Pos.PlyOffset = Ply;
+}
+
 State::State(const Position& CurrentP, const Position& InitP)
     : Pos(CurrentP), Helper(InitP) {
 }

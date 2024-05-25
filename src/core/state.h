@@ -625,6 +625,7 @@ class State {
  private:
     State() = delete;
     State(const Position& P);
+    State(const Position& P, uint16_t Ply);
     State(const Position& CurrentP, const Position& InitP);
 
     Position Pos;
