@@ -82,8 +82,8 @@ struct alignas(32) HuffmanCode {
         return 4 * sizeof(uint64_t);
     }
 
-    char* data() {
-        return reinterpret_cast<char*>(Data);
+    const char* data() const {
+        return reinterpret_cast<const char*>(Data);
     }
 
  protected:
