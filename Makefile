@@ -68,6 +68,7 @@ TEST_SOURCES :=                         \
 	src/test/test_squareiterator.cc \
 	src/test/test_utils.cc          \
 	src/test/test_state.cc          \
+	src/test/test_position.cc       \
 	src/test/test_ml.cc
 
 BENCH_SOURCES :=                          \
