@@ -579,6 +579,21 @@ void testRepetitionHandmade14() {
     CU_ASSERT_EQUAL(State.getRepetitionStatus(), nshogi::core::RepetitionStatus::NoRepetition);
 }
 
+void testPlyOffset1() {
+    const std::string Sfen =
+      "lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL b - 100";
+    nshogi::core::State State = nshogi::io::sfen::StateBuilder::newState(Sfen);
+
+    CU_ASSERT_EQUAL(State.getPly(), 100 - 1);
+}
+
+void testPlyOffset2() {
+    nshogi::core::State State =
+        nshogi::core::StateBuilder::newState(nshogi::core::PositionBuilder::getInitialPosition(), 100);
+
+    CU_ASSERT_EQUAL(State.getPly(), 100);
+}
+
 void testPieceScore(const nshogi::core::State& S, uint8_t BlackScore, uint8_t WhiteScore) {
     const uint8_t BlackScoreComputed = S.computePieceScore<nshogi::core::Black, 5, 1, false>();
     const uint8_t WhiteScoreComputed = S.computePieceScore<nshogi::core::White, 5, 1, false>();
@@ -741,6 +756,9 @@ int setupTestState() {
     CU_add_test(suite, "Repetition 12", testRepetitionHandmade12);
     CU_add_test(suite, "Repetition 13", testRepetitionHandmade13);
     CU_add_test(suite, "Repetition 14", testRepetitionHandmade14);
+
+    CU_add_test(suite, "PlyOffset 1", testPlyOffset1);
+    CU_add_test(suite, "PlyOffset 2", testPlyOffset2);
 
     CU_add_test(suite, "Position Equals Itself", testEqualsItself);
     CU_add_test(suite, "Position Not Equals After One Move", testNotEqualOneMove);

@@ -268,6 +268,30 @@ void testMakePiece() {
                     nshogi::core::PK_WhiteProRook);
 }
 
+void testFileRange() {
+    CU_ASSERT_TRUE(checkRange(nshogi::core::File1));
+    CU_ASSERT_TRUE(checkRange(nshogi::core::File2));
+    CU_ASSERT_TRUE(checkRange(nshogi::core::File3));
+    CU_ASSERT_TRUE(checkRange(nshogi::core::File4));
+    CU_ASSERT_TRUE(checkRange(nshogi::core::File5));
+    CU_ASSERT_TRUE(checkRange(nshogi::core::File6));
+    CU_ASSERT_TRUE(checkRange(nshogi::core::File7));
+    CU_ASSERT_TRUE(checkRange(nshogi::core::File8));
+    CU_ASSERT_TRUE(checkRange(nshogi::core::File9));
+}
+
+void testRankRange() {
+    CU_ASSERT_TRUE(checkRange(nshogi::core::RankA));
+    CU_ASSERT_TRUE(checkRange(nshogi::core::RankB));
+    CU_ASSERT_TRUE(checkRange(nshogi::core::RankC));
+    CU_ASSERT_TRUE(checkRange(nshogi::core::RankD));
+    CU_ASSERT_TRUE(checkRange(nshogi::core::RankE));
+    CU_ASSERT_TRUE(checkRange(nshogi::core::RankF));
+    CU_ASSERT_TRUE(checkRange(nshogi::core::RankG));
+    CU_ASSERT_TRUE(checkRange(nshogi::core::RankH));
+    CU_ASSERT_TRUE(checkRange(nshogi::core::RankI));
+}
+
 void testSquareRange() {
     for (nshogi::core::Square sq : nshogi::core::Squares) {
         CU_ASSERT_TRUE(checkRange(sq));
@@ -519,6 +543,8 @@ int setupTestTypes() {
     CU_add_test(suite, "PromotePiece", testPiecePromote);
     CU_add_test(suite, "IsPromoted", testIsPromoted);
     CU_add_test(suite, "MakePiece", testMakePiece);
+    CU_add_test(suite, "FileRange", testFileRange);
+    CU_add_test(suite, "RankRange", testRankRange);
     CU_add_test(suite, "SquareRange", testSquareRange);
     CU_add_test(suite, "StandPawn", testStandPawn);
     CU_add_test(suite, "StandGold", testStandGold);

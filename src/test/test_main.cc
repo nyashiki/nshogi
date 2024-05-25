@@ -9,6 +9,7 @@ int setupTestSfen();
 int setupTestCSA();
 int setupTestMoveGeneration();
 int setupTestUtils();
+int setupTestPosition();
 int setupTestState();
 int setupTestML();
 int setupTestSquareIterator();
@@ -40,6 +41,7 @@ int main() {
     setupTestML();
     setupTestSquareIterator();
     setupTestMoveGeneration();
+    setupTestPosition();
     setupTestState();
     // Test body end.
 

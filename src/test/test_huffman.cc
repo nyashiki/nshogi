@@ -9,6 +9,12 @@
 
 namespace {
 
+void testHuffmanSize() {
+    nshogi::core::HuffmanCode HC = nshogi::core::HuffmanCode::zero();
+    CU_ASSERT_EQUAL(HC.size(), 4 * sizeof(uint64_t));
+    CU_ASSERT_EQUAL(sizeof(nshogi::core::HuffmanCode), 4 * sizeof(uint64_t));
+}
+
 bool testPositionEquality(const nshogi::core::Position& Pos) {
     nshogi::core::HuffmanCode HC = nshogi::core::HuffmanCode::encode(Pos);
     const auto DecodedPos = nshogi::core::HuffmanCode::decode(HC);
@@ -99,6 +105,36 @@ void testRandomMove() {
     }
 }
 
+void testMemcpy() {
+    const int N = 200;
+    std::mt19937_64 mt(20240522);
+
+    for (int I = 0; I < N; ++I) {
+        nshogi::core::State State =
+            nshogi::io::sfen::StateBuilder::getInitialState();
+
+        for (int Ply = 0; Ply < 1024; ++Ply) {
+            const auto Moves =
+                nshogi::core::MoveGenerator::generateLegalMoves(State);
+
+            if (Moves.size() == 0) {
+                break;
+            }
+
+            const auto RandomMove = Moves[mt() % Moves.size()];
+
+            State.doMove(RandomMove);
+
+            uint64_t Codes[4];
+            const auto HC = nshogi::core::HuffmanCode::encode(State.getPosition());
+            std::memcpy(reinterpret_cast<char*>(Codes), HC.data(), HC.size());
+            const auto HC2 = nshogi::core::HuffmanCode(Codes[3], Codes[2], Codes[1], Codes[0]);
+
+            CU_ASSERT_EQUAL(std::memcmp(HC.data(), HC2.data(), HC.size()), 0);
+        }
+    }
+}
+
 void testConstructor() {
     const int N = 20000;
     std::mt19937_64 mt(20240216);
@@ -161,6 +197,7 @@ void testCopyConstructor() {
 int setupTestHuffman() {
     CU_pSuite suite = CU_add_suite("huffman test", 0, 0);
 
+    CU_add_test(suite, "Huffman Size", testHuffmanSize);
     CU_add_test(suite, "Huffman Constructor", testConstructor);
     CU_add_test(suite, "Huffman Copy Constructor", testCopyConstructor);
     CU_add_test(suite, "Huffman InitialPosition", testInitialPosition);
@@ -168,6 +205,7 @@ int setupTestHuffman() {
     CU_add_test(suite, "Huffman AllStandsWhite", testAllStandsWhite);
     CU_add_test(suite, "Huffman Handmade 1", testHandmade1);
     CU_add_test(suite, "Huffman RandomMove", testRandomMove);
+    CU_add_test(suite, "Huffman Memcpy", testMemcpy);
 
     return CUE_SUCCESS;
 }
