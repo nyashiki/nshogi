@@ -472,34 +472,38 @@ struct Move32 {
 
     constexpr Square from() const {
 #if defined(USE_BMI1)
-        return (Square)(_bextr_u32(C_, FromShift, 7));
-#else
-        return (Square)((C_ & FromBits) >> FromShift);
+        if (!std::is_constant_evaluated()) {
+            return (Square)(_bextr_u32(C_, FromShift, 7));
+        }
 #endif
+        return (Square)((C_ & FromBits) >> FromShift);
     }
 
     constexpr bool promote() const {
 #if defined(USE_BMI1)
-        return (bool)(_bextr_u32(C_, PromoteShift, 1));
-#else
-        return (bool)((C_ & PromoteBit) >> PromoteShift);
+        if (!std::is_constant_evaluated()) {
+            return (bool)(_bextr_u32(C_, PromoteShift, 1));
+        }
 #endif
+        return (bool)((C_ & PromoteBit) >> PromoteShift);
     }
 
     constexpr PieceTypeKind pieceType() const {
 #if defined(USE_BMI1)
-        return (PieceTypeKind)(_bextr_u32(C_, PieceTypeShift, 4));
-#else
-        return (PieceTypeKind)((C_ & PieceTypeBits) >> PieceTypeShift);
+        if (!std::is_constant_evaluated()) {
+            return (PieceTypeKind)(_bextr_u32(C_, PieceTypeShift, 4));
+        }
 #endif
+        return (PieceTypeKind)((C_ & PieceTypeBits) >> PieceTypeShift);
     }
 
     constexpr PieceTypeKind capturePieceType() const {
 #if defined(USE_BMI1)
-        return (PieceTypeKind)(_bextr_u32(C_, CaptureTypeShift, 4));
-#else
-        return (PieceTypeKind)((C_ & CaptureTypeBits) >> CaptureTypeShift);
+        if (!std::is_constant_evaluated()) {
+            return (PieceTypeKind)(_bextr_u32(C_, CaptureTypeShift, 4));
+        }
 #endif
+        return (PieceTypeKind)((C_ & CaptureTypeBits) >> CaptureTypeShift);
     }
 
     constexpr bool drop() const {
@@ -578,10 +582,11 @@ struct Move16 {
 
     constexpr Square from() const {
 #if defined(USE_BMI1)
-        return (Square)(_bextr_u32(C_, (uint16_t)Move32::FromShift, 7));
-#else
-        return (Square)((C_ & (uint16_t)Move32::FromBits) >> (uint16_t)Move32::FromShift);
+        if (!std::is_constant_evaluated()) {
+            return (Square)(_bextr_u32(C_, (uint16_t)Move32::FromShift, 7));
+        }
 #endif
+        return (Square)((C_ & (uint16_t)Move32::FromBits) >> (uint16_t)Move32::FromShift);
     }
 
     constexpr Square to() const {
@@ -594,10 +599,11 @@ struct Move16 {
 
     constexpr bool promote() const {
 #if defined(USE_BMI1)
-        return (bool)(_bextr_u32(C_, (uint16_t)Move32::PromoteShift, 1));
-#else
-        return (bool)((C_ & (uint16_t)Move32::PromoteBit) >> (uint16_t)Move32::PromoteShift);
+        if (!std::is_constant_evaluated()) {
+            return (bool)(_bextr_u32(C_, (uint16_t)Move32::PromoteShift, 1));
+        }
 #endif
+        return (bool)((C_ & (uint16_t)Move32::PromoteBit) >> (uint16_t)Move32::PromoteShift);
     }
 
     constexpr uint16_t value() const {
