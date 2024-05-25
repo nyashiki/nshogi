@@ -77,11 +77,13 @@ inline constexpr bool isPromoted(PieceTypeKind Type) {
 };
 
 template<Color C>
-inline constexpr PieceKind makePiece(PieceTypeKind Pt) {
-    if constexpr (C == Color::Black) {
-        return (PieceKind)(Pt);
-    }
+inline constexpr PieceKind makePiece(PieceTypeKind Pt);
 
+template<> inline constexpr PieceKind makePiece<Black>(PieceTypeKind Pt) {
+    return (PieceKind)(Pt);
+}
+
+template<> inline constexpr PieceKind makePiece<White>(PieceTypeKind Pt) {
     return (PieceKind)(0b10000 | Pt);
 }
 
