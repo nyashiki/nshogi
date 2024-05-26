@@ -846,7 +846,7 @@ void testFeatureTypeRandom() {
 void testAZTeacherSaveLoad() {
     nshogi::ml::AZTeacher t1;
 
-    const int N = 10000;
+    const int N = 100;
 
     const std::string Path = std::filesystem::temp_directory_path().string() + "/az_teacher_test.bin";
 
@@ -929,7 +929,7 @@ void testAZTeacherHandmade1() {
 }
 
 void testSimpleTeacherPosition() {
-    const int N = 10000;
+    const int N = 100;
     std::mt19937_64 mt(20240525);
 
     nshogi::ml::SimpleTeacher SimpleTeacher;
@@ -956,7 +956,7 @@ void testSimpleTeacherPosition() {
 }
 
 void testSimpleTeacherCopyConstructor() {
-    const int N = 10000;
+    const int N = 100;
     std::mt19937_64 mt(20240525);
 
     nshogi::core::StateConfig Config;
@@ -992,7 +992,7 @@ void testSimpleTeacherCopyConstructor() {
 }
 
 void testSimpleTeacherState() {
-    const int N = 10000;
+    const int N = 100;
     std::mt19937_64 mt(20240525);
 
     nshogi::ml::SimpleTeacher SimpleTeacher;

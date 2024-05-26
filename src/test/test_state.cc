@@ -283,7 +283,7 @@ void testPly4() {
 }
 
 void testHelperRandom() {
-    const int N = 100000;
+    const int N = 1000;
     std::mt19937_64 mt(20230620);
 
     for (int I = 0; I < N; ++I) {

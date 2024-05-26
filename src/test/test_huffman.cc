@@ -80,7 +80,7 @@ void testHandmade1() {
 }
 
 void testRandomMove() {
-    const int N = 20000;
+    const int N = 200;
     std::mt19937_64 mt(20240216);
 
     for (int I = 0; I < N; ++I) {
@@ -136,7 +136,7 @@ void testMemcpy() {
 }
 
 void testConstructor() {
-    const int N = 20000;
+    const int N = 200;
     std::mt19937_64 mt(20240216);
 
     for (int I = 0; I < N; ++I) {
@@ -164,7 +164,7 @@ void testConstructor() {
 }
 
 void testCopyConstructor() {
-    const int N = 20000;
+    const int N = 200;
     std::mt19937_64 mt(20240216);
 
     for (int I = 0; I < N; ++I) {

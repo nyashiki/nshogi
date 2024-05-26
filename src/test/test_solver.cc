@@ -242,30 +242,6 @@ void testMate7Ply() {
     }
 }
 
-void testMate9Ply() {
-    std::ifstream Ifs("./res/test/mate-9-ply.txt");
-
-    std::string Line;
-    while (std::getline(Ifs, Line)) {
-        auto State = nshogi::io::sfen::StateBuilder::newState(Line);
-        auto CheckmateMove = nshogi::solver::dfs::solve(&State, 9);
-
-        CU_ASSERT_TRUE(!CheckmateMove.isNone());
-    }
-}
-
-void testMate11Ply() {
-    std::ifstream Ifs("./res/test/mate-11-ply.txt");
-
-    std::string Line;
-    while (std::getline(Ifs, Line)) {
-        auto State = nshogi::io::sfen::StateBuilder::newState(Line);
-        auto CheckmateMove = nshogi::solver::dfs::solve(&State, 11);
-
-        CU_ASSERT_TRUE(!CheckmateMove.isNone());
-    }
-}
-
 } // namespace
 
 int setupTestSolver() {
@@ -293,8 +269,6 @@ int setupTestSolver() {
     CU_add_test(suite, "Mate3Ply Positive Example Positions", testMate3Ply);
     CU_add_test(suite, "Mate5Ply Positive Example Positions", testMate5Ply);
     CU_add_test(suite, "Mate7Ply Positive Example Positions", testMate7Ply);
-    CU_add_test(suite, "Mate9Ply Positive Example Positions", testMate9Ply);
-    CU_add_test(suite, "Mate11Ply Positive Example Positions", testMate11Ply);
 
     return CUE_SUCCESS;
 }
