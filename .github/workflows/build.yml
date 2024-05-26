@@ -5,6 +5,9 @@ on: [push]
 jobs:
   library-build:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        sse_flags: ['', 'SSE2=1', 'SSE41=1', 'SSE42=1', 'AVX=1', 'AVX2=1']
     env:
       working-directory: ./
 
@@ -12,7 +15,7 @@ jobs:
     - uses: actions/checkout@v2
     - name: make library
       working-directory: ${{env.working-directory}}
-      run: make libnshogi
+      run: make ${{ matrix.sse_flags }} libnshogi
 
   python-module-build:
     runs-on: ubuntu-latest
@@ -25,4 +28,4 @@ jobs:
       run: pip3 install pybind11
     - name: make pythoon module
       working-directory: ${{env.working-directory}}
-      run: make python
+      run: make ${{ matrix.sse_flags }} python
