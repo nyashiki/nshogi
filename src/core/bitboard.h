@@ -375,7 +375,12 @@ struct alignas(16) Bitboard {
                         : (uint64_t)_mm_cvtsi128_si64(Bitboard_);
         }
 #endif
-        return High? Primitive[1] : Primitive[0];
+        if constexpr (High) {
+            return Primitive[1];
+        } else {
+            return Primitive[0];
+        }
+        // return High? Primitive[1] : Primitive[0];
     }
 
 #if defined(USE_SSE2)
