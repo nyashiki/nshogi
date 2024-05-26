@@ -35,7 +35,9 @@ struct alignas(32) HuffmanCode {
 #ifdef USE_AVX2
         C = HC.C;
 #else
-        std::memcpy(Data, HC.Data, HC.size());
+        if (this != &HC) {
+            std::memcpy(Data, HC.Data, HC.size());
+        }
 #endif // #ifdef USE_AVX2
         return *this;
     }
