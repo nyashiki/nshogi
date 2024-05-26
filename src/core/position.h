@@ -48,7 +48,7 @@ struct Position {
         return core::getStandCount(getStand(C), Type);
     }
 
-    bool equals(const Position& Pos) const;
+    bool equals(const Position& Pos, bool IgnorePlyOffset = false) const;
 
  private:
     void changeSideToMove() {

@@ -16,12 +16,12 @@ Position::Position(const Position& Pos) {
                 sizeof(*this));
 }
 
-bool Position::equals(const Position &Pos) const {
+bool Position::equals(const Position &Pos, bool IgnorePlyOffset) const {
     if (SideToMove != Pos.SideToMove) {
         return false;
     }
 
-    if (PlyOffset != Pos.PlyOffset) {
+    if (!IgnorePlyOffset && PlyOffset != Pos.PlyOffset) {
         return false;
     }
 
