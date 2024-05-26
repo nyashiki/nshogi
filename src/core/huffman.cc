@@ -22,7 +22,7 @@ struct HuffmanCodeElem {
 
 // clang-format off
 
-constexpr HuffmanCodeElem HuffmanTable[31] = {
+static constexpr HuffmanCodeElem HuffmanTable[31] = {
     {        0b1, 1 }, // Empty
     {     0b0000, 4 }, // BlackPawn
     {   0b000010, 6 }, // BlackLance
@@ -56,8 +56,8 @@ constexpr HuffmanCodeElem HuffmanTable[31] = {
     { 0b11101110, 8 }, // WhiteProRook
 };
 
-constexpr HuffmanCodeElem HuffmanStandTable[8] = {
-    { 0,        0 }, // Empty
+static constexpr HuffmanCodeElem HuffmanStandTable[8] = {
+    {        0, 0 }, // Empty
     {     0b00, 2 }, // Pawn
     {   0b0001, 4 }, // Lance
     {   0b0101, 4 }, // Knight
@@ -69,7 +69,7 @@ constexpr HuffmanCodeElem HuffmanStandTable[8] = {
 
 // clang-format on
 
-constexpr auto HuffmanLUT = []() -> std::array<std::array<uint16_t, 1 << 9>, 9> {
+static constexpr auto HuffmanLUT = []() -> std::array<std::array<uint16_t, 1 << 9>, 9> {
     std::array<std::array<uint16_t, 1 << 9>, 9> LUT;
 
     for (std::size_t I = 0; I < 9; ++I) {
@@ -95,7 +95,7 @@ constexpr auto HuffmanLUT = []() -> std::array<std::array<uint16_t, 1 << 9>, 9> 
     return LUT;
 }();
 
-constexpr auto HuffmanStandLUT = []() -> std::array<std::array<uint16_t, 1 << 8>, 8> {
+static constexpr auto HuffmanStandLUT = []() -> std::array<std::array<uint16_t, 1 << 8>, 8> {
     std::array<std::array<uint16_t, 1 << 8>, 8> LUT;
 
     for (std::size_t I = 0; I < 8; ++I) {
