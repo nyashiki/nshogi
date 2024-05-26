@@ -16,13 +16,6 @@ int setupTestSquareIterator();
 int setupTestSolver();
 
 #include "../core/initializer.h"
-#include "../core/bitboard.h"
-#include "../core/movegenerator.h"
-#include "../core/state.h"
-#include "../core/statebuilder.h"
-#include "../io/bitboard.h"
-#include "../io/sfen.h"
-#include <iostream>
 
 
 int main() {
