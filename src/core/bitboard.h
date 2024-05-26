@@ -366,7 +366,7 @@ struct alignas(16) Bitboard {
     }
 
     template <bool High>
-    [[nodiscard]] __attribute__((always_inline)) inline constexpr uint64_t getPrimitive() const {
+    [[nodiscard]] inline constexpr uint64_t getPrimitive() const {
 #if defined(USE_SSE41)
         if (!std::is_constant_evaluated()) {
             // _mm_cvtsi128_si64 is faster by one latency than _mm_extract_epi64
