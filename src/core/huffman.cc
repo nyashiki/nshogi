@@ -137,6 +137,7 @@ class HuffmanCodeStream : public HuffmanCode {
             Data[Index] |= (uint64_t)(Val & 0b1) << Shift;
             Val = (T)(Val >> 1);
 
+            assert((uint16_t)Cursor < 256);
             ++Cursor;
         }
     }
@@ -145,6 +146,8 @@ class HuffmanCodeStream : public HuffmanCode {
         const uint8_t Index = Cursor >> 6;
         const uint8_t Shift = Cursor & 0x3f;
         uint8_t Bit = (Data[Index] >> Shift) & 0b1;
+
+        assert((uint16_t)Cursor < 256);
         ++Cursor;
 
         return Bit;
