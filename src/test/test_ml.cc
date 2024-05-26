@@ -7,8 +7,10 @@
 #include "../core/movegenerator.h"
 #include "../io/sfen.h"
 #include "../io/bitboard.h"
+#include "../io/huffman.h"
 #include "../ml/featurestack.h"
 #include "../ml/azteacher.h"
+#include "../ml/simpleteacher.h"
 
 #include <fstream>
 #include <iostream>
@@ -926,6 +928,146 @@ void testAZTeacherHandmade1() {
     CU_ASSERT_FALSE(t2.equals(t1));
 }
 
+void testSimpleTeacherPosition() {
+    const int N = 10000;
+    std::mt19937_64 mt(20240525);
+
+    nshogi::ml::SimpleTeacher SimpleTeacher;
+
+    for (int I = 0; I < N; ++I) {
+        nshogi::core::State State =
+            nshogi::core::StateBuilder::getInitialState();
+
+        for (uint16_t Ply = 0; Ply < 1024; ++Ply) {
+            const auto Moves =
+                nshogi::core::MoveGenerator::generateLegalMoves(State);
+
+            if (Moves.size() == 0) {
+                break;
+            }
+
+            SimpleTeacher.setState(State);
+            CU_ASSERT_TRUE(State.getPosition().equals(SimpleTeacher.getPosition(), true));
+
+            const auto RandomMove = Moves[mt() % Moves.size()];
+            State.doMove(RandomMove);
+        }
+    }
+}
+
+void testSimpleTeacherCopyConstructor() {
+    const int N = 10000;
+    std::mt19937_64 mt(20240525);
+
+    nshogi::core::StateConfig Config;
+    nshogi::ml::SimpleTeacher SimpleTeacher;
+
+    for (int I = 0; I < N; ++I) {
+        nshogi::core::State State =
+            nshogi::core::StateBuilder::getInitialState();
+
+        for (uint16_t Ply = 0; Ply < 1; ++Ply) {
+            const auto Moves =
+                nshogi::core::MoveGenerator::generateLegalMoves(State);
+
+            if (Moves.size() == 0) {
+                break;
+            }
+
+            const auto RandomMove = Moves[mt() % Moves.size()];
+
+            SimpleTeacher
+                .setState(State)
+                .setConfig(Config)
+                .setNextMove(RandomMove)
+                .setWinner(State.getSideToMove());
+
+            nshogi::ml::SimpleTeacher SimpleTeacher2(SimpleTeacher);
+
+            CU_ASSERT_TRUE(SimpleTeacher.equals(SimpleTeacher2));
+
+            State.doMove(RandomMove);
+        }
+    }
+}
+
+void testSimpleTeacherState() {
+    const int N = 10000;
+    std::mt19937_64 mt(20240525);
+
+    nshogi::ml::SimpleTeacher SimpleTeacher;
+
+    for (int I = 0; I < N; ++I) {
+        nshogi::core::State State =
+            nshogi::core::StateBuilder::getInitialState();
+
+        for (uint16_t Ply = 0; Ply < 1024; ++Ply) {
+            const auto Moves =
+                nshogi::core::MoveGenerator::generateLegalMoves(State);
+
+            if (Moves.size() == 0) {
+                break;
+            }
+
+            SimpleTeacher.setState(State);
+            CU_ASSERT_TRUE(State.getPosition().equals(SimpleTeacher.getState().getPosition(), true));
+            CU_ASSERT_EQUAL(State.getPly(), SimpleTeacher.getState().getPly());
+
+            const auto RandomMove = Moves[mt() % Moves.size()];
+            State.doMove(RandomMove);
+        }
+    }
+}
+
+void testSimpleTeacherConfig() {
+    nshogi::ml::SimpleTeacher SimpleTeacher;
+
+    for (uint16_t MaxPly = 1; MaxPly < 10000; ++MaxPly) {
+        for (float BlackDrawValue = 0.0f; BlackDrawValue <= 1.0f; BlackDrawValue += 0.01f) {
+            for (float WhiteDrawValue = 0.0f; WhiteDrawValue <= 1.0f; WhiteDrawValue += 0.01f) {
+                nshogi::core::StateConfig Config;
+                Config.MaxPly = MaxPly;
+                Config.BlackDrawValue = BlackDrawValue;
+                Config.WhiteDrawValue = WhiteDrawValue;
+
+                SimpleTeacher.setConfig(Config);
+
+                CU_ASSERT_EQUAL(SimpleTeacher.getConfig().MaxPly, MaxPly);
+                CU_ASSERT_EQUAL(SimpleTeacher.getConfig().BlackDrawValue, BlackDrawValue);
+                CU_ASSERT_EQUAL(SimpleTeacher.getConfig().WhiteDrawValue, WhiteDrawValue);
+            }
+        }
+    }
+}
+
+void testSimpleTeacherNextMove() {
+    nshogi::ml::SimpleTeacher SimpleTeacher;
+
+    for (uint32_t Val = 0; Val < (1 << 16); ++Val) {
+        auto Move = nshogi::core::Move16::fromValue((uint16_t)Val);
+        SimpleTeacher.setNextMove(Move);
+
+        CU_ASSERT_EQUAL(SimpleTeacher.getNextMove(), Move);
+    }
+}
+
+void testSimpleTeacherWinnerBlack() {
+    nshogi::ml::SimpleTeacher SimpleTeacher;
+    SimpleTeacher.setWinner(nshogi::core::Black);
+    CU_ASSERT_EQUAL(SimpleTeacher.getWinner(), nshogi::core::Black);
+}
+
+void testSimpleTeacherWinnerWhite() {
+    nshogi::ml::SimpleTeacher SimpleTeacher;
+    SimpleTeacher.setWinner(nshogi::core::White);
+    CU_ASSERT_EQUAL(SimpleTeacher.getWinner(), nshogi::core::White);
+}
+
+void testSimpleTeacherEqualsMySelf() {
+    nshogi::ml::SimpleTeacher SimpleTeacher;
+    CU_ASSERT_TRUE(SimpleTeacher.equals(SimpleTeacher));
+}
+
 } // namespace
 
 
@@ -936,6 +1078,14 @@ int setupTestML() {
     CU_add_test(suite, "Feature Type RandomMove", testFeatureTypeRandom);
     CU_add_test(suite, "AZ Teacher Save/Load", testAZTeacherSaveLoad);
     CU_add_test(suite, "AZ Teacher handmade 1", testAZTeacherHandmade1);
+    CU_add_test(suite, "Simple Teacher Copy Constructor", testSimpleTeacherCopyConstructor);
+    CU_add_test(suite, "Simple Teacher Position", testSimpleTeacherPosition);
+    CU_add_test(suite, "Simple Teacher State", testSimpleTeacherState);
+    CU_add_test(suite, "Simple Teacher Config", testSimpleTeacherConfig);
+    CU_add_test(suite, "Simple Teacher Next Move", testSimpleTeacherNextMove);
+    CU_add_test(suite, "Simple Teacher Winner Black", testSimpleTeacherWinnerBlack);
+    CU_add_test(suite, "Simple Teacher Winner White", testSimpleTeacherWinnerWhite);
+    CU_add_test(suite, "Simple Teacher Equals Myself", testSimpleTeacherEqualsMySelf);
 
     return CUE_SUCCESS;
 }
