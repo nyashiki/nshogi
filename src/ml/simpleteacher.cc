@@ -19,10 +19,6 @@ SimpleTeacher::SimpleTeacher(const SimpleTeacher& ST)
     , Winner(ST.Winner) {
 }
 
-const core::HuffmanCode& SimpleTeacher::getHuffmanCode() const {
-    return HuffmanCode;
-}
-
 core::Position SimpleTeacher::getPosition() const {
     return core::PositionBuilder::newPosition(core::HuffmanCode::decode(HuffmanCode), Ply);
 }

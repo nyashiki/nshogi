@@ -17,7 +17,6 @@ struct SimpleTeacher {
     SimpleTeacher();
     SimpleTeacher(const SimpleTeacher&);
 
-    const core::HuffmanCode& getHuffmanCode() const;
     core::Position getPosition() const;
     core::State getState() const;
     core::StateConfig getConfig() const;
