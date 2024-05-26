@@ -122,6 +122,10 @@ static constexpr Square Squares[81] = {
     Sq9I, Sq9H, Sq9G, Sq9F, Sq9E, Sq9D, Sq9C, Sq9B, Sq9A,
 };
 
+inline Square& operator++(Square& Sq) {
+    return Sq = (Square)((int)Sq + 1);
+}
+
 inline constexpr Square getInversed(Square Sq) {
     return (Square)((int16_t)NumSquares - 1 - (int16_t)Sq);
 }
