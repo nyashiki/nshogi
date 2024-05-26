@@ -48,13 +48,16 @@ SOURCES :=                          \
 	src/core/huffman.cc         \
 	src/solver/mate1ply.cc      \
 	src/solver/dfs.cc           \
-	src/ml/featurestack.cc      \
 	src/ml/azteacher.cc         \
+	src/ml/featurestack.cc      \
+	src/ml/simpleteacher.cc     \
 	src/ml/teacherloader.cc     \
 	src/ml/teacherwriter.cc     \
 	src/io/bitboard.cc          \
+	src/io/huffman.cc           \
 	src/io/sfen.cc              \
-	src/io/csa.cc
+	src/io/csa.cc               \
+	src/io/file.cc
 
 TEST_SOURCES :=                         \
 	src/test/test_main.cc           \
