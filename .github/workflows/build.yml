@@ -1,0 +1,28 @@
+name: build
+
+on: [push]
+
+jobs:
+  library-build:
+    runs-on: ubuntu-latest
+    env:
+      working-directory: ./
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: make library
+      working-directory: ${{env.working-directory}}
+      run: make libnshogi
+
+  python-module-build:
+    runs-on: ubuntu-latest
+    env:
+      working-directory: ./
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: install pybind11
+      run: pip3 install pybind11
+    - name: make pythoon module
+      working-directory: ${{env.working-directory}}
+      run: make python
