@@ -244,7 +244,7 @@ class HuffmanPositionBuilder : public PositionBuilder {
 HuffmanCode HuffmanCode::encode(const Position& Pos) {
     Square BlackKingSquare, WhiteKingSquare;
 
-    for (Square Sq = (Square)0; Sq < NumSquares; Sq = (Square)((int)Sq + 1)) {
+    for (Square Sq = (Square)0; Sq < NumSquares; ++Sq) {
         if (Pos.pieceOn(Sq) == PK_BlackKing) {
             BlackKingSquare = Sq;
         } else if (Pos.pieceOn(Sq) == PK_WhiteKing) {
@@ -261,7 +261,7 @@ HuffmanCode HuffmanCode::encode(const Position& Pos, Square BlackKingSquare, Squ
     HCS.write(BlackKingSquare, 7);
     HCS.write(WhiteKingSquare, 7);
 
-    for (Square Sq = (Square)0; Sq < NumSquares; Sq = (Square)((int)Sq + 1)) {
+    for (Square Sq = (Square)0; Sq < NumSquares; ++Sq) {
         const PieceKind PK = Pos.pieceOn(Sq);
 
         if (Sq == BlackKingSquare || Sq == WhiteKingSquare) {
