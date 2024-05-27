@@ -290,6 +290,19 @@ struct alignas(16) Bitboard {
         return Bitboard(Primitive[1] - BB.Primitive[1], Primitive[0] - BB.Primitive[0]);
     }
 
+    template <bool High>
+    [[nodiscard]] constexpr uint64_t getPrimitive() const {
+#if defined(USE_SSE41)
+        if (!std::is_constant_evaluated()) {
+            // _mm_cvtsi128_si64 is faster by one latency than _mm_extract_epi64
+            // so use the function to extract the lower bits.
+            return High ? (uint64_t)_mm_extract_epi64(Bitboard_, 1)
+                        : (uint64_t)_mm_cvtsi128_si64(Bitboard_);
+        }
+#endif
+        return High? Primitive[1] : Primitive[0];
+    }
+
     [[maybe_unused]] [[nodiscard]]
     Square getOne() const {
         uint64_t Low = getPrimitive<false>();
@@ -358,24 +371,11 @@ struct alignas(16) Bitboard {
         const auto Count1 = _mm_popcnt_u64(getPrimitive<false>());
         const auto Count2 = _mm_popcnt_u64(getPrimitive<true>());
 #else
-        const auto Count1 = __builtin_popcountll(Primitive[0]);
-        const auto Count2 = __builtin_popcountll(Primitive[1]);
+        const auto Count1 = __builtin_popcountll(getPrimitive<false>());
+        const auto Count2 = __builtin_popcountll(getPrimitive<true>());
 #endif
 
         return (uint8_t)(Count1 + Count2);
-    }
-
-    template <bool High>
-    [[nodiscard]] constexpr uint64_t getPrimitive() const {
-#if defined(USE_SSE41)
-        if (!std::is_constant_evaluated()) {
-            // _mm_cvtsi128_si64 is faster by one latency than _mm_extract_epi64
-            // so use the function to extract the lower bits.
-            return High ? (uint64_t)_mm_extract_epi64(Bitboard_, 1)
-                        : (uint64_t)_mm_cvtsi128_si64(Bitboard_);
-        }
-#endif
-        return High? Primitive[1] : Primitive[0];
     }
 
 #if defined(USE_SSE2)
