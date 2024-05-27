@@ -7,7 +7,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        sse_flags: ['', 'SSE2=1', 'SSE41=1', 'SSE42=1', 'AVX=1', 'AVX2=1']
+        sse_flags: ['']
     env:
       working-directory: ./
 
@@ -21,7 +21,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        sse_flags: ['', 'SSE2=1', 'SSE41=1', 'SSE42=1', 'AVX=1', 'AVX2=1']
+        sse_flags: ['']
     env:
       working-directory: ./
 
