@@ -18,7 +18,7 @@ jobs:
       run: make ${{ matrix.sse_flags }} libnshogi
     - name: install library
       working-directory: ${{ env.working-directory }}
-      run: make ${{ matrix.sse_flags }} install
+      run: sudo make ${{ matrix.sse_flags }} install
     - name: test the static library
       working-directory: ${{ env.working-directory }}
       run: make ${{ matrix.sse_flags }} runtest-static
