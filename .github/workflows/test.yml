@@ -1,0 +1,27 @@
+name: test
+
+on: [push]
+
+jobs:
+  runtest:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        sse_flags: ['', 'SSE2=1', 'SSE41=1', 'SSE42=1', 'AVX=1', 'AVX2=1']
+    env:
+      working-directory: ./
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: make library
+      working-directory: ${{ env.working-directory }}
+      run: make ${{ matrix.sse_flags }} libnshogi
+    - name: install library
+      working-directory: ${{ env.working-directory }}
+      run: make ${{ matrix.sse_flags }} install
+    - name: test the static library
+      working-directory: ${{ env.working-directory }}
+      run: make ${{ matrix.sse_flags }} runtest-static
+    - name: test the shared library
+      working-directory: ${{ env.working-directory }}
+      run: make ${{ matrix.sse_flags }} runtest-shared
