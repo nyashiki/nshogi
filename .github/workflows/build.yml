@@ -12,7 +12,7 @@ jobs:
       working-directory: ./
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
     - name: make library
       working-directory: ${{ env.working-directory }}
       run: make ${{ matrix.sse_flags }} libnshogi
@@ -26,7 +26,7 @@ jobs:
       working-directory: ./
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
     - name: install pybind11
       run: pip3 install pybind11
     - name: make pythoon module
