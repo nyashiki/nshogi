@@ -2,7 +2,6 @@
 #define NSHOGI_CORE_BITBOARD_H
 
 #include "types.h"
-#include <ammintrin.h>
 #include <cassert>
 #include <cinttypes>
 #include <cstdint>
