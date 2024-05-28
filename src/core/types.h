@@ -4,8 +4,13 @@
 #include <cassert>
 #include <cinttypes>
 #include <cstdint>
-#include <x86intrin.h>
 #include <array>
+
+#if defined(USE_BMI1)
+
+#include <immintrin.h>
+
+#endif
 
 // clang-format off
 
