@@ -14,9 +14,6 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
-    - name: install llvm
-      if: ${{ matrix.os }} == ubuntu-24.04
-      run: sudo apt-get -y install libclang-rt-dev
     - name: make library
       working-directory: ${{ env.working-directory }}
       run: make ${{ matrix.sse_flags }} libnshogi
@@ -31,9 +28,6 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
-    - name: install llvm
-      if: ${{ matrix.os }} == ubuntu-24.04
-      run: sudo apt-get -y install libclang-rt-dev
     - name: install pybind11
       run: pip3 install pybind11
     - name: make pythoon module
