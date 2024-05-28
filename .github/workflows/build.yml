@@ -14,6 +14,9 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
+    - name: install llvm
+      if: ${{ matrix.os }} == ubuntu-24.04
+      run: sudo apt-get install llvm-13-linker-tools
     - name: make library
       working-directory: ${{ env.working-directory }}
       run: make ${{ matrix.sse_flags }} libnshogi
@@ -28,6 +31,9 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
+    - name: install llvm
+      if: ${{ matrix.os }} == ubuntu-24.04
+      run: sudo apt-get install llvm-13-linker-tools
     - name: install pybind11
       run: pip3 install pybind11
     - name: make pythoon module
