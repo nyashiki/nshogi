@@ -6,7 +6,7 @@ jobs:
   runtest:
     strategy:
       matrix:
-        os: [ubuntu-22.04, macos-13-xlarge]
+        os: [ubuntu-22.04, macos-latest]
         sse_flags: ['']
     runs-on: ${{ matrix.os }}
     env:
