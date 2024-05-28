@@ -6,7 +6,7 @@ jobs:
   library-build:
     strategy:
       matrix:
-        os: [ubuntu-22.04, aarch64-apple-darwin]
+        os: [ubuntu-22.04, macos-13-xlarge]
         sse_flags: ['']
     runs-on: ${{ matrix.os }}
     env:
