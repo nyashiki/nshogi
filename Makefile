@@ -1,13 +1,17 @@
 CXX := clang++
 # CXX := g++
 
-PREFIX ?= /usr/local/
+PREFIX ?= /usr/local
 
 BUILD ?= release
 VERSION = $(shell cat NSHOGI_VERSION)
 
 OBJDIR = build/$(BUILD)_$(CXX)
-SHARED_TARGET_NAME := libnshogi.so.$(VERSION)
+ifeq ($(shell uname), Darwin)
+	SHARED_TARGET_NAME := libnshogi.$(VERSION).dylib
+else
+	SHARED_TARGET_NAME := libnshogi.so.$(VERSION)
+endif
 SHARED_TARGET := $(OBJDIR)/lib/$(SHARED_TARGET_NAME)
 STATIC_TARGET := $(OBJDIR)/lib/libnshogi_static.a
 PYTHON_TARGET := $(OBJDIR)/lib/nshogi$(shell python3-config --extension-suffix)
@@ -142,10 +146,15 @@ $(PYTHON_OBJECTS): $(OBJDIR)/%.o: %.cc Makefile
 	$(CXX) -c -o $@ $(OPTIM) $(ARCH_FLAGS) $(PYTHON_CXX_FLAGS) $(INCLUDES) $(PYTHON_INCLUDES) -fPIC $<
 
 $(SHARED_TARGET): $(OBJECTS)
-	@[ -d $(dir $@) ] || mkdir -p $(dir $@)
+ifeq ($(shell uname), Darwin)
+	$(CXX) -dynamiclib -Wl,-install_name,@rpath/libnshogi.dylib -o $@ $(OBJECTS) $(OPTIM) $(ARCH_FLAGS) $(CXX_FLAGS) -fPIC $(LINKS)
+	-rm -f $(OBJDIR)/lib/libnshogi.dylib
+	cd $(OBJDIR)/lib && ln -s $(notdir $@) libnshogi.dylib
+else
 	$(CXX) -shared -Wl,-soname,libnshogi.so -o $@ $(OBJECTS) $(OPTIM) $(ARCH_FLAGS) $(CXX_FLAGS) -fPIC $(LINKS)
 	-rm -f $(OBJDIR)/lib/libnshogi.so
 	cd $(OBJDIR)/lib && ln -s $(notdir $@) libnshogi.so
+endif
 
 $(STATIC_TARGET): $(OBJECTS)
 	@[ -d $(dir $@) ] || mkdir -p $(dir $@)
