@@ -15,12 +15,12 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - name: install CUnit
-      if: ${{ matrix.os }} == ubuntu-24.04
+      if: runner.os == 'Linux'
       run: |
         sudo apt update
         sudo apt install -y libcunit1-dev
     - name: install CUnit
-      if: ${{ matrix.os }} == macos-latest
+      if: runner.os == 'macOS'
       run: |
         brew install cunit
     - name: make library
