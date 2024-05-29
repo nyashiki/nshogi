@@ -23,6 +23,7 @@ INCLUDES :=
 LINKS :=
 
 PYTHON_INCLUDES := $(shell python3-config --includes) $(shell python3 -m pybind11 --includes)
+PYTHON_LDFLAGS := $(shell python3-config --ldflags)
 
 ifeq ($(BUILD), debug)
 	# CXX_FLAGS = -std=c++2b -Wall -Wextra -Wconversion -Wpedantic -Wshadow -fno-omit-frame-pointer -fsanitize=address -pipe
@@ -163,7 +164,7 @@ $(STATIC_TARGET): $(OBJECTS)
 
 $(PYTHON_TARGET): $(PYTHON_OBJECTS) $(STATIC_TARGET)
 	@[ -d $(dir $@) ] || mkdir -p $(dir $@)
-	$(CXX) -shared -o $@ $(PYTHON_OBJECTS) $(STATIC_TARGET) $(OPTIM) $(ARCH_FLAGS) $(PYTHON_CXX_FLAGS) -fPIC $(LINKS)
+	$(CXX) -shared -o $@ $(PYTHON_OBJECTS) $(STATIC_TARGET) $(OPTIM) $(ARCH_FLAGS) $(PYTHON_CXX_FLAGS) -fPIC $(LINKS) $(PYTHON_LDFLAGS)
 
 $(TEST_STATIC_TARGET): $(TEST_OBJECTS) $(STATIC_TARGET)
 	@[ -d $(dir $@) ] || mkdir -p $(dir $@)
