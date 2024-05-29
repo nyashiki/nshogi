@@ -22,6 +22,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
+        os: [macos-latest]
         sse_flags: ['']
     env:
       working-directory: ./
