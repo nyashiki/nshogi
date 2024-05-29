@@ -146,6 +146,7 @@ $(PYTHON_OBJECTS): $(OBJDIR)/%.o: %.cc Makefile
 	$(CXX) -c -o $@ $(OPTIM) $(ARCH_FLAGS) $(PYTHON_CXX_FLAGS) $(INCLUDES) $(PYTHON_INCLUDES) -fPIC $<
 
 $(SHARED_TARGET): $(OBJECTS)
+	@[ -d $(dir $@) ] || mkdir -p $(dir $@)
 ifeq ($(shell uname), Darwin)
 	$(CXX) -dynamiclib -Wl,-install_name,@rpath/libnshogi.dylib -o $@ $(OBJECTS) $(OPTIM) $(ARCH_FLAGS) $(CXX_FLAGS) -fPIC $(LINKS)
 	-rm -f $(OBJDIR)/lib/libnshogi.dylib
