@@ -23,7 +23,7 @@ INCLUDES :=
 LINKS :=
 
 PYTHON_INCLUDES := $(shell python3-config --includes) $(shell python3 -m pybind11 --includes)
-PYTHON_LDFLAGS := $(shell python3-config --ldflags)
+PYTHON_LINKS := $(shell python3-config --ldflags)
 
 ifeq ($(BUILD), debug)
 	# CXX_FLAGS = -std=c++2b -Wall -Wextra -Wconversion -Wpedantic -Wshadow -fno-omit-frame-pointer -fsanitize=address -pipe
@@ -31,9 +31,10 @@ ifeq ($(BUILD), debug)
 	PYTHON_CXX_FLAGS = $(CXX_FLAGS)
 	OPTIM = -g3
 else
-	CXX_FLAGS = -std=c++2b -Wall -Wextra -Wconversion -Wpedantic -Wshadow -fomit-frame-pointer -fno-stack-protector -fno-rtti -flto -DNDEBUG -pipe
-	PYTHON_CXX_FLAGS = -std=c++2b -Wall -Wextra -Wconversion -Wpedantic -Wshadow -fomit-frame-pointer -fno-stack-protector -flto -DNDEBUG -pipe
-	OPTIM = -Ofast
+	CXX_FLAGS = -std=c++20 -Wall -Wextra -Wconversion -Wpedantic -Wshadow -fomit-frame-pointer -fno-stack-protector -fno-rtti -flto -DNDEBUG -pipe
+	# CXX_FLAGS = -std=c++20 -Wall -Wextra -Wconversion -Wpedantic -Wshadow -fno-omit-frame-pointer -flto -pipe
+	PYTHON_CXX_FLAGS = -std=c++20 -Wall -Wextra -Wconversion -Wpedantic -Wshadow -fomit-frame-pointer -fno-stack-protector -flto -DNDEBUG -pipe
+	OPTIM = -Ofast -g3
 endif
 
 SOURCES :=                          \
@@ -164,7 +165,7 @@ $(STATIC_TARGET): $(OBJECTS)
 
 $(PYTHON_TARGET): $(PYTHON_OBJECTS) $(STATIC_TARGET)
 	@[ -d $(dir $@) ] || mkdir -p $(dir $@)
-	$(CXX) -shared -o $@ $(PYTHON_OBJECTS) $(STATIC_TARGET) $(OPTIM) $(ARCH_FLAGS) $(PYTHON_CXX_FLAGS) -fPIC $(LINKS) $(PYTHON_LDFLAGS)
+	$(CXX) -shared -o $@ $(PYTHON_OBJECTS) $(STATIC_TARGET) $(OPTIM) $(ARCH_FLAGS) $(PYTHON_CXX_FLAGS) -fPIC $(LINKS) $(PYTHON_LINKS)
 
 $(TEST_STATIC_TARGET): $(TEST_OBJECTS) $(STATIC_TARGET)
 	@[ -d $(dir $@) ] || mkdir -p $(dir $@)
