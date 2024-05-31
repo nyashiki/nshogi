@@ -14,15 +14,6 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
-    - name: install CUnit
-      if: runner.os == 'Linux'
-      run: |
-        sudo apt update
-        sudo apt install -y libcunit1-dev
-    - name: install CUnit
-      if: runner.os == 'macOS'
-      run: |
-        brew install cunit
     - name: make library
       working-directory: ${{ env.working-directory }}
       run: make ${{ matrix.sse_flags }} libnshogi

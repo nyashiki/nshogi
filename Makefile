@@ -202,11 +202,9 @@ install: $(SHARED_TARGET) $(STATIC_TARGET)
 	install -m 644 src/solver/*.h $(PREFIX)/include/nshogi/solver
 
 .PHONY: test-static
-test-static: LINKS += -lcunit
 test-static: $(TEST_STATIC_TARGET)
 
 .PHONY: test-shared
-test-shared: LINKS += -lcunit
 test-shared: $(TEST_SHARED_TARGET)
 
 .PHONY: bench
