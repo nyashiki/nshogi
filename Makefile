@@ -67,17 +67,17 @@ SOURCES :=                          \
 
 TEST_SOURCES :=                         \
 	src/test/test_main.cc           \
+	src/test/test_types.cc 		\
 	src/test/test_bitboard.cc       \
-	src/test/test_huffman.cc        \
-	src/test/test_types.cc          \
-	src/test/test_sfen.cc           \
-	src/test/test_csa.cc            \
-	src/test/test_solver.cc         \
+	src/test/test_position.cc       \
+	src/test/test_state.cc          \
 	src/test/test_movegeneration.cc \
 	src/test/test_squareiterator.cc \
 	src/test/test_utils.cc          \
-	src/test/test_state.cc          \
-	src/test/test_position.cc       \
+	src/test/test_csa.cc		\
+	src/test/test_sfen.cc           \
+	src/test/test_huffman.cc     	\
+	src/test/test_solver.cc		\
 	src/test/test_ml.cc
 
 BENCH_SOURCES :=                          \

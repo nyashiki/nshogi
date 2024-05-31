@@ -1,13 +1,17 @@
 #ifndef NSHOGI_TEST_COMMON_H
 #define NSHOGI_TEST_COMMON_H
 
+
 #include <chrono>
+#include <concepts>
 #include <functional>
 #include <iostream>
+#include <sstream>
 #include <string>
+#include <stdexcept>
+#include <type_traits>
 #include <vector>
 #include <cstdint>
-#include <sstream>
 
 namespace nshogi {
 namespace test {
@@ -52,8 +56,8 @@ class TestCase {
             std::cout << "[       OK ] " << SuiteName << "." << CaseName
                 << " (" << Duration << " milliseconds)" << std::endl;
             return TestStatistics(1, 0);
-        } catch (const std::exception& e) {
-            std::cout << e.what() << std::endl;
+        } catch (const std::exception& Exception) {
+            std::cout << Exception.what() << std::endl;
             std::cout << "[   FAILED ] " << SuiteName << "." << CaseName << std::endl;
             return TestStatistics(0, 1);
         } catch (...) {
@@ -133,14 +137,27 @@ class TestBody {
 } // namespace test
 } // namespace nshogi
 
-#define TEST_ASSERT_EQ(Actual, Expected) \
-    if ((Actual) != (Expected)) { \
-        std::ostringstream Oss; \
-        Oss << "Test failed: " << #Actual << " == " << #Expected << "\n" \
-            << "    Expected: " << (Expected) << "\n" \
-            << "    Actual: " << (Actual); \
-        throw std::runtime_error(Oss.str()); \
-    }
+#define TEST_ASSERT_EQ(Actual, Expected)                              \
+    do {                                                              \
+        auto&& _Actual = (Actual);                                    \
+        auto&& _Expected = (Expected);                                \
+        if (_Actual != _Expected) {                                   \
+            std::ostringstream Oss;                                   \
+            Oss << "Test failed: " << #Actual << " == " << #Expected; \
+            throw std::runtime_error(Oss.str());                      \
+        }                                                             \
+    } while (false)
+
+#define TEST_ASSERT_NEQ(Actual, Expected)                             \
+    do {                                                              \
+        auto&& _Actual = (Actual);                                    \
+        auto&& _Expected = (Expected);                                \
+        if (_Actual == _Expected) {                                   \
+            std::ostringstream Oss;                                   \
+            Oss << "Test failed: " << #Actual << " != " << #Expected; \
+            throw std::runtime_error(Oss.str());                      \
+        }                                                             \
+    } while (false)
 
 #define TEST_ASSERT_STREQ(Actual, Expected) \
     if (std::string(Actual) != std::string(Expected)) { \

@@ -1,5 +1,4 @@
-#include <CUnit/CUnit.h>
-
+#include "common.h"
 #include "../core/types.h"
 #include "../core/squareiterator.h"
 
@@ -15,46 +14,32 @@ void testReverseOrder() {
         auto Sq1 = *SqIt;
         auto Sq2 = *RvSqIt;
 
-        CU_ASSERT_EQUAL(Sq1, nshogi::core::getInversed(Sq2));
+        TEST_ASSERT_EQ(Sq1, nshogi::core::getInversed(Sq2));
 
         ++SqIt;
         ++RvSqIt;
 
         if (SqIt == SqIt.end()) {
-            CU_ASSERT_TRUE(RvSqIt == RvSqIt.end());
-
+            TEST_ASSERT_TRUE(RvSqIt == RvSqIt.end());
             break;
         }
     }
-
-}
-
-void testReverseESWN() {
-    testReverseOrder<nshogi::core::IterateOrder::ESWN>();
-}
-
-void testReverseWNES() {
-    testReverseOrder<nshogi::core::IterateOrder::WNES>();
-}
-
-void testReverseNWSE() {
-    testReverseOrder<nshogi::core::IterateOrder::NWSE>();
-}
-
-void testReverseSENW() {
-    testReverseOrder<nshogi::core::IterateOrder::SENW>();
 }
 
 } // namespace
 
+TEST(SquareIterator, ReverseESWN) {
+    testReverseOrder<nshogi::core::IterateOrder::ESWN>();
+}
 
-int setupTestSquareIterator() {
-    CU_pSuite suite = CU_add_suite("squareiterator test", 0, 0);
+TEST(SquareIterator, ReverseWNES) {
+    testReverseOrder<nshogi::core::IterateOrder::WNES>();
+}
 
-    CU_add_test(suite, "Test Reverse ESWN", testReverseESWN);
-    CU_add_test(suite, "Test Reverse WNES", testReverseWNES);
-    CU_add_test(suite, "Test Reverse NWSE", testReverseNWSE);
-    CU_add_test(suite, "Test Reverse SENW", testReverseSENW);
+TEST(SquareIterator, ReverseNWSE) {
+    testReverseOrder<nshogi::core::IterateOrder::NWSE>();
+}
 
-    return CUE_SUCCESS;
+TEST(SquareIterator, ReverseSENW) {
+    testReverseOrder<nshogi::core::IterateOrder::SENW>();
 }

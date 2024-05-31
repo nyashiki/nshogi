@@ -1,24 +1,102 @@
-#include <CUnit/CUnit.h>
-
+#include "common.h"
 #include "../core/positionbuilder.h"
 #include "../core/statebuilder.h"
 #include "../io/sfen.h"
-#include <CUnit/TestDB.h>
-#include <iostream>
 #include <stdexcept>
 #include <vector>
 
-namespace {
+TEST(Sfen, Files) {
+    using namespace nshogi::core;
+    using namespace nshogi::io::sfen;
 
-void testInitialPositionSfen() {
+    TEST_ASSERT_EQ(fileToChar(File1), '1');
+    TEST_ASSERT_EQ(fileToChar(File2), '2');
+    TEST_ASSERT_EQ(fileToChar(File3), '3');
+    TEST_ASSERT_EQ(fileToChar(File4), '4');
+    TEST_ASSERT_EQ(fileToChar(File5), '5');
+    TEST_ASSERT_EQ(fileToChar(File6), '6');
+    TEST_ASSERT_EQ(fileToChar(File7), '7');
+    TEST_ASSERT_EQ(fileToChar(File8), '8');
+    TEST_ASSERT_EQ(fileToChar(File9), '9');
+
+    TEST_ASSERT_EQ(charToFile('1'), File1);
+    TEST_ASSERT_EQ(charToFile('2'), File2);
+    TEST_ASSERT_EQ(charToFile('3'), File3);
+    TEST_ASSERT_EQ(charToFile('4'), File4);
+    TEST_ASSERT_EQ(charToFile('5'), File5);
+    TEST_ASSERT_EQ(charToFile('6'), File6);
+    TEST_ASSERT_EQ(charToFile('7'), File7);
+    TEST_ASSERT_EQ(charToFile('8'), File8);
+    TEST_ASSERT_EQ(charToFile('9'), File9);
+}
+
+TEST(Sfen, Ranks) {
+    using namespace nshogi::core;
+    using namespace nshogi::io::sfen;
+
+    TEST_ASSERT_EQ(rankToChar(RankA), 'a');
+    TEST_ASSERT_EQ(rankToChar(RankB), 'b');
+    TEST_ASSERT_EQ(rankToChar(RankC), 'c');
+    TEST_ASSERT_EQ(rankToChar(RankD), 'd');
+    TEST_ASSERT_EQ(rankToChar(RankE), 'e');
+    TEST_ASSERT_EQ(rankToChar(RankF), 'f');
+    TEST_ASSERT_EQ(rankToChar(RankG), 'g');
+    TEST_ASSERT_EQ(rankToChar(RankH), 'h');
+    TEST_ASSERT_EQ(rankToChar(RankI), 'i');
+
+    TEST_ASSERT_EQ(charToRank('a'), RankA);
+    TEST_ASSERT_EQ(charToRank('b'), RankB);
+    TEST_ASSERT_EQ(charToRank('c'), RankC);
+    TEST_ASSERT_EQ(charToRank('d'), RankD);
+    TEST_ASSERT_EQ(charToRank('e'), RankE);
+    TEST_ASSERT_EQ(charToRank('f'), RankF);
+    TEST_ASSERT_EQ(charToRank('g'), RankG);
+    TEST_ASSERT_EQ(charToRank('h'), RankH);
+    TEST_ASSERT_EQ(charToRank('i'), RankI);
+}
+
+TEST(Sfen, PieceToSfen) {
+    using namespace nshogi::core;
+    using namespace nshogi::io::sfen;
+
+    TEST_ASSERT_STREQ(pieceToSfen(PK_BlackPawn).c_str(), "P");
+    TEST_ASSERT_STREQ(pieceToSfen(PK_BlackLance).c_str(), "L");
+    TEST_ASSERT_STREQ(pieceToSfen(PK_BlackKnight).c_str(), "N");
+    TEST_ASSERT_STREQ(pieceToSfen(PK_BlackSilver).c_str(), "S");
+    TEST_ASSERT_STREQ(pieceToSfen(PK_BlackGold).c_str(), "G");
+    TEST_ASSERT_STREQ(pieceToSfen(PK_BlackKing).c_str(), "K");
+    TEST_ASSERT_STREQ(pieceToSfen(PK_BlackBishop).c_str(), "B");
+    TEST_ASSERT_STREQ(pieceToSfen(PK_BlackRook).c_str(), "R");
+    TEST_ASSERT_STREQ(pieceToSfen(PK_BlackProLance).c_str(), "+L");
+    TEST_ASSERT_STREQ(pieceToSfen(PK_BlackProKnight).c_str(), "+N");
+    TEST_ASSERT_STREQ(pieceToSfen(PK_BlackProSilver).c_str(), "+S");
+    TEST_ASSERT_STREQ(pieceToSfen(PK_BlackProBishop).c_str(), "+B");
+    TEST_ASSERT_STREQ(pieceToSfen(PK_BlackProRook).c_str(), "+R");
+
+    TEST_ASSERT_STREQ(pieceToSfen(PK_WhitePawn).c_str(), "p");
+    TEST_ASSERT_STREQ(pieceToSfen(PK_WhiteLance).c_str(), "l");
+    TEST_ASSERT_STREQ(pieceToSfen(PK_WhiteKnight).c_str(), "n");
+    TEST_ASSERT_STREQ(pieceToSfen(PK_WhiteSilver).c_str(), "s");
+    TEST_ASSERT_STREQ(pieceToSfen(PK_WhiteGold).c_str(), "g");
+    TEST_ASSERT_STREQ(pieceToSfen(PK_WhiteKing).c_str(), "k");
+    TEST_ASSERT_STREQ(pieceToSfen(PK_WhiteBishop).c_str(), "b");
+    TEST_ASSERT_STREQ(pieceToSfen(PK_WhiteRook).c_str(), "r");
+    TEST_ASSERT_STREQ(pieceToSfen(PK_WhiteProLance).c_str(), "+l");
+    TEST_ASSERT_STREQ(pieceToSfen(PK_WhiteProKnight).c_str(), "+n");
+    TEST_ASSERT_STREQ(pieceToSfen(PK_WhiteProSilver).c_str(), "+s");
+    TEST_ASSERT_STREQ(pieceToSfen(PK_WhiteProBishop).c_str(), "+b");
+    TEST_ASSERT_STREQ(pieceToSfen(PK_WhiteProRook).c_str(), "+r");
+}
+
+TEST(Sfen, InitialPosition) {
     nshogi::core::Position Position =
         nshogi::core::PositionBuilder::getInitialPosition();
-    CU_ASSERT_STRING_EQUAL(
+    TEST_ASSERT_STREQ(
         nshogi::io::sfen::positionToSfen(Position).c_str(),
         "lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL b - 1");
 }
 
-void testSetGetSfenPositionTest() {
+TEST(Sfen, SetGetSfenPosition) {
     // clang-format off
     const std::vector<std::string> Sfens({
         "lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL b - 1",
@@ -85,76 +163,26 @@ void testSetGetSfenPositionTest() {
     for (const auto& Sfen : Sfens) {
         nshogi::core::Position Position =
             nshogi::io::sfen::PositionBuilder::newPosition(Sfen);
-        CU_ASSERT_STRING_EQUAL(
+        TEST_ASSERT_STREQ(
             nshogi::io::sfen::positionToSfen(Position).c_str(), Sfen.c_str());
 
         nshogi::core::State State =
             nshogi::io::sfen::StateBuilder::newState(Sfen);
-        CU_ASSERT_STRING_EQUAL(nshogi::io::sfen::positionToSfen(
+        TEST_ASSERT_STREQ(nshogi::io::sfen::positionToSfen(
                                    State.getInitialPosition())
                                    .c_str(),
                                Sfen.c_str());
     }
 }
 
-void testInitialStateSfen() {
+TEST(State, InitialState) {
     nshogi::core::State State = nshogi::core::StateBuilder::getInitialState();
-    CU_ASSERT_STRING_EQUAL(
+    TEST_ASSERT_STREQ(
         nshogi::io::sfen::positionToSfen(State.getPosition()).c_str(),
         "lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL b - 1");
 }
 
-void testFiles() {
-    using namespace nshogi::core;
-    using namespace nshogi::io::sfen;
-
-    CU_ASSERT_EQUAL(fileToChar(File1), '1');
-    CU_ASSERT_EQUAL(fileToChar(File2), '2');
-    CU_ASSERT_EQUAL(fileToChar(File3), '3');
-    CU_ASSERT_EQUAL(fileToChar(File4), '4');
-    CU_ASSERT_EQUAL(fileToChar(File5), '5');
-    CU_ASSERT_EQUAL(fileToChar(File6), '6');
-    CU_ASSERT_EQUAL(fileToChar(File7), '7');
-    CU_ASSERT_EQUAL(fileToChar(File8), '8');
-    CU_ASSERT_EQUAL(fileToChar(File9), '9');
-
-    CU_ASSERT_EQUAL(charToFile('1'), File1);
-    CU_ASSERT_EQUAL(charToFile('2'), File2);
-    CU_ASSERT_EQUAL(charToFile('3'), File3);
-    CU_ASSERT_EQUAL(charToFile('4'), File4);
-    CU_ASSERT_EQUAL(charToFile('5'), File5);
-    CU_ASSERT_EQUAL(charToFile('6'), File6);
-    CU_ASSERT_EQUAL(charToFile('7'), File7);
-    CU_ASSERT_EQUAL(charToFile('8'), File8);
-    CU_ASSERT_EQUAL(charToFile('9'), File9);
-}
-
-void testRanks() {
-    using namespace nshogi::core;
-    using namespace nshogi::io::sfen;
-
-    CU_ASSERT_EQUAL(rankToChar(RankA), 'a');
-    CU_ASSERT_EQUAL(rankToChar(RankB), 'b');
-    CU_ASSERT_EQUAL(rankToChar(RankC), 'c');
-    CU_ASSERT_EQUAL(rankToChar(RankD), 'd');
-    CU_ASSERT_EQUAL(rankToChar(RankE), 'e');
-    CU_ASSERT_EQUAL(rankToChar(RankF), 'f');
-    CU_ASSERT_EQUAL(rankToChar(RankG), 'g');
-    CU_ASSERT_EQUAL(rankToChar(RankH), 'h');
-    CU_ASSERT_EQUAL(rankToChar(RankI), 'i');
-
-    CU_ASSERT_EQUAL(charToRank('a'), RankA);
-    CU_ASSERT_EQUAL(charToRank('b'), RankB);
-    CU_ASSERT_EQUAL(charToRank('c'), RankC);
-    CU_ASSERT_EQUAL(charToRank('d'), RankD);
-    CU_ASSERT_EQUAL(charToRank('e'), RankE);
-    CU_ASSERT_EQUAL(charToRank('f'), RankF);
-    CU_ASSERT_EQUAL(charToRank('g'), RankG);
-    CU_ASSERT_EQUAL(charToRank('h'), RankH);
-    CU_ASSERT_EQUAL(charToRank('i'), RankI);
-}
-
-void testInvalidSfens() {
+TEST(State, InvalidSfens) {
     const std::string SfenMoves[] = {"aaaa", "abcdef", "a", "2i2j", "B*3a+"};
 
     for (const auto& SfenMove : SfenMoves) {
@@ -162,89 +190,38 @@ void testInvalidSfens() {
             nshogi::core::State State =
                 nshogi::core::StateBuilder::getInitialState();
             nshogi::io::sfen::sfenToMove32(State.getPosition(), SfenMove);
-            CU_ASSERT_FALSE(true);
+            TEST_ASSERT_FALSE(true);
         } catch ([[maybe_unused]] std::runtime_error& e) {
-            CU_ASSERT_TRUE(true);
+            TEST_ASSERT_TRUE(true);
         }
     }
 }
 
-void testPieceToSfen() {
+TEST(State, MoveToSfen) {
     using namespace nshogi::core;
     using namespace nshogi::io::sfen;
 
-    CU_ASSERT_STRING_EQUAL(pieceToSfen(PK_BlackPawn).c_str(), "P");
-    CU_ASSERT_STRING_EQUAL(pieceToSfen(PK_BlackLance).c_str(), "L");
-    CU_ASSERT_STRING_EQUAL(pieceToSfen(PK_BlackKnight).c_str(), "N");
-    CU_ASSERT_STRING_EQUAL(pieceToSfen(PK_BlackSilver).c_str(), "S");
-    CU_ASSERT_STRING_EQUAL(pieceToSfen(PK_BlackGold).c_str(), "G");
-    CU_ASSERT_STRING_EQUAL(pieceToSfen(PK_BlackKing).c_str(), "K");
-    CU_ASSERT_STRING_EQUAL(pieceToSfen(PK_BlackBishop).c_str(), "B");
-    CU_ASSERT_STRING_EQUAL(pieceToSfen(PK_BlackRook).c_str(), "R");
-    CU_ASSERT_STRING_EQUAL(pieceToSfen(PK_BlackProLance).c_str(), "+L");
-    CU_ASSERT_STRING_EQUAL(pieceToSfen(PK_BlackProKnight).c_str(), "+N");
-    CU_ASSERT_STRING_EQUAL(pieceToSfen(PK_BlackProSilver).c_str(), "+S");
-    CU_ASSERT_STRING_EQUAL(pieceToSfen(PK_BlackProBishop).c_str(), "+B");
-    CU_ASSERT_STRING_EQUAL(pieceToSfen(PK_BlackProRook).c_str(), "+R");
-
-    CU_ASSERT_STRING_EQUAL(pieceToSfen(PK_WhitePawn).c_str(), "p");
-    CU_ASSERT_STRING_EQUAL(pieceToSfen(PK_WhiteLance).c_str(), "l");
-    CU_ASSERT_STRING_EQUAL(pieceToSfen(PK_WhiteKnight).c_str(), "n");
-    CU_ASSERT_STRING_EQUAL(pieceToSfen(PK_WhiteSilver).c_str(), "s");
-    CU_ASSERT_STRING_EQUAL(pieceToSfen(PK_WhiteGold).c_str(), "g");
-    CU_ASSERT_STRING_EQUAL(pieceToSfen(PK_WhiteKing).c_str(), "k");
-    CU_ASSERT_STRING_EQUAL(pieceToSfen(PK_WhiteBishop).c_str(), "b");
-    CU_ASSERT_STRING_EQUAL(pieceToSfen(PK_WhiteRook).c_str(), "r");
-    CU_ASSERT_STRING_EQUAL(pieceToSfen(PK_WhiteProLance).c_str(), "+l");
-    CU_ASSERT_STRING_EQUAL(pieceToSfen(PK_WhiteProKnight).c_str(), "+n");
-    CU_ASSERT_STRING_EQUAL(pieceToSfen(PK_WhiteProSilver).c_str(), "+s");
-    CU_ASSERT_STRING_EQUAL(pieceToSfen(PK_WhiteProBishop).c_str(), "+b");
-    CU_ASSERT_STRING_EQUAL(pieceToSfen(PK_WhiteProRook).c_str(), "+r");
-}
-
-void testMoveToSfen() {
-    using namespace nshogi::core;
-    using namespace nshogi::io::sfen;
-
-    CU_ASSERT_STRING_EQUAL(
+    TEST_ASSERT_STREQ(
         "7g7f", move32ToSfen(Move32::boardMove(Sq7G, Sq7F, PTK_Empty)).c_str());
-    CU_ASSERT_STRING_EQUAL(
+    TEST_ASSERT_STREQ(
         "2g2f", move32ToSfen(Move32::boardMove(Sq2G, Sq2F, PTK_Empty)).c_str());
-    CU_ASSERT_STRING_EQUAL(
+    TEST_ASSERT_STREQ(
         "G*5e", move32ToSfen(Move32::droppingMove(Sq5E, PTK_Gold)).c_str());
-    CU_ASSERT_STRING_EQUAL(
+    TEST_ASSERT_STREQ(
         "2c2b+", move32ToSfen(Move32::boardPromotingMove(Sq2C, Sq2B, PTK_Empty))
                      .c_str());
-    CU_ASSERT_STRING_EQUAL("resign", move32ToSfen(Move32::MoveNone()).c_str());
+    TEST_ASSERT_STREQ("resign", move32ToSfen(Move32::MoveNone()).c_str());
 }
 
-void testSfenWithMoves1() {
+TEST(State, SfenWithMoves) {
     const std::string Sfen = "lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/"
                              "LNSGKGSNL b - 1 moves 7g7f 3c3d 8h2b+ 3a2b";
     nshogi::core::State State = nshogi::io::sfen::StateBuilder::newState(Sfen);
 
-    CU_ASSERT_STRING_EQUAL(
+    TEST_ASSERT_STREQ(
         nshogi::io::sfen::positionToSfen(State.getPosition()).c_str(),
         "lnsgkg1nl/1r5s1/pppppp1pp/6p2/9/2P6/PP1PPPPPP/7R1/LNSGKGSNL b Bb 1");
 
-    CU_ASSERT_STRING_EQUAL(nshogi::io::sfen::stateToSfen(State).c_str(),
+    TEST_ASSERT_STREQ(nshogi::io::sfen::stateToSfen(State).c_str(),
                            Sfen.c_str());
-}
-
-} // namespace
-
-int setupTestSfen() {
-    CU_pSuite suite = CU_add_suite("sfen test", 0, 0);
-
-    CU_add_test(suite, "Files", testFiles);
-    CU_add_test(suite, "Ranks", testRanks);
-    CU_add_test(suite, "PieceToSfen", testPieceToSfen);
-    CU_add_test(suite, "Initial Position", testInitialPositionSfen);
-    CU_add_test(suite, "Set/Get sfen Position", testSetGetSfenPositionTest);
-    CU_add_test(suite, "Initial State", testInitialStateSfen);
-    CU_add_test(suite, "Invalid Sfens", testInvalidSfens);
-    CU_add_test(suite, "MoveToSfen", testMoveToSfen);
-    CU_add_test(suite, "SfenWithMoves 1", testSfenWithMoves1);
-
-    return CUE_SUCCESS;
 }

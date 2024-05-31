@@ -1,6 +1,6 @@
-#include <CUnit/CUnit.h>
 #include <cstddef>
 
+#include "common.h"
 #include "../core/state.h"
 #include "../core/stateconfig.h"
 #include "../core/statebuilder.h"
@@ -26,15 +26,15 @@ void checkFeatureTypeColor(const nshogi::core::State& State, const nshogi::core:
     > Features(State, Config);
 
     if (State.getPosition().sideToMove() == nshogi::core::Black) {
-        CU_ASSERT_EQUAL(Features.get(0).getValue(), 1);
-        CU_ASSERT_EQUAL(Features.get(0).getBitboard(), nshogi::core::bitboard::Bitboard::AllBB());
-        CU_ASSERT_EQUAL(Features.get(1).getValue(), 0);
-        CU_ASSERT_EQUAL(Features.get(1).getBitboard(), nshogi::core::bitboard::Bitboard::ZeroBB());
+        TEST_ASSERT_EQ(Features.get(0).getValue(), 1.0f);
+        TEST_ASSERT_EQ(Features.get(0).getBitboard(), nshogi::core::bitboard::Bitboard::AllBB());
+        TEST_ASSERT_EQ(Features.get(1).getValue(), 0.0f);
+        TEST_ASSERT_EQ(Features.get(1).getBitboard(), nshogi::core::bitboard::Bitboard::ZeroBB());
     } else {
-        CU_ASSERT_EQUAL(Features.get(0).getValue(), 0);
-        CU_ASSERT_EQUAL(Features.get(0).getBitboard(), nshogi::core::bitboard::Bitboard::ZeroBB());
-        CU_ASSERT_EQUAL(Features.get(1).getValue(), 1);
-        CU_ASSERT_EQUAL(Features.get(1).getBitboard(), nshogi::core::bitboard::Bitboard::AllBB());
+        TEST_ASSERT_EQ(Features.get(0).getValue(), 0.0f);
+        TEST_ASSERT_EQ(Features.get(0).getBitboard(), nshogi::core::bitboard::Bitboard::ZeroBB());
+        TEST_ASSERT_EQ(Features.get(1).getValue(), 1.0f);
+        TEST_ASSERT_EQ(Features.get(1).getBitboard(), nshogi::core::bitboard::Bitboard::AllBB());
     }
 }
 
@@ -45,15 +45,15 @@ void checkFeatureTypeColorRuntime(const nshogi::core::State& State, const nshogi
     }, State, Config);
 
     if (State.getPosition().sideToMove() == nshogi::core::Black) {
-        CU_ASSERT_EQUAL(Features.get(0).getValue(), 1);
-        CU_ASSERT_EQUAL(Features.get(0).getBitboard(), nshogi::core::bitboard::Bitboard::AllBB());
-        CU_ASSERT_EQUAL(Features.get(1).getValue(), 0);
-        CU_ASSERT_EQUAL(Features.get(1).getBitboard(), nshogi::core::bitboard::Bitboard::ZeroBB());
+        TEST_ASSERT_EQ(Features.get(0).getValue(), 1.0f);
+        TEST_ASSERT_EQ(Features.get(0).getBitboard(), nshogi::core::bitboard::Bitboard::AllBB());
+        TEST_ASSERT_EQ(Features.get(1).getValue(), 0.0f);
+        TEST_ASSERT_EQ(Features.get(1).getBitboard(), nshogi::core::bitboard::Bitboard::ZeroBB());
     } else {
-        CU_ASSERT_EQUAL(Features.get(0).getValue(), 0);
-        CU_ASSERT_EQUAL(Features.get(0).getBitboard(), nshogi::core::bitboard::Bitboard::ZeroBB());
-        CU_ASSERT_EQUAL(Features.get(1).getValue(), 1);
-        CU_ASSERT_EQUAL(Features.get(1).getBitboard(), nshogi::core::bitboard::Bitboard::AllBB());
+        TEST_ASSERT_EQ(Features.get(0).getValue(), 0.0f);
+        TEST_ASSERT_EQ(Features.get(0).getBitboard(), nshogi::core::bitboard::Bitboard::ZeroBB());
+        TEST_ASSERT_EQ(Features.get(1).getValue(), 1.0f);
+        TEST_ASSERT_EQ(Features.get(1).getBitboard(), nshogi::core::bitboard::Bitboard::AllBB());
     }
 }
 
@@ -92,13 +92,13 @@ void checkFeatureTypeOnBoard(const nshogi::core::State& State, const nshogi::cor
     std::size_t I = 0;
     for (nshogi::core::Color C : { State.getPosition().sideToMove(), ~State.getPosition().sideToMove() }) {
         for (nshogi::core::PieceTypeKind Type : nshogi::core::PieceTypes) {
-            CU_ASSERT_EQUAL(Features.get(I).getValue(), 1);
-            CU_ASSERT_EQUAL(Features.get(I).getBitboard(), State.getBitboard(C, Type));
+            TEST_ASSERT_EQ(Features.get(I).getValue(), 1.0f);
+            TEST_ASSERT_EQ(Features.get(I).getBitboard(), State.getBitboard(C, Type));
 
             if (State.getPosition().sideToMove() == nshogi::core::Black) {
-                CU_ASSERT_FALSE(Features.get(I).isRotated());
+                TEST_ASSERT_FALSE(Features.get(I).isRotated());
             } else {
-                CU_ASSERT_TRUE(Features.get(I).isRotated());
+                TEST_ASSERT_TRUE(Features.get(I).isRotated());
             }
 
             ++I;
@@ -141,13 +141,13 @@ void checkFeatureTypeOnBoardRuntime(const nshogi::core::State& State, const nsho
     std::size_t I = 0;
     for (nshogi::core::Color C : { State.getPosition().sideToMove(), ~State.getPosition().sideToMove() }) {
         for (nshogi::core::PieceTypeKind Type : nshogi::core::PieceTypes) {
-            CU_ASSERT_EQUAL(Features.get(I).getValue(), 1);
-            CU_ASSERT_EQUAL(Features.get(I).getBitboard(), State.getBitboard(C, Type));
+            TEST_ASSERT_EQ(Features.get(I).getValue(), 1.0f);
+            TEST_ASSERT_EQ(Features.get(I).getBitboard(), State.getBitboard(C, Type));
 
             if (State.getPosition().sideToMove() == nshogi::core::Black) {
-                CU_ASSERT_FALSE(Features.get(I).isRotated());
+                TEST_ASSERT_FALSE(Features.get(I).isRotated());
             } else {
-                CU_ASSERT_TRUE(Features.get(I).isRotated());
+                TEST_ASSERT_TRUE(Features.get(I).isRotated());
             }
 
             ++I;
@@ -204,11 +204,11 @@ void checkFeatureTypeSmallStand(const nshogi::core::State& State, const nshogi::
         for (nshogi::core::PieceTypeKind Type : {nshogi::core::PTK_Pawn, nshogi::core::PTK_Lance, nshogi::core::PTK_Knight, nshogi::core::PTK_Silver, nshogi::core::PTK_Gold}) {
             for (uint8_t Count = 1; Count <= 4; ++Count) {
                 if (State.getPosition().getStandCount(C, Type) >= Count) {
-                    CU_ASSERT_EQUAL(Features.get(I).getValue(), 1);
-                    CU_ASSERT_EQUAL(Features.get(I).getBitboard(), nshogi::core::bitboard::Bitboard::AllBB());
+                    TEST_ASSERT_EQ(Features.get(I).getValue(), 1.0f);
+                    TEST_ASSERT_EQ(Features.get(I).getBitboard(), nshogi::core::bitboard::Bitboard::AllBB());
                 } else {
-                    CU_ASSERT_EQUAL(Features.get(I).getValue(), 0);
-                    CU_ASSERT_EQUAL(Features.get(I).getBitboard(), nshogi::core::bitboard::Bitboard::AllBB());
+                    TEST_ASSERT_EQ(Features.get(I).getValue(), 0.0f);
+                    TEST_ASSERT_EQ(Features.get(I).getBitboard(), nshogi::core::bitboard::Bitboard::AllBB());
                 }
 
                 ++I;
@@ -266,11 +266,11 @@ void checkFeatureTypeSmallStandRuntime(const nshogi::core::State& State, const n
         for (nshogi::core::PieceTypeKind Type : {nshogi::core::PTK_Pawn, nshogi::core::PTK_Lance, nshogi::core::PTK_Knight, nshogi::core::PTK_Silver, nshogi::core::PTK_Gold}) {
             for (uint8_t Count = 1; Count <= 4; ++Count) {
                 if (State.getPosition().getStandCount(C, Type) >= Count) {
-                    CU_ASSERT_EQUAL(Features.get(I).getValue(), 1);
-                    CU_ASSERT_EQUAL(Features.get(I).getBitboard(), nshogi::core::bitboard::Bitboard::AllBB());
+                    TEST_ASSERT_EQ(Features.get(I).getValue(), 1.0f);
+                    TEST_ASSERT_EQ(Features.get(I).getBitboard(), nshogi::core::bitboard::Bitboard::AllBB());
                 } else {
-                    CU_ASSERT_EQUAL(Features.get(I).getValue(), 0);
-                    CU_ASSERT_EQUAL(Features.get(I).getBitboard(), nshogi::core::bitboard::Bitboard::AllBB());
+                    TEST_ASSERT_EQ(Features.get(I).getValue(), 0.0f);
+                    TEST_ASSERT_EQ(Features.get(I).getBitboard(), nshogi::core::bitboard::Bitboard::AllBB());
                 }
 
                 ++I;
@@ -296,11 +296,11 @@ void checkFeatureTypeLargeStand(const nshogi::core::State& State, const nshogi::
         for (nshogi::core::PieceTypeKind Type : {nshogi::core::PTK_Bishop, nshogi::core::PTK_Rook}) {
             for (uint8_t Count = 1; Count <= 2; ++Count) {
                 if (State.getPosition().getStandCount(C, Type) >= Count) {
-                    CU_ASSERT_EQUAL(Features.get(I).getValue(), 1);
-                    CU_ASSERT_EQUAL(Features.get(I).getBitboard(), nshogi::core::bitboard::Bitboard::AllBB());
+                    TEST_ASSERT_EQ(Features.get(I).getValue(), 1.0f);
+                    TEST_ASSERT_EQ(Features.get(I).getBitboard(), nshogi::core::bitboard::Bitboard::AllBB());
                 } else {
-                    CU_ASSERT_EQUAL(Features.get(I).getValue(), 0);
-                    CU_ASSERT_EQUAL(Features.get(I).getBitboard(), nshogi::core::bitboard::Bitboard::AllBB());
+                    TEST_ASSERT_EQ(Features.get(I).getValue(), 0.0f);
+                    TEST_ASSERT_EQ(Features.get(I).getBitboard(), nshogi::core::bitboard::Bitboard::AllBB());
                 }
 
                 ++I;
@@ -326,11 +326,11 @@ void checkFeatureTypeLargeStandRuntime(const nshogi::core::State& State, const n
         for (nshogi::core::PieceTypeKind Type : {nshogi::core::PTK_Bishop, nshogi::core::PTK_Rook}) {
             for (uint8_t Count = 1; Count <= 2; ++Count) {
                 if (State.getPosition().getStandCount(C, Type) >= Count) {
-                    CU_ASSERT_EQUAL(Features.get(I).getValue(), 1);
-                    CU_ASSERT_EQUAL(Features.get(I).getBitboard(), nshogi::core::bitboard::Bitboard::AllBB());
+                    TEST_ASSERT_EQ(Features.get(I).getValue(), 1.0f);
+                    TEST_ASSERT_EQ(Features.get(I).getBitboard(), nshogi::core::bitboard::Bitboard::AllBB());
                 } else {
-                    CU_ASSERT_EQUAL(Features.get(I).getValue(), 0);
-                    CU_ASSERT_EQUAL(Features.get(I).getBitboard(), nshogi::core::bitboard::Bitboard::AllBB());
+                    TEST_ASSERT_EQ(Features.get(I).getValue(), 0.0f);
+                    TEST_ASSERT_EQ(Features.get(I).getBitboard(), nshogi::core::bitboard::Bitboard::AllBB());
                 }
 
                 ++I;
@@ -345,11 +345,11 @@ void checkFeatureTypeCheck(const nshogi::core::State& State, const nshogi::core:
     > Features(State, Config);
 
     if (State.getCheckerBB().isZero()) {
-        CU_ASSERT_EQUAL(Features.get(0).getValue(), 0);
-        CU_ASSERT_EQUAL(Features.get(0).getBitboard(), nshogi::core::bitboard::Bitboard::ZeroBB());
+        TEST_ASSERT_EQ(Features.get(0).getValue(), 0.0f);
+        TEST_ASSERT_EQ(Features.get(0).getBitboard(), nshogi::core::bitboard::Bitboard::ZeroBB());
     } else {
-        CU_ASSERT_EQUAL(Features.get(0).getValue(), 1);
-        CU_ASSERT_EQUAL(Features.get(0).getBitboard(), nshogi::core::bitboard::Bitboard::AllBB());
+        TEST_ASSERT_EQ(Features.get(0).getValue(), 1.0f);
+        TEST_ASSERT_EQ(Features.get(0).getBitboard(), nshogi::core::bitboard::Bitboard::AllBB());
     }
 }
 
@@ -359,11 +359,11 @@ void checkFeatureTypeCheckRuntime(const nshogi::core::State& State, const nshogi
     }, State, Config);
 
     if (State.getCheckerBB().isZero()) {
-        CU_ASSERT_EQUAL(Features.get(0).getValue(), 0);
-        CU_ASSERT_EQUAL(Features.get(0).getBitboard(), nshogi::core::bitboard::Bitboard::ZeroBB());
+        TEST_ASSERT_EQ(Features.get(0).getValue(), 0.0f);
+        TEST_ASSERT_EQ(Features.get(0).getBitboard(), nshogi::core::bitboard::Bitboard::ZeroBB());
     } else {
-        CU_ASSERT_EQUAL(Features.get(0).getValue(), 1);
-        CU_ASSERT_EQUAL(Features.get(0).getBitboard(), nshogi::core::bitboard::Bitboard::AllBB());
+        TEST_ASSERT_EQ(Features.get(0).getValue(), 1.0f);
+        TEST_ASSERT_EQ(Features.get(0).getBitboard(), nshogi::core::bitboard::Bitboard::AllBB());
     }
 }
 
@@ -385,8 +385,8 @@ void checkFeatureTypeNoPawnFile(const nshogi::core::State& State, const nshogi::
             }
         }
 
-        CU_ASSERT_EQUAL(Features.get(I).getValue(), 1);
-        CU_ASSERT_EQUAL(Features.get(I).getBitboard(), ~PawnFileBB);
+        TEST_ASSERT_EQ(Features.get(I).getValue(), 1.0f);
+        TEST_ASSERT_EQ(Features.get(I).getBitboard(), ~PawnFileBB);
 
         if (Features.get(I).getBitboard() != ~PawnFileBB) {
             nshogi::core::bitboard::Bitboard BB = Features.get(I).getBitboard();
@@ -395,9 +395,9 @@ void checkFeatureTypeNoPawnFile(const nshogi::core::State& State, const nshogi::
         }
 
         if (State.getPosition().sideToMove() == nshogi::core::Black) {
-            CU_ASSERT_FALSE(Features.get(I).isRotated());
+            TEST_ASSERT_FALSE(Features.get(I).isRotated());
         } else {
-            CU_ASSERT_TRUE(Features.get(I).isRotated());
+            TEST_ASSERT_TRUE(Features.get(I).isRotated());
         }
 
         ++I;
@@ -422,13 +422,13 @@ void checkFeatureTypeNoPawnFileRuntime(const nshogi::core::State& State, const n
             }
         }
 
-        CU_ASSERT_EQUAL(Features.get(I).getValue(), 1);
-        CU_ASSERT_EQUAL(Features.get(I).getBitboard(), ~PawnFileBB);
+        TEST_ASSERT_EQ(Features.get(I).getValue(), 1.0f);
+        TEST_ASSERT_EQ(Features.get(I).getBitboard(), ~PawnFileBB);
 
         if (State.getPosition().sideToMove() == nshogi::core::Black) {
-            CU_ASSERT_FALSE(Features.get(I).isRotated());
+            TEST_ASSERT_FALSE(Features.get(I).isRotated());
         } else {
-            CU_ASSERT_TRUE(Features.get(I).isRotated());
+            TEST_ASSERT_TRUE(Features.get(I).isRotated());
         }
 
         ++I;
@@ -440,9 +440,9 @@ void checkFeatureTypeProgress(const nshogi::core::State& State, const nshogi::co
         nshogi::ml::FeatureType::FT_Progress
     > Features(State, Config);
 
-    CU_ASSERT_DOUBLE_EQUAL(Features.get(0).getValue(),
+    TEST_ASSERT_FLOAT_EQ(Features.get(0).getValue(),
             (double)State.getPly() / Config.MaxPly, 1e-6);
-    CU_ASSERT_EQUAL(Features.get(0).getBitboard(), nshogi::core::bitboard::Bitboard::AllBB());
+    TEST_ASSERT_EQ(Features.get(0).getBitboard(), nshogi::core::bitboard::Bitboard::AllBB());
 }
 
 void checkFeatureTypeProgressRuntime(const nshogi::core::State& State, const nshogi::core::StateConfig& Config) {
@@ -450,9 +450,9 @@ void checkFeatureTypeProgressRuntime(const nshogi::core::State& State, const nsh
         nshogi::ml::FeatureType::FT_Progress
     }, State, Config);
 
-    CU_ASSERT_DOUBLE_EQUAL(Features.get(0).getValue(),
+    TEST_ASSERT_FLOAT_EQ(Features.get(0).getValue(),
             (double)State.getPly() / Config.MaxPly, 1e-6);
-    CU_ASSERT_EQUAL(Features.get(0).getBitboard(), nshogi::core::bitboard::Bitboard::AllBB());
+    TEST_ASSERT_EQ(Features.get(0).getBitboard(), nshogi::core::bitboard::Bitboard::AllBB());
 }
 
 void checkFeatureTypeProgressUnit(const nshogi::core::State& State, const nshogi::core::StateConfig& Config) {
@@ -460,8 +460,8 @@ void checkFeatureTypeProgressUnit(const nshogi::core::State& State, const nshogi
         nshogi::ml::FeatureType::FT_ProgressUnit
     > Features(State, Config);
 
-    CU_ASSERT_DOUBLE_EQUAL(Features.get(0).getValue(), 1.0f / Config.MaxPly, 1e-6);
-    CU_ASSERT_EQUAL(Features.get(0).getBitboard(), nshogi::core::bitboard::Bitboard::AllBB());
+    TEST_ASSERT_FLOAT_EQ(Features.get(0).getValue(), 1.0f / Config.MaxPly, 1e-6);
+    TEST_ASSERT_EQ(Features.get(0).getBitboard(), nshogi::core::bitboard::Bitboard::AllBB());
 }
 
 void checkFeatureTypeProgressUnitRuntime(const nshogi::core::State& State, const nshogi::core::StateConfig& Config) {
@@ -469,8 +469,8 @@ void checkFeatureTypeProgressUnitRuntime(const nshogi::core::State& State, const
         nshogi::ml::FeatureType::FT_ProgressUnit
     }, State, Config);
 
-    CU_ASSERT_DOUBLE_EQUAL(Features.get(0).getValue(), 1.0f / Config.MaxPly, 1e-6);
-    CU_ASSERT_EQUAL(Features.get(0).getBitboard(), nshogi::core::bitboard::Bitboard::AllBB());
+    TEST_ASSERT_FLOAT_EQ(Features.get(0).getValue(), 1.0f / Config.MaxPly, 1e-6);
+    TEST_ASSERT_EQ(Features.get(0).getBitboard(), nshogi::core::bitboard::Bitboard::AllBB());
 }
 
 void checkFeatureTypeRule(const nshogi::core::State& State, const nshogi::core::StateConfig& Config) {
@@ -480,22 +480,22 @@ void checkFeatureTypeRule(const nshogi::core::State& State, const nshogi::core::
         nshogi::ml::FeatureType::FT_RuleTrying
     > Features(State, Config);
 
-    CU_ASSERT_EQUAL(Features.get(0).getBitboard(), nshogi::core::bitboard::Bitboard::AllBB());
-    CU_ASSERT_EQUAL(Features.get(1).getBitboard(), nshogi::core::bitboard::Bitboard::AllBB());
-    CU_ASSERT_EQUAL(Features.get(2).getBitboard(), nshogi::core::bitboard::Bitboard::AllBB());
+    TEST_ASSERT_EQ(Features.get(0).getBitboard(), nshogi::core::bitboard::Bitboard::AllBB());
+    TEST_ASSERT_EQ(Features.get(1).getBitboard(), nshogi::core::bitboard::Bitboard::AllBB());
+    TEST_ASSERT_EQ(Features.get(2).getBitboard(), nshogi::core::bitboard::Bitboard::AllBB());
 
     if (Config.Rule == nshogi::core::EndingRule::Declare27_ER) {
-        CU_ASSERT_EQUAL(Features.get(0).getValue(), 1);
-        CU_ASSERT_EQUAL(Features.get(1).getValue(), 0);
-        CU_ASSERT_EQUAL(Features.get(2).getValue(), 0);
+        TEST_ASSERT_EQ(Features.get(0).getValue(), 1.0f);
+        TEST_ASSERT_EQ(Features.get(1).getValue(), 0.0f);
+        TEST_ASSERT_EQ(Features.get(2).getValue(), 0.0f);
     } else if (Config.Rule == nshogi::core::EndingRule::Draw24_ER) {
-        CU_ASSERT_EQUAL(Features.get(0).getValue(), 0);
-        CU_ASSERT_EQUAL(Features.get(1).getValue(), 1);
-        CU_ASSERT_EQUAL(Features.get(2).getValue(), 0);
+        TEST_ASSERT_EQ(Features.get(0).getValue(), 0.0f);
+        TEST_ASSERT_EQ(Features.get(1).getValue(), 1.0f);
+        TEST_ASSERT_EQ(Features.get(2).getValue(), 0.0f);
     } else if (Config.Rule == nshogi::core::EndingRule::Trying_ER) {
-        CU_ASSERT_EQUAL(Features.get(0).getValue(), 0);
-        CU_ASSERT_EQUAL(Features.get(1).getValue(), 0);
-        CU_ASSERT_EQUAL(Features.get(2).getValue(), 1);
+        TEST_ASSERT_EQ(Features.get(0).getValue(), 0.0f);
+        TEST_ASSERT_EQ(Features.get(1).getValue(), 0.0f);
+        TEST_ASSERT_EQ(Features.get(2).getValue(), 1.0f);
     }
 }
 
@@ -506,22 +506,22 @@ void checkFeatureTypeRuleRuntime(const nshogi::core::State& State, const nshogi:
         nshogi::ml::FeatureType::FT_RuleTrying
     }, State, Config);
 
-    CU_ASSERT_EQUAL(Features.get(0).getBitboard(), nshogi::core::bitboard::Bitboard::AllBB());
-    CU_ASSERT_EQUAL(Features.get(1).getBitboard(), nshogi::core::bitboard::Bitboard::AllBB());
-    CU_ASSERT_EQUAL(Features.get(2).getBitboard(), nshogi::core::bitboard::Bitboard::AllBB());
+    TEST_ASSERT_EQ(Features.get(0).getBitboard(), nshogi::core::bitboard::Bitboard::AllBB());
+    TEST_ASSERT_EQ(Features.get(1).getBitboard(), nshogi::core::bitboard::Bitboard::AllBB());
+    TEST_ASSERT_EQ(Features.get(2).getBitboard(), nshogi::core::bitboard::Bitboard::AllBB());
 
     if (Config.Rule == nshogi::core::EndingRule::Declare27_ER) {
-        CU_ASSERT_EQUAL(Features.get(0).getValue(), 1);
-        CU_ASSERT_EQUAL(Features.get(1).getValue(), 0);
-        CU_ASSERT_EQUAL(Features.get(2).getValue(), 0);
+        TEST_ASSERT_EQ(Features.get(0).getValue(), 1.0f);
+        TEST_ASSERT_EQ(Features.get(1).getValue(), 0.0f);
+        TEST_ASSERT_EQ(Features.get(2).getValue(), 0.0f);
     } else if (Config.Rule == nshogi::core::EndingRule::Draw24_ER) {
-        CU_ASSERT_EQUAL(Features.get(0).getValue(), 0);
-        CU_ASSERT_EQUAL(Features.get(1).getValue(), 1);
-        CU_ASSERT_EQUAL(Features.get(2).getValue(), 0);
+        TEST_ASSERT_EQ(Features.get(0).getValue(), 0.0f);
+        TEST_ASSERT_EQ(Features.get(1).getValue(), 1.0f);
+        TEST_ASSERT_EQ(Features.get(2).getValue(), 0.0f);
     } else if (Config.Rule == nshogi::core::EndingRule::Trying_ER) {
-        CU_ASSERT_EQUAL(Features.get(0).getValue(), 0);
-        CU_ASSERT_EQUAL(Features.get(1).getValue(), 0);
-        CU_ASSERT_EQUAL(Features.get(2).getValue(), 1);
+        TEST_ASSERT_EQ(Features.get(0).getValue(), 0.0f);
+        TEST_ASSERT_EQ(Features.get(1).getValue(), 0.0f);
+        TEST_ASSERT_EQ(Features.get(2).getValue(), 1.0f);
     }
 }
 
@@ -729,22 +729,24 @@ void checkEqualComptimeAndRuntime(const nshogi::core::State& State, const nshogi
     }, State, Config);
 
     for (std::size_t I = 0; I < 86; ++I) {
-        CU_ASSERT_EQUAL(FeaturesComptime.get(I).getValue(), FeaturesRuntime.get(I).getValue());
-        CU_ASSERT_EQUAL(FeaturesComptime.get(I).getBitboard(), FeaturesRuntime.get(I).getBitboard());
-        CU_ASSERT_EQUAL(FeaturesComptime.get(I).isRotated(), FeaturesRuntime.get(I).isRotated());
+        TEST_ASSERT_EQ(FeaturesComptime.get(I).getValue(), FeaturesRuntime.get(I).getValue());
+        TEST_ASSERT_EQ(FeaturesComptime.get(I).getBitboard(), FeaturesRuntime.get(I).getBitboard());
+        TEST_ASSERT_EQ(FeaturesComptime.get(I).isRotated(), FeaturesRuntime.get(I).isRotated());
     }
 
     const auto ExtractedComptime = FeaturesComptime.extract();
     const auto ExtractedRuntime = FeaturesRuntime.extract();
 
-    CU_ASSERT_EQUAL(ExtractedComptime.size(), ExtractedRuntime.size());
+    TEST_ASSERT_EQ(ExtractedComptime.size(), ExtractedRuntime.size());
 
     for (std::size_t I = 0; I < ExtractedComptime.size(); ++I) {
-        CU_ASSERT_EQUAL(ExtractedComptime[I], ExtractedRuntime[I]);
+        TEST_ASSERT_EQ(ExtractedComptime[I], ExtractedRuntime[I]);
     }
 }
 
-void testFeatureType() {
+} // namespace
+
+TEST(ML, FeatureType) {
     const std::vector<std::string> Sfens({
         "lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL b - 1",
         "lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL w - 1",
@@ -816,7 +818,7 @@ void testFeatureType() {
     }
 }
 
-void testFeatureTypeRandom() {
+TEST(ML, FeatureTypeRandom) {
     std::mt19937_64 mt(20230627);
 
     const int N = 10;
@@ -843,7 +845,7 @@ void testFeatureTypeRandom() {
     }
 }
 
-void testAZTeacherSaveLoad() {
+TEST(ML, AZTeacherSaveAndLoad) {
     nshogi::ml::AZTeacher t1;
 
     const int N = 100;
@@ -863,99 +865,72 @@ void testAZTeacherSaveLoad() {
 
             auto t2 = nshogi::ml::AZTeacher::load(Ifs);
 
-            CU_ASSERT_TRUE(t1.equals(t2));
-            CU_ASSERT_TRUE(t2.equals(t1));
+            TEST_ASSERT_TRUE(t1.equals(t2));
+            TEST_ASSERT_TRUE(t2.equals(t1));
         }
     }
 }
 
-void testAZTeacherHandmade1() {
+TEST(ML, AZTeacherHandmade1) {
     nshogi::ml::AZTeacher t1;
     t1.corruptMyself();
 
     nshogi::ml::AZTeacher t2(t1);
 
-    CU_ASSERT_TRUE(t1.equals(t2));
-    CU_ASSERT_TRUE(t2.equals(t1));
+    TEST_ASSERT_TRUE(t1.equals(t2));
+    TEST_ASSERT_TRUE(t2.equals(t1));
 
     // Change helpers.
     t1.Declared = true;
     t2.Declared = false;
 
-    CU_ASSERT_FALSE(t1.equals(t2));
-    CU_ASSERT_FALSE(t2.equals(t1));
+    TEST_ASSERT_FALSE(t1.equals(t2));
+    TEST_ASSERT_FALSE(t2.equals(t1));
 
     // Change configs.
     t2.WhiteDrawValue = t2.WhiteDrawValue * 0.20230711f;
-    CU_ASSERT_FALSE(t1.equals(t2));
-    CU_ASSERT_FALSE(t2.equals(t1));
+    TEST_ASSERT_FALSE(t1.equals(t2));
+    TEST_ASSERT_FALSE(t2.equals(t1));
 
     t2.BlackDrawValue = t2.BlackDrawValue * 0.1613f;
-    CU_ASSERT_FALSE(t1.equals(t2));
-    CU_ASSERT_FALSE(t2.equals(t1));
+    TEST_ASSERT_FALSE(t1.equals(t2));
+    TEST_ASSERT_FALSE(t2.equals(t1));
 
     t1.EndingRule = nshogi::core::NoRule_ER;
     t2.EndingRule = nshogi::core::Declare27_ER;
-    CU_ASSERT_FALSE(t1.equals(t2));
-    CU_ASSERT_FALSE(t2.equals(t1));
+    TEST_ASSERT_FALSE(t1.equals(t2));
+    TEST_ASSERT_FALSE(t2.equals(t1));
 
     t2.MaxPly = t2.MaxPly + 1;
-    CU_ASSERT_FALSE(t1.equals(t2));
-    CU_ASSERT_FALSE(t2.equals(t1));
+    TEST_ASSERT_FALSE(t1.equals(t2));
+    TEST_ASSERT_FALSE(t2.equals(t1));
 
     // Change targets.
     t2.Visits[0] = t2.Visits[0] + 1;
-    CU_ASSERT_FALSE(t1.equals(t2));
-    CU_ASSERT_FALSE(t2.equals(t1));
+    TEST_ASSERT_FALSE(t1.equals(t2));
+    TEST_ASSERT_FALSE(t2.equals(t1));
 
     t2.NumMoves = t2.NumMoves + 2;
-    CU_ASSERT_FALSE(t1.equals(t2));
-    CU_ASSERT_FALSE(t2.equals(t1));
+    TEST_ASSERT_FALSE(t1.equals(t2));
+    TEST_ASSERT_FALSE(t2.equals(t1));
 
     t1.SideToMove = nshogi::core::Color::White;
     t2.SideToMove = nshogi::core::Color::Black;
-    CU_ASSERT_FALSE(t1.equals(t2));
-    CU_ASSERT_FALSE(t2.equals(t1));
+    TEST_ASSERT_FALSE(t1.equals(t2));
+    TEST_ASSERT_FALSE(t2.equals(t1));
 
     t1.Winner = nshogi::core::Color::White;
     t2.Winner = nshogi::core::Color::Black;
-    CU_ASSERT_FALSE(t1.equals(t2));
-    CU_ASSERT_FALSE(t2.equals(t1));
+    TEST_ASSERT_FALSE(t1.equals(t2));
+    TEST_ASSERT_FALSE(t2.equals(t1));
 
     std::strcpy(t1.Sfen, "lnsgkgsnl/9/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL w - 1");
     std::strcpy(t2.Sfen, "lnsgkgsnl/1b5r1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL b - 1");
-    CU_ASSERT_FALSE(t1.equals(t2));
-    CU_ASSERT_FALSE(t2.equals(t1));
+    TEST_ASSERT_FALSE(t1.equals(t2));
+    TEST_ASSERT_FALSE(t2.equals(t1));
 }
 
-void testSimpleTeacherPosition() {
-    const int N = 100;
-    std::mt19937_64 mt(20240525);
-
-    nshogi::ml::SimpleTeacher SimpleTeacher;
-
-    for (int I = 0; I < N; ++I) {
-        nshogi::core::State State =
-            nshogi::core::StateBuilder::getInitialState();
-
-        for (uint16_t Ply = 0; Ply < 1024; ++Ply) {
-            const auto Moves =
-                nshogi::core::MoveGenerator::generateLegalMoves(State);
-
-            if (Moves.size() == 0) {
-                break;
-            }
-
-            SimpleTeacher.setState(State);
-            CU_ASSERT_TRUE(State.getPosition().equals(SimpleTeacher.getPosition(), true));
-
-            const auto RandomMove = Moves[mt() % Moves.size()];
-            State.doMove(RandomMove);
-        }
-    }
-}
-
-void testSimpleTeacherCopyConstructor() {
+TEST(ML, SimpleTeacherCopyConstructor) {
     const int N = 100;
     std::mt19937_64 mt(20240525);
 
@@ -984,14 +959,14 @@ void testSimpleTeacherCopyConstructor() {
 
             nshogi::ml::SimpleTeacher SimpleTeacher2(SimpleTeacher);
 
-            CU_ASSERT_TRUE(SimpleTeacher.equals(SimpleTeacher2));
+            TEST_ASSERT_TRUE(SimpleTeacher.equals(SimpleTeacher2));
 
             State.doMove(RandomMove);
         }
     }
 }
 
-void testSimpleTeacherState() {
+TEST(ML, SimpleTeacherPosition) {
     const int N = 100;
     std::mt19937_64 mt(20240525);
 
@@ -1010,8 +985,7 @@ void testSimpleTeacherState() {
             }
 
             SimpleTeacher.setState(State);
-            CU_ASSERT_TRUE(State.getPosition().equals(SimpleTeacher.getState().getPosition(), true));
-            CU_ASSERT_EQUAL(State.getPly(), SimpleTeacher.getState().getPly());
+            TEST_ASSERT_TRUE(State.getPosition().equals(SimpleTeacher.getPosition(), true));
 
             const auto RandomMove = Moves[mt() % Moves.size()];
             State.doMove(RandomMove);
@@ -1019,7 +993,35 @@ void testSimpleTeacherState() {
     }
 }
 
-void testSimpleTeacherConfig() {
+TEST(ML, SimpleTeacherState) {
+    const int N = 100;
+    std::mt19937_64 mt(20240525);
+
+    nshogi::ml::SimpleTeacher SimpleTeacher;
+
+    for (int I = 0; I < N; ++I) {
+        nshogi::core::State State =
+            nshogi::core::StateBuilder::getInitialState();
+
+        for (uint16_t Ply = 0; Ply < 1024; ++Ply) {
+            const auto Moves =
+                nshogi::core::MoveGenerator::generateLegalMoves(State);
+
+            if (Moves.size() == 0) {
+                break;
+            }
+
+            SimpleTeacher.setState(State);
+            TEST_ASSERT_TRUE(State.getPosition().equals(SimpleTeacher.getState().getPosition(), true));
+            TEST_ASSERT_EQ(State.getPly(), SimpleTeacher.getState().getPly());
+
+            const auto RandomMove = Moves[mt() % Moves.size()];
+            State.doMove(RandomMove);
+        }
+    }
+}
+
+TEST(ML, SimpleTeacherConfig) {
     nshogi::ml::SimpleTeacher SimpleTeacher;
 
     for (uint16_t MaxPly = 1; MaxPly < 10000; ++MaxPly) {
@@ -1032,60 +1034,38 @@ void testSimpleTeacherConfig() {
 
                 SimpleTeacher.setConfig(Config);
 
-                CU_ASSERT_EQUAL(SimpleTeacher.getConfig().MaxPly, MaxPly);
-                CU_ASSERT_EQUAL(SimpleTeacher.getConfig().BlackDrawValue, BlackDrawValue);
-                CU_ASSERT_EQUAL(SimpleTeacher.getConfig().WhiteDrawValue, WhiteDrawValue);
+                TEST_ASSERT_EQ(SimpleTeacher.getConfig().MaxPly, MaxPly);
+                TEST_ASSERT_EQ(SimpleTeacher.getConfig().BlackDrawValue, BlackDrawValue);
+                TEST_ASSERT_EQ(SimpleTeacher.getConfig().WhiteDrawValue, WhiteDrawValue);
             }
         }
     }
 }
 
-void testSimpleTeacherNextMove() {
+TEST(ML, SimpleTeacherNextMove) {
     nshogi::ml::SimpleTeacher SimpleTeacher;
 
     for (uint32_t Val = 0; Val < (1 << 16); ++Val) {
         auto Move = nshogi::core::Move16::fromValue((uint16_t)Val);
         SimpleTeacher.setNextMove(Move);
 
-        CU_ASSERT_EQUAL(SimpleTeacher.getNextMove(), Move);
+        TEST_ASSERT_EQ(SimpleTeacher.getNextMove(), Move);
     }
 }
 
-void testSimpleTeacherWinnerBlack() {
+TEST(ML, SimpleTeacherWinnerBlack) {
     nshogi::ml::SimpleTeacher SimpleTeacher;
     SimpleTeacher.setWinner(nshogi::core::Black);
-    CU_ASSERT_EQUAL(SimpleTeacher.getWinner(), nshogi::core::Black);
+    TEST_ASSERT_EQ(SimpleTeacher.getWinner(), nshogi::core::Black);
 }
 
-void testSimpleTeacherWinnerWhite() {
+TEST(ML, SimpleTeacherWinnerWhite) {
     nshogi::ml::SimpleTeacher SimpleTeacher;
     SimpleTeacher.setWinner(nshogi::core::White);
-    CU_ASSERT_EQUAL(SimpleTeacher.getWinner(), nshogi::core::White);
+    TEST_ASSERT_EQ(SimpleTeacher.getWinner(), nshogi::core::White);
 }
 
-void testSimpleTeacherEqualsMySelf() {
+TEST(ML, SimpleTeacherEqualsItself) {
     nshogi::ml::SimpleTeacher SimpleTeacher;
-    CU_ASSERT_TRUE(SimpleTeacher.equals(SimpleTeacher));
-}
-
-} // namespace
-
-
-int setupTestML() {
-    CU_pSuite suite = CU_add_suite("ml test", 0, 0);
-
-    CU_add_test(suite, "Feature Type Handmade", testFeatureType);
-    CU_add_test(suite, "Feature Type RandomMove", testFeatureTypeRandom);
-    CU_add_test(suite, "AZ Teacher Save/Load", testAZTeacherSaveLoad);
-    CU_add_test(suite, "AZ Teacher handmade 1", testAZTeacherHandmade1);
-    CU_add_test(suite, "Simple Teacher Copy Constructor", testSimpleTeacherCopyConstructor);
-    CU_add_test(suite, "Simple Teacher Position", testSimpleTeacherPosition);
-    CU_add_test(suite, "Simple Teacher State", testSimpleTeacherState);
-    CU_add_test(suite, "Simple Teacher Config", testSimpleTeacherConfig);
-    CU_add_test(suite, "Simple Teacher Next Move", testSimpleTeacherNextMove);
-    CU_add_test(suite, "Simple Teacher Winner Black", testSimpleTeacherWinnerBlack);
-    CU_add_test(suite, "Simple Teacher Winner White", testSimpleTeacherWinnerWhite);
-    CU_add_test(suite, "Simple Teacher Equals Myself", testSimpleTeacherEqualsMySelf);
-
-    return CUE_SUCCESS;
+    TEST_ASSERT_TRUE(SimpleTeacher.equals(SimpleTeacher));
 }
