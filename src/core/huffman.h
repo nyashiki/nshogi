@@ -24,11 +24,20 @@ struct alignas(32) HuffmanCode {
 #endif // #ifdef USE_AVX2
     }
 
+    HuffmanCode(uint64_t Code3, uint64_t Code2, uint64_t Code1, uint64_t Code0) {
+        Data[0] = Code0;
+        Data[1] = Code1;
+        Data[2] = Code2;
+        Data[3] = Code3;
+    }
+
     HuffmanCode operator=(const HuffmanCode& HC) {
 #ifdef USE_AVX2
         C = HC.C;
 #else
-        std::memcpy(Data, HC.Data, HC.size());
+        if (this != &HC) {
+            std::memcpy(Data, HC.Data, HC.size());
+        }
 #endif // #ifdef USE_AVX2
         return *this;
     }
@@ -75,8 +84,8 @@ struct alignas(32) HuffmanCode {
         return 4 * sizeof(uint64_t);
     }
 
-    char* data() {
-        return reinterpret_cast<char*>(Data);
+    const char* data() const {
+        return reinterpret_cast<const char*>(Data);
     }
 
  protected:

@@ -4,8 +4,13 @@
 #include <cassert>
 #include <cinttypes>
 #include <cstdint>
-#include <x86intrin.h>
 #include <array>
+
+#if defined(USE_BMI1)
+
+#include <immintrin.h>
+
+#endif
 
 // clang-format off
 
@@ -77,11 +82,13 @@ inline constexpr bool isPromoted(PieceTypeKind Type) {
 };
 
 template<Color C>
-inline constexpr PieceKind makePiece(PieceTypeKind Pt) {
-    if constexpr (C == Color::Black) {
-        return (PieceKind)(Pt);
-    }
+inline constexpr PieceKind makePiece(PieceTypeKind Pt);
 
+template<> inline constexpr PieceKind makePiece<Black>(PieceTypeKind Pt) {
+    return (PieceKind)(Pt);
+}
+
+template<> inline constexpr PieceKind makePiece<White>(PieceTypeKind Pt) {
     return (PieceKind)(0b10000 | Pt);
 }
 
@@ -119,6 +126,10 @@ static constexpr Square Squares[81] = {
     Sq8I, Sq8H, Sq8G, Sq8F, Sq8E, Sq8D, Sq8C, Sq8B, Sq8A,
     Sq9I, Sq9H, Sq9G, Sq9F, Sq9E, Sq9D, Sq9C, Sq9B, Sq9A,
 };
+
+inline Square& operator++(Square& Sq) {
+    return Sq = (Square)((int)Sq + 1);
+}
 
 inline constexpr Square getInversed(Square Sq) {
     return (Square)((int16_t)NumSquares - 1 - (int16_t)Sq);
@@ -239,16 +250,16 @@ static constexpr auto DirectionDataInternal = []() ->
             } else if (F1 == F2) {
                 Directions[(std::size_t)Sq1][(std::size_t)Sq2] = Comp? South : North;
                 SerializedDirections[(std::size_t)Sq1][(std::size_t)Sq2] = Comp? 4 : 0;
-            } else if (Sq2 == Sq1 + NorthNorthEast) {
+            } else if (Sq2 == Sq1 + NorthNorthEast && F1 != File1) {
                 Directions[(std::size_t)Sq1][(std::size_t)Sq2] = NorthNorthEast;
                 SerializedDirections[(std::size_t)Sq1][(std::size_t)Sq2] = 8;
-            } else if (Sq2 == Sq1 + NorthNorthWest) {
+            } else if (Sq2 == Sq1 + NorthNorthWest && F1 != File9) {
                 Directions[(std::size_t)Sq1][(std::size_t)Sq2] = NorthNorthWest;
                 SerializedDirections[(std::size_t)Sq1][(std::size_t)Sq2] = 9;
-            } else if (Sq2 == Sq1 + SouthSouthEast) {
+            } else if (Sq2 == Sq1 + SouthSouthEast && F1 != File1) {
                 Directions[(std::size_t)Sq1][(std::size_t)Sq2] = SouthSouthEast;
                 SerializedDirections[(std::size_t)Sq1][(std::size_t)Sq2] = 10;
-            } else if (Sq2 == Sq1 + SouthSouthWest) {
+            } else if (Sq2 == Sq1 + SouthSouthWest && F1 != File9) {
                 Directions[(std::size_t)Sq1][(std::size_t)Sq2] = SouthSouthWest;
                 SerializedDirections[(std::size_t)Sq1][(std::size_t)Sq2] = 11;
             } else if ((int)F1 - (int)F2 == (int)R1 - (int)R2) {
@@ -407,6 +418,10 @@ struct Move32 {
         return C_ == 0;
     }
 
+    constexpr bool isWin() const {
+        return C_ == MoveWin().value();
+    }
+
     constexpr bool isInvalid() const {
         return C_ == MoveInvalid().value();
     }
@@ -468,34 +483,38 @@ struct Move32 {
 
     constexpr Square from() const {
 #if defined(USE_BMI1)
-        return (Square)(_bextr_u32(C_, FromShift, 7));
-#else
-        return (Square)((C_ & FromBits) >> FromShift);
+        if (!std::is_constant_evaluated()) {
+            return (Square)(_bextr_u32(C_, FromShift, 7));
+        }
 #endif
+        return (Square)((C_ & FromBits) >> FromShift);
     }
 
     constexpr bool promote() const {
 #if defined(USE_BMI1)
-        return (bool)(_bextr_u32(C_, PromoteShift, 1));
-#else
-        return (bool)((C_ & PromoteBit) >> PromoteShift);
+        if (!std::is_constant_evaluated()) {
+            return (bool)(_bextr_u32(C_, PromoteShift, 1));
+        }
 #endif
+        return (bool)((C_ & PromoteBit) >> PromoteShift);
     }
 
     constexpr PieceTypeKind pieceType() const {
 #if defined(USE_BMI1)
-        return (PieceTypeKind)(_bextr_u32(C_, PieceTypeShift, 4));
-#else
-        return (PieceTypeKind)((C_ & PieceTypeBits) >> PieceTypeShift);
+        if (!std::is_constant_evaluated()) {
+            return (PieceTypeKind)(_bextr_u32(C_, PieceTypeShift, 4));
+        }
 #endif
+        return (PieceTypeKind)((C_ & PieceTypeBits) >> PieceTypeShift);
     }
 
     constexpr PieceTypeKind capturePieceType() const {
 #if defined(USE_BMI1)
-        return (PieceTypeKind)(_bextr_u32(C_, CaptureTypeShift, 4));
-#else
-        return (PieceTypeKind)((C_ & CaptureTypeBits) >> CaptureTypeShift);
+        if (!std::is_constant_evaluated()) {
+            return (PieceTypeKind)(_bextr_u32(C_, CaptureTypeShift, 4));
+        }
 #endif
+        return (PieceTypeKind)((C_ & CaptureTypeBits) >> CaptureTypeShift);
     }
 
     constexpr bool drop() const {
@@ -574,10 +593,11 @@ struct Move16 {
 
     constexpr Square from() const {
 #if defined(USE_BMI1)
-        return (Square)(_bextr_u32(C_, (uint16_t)Move32::FromShift, 7));
-#else
-        return (Square)((C_ & (uint16_t)Move32::FromBits) >> (uint16_t)Move32::FromShift);
+        if (!std::is_constant_evaluated()) {
+            return (Square)(_bextr_u32(C_, (uint16_t)Move32::FromShift, 7));
+        }
 #endif
+        return (Square)((C_ & (uint16_t)Move32::FromBits) >> (uint16_t)Move32::FromShift);
     }
 
     constexpr Square to() const {
@@ -590,10 +610,11 @@ struct Move16 {
 
     constexpr bool promote() const {
 #if defined(USE_BMI1)
-        return (bool)(_bextr_u32(C_, (uint16_t)Move32::PromoteShift, 1));
-#else
-        return (bool)((C_ & (uint16_t)Move32::PromoteBit) >> (uint16_t)Move32::PromoteShift);
+        if (!std::is_constant_evaluated()) {
+            return (bool)(_bextr_u32(C_, (uint16_t)Move32::PromoteShift, 1));
+        }
 #endif
+        return (bool)((C_ & (uint16_t)Move32::PromoteBit) >> (uint16_t)Move32::PromoteShift);
     }
 
     constexpr uint16_t value() const {

@@ -1,4 +1,4 @@
-#include <CUnit/CUnit.h>
+#include "common.h"
 
 #include <algorithm>
 #include <cstddef>
@@ -22,34 +22,36 @@ void testMoveGenerationNum(const std::string& Sfen, size_t Count) {
         nshogi::core::MoveGenerator::generatePossiblyLegalMoves<WilyPromote>(
             State);
 
-    CU_ASSERT_EQUAL(Moves.size(), Count);
+    TEST_ASSERT_EQ(Moves.size(), Count);
 }
 
-void testMaxMoveCountPosition() {
+} // namespace
+
+TEST(MoveGeneration, InitialPosition) {
+    testMoveGenerationNum<true>(
+        "lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL b - 1", 30);
+}
+
+TEST(MoveGeneration, MaxMoveCountPosition) {
     testMoveGenerationNum<false>(
         "R8/2K1S1SSk/4B4/9/9/9/9/9/1L1L1L3 b RBGSNLP3g3n17p 1", 593);
 }
 
-void testMatsuriPosition() {
+TEST(MoveGeneration, MatsuriPosition) {
     testMoveGenerationNum<true>(
         "l6nl/5+P1gk/2np1S3/p1p4Pp/3P2Sp1/1PPb2P1P/P5GS1/R8/LN4bKL w RGgsn5p 1",
         199);
 }
 
-void testInitialPosition() {
-    testMoveGenerationNum<true>(
-        "lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL b - 1", 30);
-}
-
-void testEvasionPosition1() {
+TEST(MoveGeneration, EvasionPosition1) {
     nshogi::core::State State =
         nshogi::io::sfen::StateBuilder::newState("4l4/9/9/9/9/9/9/9/4K4 b P 1");
     const auto Moves = nshogi::core::MoveGenerator::generateLegalMoves(State);
 
-    CU_ASSERT_EQUAL(Moves.size(), 11);
+    TEST_ASSERT_EQ(Moves.size(), (std::size_t)11);
 }
 
-void testFindMoves1() {
+TEST(MoveGeneration, FindMoves1) {
     const std::string Sfens[] = {
         "1g1f", "2g2f", "3g3f", "4g4f", "5g5f", "6g6f", "7g7f", "8g8f", "9g9f",
         "3i3h", "3i4h", "7i6h", "7i7h", "4i3h", "4i4h", "4i5h", "6i5h", "6i6h",
@@ -62,14 +64,14 @@ void testFindMoves1() {
 
     for (const auto& Sfen : Sfens) {
         nshogi::core::Move32 Move = nshogi::io::sfen::sfenToMove32(State.getPosition(), Sfen);
-        CU_ASSERT_TRUE(Moves.find(Move) != Moves.end());
+        TEST_ASSERT_TRUE(Moves.find(Move) != Moves.end());
     }
 
     nshogi::core::Move32 IllegalMove = nshogi::io::sfen::sfenToMove32(State.getPosition(), "G*5e");
-    CU_ASSERT_TRUE(Moves.find(IllegalMove) == Moves.end());
+    TEST_ASSERT_TRUE(Moves.find(IllegalMove) == Moves.end());
 }
 
-void testExamplePositions() {
+TEST(MoveGeneration, ExamplePositions) {
     const uint16_t  NumTestRandomMove = 2;
     std::mt19937_64 mt(20230704);
 
@@ -97,16 +99,16 @@ void testExamplePositions() {
 
         auto GeneratedMoves = nshogi::core::MoveGenerator::generateLegalMoves(State);
 
-        CU_ASSERT_EQUAL(GeneratedMoves.size(), LegalMoves.size());
+        TEST_ASSERT_EQ(GeneratedMoves.size(), LegalMoves.size());
 
         for (uint16_t I = 0; I < NumTestRandomMove; ++I) {
             const auto& RandomLegalMove = LegalMoves[mt() % LegalMoves.size()];
-            CU_ASSERT_TRUE(GeneratedMoves.find(RandomLegalMove) != GeneratedMoves.end());
+            TEST_ASSERT_TRUE(GeneratedMoves.find(RandomLegalMove) != GeneratedMoves.end());
         }
     }
 }
 
-void testExampleCheckPositions() {
+TEST(MoveGeneration, CheckPositions) {
     std::mt19937_64 mt(20230704);
 
     std::ifstream Ifs("./res/test/legal-check-examples.txt");
@@ -157,26 +159,10 @@ void testExampleCheckPositions() {
         Ifs >> std::ws;
 
         auto GeneratedMoves = nshogi::core::MoveGenerator::generateLegalCheckMoves(State);
-        CU_ASSERT_EQUAL(GeneratedMoves.size(), LegalMoves.size());
+        TEST_ASSERT_EQ(GeneratedMoves.size(), LegalMoves.size());
 
         for (uint16_t I = 0; I < LegalMoves.size(); ++I) {
-            CU_ASSERT_TRUE(GeneratedMoves.find(LegalMoves[I]) != GeneratedMoves.end());
+            TEST_ASSERT_TRUE(GeneratedMoves.find(LegalMoves[I]) != GeneratedMoves.end());
         }
     }
-}
-
-} // namespace
-
-int setupTestMoveGeneration() {
-    CU_pSuite suite = CU_add_suite("move generation test", 0, 0);
-
-    CU_add_test(suite, "Initial Position", testInitialPosition);
-    CU_add_test(suite, "Max Move Count Position", testMaxMoveCountPosition);
-    CU_add_test(suite, "Matsuri Position", testMatsuriPosition);
-    CU_add_test(suite, "Evasion Position 1", testEvasionPosition1);
-    CU_add_test(suite, "Find Moves 1", testFindMoves1);
-    CU_add_test(suite, "Example Positions", testExamplePositions);
-    CU_add_test(suite, "Example Check Positions", testExampleCheckPositions);
-
-    return CUE_SUCCESS;
 }

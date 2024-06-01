@@ -22,7 +22,7 @@ struct HuffmanCodeElem {
 
 // clang-format off
 
-constexpr HuffmanCodeElem HuffmanTable[31] = {
+static constexpr HuffmanCodeElem HuffmanTable[31] = {
     {        0b1, 1 }, // Empty
     {     0b0000, 4 }, // BlackPawn
     {   0b000010, 6 }, // BlackLance
@@ -56,8 +56,8 @@ constexpr HuffmanCodeElem HuffmanTable[31] = {
     { 0b11101110, 8 }, // WhiteProRook
 };
 
-constexpr HuffmanCodeElem HuffmanStandTable[8] = {
-    { 0,        0 }, // Empty
+static constexpr HuffmanCodeElem HuffmanStandTable[8] = {
+    {        0, 0 }, // Empty
     {     0b00, 2 }, // Pawn
     {   0b0001, 4 }, // Lance
     {   0b0101, 4 }, // Knight
@@ -69,7 +69,7 @@ constexpr HuffmanCodeElem HuffmanStandTable[8] = {
 
 // clang-format on
 
-constexpr auto HuffmanLUT = []() -> std::array<std::array<uint16_t, 1 << 9>, 9> {
+static constexpr auto HuffmanLUT = []() -> std::array<std::array<uint16_t, 1 << 9>, 9> {
     std::array<std::array<uint16_t, 1 << 9>, 9> LUT;
 
     for (std::size_t I = 0; I < 9; ++I) {
@@ -95,7 +95,7 @@ constexpr auto HuffmanLUT = []() -> std::array<std::array<uint16_t, 1 << 9>, 9> 
     return LUT;
 }();
 
-constexpr auto HuffmanStandLUT = []() -> std::array<std::array<uint16_t, 1 << 8>, 8> {
+static constexpr auto HuffmanStandLUT = []() -> std::array<std::array<uint16_t, 1 << 8>, 8> {
     std::array<std::array<uint16_t, 1 << 8>, 8> LUT;
 
     for (std::size_t I = 0; I < 8; ++I) {
@@ -137,6 +137,7 @@ class HuffmanCodeStream : public HuffmanCode {
             Data[Index] |= (uint64_t)(Val & 0b1) << Shift;
             Val = (T)(Val >> 1);
 
+            assert((uint16_t)Cursor < 256);
             ++Cursor;
         }
     }
@@ -145,6 +146,8 @@ class HuffmanCodeStream : public HuffmanCode {
         const uint8_t Index = Cursor >> 6;
         const uint8_t Shift = Cursor & 0x3f;
         uint8_t Bit = (Data[Index] >> Shift) & 0b1;
+
+        assert((uint16_t)Cursor < 256);
         ++Cursor;
 
         return Bit;
@@ -241,7 +244,7 @@ class HuffmanPositionBuilder : public PositionBuilder {
 HuffmanCode HuffmanCode::encode(const Position& Pos) {
     Square BlackKingSquare, WhiteKingSquare;
 
-    for (Square Sq = (Square)0; Sq < NumSquares; Sq = (Square)((int)Sq + 1)) {
+    for (Square Sq = (Square)0; Sq < NumSquares; ++Sq) {
         if (Pos.pieceOn(Sq) == PK_BlackKing) {
             BlackKingSquare = Sq;
         } else if (Pos.pieceOn(Sq) == PK_WhiteKing) {
@@ -258,7 +261,7 @@ HuffmanCode HuffmanCode::encode(const Position& Pos, Square BlackKingSquare, Squ
     HCS.write(BlackKingSquare, 7);
     HCS.write(WhiteKingSquare, 7);
 
-    for (Square Sq = (Square)0; Sq < NumSquares; Sq = (Square)((int)Sq + 1)) {
+    for (Square Sq = (Square)0; Sq < NumSquares; ++Sq) {
         const PieceKind PK = Pos.pieceOn(Sq);
 
         if (Sq == BlackKingSquare || Sq == WhiteKingSquare) {

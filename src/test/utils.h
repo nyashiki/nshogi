@@ -1,7 +1,7 @@
-#ifndef NSHOGI_TEST_COMMON_HPP
-#define NSHOGI_TEST_COMMON_HPP
+#ifndef NSHOGI_TEST_UTILS_H
+#define NSHOGI_TEST_UTILS_H
 
-#include <CUnit/CUnit.h>
+#include "common.h"
 #include <iostream>
 #include <string>
 #include <unistd.h>
@@ -42,10 +42,10 @@ inline void testStdOut(const std::string& Expected, Function&& F,
     close(PipeFD[0]);
     Buffer[ReadBytes] = '\0';
 
-    CU_ASSERT_STRING_EQUAL(Buffer, Expected.c_str());
+    TEST_ASSERT_STREQ(Buffer, Expected.c_str());
 }
 
 } // namespace test
 } // namespace nshogi
 
-#endif // #ifndef NSHOGI_TEST_COMMON_HPP
+#endif // #ifndef NSHOGI_TEST_UTILS_H

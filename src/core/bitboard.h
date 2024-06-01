@@ -2,7 +2,6 @@
 #define NSHOGI_CORE_BITBOARD_H
 
 #include "types.h"
-#include <ammintrin.h>
 #include <cassert>
 #include <cinttypes>
 #include <cstdint>
@@ -58,6 +57,10 @@ extern const Bitboard PromotableBB[NumColors];
 extern Bitboard LineBB[NumSquares][NumSquares];
 extern Bitboard DirectionBB[11 + NorthNorthWest + 1][NumSquares];
 extern Bitboard BetweenBB[NumSquares][NumSquares];
+extern Bitboard DiagBB[NumSquares];
+extern Bitboard CrossBB[NumSquares];
+extern Bitboard ForwardBB[NumSquares];
+extern Bitboard BackwardBB[NumSquares];
 
 struct alignas(16) Bitboard {
     constexpr Bitboard() {
@@ -286,6 +289,19 @@ struct alignas(16) Bitboard {
         return Bitboard(Primitive[1] - BB.Primitive[1], Primitive[0] - BB.Primitive[0]);
     }
 
+    template <bool High>
+    [[nodiscard]] constexpr uint64_t getPrimitive() const {
+#if defined(USE_SSE41)
+        if (!std::is_constant_evaluated()) {
+            // _mm_cvtsi128_si64 is faster by one latency than _mm_extract_epi64
+            // so use the function to extract the lower bits.
+            return High ? (uint64_t)_mm_extract_epi64(Bitboard_, 1)
+                        : (uint64_t)_mm_cvtsi128_si64(Bitboard_);
+        }
+#endif
+        return High? Primitive[1] : Primitive[0];
+    }
+
     [[maybe_unused]] [[nodiscard]]
     Square getOne() const {
         uint64_t Low = getPrimitive<false>();
@@ -354,24 +370,11 @@ struct alignas(16) Bitboard {
         const auto Count1 = _mm_popcnt_u64(getPrimitive<false>());
         const auto Count2 = _mm_popcnt_u64(getPrimitive<true>());
 #else
-        const auto Count1 = __builtin_popcountll(Primitive[0]);
-        const auto Count2 = __builtin_popcountll(Primitive[1]);
+        const auto Count1 = __builtin_popcountll(getPrimitive<false>());
+        const auto Count2 = __builtin_popcountll(getPrimitive<true>());
 #endif
 
         return (uint8_t)(Count1 + Count2);
-    }
-
-    template <bool High>
-    [[nodiscard]] constexpr uint64_t getPrimitive() const {
-#if defined(USE_SSE41)
-        if (!std::is_constant_evaluated()) {
-            // _mm_cvtsi128_si64 is faster by one latency than _mm_extract_epi64
-            // so use the function to extract the lower bits.
-            return High ? (uint64_t)_mm_extract_epi64(Bitboard_, 1)
-                        : (uint64_t)_mm_cvtsi128_si64(Bitboard_);
-        }
-#endif
-        return High? Primitive[1] : Primitive[0];
     }
 
 #if defined(USE_SSE2)
@@ -509,6 +512,23 @@ inline bool isAttacked(const Bitboard& AttackBB, const Bitboard& ExistBB) {
 
 inline Bitboard getBetweenBB(Square Sq1, Square Sq2) {
     return BetweenBB[Sq1][Sq2];
+}
+
+inline Bitboard getDiagBB(Square Sq) {
+    return DiagBB[Sq];
+}
+
+inline Bitboard getCrossBB(Square Sq) {
+    return CrossBB[Sq];
+}
+
+template <Color C>
+inline Bitboard getForwardBB(Square Sq) {
+    if constexpr (C == Black) {
+        return ForwardBB[Sq];
+    } else {
+        return BackwardBB[Sq];
+    }
 }
 
 void initializeBitboards();

@@ -3,7 +3,7 @@
 
 #include "state.h"
 #include "types.h"
-#include <initializer_list>
+#include <memory>
 #include <utility>
 
 namespace nshogi {
@@ -18,9 +18,11 @@ class StateBuilder {
     }
 
     static core::State newState(const Position&);
+    static core::State newState(const Position&, uint16_t Ply);
 
  protected:
     StateBuilder(const Position&);
+    StateBuilder(const Position&, uint16_t Ply);
     State Instance;
 };
 

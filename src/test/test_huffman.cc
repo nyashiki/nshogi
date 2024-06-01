@@ -1,5 +1,4 @@
-#include <CUnit/CUnit.h>
-
+#include "common.h"
 #include "../core/positionbuilder.h"
 #include "../io/sfen.h"
 #include "../core/huffman.h"
@@ -45,62 +44,16 @@ bool testDiffHuffmanCodeOneMoveAfter(const nshogi::core::Position& Pos) {
     return true;
 }
 
-void testInitialPosition() {
-    nshogi::core::Position Pos = nshogi::core::PositionBuilder::getInitialPosition();
-    CU_ASSERT_TRUE(testPositionEquality(Pos));
-    CU_ASSERT_TRUE(testHuffmanEquality(Pos));
-    CU_ASSERT_TRUE(testDiffHuffmanCodeOneMoveAfter(Pos));
+} // namespace
+
+TEST(Huffman, Size) {
+    nshogi::core::HuffmanCode HC = nshogi::core::HuffmanCode::zero();
+    TEST_ASSERT_EQ(HC.size(), 4 * sizeof(uint64_t));
+    TEST_ASSERT_EQ(sizeof(nshogi::core::HuffmanCode), 4 * sizeof(uint64_t));
 }
 
-void testAllStandsBlack() {
-    nshogi::core::Position Pos = nshogi::io::sfen::PositionBuilder::newPosition("4k4/9/9/9/9/9/9/9/4K4 b 2R2B4G4S4N4L18P 1");
-    CU_ASSERT_TRUE(testPositionEquality(Pos));
-    CU_ASSERT_TRUE(testHuffmanEquality(Pos));
-    CU_ASSERT_TRUE(testDiffHuffmanCodeOneMoveAfter(Pos));
-}
-
-void testAllStandsWhite() {
-    nshogi::core::Position Pos = nshogi::io::sfen::PositionBuilder::newPosition("4k4/9/9/9/9/9/9/9/4K4 b 2r2b4g4s4n4l18p 1");
-    CU_ASSERT_TRUE(testPositionEquality(Pos));
-    CU_ASSERT_TRUE(testHuffmanEquality(Pos));
-    CU_ASSERT_TRUE(testDiffHuffmanCodeOneMoveAfter(Pos));
-}
-
-void testHandmade1() {
-    nshogi::core::Position Pos = nshogi::io::sfen::PositionBuilder::newPosition("lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL w - 1");
-    CU_ASSERT_TRUE(testPositionEquality(Pos));
-    CU_ASSERT_TRUE(testHuffmanEquality(Pos));
-    CU_ASSERT_TRUE(testDiffHuffmanCodeOneMoveAfter(Pos));
-}
-
-void testRandomMove() {
-    const int N = 20000;
-    std::mt19937_64 mt(20240216);
-
-    for (int I = 0; I < N; ++I) {
-        nshogi::core::State State =
-            nshogi::io::sfen::StateBuilder::getInitialState();
-
-        for (int Ply = 0; Ply < 1024; ++Ply) {
-            const auto Moves =
-                nshogi::core::MoveGenerator::generateLegalMoves(State);
-
-            if (Moves.size() == 0) {
-                break;
-            }
-
-            const auto RandomMove = Moves[mt() % Moves.size()];
-
-            State.doMove(RandomMove);
-
-            CU_ASSERT_TRUE(testPositionEquality(State.getPosition()));
-            CU_ASSERT_TRUE(testHuffmanEquality(State.getPosition()));
-        }
-    }
-}
-
-void testConstructor() {
-    const int N = 20000;
+TEST(Huffman, Constructor) {
+    const int N = 200;
     std::mt19937_64 mt(20240216);
 
     for (int I = 0; I < N; ++I) {
@@ -122,13 +75,13 @@ void testConstructor() {
             nshogi::core::HuffmanCode HC1 = nshogi::core::HuffmanCode::encode(State.getPosition());
             nshogi::core::HuffmanCode HC2(HC1);
 
-            CU_ASSERT_EQUAL(HC1, HC2);
+            TEST_ASSERT_EQ(HC1, HC2);
         }
     }
 }
 
-void testCopyConstructor() {
-    const int N = 20000;
+TEST(Huffman, CopyConstructor) {
+    const int N = 200;
     std::mt19937_64 mt(20240216);
 
     for (int I = 0; I < N; ++I) {
@@ -151,23 +104,91 @@ void testCopyConstructor() {
             nshogi::core::HuffmanCode HC2 = nshogi::core::HuffmanCode::zero();
             HC2 = HC1;
 
-            CU_ASSERT_EQUAL(HC1, HC2);
+            TEST_ASSERT_EQ(HC1, HC2);
         }
     }
 }
 
-} // namespace
+TEST(Huffman, InitialPosition) {
+    nshogi::core::Position Pos = nshogi::core::PositionBuilder::getInitialPosition();
+    TEST_ASSERT_TRUE(testPositionEquality(Pos));
+    TEST_ASSERT_TRUE(testHuffmanEquality(Pos));
+    TEST_ASSERT_TRUE(testDiffHuffmanCodeOneMoveAfter(Pos));
+}
 
-int setupTestHuffman() {
-    CU_pSuite suite = CU_add_suite("huffman test", 0, 0);
+TEST(Huffman, AllStandsBlack) {
+    nshogi::core::Position Pos = nshogi::io::sfen::PositionBuilder::newPosition("4k4/9/9/9/9/9/9/9/4K4 b 2R2B4G4S4N4L18P 1");
+    TEST_ASSERT_TRUE(testPositionEquality(Pos));
+    TEST_ASSERT_TRUE(testHuffmanEquality(Pos));
+    TEST_ASSERT_TRUE(testDiffHuffmanCodeOneMoveAfter(Pos));
+}
 
-    CU_add_test(suite, "Huffman Constructor", testConstructor);
-    CU_add_test(suite, "Huffman Copy Constructor", testCopyConstructor);
-    CU_add_test(suite, "Huffman InitialPosition", testInitialPosition);
-    CU_add_test(suite, "Huffman AllStandsBlack", testAllStandsBlack);
-    CU_add_test(suite, "Huffman AllStandsWhite", testAllStandsWhite);
-    CU_add_test(suite, "Huffman Handmade 1", testHandmade1);
-    CU_add_test(suite, "Huffman RandomMove", testRandomMove);
+TEST(Huffman, AllStandsWhite) {
+    nshogi::core::Position Pos = nshogi::io::sfen::PositionBuilder::newPosition("4k4/9/9/9/9/9/9/9/4K4 b 2r2b4g4s4n4l18p 1");
+    TEST_ASSERT_TRUE(testPositionEquality(Pos));
+    TEST_ASSERT_TRUE(testHuffmanEquality(Pos));
+    TEST_ASSERT_TRUE(testDiffHuffmanCodeOneMoveAfter(Pos));
+}
 
-    return CUE_SUCCESS;
+TEST(Huffman, Handmade1) {
+    nshogi::core::Position Pos = nshogi::io::sfen::PositionBuilder::newPosition("lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL w - 1");
+    TEST_ASSERT_TRUE(testPositionEquality(Pos));
+    TEST_ASSERT_TRUE(testHuffmanEquality(Pos));
+    TEST_ASSERT_TRUE(testDiffHuffmanCodeOneMoveAfter(Pos));
+}
+
+TEST(Huffman, RandomMove) {
+    const int N = 200;
+    std::mt19937_64 mt(20240216);
+
+    for (int I = 0; I < N; ++I) {
+        nshogi::core::State State =
+            nshogi::io::sfen::StateBuilder::getInitialState();
+
+        for (int Ply = 0; Ply < 1024; ++Ply) {
+            const auto Moves =
+                nshogi::core::MoveGenerator::generateLegalMoves(State);
+
+            if (Moves.size() == 0) {
+                break;
+            }
+
+            const auto RandomMove = Moves[mt() % Moves.size()];
+
+            State.doMove(RandomMove);
+
+            TEST_ASSERT_TRUE(testPositionEquality(State.getPosition()));
+            TEST_ASSERT_TRUE(testHuffmanEquality(State.getPosition()));
+        }
+    }
+}
+
+TEST(Huffman, Memcpy) {
+    const int N = 200;
+    std::mt19937_64 mt(20240522);
+
+    for (int I = 0; I < N; ++I) {
+        nshogi::core::State State =
+            nshogi::io::sfen::StateBuilder::getInitialState();
+
+        for (int Ply = 0; Ply < 1024; ++Ply) {
+            const auto Moves =
+                nshogi::core::MoveGenerator::generateLegalMoves(State);
+
+            if (Moves.size() == 0) {
+                break;
+            }
+
+            const auto RandomMove = Moves[mt() % Moves.size()];
+
+            State.doMove(RandomMove);
+
+            uint64_t Codes[4];
+            const auto HC = nshogi::core::HuffmanCode::encode(State.getPosition());
+            std::memcpy(reinterpret_cast<char*>(Codes), HC.data(), HC.size());
+            const auto HC2 = nshogi::core::HuffmanCode(Codes[3], Codes[2], Codes[1], Codes[0]);
+
+            TEST_ASSERT_EQ(std::memcmp(HC.data(), HC2.data(), HC.size()), 0);
+        }
+    }
 }

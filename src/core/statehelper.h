@@ -9,7 +9,6 @@
 #include <cstdint>
 #include <cstring>
 #include <vector>
-#include <xmmintrin.h>
 
 namespace nshogi {
 namespace core {

@@ -5,6 +5,10 @@
 namespace nshogi {
 namespace core {
 
+PositionBuilder::PositionBuilder(const Position& Pos)
+    : Instance(Pos) {
+}
+
 Position PositionBuilder::getInitialPosition() {
     PositionBuilder Builder;
 
@@ -29,6 +33,17 @@ Position PositionBuilder::getInitialPosition() {
         Builder.setStand(Black, Type, 0);
         Builder.setStand(White, Type, 0);
     }
+
+    return Builder.build();
+}
+
+Position PositionBuilder::newPosition(const Position& Pos) {
+    return newPosition(Pos, Pos.PlyOffset);
+}
+
+Position PositionBuilder::newPosition(const Position& Pos, uint16_t PlyOffset) {
+    PositionBuilder Builder(Pos);
+    Builder.setPlyOffset(PlyOffset);
 
     return Builder.build();
 }

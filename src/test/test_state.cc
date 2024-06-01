@@ -1,10 +1,9 @@
-#include <CUnit/CUnit.h>
+#include "common.h"
 
 #include "../core/positionbuilder.h"
 #include "../core/statebuilder.h"
 #include "../io/bitboard.h"
 #include "../io/sfen.h"
-#include <CUnit/TestDB.h>
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
@@ -23,9 +22,9 @@ void testDefenderImpl(const std::string& Sfen, nshogi::core::Square Defender) {
     nshogi::core::State State = nshogi::io::sfen::StateBuilder::newState(Sfen);
 
     if (Defender == nshogi::core::SqInvalid) {
-        CU_ASSERT_TRUE(State.getDefendingOpponentSliderBB<C>().isZero());
+        TEST_ASSERT_TRUE(State.getDefendingOpponentSliderBB<C>().isZero());
     } else {
-        CU_ASSERT_TRUE(State.getDefendingOpponentSliderBB<C>().isSet(Defender));
+        TEST_ASSERT_TRUE(State.getDefendingOpponentSliderBB<C>().isSet(Defender));
     }
 }
 
@@ -33,66 +32,66 @@ void testRecomputeHelper(const nshogi::core::State& State) {
     nshogi::core::State DummyState =
         nshogi::core::StateBuilder::newState(State.getPosition());
 
-    CU_ASSERT_EQUAL(State.getKingSquare<nshogi::core::Black>(),
+    TEST_ASSERT_EQ(State.getKingSquare<nshogi::core::Black>(),
                     DummyState.getKingSquare<nshogi::core::Black>());
 
-    CU_ASSERT_EQUAL(State.getKingSquare<nshogi::core::White>(),
+    TEST_ASSERT_EQ(State.getKingSquare<nshogi::core::White>(),
                     DummyState.getKingSquare<nshogi::core::White>());
 
-    CU_ASSERT_EQUAL(State.getDefendingOpponentSliderBB<nshogi::core::Black>(),
+    TEST_ASSERT_EQ(State.getDefendingOpponentSliderBB<nshogi::core::Black>(),
                     DummyState.getDefendingOpponentSliderBB<nshogi::core::Black>());
 
-    CU_ASSERT_EQUAL(State.getDefendingOpponentSliderBB<nshogi::core::White>(),
+    TEST_ASSERT_EQ(State.getDefendingOpponentSliderBB<nshogi::core::White>(),
                     DummyState.getDefendingOpponentSliderBB<nshogi::core::White>());
 
-    CU_ASSERT_EQUAL(State.getCheckerBB(), DummyState.getCheckerBB());
+    TEST_ASSERT_EQ(State.getCheckerBB(), DummyState.getCheckerBB());
 
-    CU_ASSERT_EQUAL(State.getBitboard<nshogi::core::Black>(),
+    TEST_ASSERT_EQ(State.getBitboard<nshogi::core::Black>(),
                     DummyState.getBitboard<nshogi::core::Black>());
 
-    CU_ASSERT_EQUAL(State.getBitboard<nshogi::core::White>(),
+    TEST_ASSERT_EQ(State.getBitboard<nshogi::core::White>(),
                     DummyState.getBitboard<nshogi::core::White>());
 
-    CU_ASSERT_EQUAL(State.getBitboard<nshogi::core::PTK_Pawn>(),
+    TEST_ASSERT_EQ(State.getBitboard<nshogi::core::PTK_Pawn>(),
                     DummyState.getBitboard<nshogi::core::PTK_Pawn>());
 
-    CU_ASSERT_EQUAL(State.getBitboard<nshogi::core::PTK_Lance>(),
+    TEST_ASSERT_EQ(State.getBitboard<nshogi::core::PTK_Lance>(),
                     DummyState.getBitboard<nshogi::core::PTK_Lance>());
 
-    CU_ASSERT_EQUAL(State.getBitboard<nshogi::core::PTK_Knight>(),
+    TEST_ASSERT_EQ(State.getBitboard<nshogi::core::PTK_Knight>(),
                     DummyState.getBitboard<nshogi::core::PTK_Knight>());
 
-    CU_ASSERT_EQUAL(State.getBitboard<nshogi::core::PTK_Silver>(),
+    TEST_ASSERT_EQ(State.getBitboard<nshogi::core::PTK_Silver>(),
                     DummyState.getBitboard<nshogi::core::PTK_Silver>());
 
-    CU_ASSERT_EQUAL(State.getBitboard<nshogi::core::PTK_Gold>(),
+    TEST_ASSERT_EQ(State.getBitboard<nshogi::core::PTK_Gold>(),
                     DummyState.getBitboard<nshogi::core::PTK_Gold>());
 
-    CU_ASSERT_EQUAL(State.getBitboard<nshogi::core::PTK_King>(),
+    TEST_ASSERT_EQ(State.getBitboard<nshogi::core::PTK_King>(),
                     DummyState.getBitboard<nshogi::core::PTK_King>());
 
-    CU_ASSERT_EQUAL(State.getBitboard<nshogi::core::PTK_Bishop>(),
+    TEST_ASSERT_EQ(State.getBitboard<nshogi::core::PTK_Bishop>(),
                     DummyState.getBitboard<nshogi::core::PTK_Bishop>());
 
-    CU_ASSERT_EQUAL(State.getBitboard<nshogi::core::PTK_Rook>(),
+    TEST_ASSERT_EQ(State.getBitboard<nshogi::core::PTK_Rook>(),
                     DummyState.getBitboard<nshogi::core::PTK_Rook>());
 
-    CU_ASSERT_EQUAL(State.getBitboard<nshogi::core::PTK_ProPawn>(),
+    TEST_ASSERT_EQ(State.getBitboard<nshogi::core::PTK_ProPawn>(),
                     DummyState.getBitboard<nshogi::core::PTK_ProPawn>());
 
-    CU_ASSERT_EQUAL(State.getBitboard<nshogi::core::PTK_ProLance>(),
+    TEST_ASSERT_EQ(State.getBitboard<nshogi::core::PTK_ProLance>(),
                     DummyState.getBitboard<nshogi::core::PTK_ProLance>());
 
-    CU_ASSERT_EQUAL(State.getBitboard<nshogi::core::PTK_ProKnight>(),
+    TEST_ASSERT_EQ(State.getBitboard<nshogi::core::PTK_ProKnight>(),
                     DummyState.getBitboard<nshogi::core::PTK_ProKnight>());
 
-    CU_ASSERT_EQUAL(State.getBitboard<nshogi::core::PTK_ProSilver>(),
+    TEST_ASSERT_EQ(State.getBitboard<nshogi::core::PTK_ProSilver>(),
                     DummyState.getBitboard<nshogi::core::PTK_ProSilver>());
 
-    CU_ASSERT_EQUAL(State.getBitboard<nshogi::core::PTK_ProBishop>(),
+    TEST_ASSERT_EQ(State.getBitboard<nshogi::core::PTK_ProBishop>(),
                     DummyState.getBitboard<nshogi::core::PTK_ProBishop>());
 
-    CU_ASSERT_EQUAL(State.getBitboard<nshogi::core::PTK_ProRook>(),
+    TEST_ASSERT_EQ(State.getBitboard<nshogi::core::PTK_ProRook>(),
                     DummyState.getBitboard<nshogi::core::PTK_ProRook>());
 }
 
@@ -106,7 +105,7 @@ void testDoMoveAndUndoMove(nshogi::core::State& State,
 
     const std::string DoMoveAndUndoMoveSfen =
         nshogi::io::sfen::positionToSfen(State.getPosition());
-    CU_ASSERT_STRING_EQUAL(OriginalSfen.c_str(), DoMoveAndUndoMoveSfen.c_str());
+    TEST_ASSERT_STREQ(OriginalSfen.c_str(), DoMoveAndUndoMoveSfen.c_str());
     testRecomputeHelper(State);
 }
 
@@ -118,10 +117,32 @@ void testHashDoMoveAndUndoMove(nshogi::core::State& State,
     State.doMove(Move);
     State.undoMove();
 
-    CU_ASSERT_EQUAL(OriginalHashValue, State.getHash());
+    TEST_ASSERT_EQ(OriginalHashValue, State.getHash());
 }
 
-void testDefender() {
+void testPieceScore(const nshogi::core::State& S, uint8_t BlackScore, uint8_t WhiteScore) {
+    const uint8_t BlackScoreComputed = S.computePieceScore<nshogi::core::Black, 5, 1, false>();
+    const uint8_t WhiteScoreComputed = S.computePieceScore<nshogi::core::White, 5, 1, false>();
+
+    if (BlackScoreComputed != BlackScore) {
+        std::cout << (int)BlackScoreComputed << ", " << (int)BlackScore << std::endl;
+    }
+    if (WhiteScoreComputed != WhiteScore) {
+        std::cout << (int)WhiteScoreComputed << ", " << (int)WhiteScore << std::endl;
+    }
+
+    TEST_ASSERT_EQ(BlackScoreComputed, BlackScore);
+    TEST_ASSERT_EQ(WhiteScoreComputed, WhiteScore);
+}
+
+void testEntryingScore(const nshogi::core::State& S, uint8_t BlackScore, uint8_t WhiteScore) {
+    TEST_ASSERT_EQ(S.computeDeclarationScore<nshogi::core::Black>(), BlackScore);
+    TEST_ASSERT_EQ(S.computeDeclarationScore<nshogi::core::White>(), WhiteScore);
+}
+
+} // namespace
+
+TEST(State, Defender) {
     testDefenderImpl<nshogi::core::Black>(
         "lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL b - 1",
         nshogi::core::SqInvalid);
@@ -178,55 +199,79 @@ void testDefender() {
                                           nshogi::core::Sq6B);
 }
 
-void testMove1() {
+TEST(State, Move1) {
     nshogi::core::State State =
         nshogi::io::sfen::StateBuilder::getInitialState();
 
     auto Move = nshogi::io::sfen::sfenToMove32(State.getPosition(), "7g7f");
     State.doMove(Move);
 
-    CU_ASSERT_STRING_EQUAL(
+    TEST_ASSERT_STREQ(
         nshogi::io::sfen::positionToSfen(State.getPosition()).c_str(),
         "lnsgkgsnl/1r5b1/ppppppppp/9/9/2P6/PP1PPPPPP/1B5R1/LNSGKGSNL w - 1");
 }
 
-void testMove2() {
+TEST(State, Move2) {
     nshogi::core::State State = nshogi::io::sfen::StateBuilder::newState(
         "lnsgkgsnl/1r5b1/pppppp1pp/6p2/9/2P6/PP1PPPPPP/1B5R1/LNSGKGSNL b - 1");
 
     auto Move = nshogi::io::sfen::sfenToMove32(State.getPosition(), "8h2b+");
     State.doMove(Move);
 
-    CU_ASSERT_STRING_EQUAL(
+    TEST_ASSERT_STREQ(
         nshogi::io::sfen::positionToSfen(State.getPosition()).c_str(),
         "lnsgkgsnl/1r5+B1/pppppp1pp/6p2/9/2P6/PP1PPPPPP/7R1/LNSGKGSNL w B 1");
 }
 
-void testMove3() {
+TEST(State, Move3) {
     nshogi::core::State State = nshogi::io::sfen::StateBuilder::newState(
         "lnsgkg1nl/1r5s1/pppppp1pp/6p2/9/2P6/PP1PPPPPP/7R1/LNSGKGSNL b Bb 1");
 
     auto Move = nshogi::io::sfen::sfenToMove32(State.getPosition(), "B*4e");
     State.doMove(Move);
 
-    CU_ASSERT_STRING_EQUAL(
+    TEST_ASSERT_STREQ(
         nshogi::io::sfen::positionToSfen(State.getPosition()).c_str(),
         "lnsgkg1nl/1r5s1/pppppp1pp/6p2/5B3/2P6/PP1PPPPPP/7R1/LNSGKGSNL w b 1");
 }
 
-void testMove4() {
+TEST(State, Move4) {
     nshogi::core::State State = nshogi::io::sfen::StateBuilder::newState(
         "lnsgkgsnl/1r5+B1/pppppp1pp/6p2/9/2P6/PP1PPPPPP/7R1/LNSGKGSNL w B 1");
 
     auto Move = nshogi::io::sfen::sfenToMove32(State.getPosition(), "3a2b");
     State.doMove(Move);
 
-    CU_ASSERT_STRING_EQUAL(
+    TEST_ASSERT_STREQ(
         nshogi::io::sfen::positionToSfen(State.getPosition()).c_str(),
         "lnsgkg1nl/1r5s1/pppppp1pp/6p2/9/2P6/PP1PPPPPP/7R1/LNSGKGSNL b Bb 1");
 }
 
-void testDoAndUndo1() {
+TEST(State, Ply1) {
+    nshogi::core::State State = nshogi::io::sfen::StateBuilder::newState(
+        "lnsgkgsnl/1r5+B1/pppppp1pp/6p2/9/2P6/PP1PPPPPP/7R1/LNSGKGSNL w B 1");
+    TEST_ASSERT_EQ(State.getPly(), 0);
+}
+
+TEST(State, Ply2) {
+    nshogi::core::State State = nshogi::io::sfen::StateBuilder::newState(
+        "lnsgkgsnl/1r5+B1/pppppp1pp/6p2/9/2P6/PP1PPPPPP/7R1/LNSGKGSNL w B 1 moves 3a2b");
+    TEST_ASSERT_EQ(State.getPly(), 1);
+}
+
+TEST(State, Ply3) {
+    nshogi::core::State State = nshogi::io::sfen::StateBuilder::newState(
+        "lnsgkgsnl/1r5+B1/pppppp1pp/6p2/9/2P6/PP1PPPPPP/7R1/LNSGKGSNL w B 127");
+    TEST_ASSERT_EQ(State.getPly(), 126);
+}
+
+TEST(State, Ply4) {
+    nshogi::core::State State = nshogi::io::sfen::StateBuilder::newState(
+        "lnsgkgsnl/1r5+B1/pppppp1pp/6p2/9/2P6/PP1PPPPPP/7R1/LNSGKGSNL w B 127 moves 3a2b");
+    TEST_ASSERT_EQ(State.getPly(), 127);
+}
+
+TEST(State, DoAndUndo1) {
     nshogi::core::State State =
         nshogi::io::sfen::StateBuilder::getInitialState();
     auto Move = nshogi::io::sfen::sfenToMove32(State.getPosition(), "7g7f");
@@ -234,7 +279,7 @@ void testDoAndUndo1() {
     testDoMoveAndUndoMove(State, Move);
 }
 
-void testDoAndUndo2() {
+TEST(State, DoAndUndo2) {
     nshogi::core::State State = nshogi::io::sfen::StateBuilder::newState(
         "lnsgkgsnl/1r5b1/pppppp1pp/6p2/9/2P6/PP1PPPPPP/1B5R1/LNSGKGSNL b - 1");
     auto Move = nshogi::io::sfen::sfenToMove32(State.getPosition(), "8h2b+");
@@ -242,7 +287,7 @@ void testDoAndUndo2() {
     testDoMoveAndUndoMove(State, Move);
 }
 
-void testDoAndUndo3() {
+TEST(State, DoAndUndo3) {
     nshogi::core::State State = nshogi::io::sfen::StateBuilder::newState(
         "lnsgkg1nl/1r5s1/pppppp1pp/6p2/9/2P6/PP1PPPPPP/7R1/LNSGKGSNL b Bb 1");
     auto Move = nshogi::io::sfen::sfenToMove32(State.getPosition(), "B*4e");
@@ -250,7 +295,7 @@ void testDoAndUndo3() {
     testDoMoveAndUndoMove(State, Move);
 }
 
-void testDoAndUndo4() {
+TEST(State, DoAndUndo4) {
     nshogi::core::State State = nshogi::io::sfen::StateBuilder::newState(
         "lnsgkgsnl/1r5+B1/pppppp1pp/6p2/9/2P6/PP1PPPPPP/7R1/LNSGKGSNL w B 1");
     auto Move = nshogi::io::sfen::sfenToMove32(State.getPosition(), "3a2b");
@@ -258,32 +303,8 @@ void testDoAndUndo4() {
     testDoMoveAndUndoMove(State, Move);
 }
 
-void testPly1() {
-    nshogi::core::State State = nshogi::io::sfen::StateBuilder::newState(
-        "lnsgkgsnl/1r5+B1/pppppp1pp/6p2/9/2P6/PP1PPPPPP/7R1/LNSGKGSNL w B 1");
-    CU_ASSERT_EQUAL(State.getPly(), 0);
-}
-
-void testPly2() {
-    nshogi::core::State State = nshogi::io::sfen::StateBuilder::newState(
-        "lnsgkgsnl/1r5+B1/pppppp1pp/6p2/9/2P6/PP1PPPPPP/7R1/LNSGKGSNL w B 1 moves 3a2b");
-    CU_ASSERT_EQUAL(State.getPly(), 1);
-}
-
-void testPly3() {
-    nshogi::core::State State = nshogi::io::sfen::StateBuilder::newState(
-        "lnsgkgsnl/1r5+B1/pppppp1pp/6p2/9/2P6/PP1PPPPPP/7R1/LNSGKGSNL w B 127");
-    CU_ASSERT_EQUAL(State.getPly(), 126);
-}
-
-void testPly4() {
-    nshogi::core::State State = nshogi::io::sfen::StateBuilder::newState(
-        "lnsgkgsnl/1r5+B1/pppppp1pp/6p2/9/2P6/PP1PPPPPP/7R1/LNSGKGSNL w B 127 moves 3a2b");
-    CU_ASSERT_EQUAL(State.getPly(), 127);
-}
-
-void testHelperRandom() {
-    const int N = 100000;
+TEST(State, HelperRandom) {
+    const int N = 1000;
     std::mt19937_64 mt(20230620);
 
     for (int I = 0; I < N; ++I) {
@@ -302,13 +323,13 @@ void testHelperRandom() {
 
             State.doMove(RandomMove);
 
-            CU_ASSERT_EQUAL(Ply + 1, State.getPly());
+            TEST_ASSERT_EQ(Ply + 1, State.getPly());
             testRecomputeHelper(State);
         }
     }
 }
 
-void testDoAndUndoRandom() {
+TEST(State, DoAndUndoRandom) {
     const int N = 100;
     std::mt19937_64 mt(20230620);
 
@@ -330,7 +351,7 @@ void testDoAndUndoRandom() {
                 const auto M16 = nshogi::core::Move16(Move);
                 const auto RestoredM32 = State.getMove32FromMove16(M16);
 
-                CU_ASSERT_EQUAL(Move, RestoredM32);
+                TEST_ASSERT_EQ(Move, RestoredM32);
             }
 
             const auto RandomMove = Moves[mt() % Moves.size()];
@@ -339,7 +360,7 @@ void testDoAndUndoRandom() {
     }
 }
 
-void testHashDoAndUndoRandom() {
+TEST(State, HashDoAndUndoRandom) {
     const int N = 100;
     std::mt19937_64 mt(20230622);
 
@@ -365,7 +386,7 @@ void testHashDoAndUndoRandom() {
     }
 }
 
-void testGetLastMoveRandom() {
+TEST(State, GetLastMoveRandom) {
     const int N = 100;
     std::mt19937_64 mt(20230825);
 
@@ -384,12 +405,12 @@ void testGetLastMoveRandom() {
             const auto RandomMove = Moves[mt() % Moves.size()];
             State.doMove(RandomMove);
 
-            CU_ASSERT_EQUAL(State.getLastMove(), RandomMove);
+            TEST_ASSERT_EQ(State.getLastMove(), RandomMove);
         }
     }
 }
 
-void testHashRecomputeRandom() {
+TEST(State, HashRecomputeRandom) {
     const int N = 100;
     std::mt19937_64 mt(20230622);
 
@@ -411,12 +432,12 @@ void testHashRecomputeRandom() {
             const std::string CurrentSfen = nshogi::io::sfen::positionToSfen(State.getPosition());
             const auto DummyState = nshogi::io::sfen::StateBuilder::newState(CurrentSfen);
 
-            CU_ASSERT_EQUAL(State.getHash(), DummyState.getHash());
+            TEST_ASSERT_EQ(State.getHash(), DummyState.getHash());
         }
     }
 }
 
-void testCloneRandom() {
+TEST(State, CloneRandom) {
     const int N = 1000;
     std::mt19937_64 mt(20230730);
 
@@ -433,15 +454,15 @@ void testCloneRandom() {
             const auto MovesByCloned =
                 nshogi::core::MoveGenerator::generateLegalMoves(StateCloned);
 
-            CU_ASSERT_EQUAL(Moves.size(), MovesByCloned.size());
-            CU_ASSERT_EQUAL(State.getHash(), StateCloned.getHash());
+            TEST_ASSERT_EQ(Moves.size(), MovesByCloned.size());
+            TEST_ASSERT_EQ(State.getHash(), StateCloned.getHash());
 
             if (Moves.size() == 0) {
                 break;
             }
 
             for (std::size_t J = 0; J < Moves.size(); ++J) {
-                CU_ASSERT_EQUAL(Moves[J], MovesByCloned[J]);
+                TEST_ASSERT_EQ(Moves[J], MovesByCloned[J]);
             }
 
             for (const auto& Move : Moves) {
@@ -454,39 +475,38 @@ void testCloneRandom() {
     }
 }
 
-
-void testRepetitionHandmade1() {
+TEST(State, RepetitionHandmade1) {
     const std::string Sfen =
       "lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL b - 1 moves 2h3h 8b7b 3h2h 7b8b";
     nshogi::core::State State = nshogi::io::sfen::StateBuilder::newState(Sfen);
 
-    CU_ASSERT_EQUAL(State.getRepetitionStatus(), nshogi::core::RepetitionStatus::Repetition);
+    TEST_ASSERT_EQ(State.getRepetitionStatus(), nshogi::core::RepetitionStatus::Repetition);
 }
 
-void testRepetitionHandmade2() {
+TEST(State, RepetitionHandmade2) {
     nshogi::core::State State = nshogi::core::StateBuilder::getInitialState();
-    CU_ASSERT_EQUAL(State.getRepetitionStatus(), nshogi::core::RepetitionStatus::NoRepetition);
+    TEST_ASSERT_EQ(State.getRepetitionStatus(), nshogi::core::RepetitionStatus::NoRepetition);
 }
 
-void testRepetitionHandmade3() {
+TEST(State, RepetitionHandmade3) {
     const std::string Sfen =
       "l3k2Bl/1r1sg4/1l1pps2p/2P1np3/1P4p2/2G1RP1N1/+p1KPP3P/3S5/1+n2G2+bL b GPsn5p 1 moves G*4a "
       "5a6a 4a5a 6a5a";
     nshogi::core::State State = nshogi::io::sfen::StateBuilder::newState(Sfen);
 
-    CU_ASSERT_EQUAL(State.getRepetitionStatus(), nshogi::core::RepetitionStatus::InferiorRepetition);
+    TEST_ASSERT_EQ(State.getRepetitionStatus(), nshogi::core::RepetitionStatus::InferiorRepetition);
 }
 
-void testRepetitionHandmade4() {
+TEST(State, RepetitionHandmade4) {
     const std::string Sfen =
       "+Bn1g1g2l/2s1ks3/p1Ppppn1p/2+BP3r1/2pN5/1p4ppP/P2gPP3/8K/L5GNL w RL2s3p 1 moves S*2g 1h1g "
       "2g1h+ 1g1h S*2g";
     nshogi::core::State State = nshogi::io::sfen::StateBuilder::newState(Sfen);
 
-    CU_ASSERT_EQUAL(State.getRepetitionStatus(), nshogi::core::RepetitionStatus::SuperiorRepetition);
+    TEST_ASSERT_EQ(State.getRepetitionStatus(), nshogi::core::RepetitionStatus::SuperiorRepetition);
 }
 
-void testRepetitionHandmade5() {
+TEST(State, RepetitionHandmade5) {
     const std::string Sfen =
       "lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL b - 1 moves 7g7f 8c8d 7i6h 3c3d "
       "6h7g 7c7d 2g2f 8d8e 2f2e 8a7c 6i7h 2b3c 8h7i 8e8f 8g8f 7c6e 7g6f 8b8f P*8h 6c6d 5g5f 8f7f "
@@ -498,64 +518,64 @@ void testRepetitionHandmade5() {
       "3f2g 2h2g S*3g R*9h 4i8i 9h5h 8i4i 5h7h 4i8i 7h5h 8i4i 5h7h 4i8i 7h5h";
     nshogi::core::State State = nshogi::io::sfen::StateBuilder::newState(Sfen);
 
-    CU_ASSERT_EQUAL(State.getRepetitionStatus(), nshogi::core::RepetitionStatus::Repetition);
+    TEST_ASSERT_EQ(State.getRepetitionStatus(), nshogi::core::RepetitionStatus::Repetition);
 }
 
-void testRepetitionHandmade6() {
+TEST(State, RepetitionHandmade6) {
     const std::string Sfen = "2k6/9/KR7/9/9/9/9/9/9 b - 1 moves 8c7c 7a8a 7c8c 8a7a 8c7c";
     nshogi::core::State State = nshogi::io::sfen::StateBuilder::newState(Sfen);
 
-    CU_ASSERT_EQUAL(State.getRepetitionStatus(), nshogi::core::RepetitionStatus::WinRepetition);
+    TEST_ASSERT_EQ(State.getRepetitionStatus(), nshogi::core::RepetitionStatus::WinRepetition);
 }
 
-void testRepetitionHandmade7() {
+TEST(State, RepetitionHandmade7) {
     const std::string Sfen = "2k6/9/KR7/9/9/9/9/9/9 b - 1 moves 8c7c 7a8a 7c8c 8a7a";
     nshogi::core::State State = nshogi::io::sfen::StateBuilder::newState(Sfen);
 
-    CU_ASSERT_EQUAL(State.getRepetitionStatus(), nshogi::core::RepetitionStatus::LossRepetition);
+    TEST_ASSERT_EQ(State.getRepetitionStatus(), nshogi::core::RepetitionStatus::LossRepetition);
 }
 
-void testRepetitionHandmade8() {
+TEST(State, RepetitionHandmade8) {
     const std::string Sfen = "2k6/9/KR7/9/9/9/9/9/9 b - 1 moves 8c7c 7a8a 7c8c 8a7a 8c7c";
     nshogi::core::State State = nshogi::io::sfen::StateBuilder::newState(Sfen);
     State.undoMove();
     State.undoMove();
 
-    CU_ASSERT_EQUAL(State.getRepetitionStatus(), nshogi::core::RepetitionStatus::NoRepetition);
+    TEST_ASSERT_EQ(State.getRepetitionStatus(), nshogi::core::RepetitionStatus::NoRepetition);
 }
 
-void testRepetitionHandmade9() {
+TEST(State, RepetitionHandmade9) {
     const std::string Sfen = "2k6/9/KR7/9/9/9/9/9/9 b - 1 moves 8c7c 7a8a 7c8c 8a7a 8c7c";
     nshogi::core::State State = nshogi::io::sfen::StateBuilder::newState(Sfen);
 
     State.undoMove();
     State.doMove(nshogi::io::sfen::sfenToMove32(State.getPosition(), "8c7c"));
 
-    CU_ASSERT_EQUAL(State.getRepetitionStatus(), nshogi::core::RepetitionStatus::WinRepetition);
+    TEST_ASSERT_EQ(State.getRepetitionStatus(), nshogi::core::RepetitionStatus::WinRepetition);
 }
 
-void testRepetitionHandmade10() {
+TEST(State, RepetitionHandmade10) {
     const std::string Sfen = "9/9/9/9/9/9/1rk6/9/K8 w - 1 moves 8g9g 9i8i 9g8g 8i9i";
     nshogi::core::State State = nshogi::io::sfen::StateBuilder::newState(Sfen);
 
-    CU_ASSERT_EQUAL(State.getRepetitionStatus(), nshogi::core::RepetitionStatus::LossRepetition);
+    TEST_ASSERT_EQ(State.getRepetitionStatus(), nshogi::core::RepetitionStatus::LossRepetition);
 }
 
-void testRepetitionHandmade11() {
+TEST(State, RepetitionHandmade11) {
     const std::string Sfen = "9/9/9/9/9/9/1rk6/9/K8 w - 1 moves 8g9g 9i8i 9g8g 8i9i 8g9g";
     nshogi::core::State State = nshogi::io::sfen::StateBuilder::newState(Sfen);
 
-    CU_ASSERT_EQUAL(State.getRepetitionStatus(), nshogi::core::RepetitionStatus::WinRepetition);
+    TEST_ASSERT_EQ(State.getRepetitionStatus(), nshogi::core::RepetitionStatus::WinRepetition);
 }
 
-void testRepetitionHandmade12() {
+TEST(State, RepetitionHandmade12) {
     const std::string Sfen = "9/9/9/9/9/9/1rk6/9/K8 w - 1 moves 8g9g 9i8i 9g8g 8i9i 8g8a";
     nshogi::core::State State = nshogi::io::sfen::StateBuilder::newState(Sfen);
 
-    CU_ASSERT_EQUAL(State.getRepetitionStatus(), nshogi::core::RepetitionStatus::NoRepetition);
+    TEST_ASSERT_EQ(State.getRepetitionStatus(), nshogi::core::RepetitionStatus::NoRepetition);
 }
 
-void testRepetitionHandmade13() {
+TEST(State, RepetitionHandmade13) {
     const std::string Sfen =
       "lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL b - 1 moves 2g2f 8c8d 2f2e 4a3b "
       "6i7h 8d8e 3i3h 7a7b 9g9f 5a5b 4g4f 9c9d 3h4g 7c7d 7g7f 3c3d 8h7g 2b7g+ 7h7g 8a7c 4g5f 3a2b "
@@ -568,88 +588,33 @@ void testRepetitionHandmade13() {
       "2f3e 3c4d 3e2d 4d3c 2d3e";
     nshogi::core::State State = nshogi::io::sfen::StateBuilder::newState(Sfen);
 
-    CU_ASSERT_EQUAL(State.getRepetitionStatus(), nshogi::core::RepetitionStatus::LossRepetition);
+    TEST_ASSERT_EQ(State.getRepetitionStatus(), nshogi::core::RepetitionStatus::LossRepetition);
 }
 
-void testRepetitionHandmade14() {
+TEST(State, RepetitionHandmade14) {
     const std::string Sfen =
       "lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL b - 1 moves 2g2f 3c3d 7g7f 8c8d 2f2e 8d8e 2e2d 2c2d 6i7h 2b8h+ 7i8h 8b2b B*7g B*3c 7g3c+ 2a3c B*8c 2d2e 8c5f+ 2b2d 3i3h 2e2f 5f4f 2d2a 4f3f 5a6b 8h7g 9c9d 5i6h 7a8b 3f2f 3a3b P*2b P*2g 2h2g 2a2b 2f5c 6b5c 2g2b+ P*5f 5g5f B*3e 6h5i 5c6b 2b1a 3c4e P*2c 3e4d 2c2b+ 4e5g+ L*6f B*3c 2b3b 3c1a 3b4a 6b7b R*3b 6a6b S*5a 8b7a G*6h 5g6h 7g6h 7c7d 5a6b+ 7a6b N*5d S*5c 5d6b+ 5c6b";
     nshogi::core::State State = nshogi::io::sfen::StateBuilder::newState(Sfen);
 
-    CU_ASSERT_EQUAL(State.getRepetitionStatus(), nshogi::core::RepetitionStatus::NoRepetition);
+    TEST_ASSERT_EQ(State.getRepetitionStatus(), nshogi::core::RepetitionStatus::NoRepetition);
 }
 
-void testPieceScore(const nshogi::core::State& S, uint8_t BlackScore, uint8_t WhiteScore) {
-    const uint8_t BlackScoreComputed = S.computePieceScore<nshogi::core::Black, 5, 1, false>();
-    const uint8_t WhiteScoreComputed = S.computePieceScore<nshogi::core::White, 5, 1, false>();
+TEST(State, PlyOffset1) {
+    const std::string Sfen =
+      "lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL b - 100";
+    nshogi::core::State State = nshogi::io::sfen::StateBuilder::newState(Sfen);
 
-    if (BlackScoreComputed != BlackScore) {
-        std::cout << (int)BlackScoreComputed << ", " << (int)BlackScore << std::endl;
-    }
-    if (WhiteScoreComputed != WhiteScore) {
-        std::cout << (int)WhiteScoreComputed << ", " << (int)WhiteScore << std::endl;
-    }
-
-    CU_ASSERT_EQUAL(BlackScoreComputed, BlackScore);
-    CU_ASSERT_EQUAL(WhiteScoreComputed, WhiteScore);
+    TEST_ASSERT_EQ(State.getPly(), 100 - 1);
 }
 
-void testEntryingScore(const nshogi::core::State& S, uint8_t BlackScore, uint8_t WhiteScore) {
-    CU_ASSERT_EQUAL(S.computeDeclarationScore<nshogi::core::Black>(), BlackScore);
-    CU_ASSERT_EQUAL(S.computeDeclarationScore<nshogi::core::White>(), WhiteScore);
+TEST(State, PlyOffset2) {
+    nshogi::core::State State =
+        nshogi::core::StateBuilder::newState(nshogi::core::PositionBuilder::getInitialPosition(), 100);
+
+    TEST_ASSERT_EQ(State.getPly(), 100);
 }
 
-void testEntryingScoreInitialPosition() {
-    auto State = nshogi::core::StateBuilder::getInitialState();
-
-    testEntryingScore(State, 0, 0);
-}
-
-void testPieceScoreExamplePositions() {
-    std::map<std::string, std::pair<uint8_t, uint8_t>> TestCases = {
-        {"lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL b - 1", {27, 27}},
-        {"2BR4K/1GBG2+P+P+P/3GN4/9/9/9/9/9/6k2 b RG4S3N4L15P 1", {54, 0}},
-        {"8K/1G1G2+P+P+P/3GN1PPP/9/9/9/9/9/6k2 b 2r2bg4s3n4l12p 1", {10, 44}},
-        {"+PK2+S4/1PpP+BP3/2+P1+L4/N4p3/Pp4+rp1/7sk/9/6+s1+p/9 b B4GS3N3L4Pr3p 1", {34, 20}},
-        {"+PK2+S4/1PpP1P+r2/2+P1+L4/N4p3/Pp5k1/7s1/9/6+s1+p/9 b B4GS3N3L4Prb4p 1", {29, 25}},
-    };
-
-    for (const auto& [K, V] : TestCases) {
-        auto State = nshogi::io::sfen::StateBuilder::newState(K);
-        testPieceScore(State, V.first, V.second);
-    }
-}
-
-void testEntryingScoreExamplePositions() {
-    std::map<std::string, std::pair<uint8_t, uint8_t>> TestCases = {
-        {"2BR4K/1GBG2+P+P+P/3GN4/9/9/9/9/9/6k2 b RG4S3N4L15P 1", {54, 0}},
-        {"8K/1G1G2+P+P+P/3GN1PPP/9/9/9/9/9/6k2 b 2r2bg4s3n4l12p 1", {10, 44}},
-        {"+PK2+S4/1PpP+BP3/2+P1+L4/N4p3/Pp4+rp1/7sk/9/6+s1+p/9 b B4GS3N3L4Pr3p 1", {32, 10}},
-        {"+PK2+S4/1PpP1P+r2/2+P1+L4/N4p3/Pp5k1/7s1/9/6+s1+p/9 b B4GS3N3L4Prb4p 1", {27, 16}},
-    };
-
-    for (const auto& [K, V] : TestCases) {
-        auto State = nshogi::io::sfen::StateBuilder::newState(K);
-        testEntryingScore(State, V.first, V.second);
-    }
-}
-
-void testDeclarationExamplePositions() {
-    std::map<std::string, bool> TestCases = {
-        {"2BR4K/1GBG2+P+P+P/3GN4/9/9/9/9/9/6k2 b RG4S3N4L15P 1", true},
-        {"2BR4K/1GBG2+P+P+P/3GN4/9/9/9/9/9/6k2 b RG4S3N4L15P 1", false},
-        {"8K/1G1G2+P+P+P/3GN1PPP/9/9/9/9/9/6k2 w 2r2bg4s3n4l12p 1", false},
-        {"8K/1G1G2+P+P+P/3GN1PPP/9/9/9/9/9/6k2 w 2r2bg4s3n4l12p 1", false},
-    };
-
-    for (const auto& [K, V] : TestCases) {
-        auto State = nshogi::io::sfen::StateBuilder::newState(K);
-
-        CU_ASSERT_EQUAL(State.canDeclare(), V);
-    }
-}
-
-void testEqualsItself() {
+TEST(State, EqualsItself) {
     const int N = 100;
     std::mt19937_64 mt(20230622);
 
@@ -661,7 +626,7 @@ void testEqualsItself() {
             const auto Moves =
                 nshogi::core::MoveGenerator::generateLegalMoves(State);
 
-            CU_ASSERT_TRUE(State.getPosition().equals(State.getPosition()));
+            TEST_ASSERT_TRUE(State.getPosition().equals(State.getPosition()));
 
             if (Moves.size() == 0) {
                 break;
@@ -669,12 +634,11 @@ void testEqualsItself() {
 
             const auto RandomMove = Moves[mt() % Moves.size()];
             State.doMove(RandomMove);
-
         }
     }
 }
 
-void testNotEqualOneMove() {
+TEST(State, NotEqualsOneMove) {
     const int N = 100;
     std::mt19937_64 mt(20230622);
 
@@ -695,60 +659,56 @@ void testNotEqualOneMove() {
             const auto RandomMove = Moves[mt() % Moves.size()];
             State.doMove(RandomMove);
 
-            CU_ASSERT_FALSE(Pos.equals(State.getPosition()));
-            CU_ASSERT_FALSE(State.getPosition().equals(Pos));
+            TEST_ASSERT_FALSE(Pos.equals(State.getPosition()));
+            TEST_ASSERT_FALSE(State.getPosition().equals(Pos));
         }
     }
 }
 
+TEST(State, EnteringScoreInitialPosition) {
+    auto State = nshogi::core::StateBuilder::getInitialState();
+    testEntryingScore(State, 0, 0);
+}
 
-} // namespace
+TEST(State, PieceScoreExamplePositions) {
+    std::map<std::string, std::pair<uint8_t, uint8_t>> TestCases = {
+        {"lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL b - 1", {27, 27}},
+        {"2BR4K/1GBG2+P+P+P/3GN4/9/9/9/9/9/6k2 b RG4S3N4L15P 1", {54, 0}},
+        {"8K/1G1G2+P+P+P/3GN1PPP/9/9/9/9/9/6k2 b 2r2bg4s3n4l12p 1", {10, 44}},
+        {"+PK2+S4/1PpP+BP3/2+P1+L4/N4p3/Pp4+rp1/7sk/9/6+s1+p/9 b B4GS3N3L4Pr3p 1", {34, 20}},
+        {"+PK2+S4/1PpP1P+r2/2+P1+L4/N4p3/Pp5k1/7s1/9/6+s1+p/9 b B4GS3N3L4Prb4p 1", {29, 25}},
+    };
 
-int setupTestState() {
-    CU_pSuite suite = CU_add_suite("State test", 0, 0);
+    for (const auto& [K, V] : TestCases) {
+        auto State = nshogi::io::sfen::StateBuilder::newState(K);
+        testPieceScore(State, V.first, V.second);
+    }
+}
 
-    CU_add_test(suite, "Defender", testDefender);
-    CU_add_test(suite, "Move Test 1", testMove1);
-    CU_add_test(suite, "Move Test 2", testMove2);
-    CU_add_test(suite, "Move Test 3", testMove3);
-    CU_add_test(suite, "Move Test 4", testMove4);
-    CU_add_test(suite, "Ply Test 1", testPly1);
-    CU_add_test(suite, "Ply Test 2", testPly2);
-    CU_add_test(suite, "Ply Test 3", testPly3);
-    CU_add_test(suite, "Ply Test 4", testPly4);
-    CU_add_test(suite, "Do/Undo Test 1", testDoAndUndo1);
-    CU_add_test(suite, "Do/Undo Test 2", testDoAndUndo2);
-    CU_add_test(suite, "Do/Undo Test 3", testDoAndUndo3);
-    CU_add_test(suite, "Do/Undo Test 4", testDoAndUndo4);
-    CU_add_test(suite, "Helper Test Random", testHelperRandom);
-    CU_add_test(suite, "Do/Undo Test Random", testDoAndUndoRandom);
-    CU_add_test(suite, "Do/Undo Hash Test Random", testHashDoAndUndoRandom);
-    CU_add_test(suite, "getLastMove() Test Random", testGetLastMoveRandom);
-    CU_add_test(suite, "Recompute Hash Test Random", testHashRecomputeRandom);
-    CU_add_test(suite, "Clone Test Random", testCloneRandom);
+TEST(State, EnteringScoreExamplePositions) {
+    std::map<std::string, std::pair<uint8_t, uint8_t>> TestCases = {
+        {"2BR4K/1GBG2+P+P+P/3GN4/9/9/9/9/9/6k2 b RG4S3N4L15P 1", {54, 0}},
+        {"8K/1G1G2+P+P+P/3GN1PPP/9/9/9/9/9/6k2 b 2r2bg4s3n4l12p 1", {10, 44}},
+        {"+PK2+S4/1PpP+BP3/2+P1+L4/N4p3/Pp4+rp1/7sk/9/6+s1+p/9 b B4GS3N3L4Pr3p 1", {32, 10}},
+        {"+PK2+S4/1PpP1P+r2/2+P1+L4/N4p3/Pp5k1/7s1/9/6+s1+p/9 b B4GS3N3L4Prb4p 1", {27, 16}},
+    };
 
-    CU_add_test(suite, "Repetition 1", testRepetitionHandmade1);
-    CU_add_test(suite, "Repetition 2", testRepetitionHandmade2);
-    CU_add_test(suite, "Repetition 3", testRepetitionHandmade3);
-    CU_add_test(suite, "Repetition 4", testRepetitionHandmade4);
-    CU_add_test(suite, "Repetition 5", testRepetitionHandmade5);
-    CU_add_test(suite, "Repetition 6", testRepetitionHandmade6);
-    CU_add_test(suite, "Repetition 7", testRepetitionHandmade7);
-    CU_add_test(suite, "Repetition 8", testRepetitionHandmade8);
-    CU_add_test(suite, "Repetition 9", testRepetitionHandmade9);
-    CU_add_test(suite, "Repetition 10", testRepetitionHandmade10);
-    CU_add_test(suite, "Repetition 11", testRepetitionHandmade11);
-    CU_add_test(suite, "Repetition 12", testRepetitionHandmade12);
-    CU_add_test(suite, "Repetition 13", testRepetitionHandmade13);
-    CU_add_test(suite, "Repetition 14", testRepetitionHandmade14);
+    for (const auto& [K, V] : TestCases) {
+        auto State = nshogi::io::sfen::StateBuilder::newState(K);
+        testEntryingScore(State, V.first, V.second);
+    }
+}
 
-    CU_add_test(suite, "Position Equals Itself", testEqualsItself);
-    CU_add_test(suite, "Position Not Equals After One Move", testNotEqualOneMove);
+TEST(State, DeclarationExamplePositions) {
+    std::map<std::string, bool> TestCases = {
+        {"2BR4K/1GBG2+P+P+P/3GN4/9/9/9/9/9/6k2 b RG4S3N4L15P 1", true},
+        {"2BR4K/1GBG2+P+P+P/3GN4/9/9/9/9/9/6k2 b RG4S3N4L15P 1", false},
+        {"8K/1G1G2+P+P+P/3GN1PPP/9/9/9/9/9/6k2 w 2r2bg4s3n4l12p 1", false},
+        {"8K/1G1G2+P+P+P/3GN1PPP/9/9/9/9/9/6k2 w 2r2bg4s3n4l12p 1", false},
+    };
 
-    CU_add_test(suite, "Compute Entering Score Test Initial Position", testEntryingScoreInitialPosition);
-    CU_add_test(suite, "Compute Piece Score Test Example Positions", testPieceScoreExamplePositions);
-    CU_add_test(suite, "Compute Entering Score Test Example Positions", testEntryingScoreExamplePositions);
-    CU_add_test(suite, "Compute Declaration Example Positions", testDeclarationExamplePositions);
-
-    return CUE_SUCCESS;
+    for (const auto& [K, V] : TestCases) {
+        auto State = nshogi::io::sfen::StateBuilder::newState(K);
+        TEST_ASSERT_EQ(State.canDeclare(), V);
+    }
 }

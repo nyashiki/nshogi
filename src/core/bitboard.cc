@@ -97,6 +97,10 @@ constexpr Bitboard PromotableBB[NumColors] = {
 Bitboard LineBB[NumSquares][NumSquares];
 Bitboard DirectionBB[11 + NorthNorthWest + 1][NumSquares];
 Bitboard BetweenBB[NumSquares][NumSquares];
+Bitboard DiagBB[NumSquares];
+Bitboard CrossBB[NumSquares];
+Bitboard ForwardBB[NumSquares];
+Bitboard BackwardBB[NumSquares];
 
 namespace {
 
@@ -593,43 +597,33 @@ isBishopMagicNumberOK(Square Sq, uint64_t MagicNumber) {
 }
 
 uint64_t generateMagicNumberCandidate() {
-    static std::mt19937_64 Mt((uint64_t)'N' | (uint64_t)'o' << 8 |
-                              (uint64_t)'v' << 16 | (uint64_t)'i' << 24 |
-                              (uint64_t)'c' << 32 | (uint64_t)'e' << 40);
+    // clang-format off
+    static std::mt19937_64 Mt(
+              (uint64_t)'n'
+            | (uint64_t)'s' << 8
+            | (uint64_t)'h' << 16
+            | (uint64_t)'o' << 24
+            | (uint64_t)'g' << 32
+            | (uint64_t)'i' << 40);
+    // clang-format on
 
     return Mt() & Mt() & Mt();
 }
 
 void setBishopMagicNumbers() {
+    // clang-format off
     constexpr uint64_t BishopMagicNumbers[NumSquares] = {
-        0x0008000701008c81ULL, 0x5002852104003202ULL, 0x0000884000800804ULL,
-        0x0c00190800824000ULL, 0x0440880501880000ULL, 0x00000a01001c0001ULL,
-        0x1000d30920082000ULL, 0x00740420010000c1ULL, 0x4011050811020060ULL,
-        0x40440200020a0030ULL, 0x4204001280c8a024ULL, 0x0048014110280004ULL,
-        0x00108241002000a0ULL, 0xa22841024119a060ULL, 0x90042000d0011a00ULL,
-        0x962208020a68e0c2ULL, 0x020a0001811181c0ULL, 0x00480000302a0108ULL,
-        0x0020a00504200010ULL, 0x0080080080310203ULL, 0x0740400900001828ULL,
-        0xa004002818132042ULL, 0x0006060000419080ULL, 0x8201009c89880410ULL,
-        0x00101286009480a0ULL, 0x401000406a400808ULL, 0x0290020500080820ULL,
-        0x0132180260400801ULL, 0x4608000941000801ULL, 0x08d0c28200010008ULL,
-        0x0000c20080620004ULL, 0x0880021000404204ULL, 0x0101640181480010ULL,
-        0x2092088008081044ULL, 0x0104484008088008ULL, 0x0018002402804008ULL,
-        0x8080090023099006ULL, 0x6040058600801a04ULL, 0x8011020040040442ULL,
-        0x911c00820020a041ULL, 0x4480800820003004ULL, 0x8400401401800012ULL,
-        0x01a2001000204204ULL, 0x0008226010201008ULL, 0x0201480800822001ULL,
-        0x884402064082c808ULL, 0x0801014081450041ULL, 0x0090429082002040ULL,
-        0x0020802081800970ULL, 0x000c001200080409ULL, 0x0418100800800402ULL,
-        0x00c0900100040042ULL, 0x0040140040001826ULL, 0x808060050100805cULL,
-        0x0240124002800400ULL, 0x1050904404011080ULL, 0x0009020400254020ULL,
-        0x0202408040010220ULL, 0x050c0002008c8400ULL, 0x001003085000a212ULL,
-        0x3010102a28200c10ULL, 0x1080c10940050081ULL, 0x0482100040000800ULL,
-        0x0200240a00584003ULL, 0x2000851000801020ULL, 0x0400090200a0440aULL,
-        0x4004000004114020ULL, 0x0800002000024014ULL, 0x28002204a8200201ULL,
-        0x000c00c1c0004001ULL, 0x3088042002014808ULL, 0x400018440811004dULL,
-        0x9a00c23000c00020ULL, 0x240050204400e021ULL, 0x40c8082030404412ULL,
-        0x400918010001010cULL, 0x2080120100142093ULL, 0x03a4506000480494ULL,
-        0x1001002800224001ULL, 0x0004228041800410ULL, 0x2000890024080108ULL,
+        0x0048000200020004ULL, 0x001000200880a002ULL, 0x0010905093002882ULL, 0x00010040412a0010ULL, 0x1008210090200002ULL, 0x404080010500a000ULL, 0x0c0442100208040cULL, 0x0800002040010008ULL, 0xc095001003810640ULL,
+        0x1840880900004038ULL, 0x00080130c00c4081ULL, 0x00c014006000a002ULL, 0x0808020644001011ULL, 0x0208280432020108ULL, 0x2020014000900200ULL, 0x2070050220030004ULL, 0x20c8090090002080ULL, 0x022280190048204cULL,
+        0x0201300089080020ULL, 0x1080e2518080080bULL, 0x000984a400420008ULL, 0x000a200010400081ULL, 0xb020400089620020ULL, 0x2064002000841d80ULL, 0x8100400005005020ULL, 0x029000a00a000820ULL, 0xc022202000100201ULL,
+        0x468122431040c081ULL, 0x200d1001428040a0ULL, 0x8014054201090102ULL, 0x0282104002081082ULL, 0x0500094000012002ULL, 0x8009424402040080ULL, 0x0484028022001015ULL, 0x0005082044043001ULL, 0x41005202800a2204ULL,
+        0x8044803220110004ULL, 0x280002400088140cULL, 0x00a00201100a4020ULL, 0x0003008410400821ULL, 0x4a00408000421002ULL, 0x0040802100a00141ULL, 0x000a008294510842ULL, 0x3420200110004008ULL, 0x0118010018000b82ULL,
+        0x000c20200304c842ULL, 0x0100005100080282ULL, 0x1102230410800442ULL, 0x1000800280400021ULL, 0x0100049010008042ULL, 0x0010e52000400a08ULL, 0x47131410600208c1ULL, 0x00014208010080c1ULL, 0x24409000a0022034ULL,
+        0x010000c062011880ULL, 0x0020220b00c01008ULL, 0x0040168828040040ULL, 0x0100240060070008ULL, 0x0401880060040080ULL, 0x2480408008010048ULL, 0x4010000240100349ULL, 0x001a44002000a142ULL, 0x0094000080040114ULL,
+        0x4809884100c00414ULL, 0x0440002320820306ULL, 0x00148440f0200040ULL, 0x104e000900200410ULL, 0x0020c40042820041ULL, 0x0300010802020018ULL, 0x9004082005204202ULL, 0x0010041041068023ULL, 0x108005191c30360eULL,
+        0x0400048002002010ULL, 0x8a00044009500018ULL, 0x044000002430d420ULL, 0x0080040000012124ULL, 0x0040001000884007ULL, 0x0080052022104102ULL, 0xc052480080800010ULL, 0xc110706518204004ULL, 0x0098004804c07008ULL,
     };
+    // clang-format on
 
     for (Square Sq : Squares) {
         BishopMagicBB[Sq].MagicNumber = BishopMagicNumbers[Sq];
@@ -637,35 +631,19 @@ void setBishopMagicNumbers() {
 };
 
 void setRookMagicNumbers() {
+    // clang-format off
     constexpr uint64_t RookMagicNumbers[NumSquares] = {
-        0x02c0000c91064100ULL, 0x0021000400080801ULL, 0x8808000200424208ULL,
-        0xa001010010000801ULL, 0x2e06020000120010ULL, 0x3840148001004010ULL,
-        0x0008000801040408ULL, 0x0004000488501046ULL, 0x8040003888088282ULL,
-        0x4000340080800140ULL, 0x84301900a2000020ULL, 0x4001000c14099002ULL,
-        0x0400680048450018ULL, 0x0056088080800008ULL, 0x0854200090a00110ULL,
-        0x4109a00004200081ULL, 0x3080560006081504ULL, 0x0011100028011041ULL,
-        0x2105050200080481ULL, 0x308080120040a500ULL, 0x0520101880400042ULL,
-        0x0040010c00100018ULL, 0x0200008100002401ULL, 0x00d0204300105090ULL,
-        0x2000210800a0080aULL, 0x00080c2800104001ULL, 0x8340001200840082ULL,
-        0x4514008010400a00ULL, 0x400c1600a4000422ULL, 0x00608001a4002008ULL,
-        0x08890a0001002104ULL, 0x0043002000400820ULL, 0xc004882028002088ULL,
-        0xc000904208000209ULL, 0x0081008a020008c1ULL, 0x0882801040401086ULL,
-        0x0048001000288020ULL, 0x1208408000412080ULL, 0x102008220d208002ULL,
-        0x2101000a12000410ULL, 0x0006040120028002ULL, 0x0402004100880001ULL,
-        0x8804408000820482ULL, 0x02004400c0042004ULL, 0x0201020001100302ULL,
-        0x05c0011120008140ULL, 0x1280080119408880ULL, 0x0002401080010074ULL,
-        0x2149404080038140ULL, 0x00800210024a0020ULL, 0x0800842040001004ULL,
-        0x0010800825044008ULL, 0x0005400104008404ULL, 0x0001002002008022ULL,
-        0x00c0400802100444ULL, 0x0131440804002221ULL, 0x020c08101000800dULL,
-        0x02200400a0009424ULL, 0x8040002020204201ULL, 0x0044200063c00009ULL,
-        0x0200008004140001ULL, 0x211888000c100a03ULL, 0x6401001104430404ULL,
-        0x0082000108107002ULL, 0x9008001080120060ULL, 0x100061184001c340ULL,
-        0x2104000084400802ULL, 0x0060110000600020ULL, 0x0a080e0202204010ULL,
-        0x4840024000039001ULL, 0x0130044850008003ULL, 0x0040022002221041ULL,
-        0x2011200049004300ULL, 0x040c080010680040ULL, 0x0001120003000080ULL,
-        0x040a040002100009ULL, 0x0002010028084408ULL, 0x0000400008800810ULL,
-        0x0280200030500088ULL, 0x0050880050a20041ULL, 0x90082000040088aaULL,
+        0x810002200a0210c1ULL, 0x0081000800008480ULL, 0x88004008c002408cULL, 0x0108004100020208ULL, 0x0a10008202011404ULL, 0x00100010a0084086ULL, 0x0020009020380184ULL, 0x0802020002040002ULL, 0x44400008c10b2202ULL,
+        0x8012a00000848105ULL, 0x0090080000818108ULL, 0xa200020020801040ULL, 0x1500080080202014ULL, 0x30c80500001ac508ULL, 0xe000420088804008ULL, 0x4202840200040014ULL, 0x1040600880d00012ULL, 0x0001200025020082ULL,
+        0x08c0800300820080ULL, 0x04842010004a00a1ULL, 0x681010020000e08aULL, 0x8901800200120040ULL, 0x208002200018a020ULL, 0x1200001080210010ULL, 0x0000804800200e52ULL, 0x8001028040010201ULL, 0x0408008800010841ULL,
+        0x0030028102000040ULL, 0x0100100060080040ULL, 0x0a00020006002082ULL, 0x0908001000a00090ULL, 0x0040002000802c10ULL, 0x1c41200404800810ULL, 0x4002001081000108ULL, 0x0008304604000421ULL, 0x020040420c000181ULL,
+        0x0403000101000840ULL, 0x100010002010c880ULL, 0x07422c0001201010ULL, 0x4880048004009008ULL, 0x0040510001414020ULL, 0x2000203040040010ULL, 0x0801000800809011ULL, 0x1140008002020402ULL, 0x0400208811010002ULL,
+        0x8480104010040090ULL, 0x008302000414c300ULL, 0x5020048002810088ULL, 0x0002400040000840ULL, 0x2026001800082020ULL, 0x010a80a100800810ULL, 0x0444204a04010008ULL, 0x0644c08010048102ULL, 0x0a4000820a094042ULL,
+        0x1540000808880042ULL, 0x000238101c004142ULL, 0x4010040000264201ULL, 0x002110c004004084ULL, 0x824280a000808012ULL, 0x30062100002019d2ULL, 0x0403000060040302ULL, 0x0000112082016408ULL, 0x4009011808908084ULL,
+        0x0508008020118020ULL, 0x0614020808004210ULL, 0x0218028101009011ULL, 0x0080812842010040ULL, 0x441000c000081020ULL, 0x1208208208540002ULL, 0x0828000980200004ULL, 0x0040040424080821ULL, 0x1004000c90004041ULL,
+        0x0010200000839100ULL, 0x00040400800280c0ULL, 0x0008800042020091ULL, 0xb100ca0000408010ULL, 0x0005040022020102ULL, 0x0180200080100448ULL, 0x480010008818004cULL, 0x0824600050008104ULL, 0x20802000622202c2ULL,
     };
+    // clang-format on
 
     for (Square Sq : Squares) {
         RookMagicBB[Sq].MagicNumber = RookMagicNumbers[Sq];
@@ -677,7 +655,7 @@ void computeBishopMagicBitboard() {
 
     for (Square Sq : Squares) {
         if (!IsPrecomputed) {
-            printf("Searching for a bishop magic number for square %2d ... ",
+            std::printf("Searching for a bishop magic number for square %2d ... ",
                    Sq);
             std::cout << std::flush;
         }
@@ -697,7 +675,7 @@ void computeBishopMagicBitboard() {
                             (1 << BishopMagicBits) * sizeof(Bitboard));
 
                 if (!IsPrecomputed) {
-                    printf("OK (found 0x%016lx with %7lu trials).",
+                    std::printf("OK (found 0x%016" PRIx64 " with %7" PRIu64 " trials).",
                            MagicNumberCandidate, Trial);
                     std::cout << std::endl;
                 }
@@ -707,15 +685,15 @@ void computeBishopMagicBitboard() {
     }
 
     if (!IsPrecomputed) {
-        printf("constexpr uint64_t BishopMagicNumbers[NumSquares] = {\n");
+        std::printf("constexpr uint64_t BishopMagicNumbers[NumSquares] = {\n");
         for (Square Sq : Squares) {
-            printf("0x%016lxULL, ", BishopMagicBB[Sq].MagicNumber);
+            std::printf("0x%016" PRIx64 "ULL, ", BishopMagicBB[Sq].MagicNumber);
 
             if (squareToRank(Sq) == RankA) {
-                printf("\n");
+                std::printf("\n");
             }
         }
-        printf("};\n");
+        std::printf("};\n");
     }
 }
 
@@ -766,7 +744,7 @@ void computeRookMagicBitboard() {
 
     for (Square Sq : Squares) {
         if (!IsPrecomputed) {
-            printf("Searching for a rook magic number for square %2d ... ", Sq);
+            std::printf("Searching for a rook magic number for square %2d ... ", Sq);
             std::cout << std::flush;
         }
 
@@ -783,7 +761,7 @@ void computeRookMagicBitboard() {
                             (1 << RookMagicBits) * sizeof(Bitboard));
 
                 if (!IsPrecomputed) {
-                    printf("OK (found 0x%016lx with %7lu trials).",
+                    std::printf("OK (found 0x%016" PRIx64 " with %7" PRIu64 " trials).",
                            MagicNumberCandidate, Trial);
                     std::cout << std::endl;
                 }
@@ -793,15 +771,15 @@ void computeRookMagicBitboard() {
     }
 
     if (!IsPrecomputed) {
-        printf("constexpr uint64_t RookMagicNumbers[NumSquares] = {\n");
+        std::printf("constexpr uint64_t RookMagicNumbers[NumSquares] = {\n");
         for (Square Sq : Squares) {
-            printf("0x%016lxULL, ", RookMagicBB[Sq].MagicNumber);
+            std::printf("0x%016" PRIx64 "ULL, ", RookMagicBB[Sq].MagicNumber);
 
             if (squareToRank(Sq) == RankA) {
-                printf("\n");
+                std::printf("\n");
             }
         }
-        printf("};\n");
+        std::printf("};\n");
     }
 }
 
@@ -886,6 +864,81 @@ void initializeBetweenBB() {
     }
 }
 
+void initializeDiagBB() {
+    std::memset(static_cast<void*>(DiagBB), 0, sizeof(DiagBB));
+
+    for (Square Sq1 : Squares) {
+        for (Square Sq2 : Squares) {
+            if (Sq1 == Sq2) {
+                continue;
+            }
+
+            const auto Direction = SquareDirection[(std::size_t)Sq1][(std::size_t)Sq2];
+
+            if (Direction == NorthWest || Direction == NorthEast
+                || Direction == SouthWest || Direction == SouthEast) {
+                DiagBB[Sq1].toggleBit(Sq2);
+            }
+        }
+    }
+}
+
+void initializeCrossBB() {
+    std::memset(static_cast<void*>(CrossBB), 0, sizeof(CrossBB));
+
+    for (Square Sq1 : Squares) {
+        for (Square Sq2 : Squares) {
+            if (Sq1 == Sq2) {
+                continue;
+            }
+
+            const auto Direction = SquareDirection[(std::size_t)Sq1][(std::size_t)Sq2];
+
+            if (Direction == North || Direction == East
+                || Direction == South || Direction == West) {
+                CrossBB[Sq1].toggleBit(Sq2);
+            }
+        }
+    }
+}
+
+void initializeForwardBB() {
+    std::memset(static_cast<void*>(ForwardBB), 0, sizeof(ForwardBB));
+
+    for (Square Sq1 : Squares) {
+        for (Square Sq2 : Squares) {
+            if (Sq1 == Sq2) {
+                continue;
+            }
+
+            const auto Direction = SquareDirection[(std::size_t)Sq1][(std::size_t)Sq2];
+
+            if (Direction == North) {
+                ForwardBB[Sq1].toggleBit(Sq2);
+            }
+        }
+    }
+}
+
+void initializeBackwardBB() {
+    std::memset(static_cast<void*>(BackwardBB), 0, sizeof(BackwardBB));
+
+    for (Square Sq1 : Squares) {
+        for (Square Sq2 : Squares) {
+            if (Sq1 == Sq2) {
+                continue;
+            }
+
+            const auto Direction = SquareDirection[(std::size_t)Sq1][(std::size_t)Sq2];
+
+            if (Direction == South) {
+                BackwardBB[Sq1].toggleBit(Sq2);
+            }
+        }
+    }
+}
+
+
 } // namespace
 
 void initializeBitboards() {
@@ -912,6 +965,10 @@ void initializeBitboards() {
     initializeLineBB();
     initializeDirectionBB();
     initializeBetweenBB();
+    initializeDiagBB();
+    initializeCrossBB();
+    initializeForwardBB();
+    initializeBackwardBB();
 }
 
 } // namespace bitboard

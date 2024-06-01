@@ -33,7 +33,7 @@ core::Move32 attack(core::State* S, int Limit) {
     }();
 
     for (const auto& Move : CheckMoves) {
-        if (!S->isLegal<C>(Move)) {
+        if (S->isSuicideMove<C>(Move)) {
             continue;
         }
 
@@ -57,7 +57,7 @@ core::Move32 defence(core::State* S, int Limit) {
 
     bool IsCheckmatedBy1Ply = true;
     for (const auto& Move : DefenceMoves) {
-        if (!S->isLegal<C>(Move)) {
+        if (S->isSuicideMove<C>(Move)) {
             continue;
         }
 

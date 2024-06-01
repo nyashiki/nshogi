@@ -1,0 +1,28 @@
+name: test
+
+on: [push]
+
+jobs:
+  runtest:
+    strategy:
+      matrix:
+        os: [ubuntu-22.04, macos-latest]
+        sse_flags: ['']
+    runs-on: ${{ matrix.os }}
+    env:
+      working-directory: ./
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: make library
+      working-directory: ${{ env.working-directory }}
+      run: make ${{ matrix.sse_flags }} libnshogi
+    - name: install library
+      working-directory: ${{ env.working-directory }}
+      run: sudo make ${{ matrix.sse_flags }} install
+    - name: test the static library
+      working-directory: ${{ env.working-directory }}
+      run: make ${{ matrix.sse_flags }} runtest-static
+    - name: test the shared library
+      working-directory: ${{ env.working-directory }}
+      run: make ${{ matrix.sse_flags }} runtest-shared

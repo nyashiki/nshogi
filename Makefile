@@ -1,13 +1,17 @@
 CXX := clang++
 # CXX := g++
 
-PREFIX ?= /usr/local/
+PREFIX ?= /usr/local
 
 BUILD ?= release
 VERSION = $(shell cat NSHOGI_VERSION)
 
 OBJDIR = build/$(BUILD)_$(CXX)
-SHARED_TARGET_NAME := libnshogi.so.$(VERSION)
+ifeq ($(shell uname), Darwin)
+	SHARED_TARGET_NAME := libnshogi.$(VERSION).dylib
+else
+	SHARED_TARGET_NAME := libnshogi.so.$(VERSION)
+endif
 SHARED_TARGET := $(OBJDIR)/lib/$(SHARED_TARGET_NAME)
 STATIC_TARGET := $(OBJDIR)/lib/libnshogi_static.a
 PYTHON_TARGET := $(OBJDIR)/lib/nshogi$(shell python3-config --extension-suffix)
@@ -19,6 +23,7 @@ INCLUDES :=
 LINKS :=
 
 PYTHON_INCLUDES := $(shell python3-config --includes) $(shell python3 -m pybind11 --includes)
+PYTHON_LINKS := $(shell python3-config --ldflags) -Wl,-undefined,dynamic_lookup
 
 ifeq ($(BUILD), debug)
 	# CXX_FLAGS = -std=c++2b -Wall -Wextra -Wconversion -Wpedantic -Wshadow -fno-omit-frame-pointer -fsanitize=address -pipe
@@ -26,9 +31,10 @@ ifeq ($(BUILD), debug)
 	PYTHON_CXX_FLAGS = $(CXX_FLAGS)
 	OPTIM = -g3
 else
-	CXX_FLAGS = -std=c++2b -Wall -Wextra -Wconversion -Wpedantic -Wshadow -fomit-frame-pointer -fno-stack-protector -fno-rtti -flto -DNDEBUG -pipe
-	PYTHON_CXX_FLAGS = -std=c++2b -Wall -Wextra -Wconversion -Wpedantic -Wshadow -fomit-frame-pointer -fno-stack-protector -flto -DNDEBUG -pipe
-	OPTIM = -Ofast
+	CXX_FLAGS = -std=c++20 -Wall -Wextra -Wconversion -Wpedantic -Wshadow -fomit-frame-pointer -fno-stack-protector -fno-rtti -flto -DNDEBUG -pipe
+	# CXX_FLAGS = -std=c++20 -Wall -Wextra -Wconversion -Wpedantic -Wshadow -fno-omit-frame-pointer -flto -pipe
+	PYTHON_CXX_FLAGS = -std=c++20 -Wall -Wextra -Wconversion -Wpedantic -Wshadow -fomit-frame-pointer -fno-stack-protector -flto -DNDEBUG -pipe
+	OPTIM = -Ofast -g3
 endif
 
 SOURCES :=                          \
@@ -48,26 +54,30 @@ SOURCES :=                          \
 	src/core/huffman.cc         \
 	src/solver/mate1ply.cc      \
 	src/solver/dfs.cc           \
-	src/ml/featurestack.cc      \
 	src/ml/azteacher.cc         \
+	src/ml/featurestack.cc      \
+	src/ml/simpleteacher.cc     \
 	src/ml/teacherloader.cc     \
 	src/ml/teacherwriter.cc     \
 	src/io/bitboard.cc          \
+	src/io/huffman.cc           \
 	src/io/sfen.cc              \
-	src/io/csa.cc
+	src/io/csa.cc               \
+	src/io/file.cc
 
 TEST_SOURCES :=                         \
 	src/test/test_main.cc           \
+	src/test/test_types.cc 		\
 	src/test/test_bitboard.cc       \
-	src/test/test_huffman.cc        \
-	src/test/test_types.cc          \
-	src/test/test_sfen.cc           \
-	src/test/test_csa.cc            \
-	src/test/test_solver.cc         \
+	src/test/test_position.cc       \
+	src/test/test_state.cc          \
 	src/test/test_movegeneration.cc \
 	src/test/test_squareiterator.cc \
 	src/test/test_utils.cc          \
-	src/test/test_state.cc          \
+	src/test/test_csa.cc		\
+	src/test/test_sfen.cc           \
+	src/test/test_huffman.cc     	\
+	src/test/test_solver.cc		\
 	src/test/test_ml.cc
 
 BENCH_SOURCES :=                          \
@@ -139,9 +149,15 @@ $(PYTHON_OBJECTS): $(OBJDIR)/%.o: %.cc Makefile
 
 $(SHARED_TARGET): $(OBJECTS)
 	@[ -d $(dir $@) ] || mkdir -p $(dir $@)
+ifeq ($(shell uname), Darwin)
+	$(CXX) -dynamiclib -Wl,-install_name,@rpath/libnshogi.dylib -o $@ $(OBJECTS) $(OPTIM) $(ARCH_FLAGS) $(CXX_FLAGS) -fPIC $(LINKS)
+	-rm -f $(OBJDIR)/lib/libnshogi.dylib
+	cd $(OBJDIR)/lib && ln -s $(notdir $@) libnshogi.dylib
+else
 	$(CXX) -shared -Wl,-soname,libnshogi.so -o $@ $(OBJECTS) $(OPTIM) $(ARCH_FLAGS) $(CXX_FLAGS) -fPIC $(LINKS)
 	-rm -f $(OBJDIR)/lib/libnshogi.so
 	cd $(OBJDIR)/lib && ln -s $(notdir $@) libnshogi.so
+endif
 
 $(STATIC_TARGET): $(OBJECTS)
 	@[ -d $(dir $@) ] || mkdir -p $(dir $@)
@@ -149,7 +165,7 @@ $(STATIC_TARGET): $(OBJECTS)
 
 $(PYTHON_TARGET): $(PYTHON_OBJECTS) $(STATIC_TARGET)
 	@[ -d $(dir $@) ] || mkdir -p $(dir $@)
-	$(CXX) -shared -o $@ $(PYTHON_OBJECTS) $(STATIC_TARGET) $(OPTIM) $(ARCH_FLAGS) $(PYTHON_CXX_FLAGS) -fPIC $(LINKS)
+	$(CXX) -shared -o $@ $(PYTHON_OBJECTS) $(STATIC_TARGET) $(OPTIM) $(ARCH_FLAGS) $(PYTHON_CXX_FLAGS) -fPIC $(LINKS) $(PYTHON_LINKS)
 
 $(TEST_STATIC_TARGET): $(TEST_OBJECTS) $(STATIC_TARGET)
 	@[ -d $(dir $@) ] || mkdir -p $(dir $@)
@@ -186,11 +202,9 @@ install: $(SHARED_TARGET) $(STATIC_TARGET)
 	install -m 644 src/solver/*.h $(PREFIX)/include/nshogi/solver
 
 .PHONY: test-static
-test-static: LINKS += -lcunit
 test-static: $(TEST_STATIC_TARGET)
 
 .PHONY: test-shared
-test-shared: LINKS += -lcunit
 test-shared: $(TEST_SHARED_TARGET)
 
 .PHONY: bench
@@ -214,7 +228,7 @@ install-python: python
 
 .PHONY: runbench
 runbench: bench
-	perf record ./$(BENCH_TARGET)
+	perf record -a --call-graph dwarf -F 49 -- ./$(BENCH_TARGET)
 	perf report > bench.txt
 
 .PHONY: llvm-cov

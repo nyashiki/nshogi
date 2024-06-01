@@ -14,11 +14,15 @@ class PositionBuilder {
     static Position getInitialPosition();
 
     Position build() {
-        return std::move(Instance);
+        return Instance;
     }
+
+    static Position newPosition(const Position&);
+    static Position newPosition(const Position&, uint16_t PlyOffset);
 
  protected:
     PositionBuilder() = default;
+    PositionBuilder(const Position&);
 
     void setColor(Color C) {
         Instance.SideToMove = C;
