@@ -1,0 +1,40 @@
+name: build
+
+on: [push]
+
+jobs:
+  library-build:
+    strategy:
+      matrix:
+        os: [ubuntu-22.04, macos-latest]
+        sse_flags: ['']
+    runs-on: ${{ matrix.os }}
+    env:
+      working-directory: ./
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: make library
+      working-directory: ${{ env.working-directory }}
+      run: make ${{ matrix.sse_flags }} libnshogi
+
+  python-module-build:
+    strategy:
+      matrix:
+        os: [ubuntu-22.04, macos-latest]
+        sse_flags: ['']
+    runs-on: ${{ matrix.os }}
+    env:
+      working-directory: ./
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: install pybind11
+      if: runner.os == 'Linux'
+      run: pip3 install pybind11
+    - name: install pybind11
+      if: runner.os == 'macOS'
+      run: brew install pybind11
+    - name: make pythoon module
+      working-directory: ${{ env.working-directory }}
+      run: make ${{ matrix.sse_flags }} python
