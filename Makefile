@@ -23,7 +23,7 @@ INCLUDES :=
 LINKS :=
 
 PYTHON_INCLUDES := $(shell python3-config --includes) $(shell python3 -m pybind11 --includes)
-PYTHON_LINKS := $(shell python3-config --ldflags)
+PYTHON_LINKS := $(shell python3-config --ldflags) -Wl,-undefined,dynamic_lookup
 
 ifeq ($(BUILD), debug)
 	# CXX_FLAGS = -std=c++2b -Wall -Wextra -Wconversion -Wpedantic -Wshadow -fno-omit-frame-pointer -fsanitize=address -pipe
