@@ -69,7 +69,7 @@ Bitboard CrossStepAttackBB[NumSquares];
 Bitboard ForwardAttackBB[NumSquares][1 << 7];
 Bitboard BackwardAttackBB[NumSquares][1 << 7];
 
-MagicBitboard<BishopMagicBits> BishopMagicBB[NumSquares];
+MagicBitboard2<DiagMagicBits> BishopMagicBB[NumSquares];
 MagicBitboard<RookMagicBits> RookMagicBB[NumSquares];
 
 constexpr Bitboard FirstAndSecondFurthestBB[NumColors] = {
@@ -508,24 +508,32 @@ getPatternBB(Square Sq, uint16_t Pattern, bool Blocked, uint8_t BitIndex) {
     return {AttackBB | NAttackBB, ExistBB | NExistBB, NBitIndex};
 }
 
-std::pair<Bitboard, Bitboard> diagPatternBB(Square Sq, const uint16_t Pattern) {
+std::pair<Bitboard, Bitboard> diagSWNEPatternBB(Square Sq, const uint16_t Pattern) {
     const auto& [A1, E1, B1] =
         getPatternBB<NorthEast, true>(Sq, Pattern, false, 0);
     const auto& [A2, E2, B2] =
-        getPatternBB<SouthEast, true>(Sq, Pattern, false, B1);
-    const auto& [A3, E3, B3] =
-        getPatternBB<SouthWest, true>(Sq, Pattern, false, B2);
-    const auto& [A4, E4, B4] =
-        getPatternBB<NorthWest, true>(Sq, Pattern, false, B3);
+        getPatternBB<SouthWest, true>(Sq, Pattern, false, B1);
 
-    assert(B4 <= 12);
-
-    const Bitboard AttackBB = (A1 | A2 | A3 | A4) & ~SquareBB[Sq];
-
-    const Bitboard ExistBB = (E1 | E2 | E3 | E4) & ~FileBB[File9] &
+    assert(B2 <= 12);
+    const Bitboard AttackBB = (A1 | A2) & ~SquareBB[Sq];
+    const Bitboard ExistBB = (E1 | E2) & ~FileBB[File9] &
                              ~FileBB[File1] & ~RankBB[RankI] & ~RankBB[RankA] &
                              ~SquareBB[Sq];
 
+    return {AttackBB, ExistBB};
+}
+
+std::pair<Bitboard, Bitboard> diagNWSEPatternBB(Square Sq, const uint16_t Pattern) {
+    const auto& [A1, E1, B1] =
+        getPatternBB<SouthEast, true>(Sq, Pattern, false, 0);
+    const auto& [A2, E2, B2] =
+        getPatternBB<NorthWest, true>(Sq, Pattern, false, B1);
+
+    assert(B2 <= 12);
+    const Bitboard AttackBB = (A1 | A2) & ~SquareBB[Sq];
+    const Bitboard ExistBB = (E1 | E2) & ~FileBB[File9] &
+                             ~FileBB[File1] & ~RankBB[RankI] & ~RankBB[RankA] &
+                             ~SquareBB[Sq];
     return {AttackBB, ExistBB};
 }
 
@@ -545,8 +553,12 @@ std::pair<Bitboard, Bitboard> crossPatternBB(Square Sq,
     return {AttackBB, ExistBB};
 }
 
-Bitboard diagPatternMask(Square Sq) {
-    return diagPatternBB(Sq, (1 << 15) - 1).second;
+Bitboard diagSWNEPatternMask(Square Sq) {
+    return diagSWNEPatternBB(Sq, (1 << 15) - 1).second;
+}
+
+Bitboard diagNWSEPatternMask(Square Sq) {
+    return diagNWSEPatternBB(Sq, (1 << 15) - 1).second;
 }
 
 Bitboard crossPatternMask(Square Sq) {
@@ -555,45 +567,74 @@ Bitboard crossPatternMask(Square Sq) {
 
 void setBishopMagicMasks() {
     for (Square Sq : Squares) {
-        BishopMagicBB[Sq].Mask = diagPatternMask(Sq);
+        BishopMagicBB[Sq].Mask1 = diagSWNEPatternMask(Sq);
+        BishopMagicBB[Sq].Mask2 = diagNWSEPatternMask(Sq);
     }
 }
 
-std::pair<bool, std::vector<Bitboard>>
+std::tuple<bool, std::vector<Bitboard>, std::vector<Bitboard>>
 isBishopMagicNumberOK(Square Sq, uint64_t MagicNumber) {
-    std::vector<Bitboard> AttackBBs(1 << BishopMagicBits, {0, 0});
+    std::vector<Bitboard> AttackBBs1(1 << DiagMagicBits, {0, 0});
+    std::vector<Bitboard> AttackBBs2(1 << DiagMagicBits, {0, 0});
 
     // clang-format off
-    const uint16_t NumBits[NumSquares] = {
-        7, 6, 6,  6,  6,  6, 6, 6, 7,
-        6, 6, 6,  6,  6,  6, 6, 6, 6,
-        6, 6, 8,  8,  8,  8, 8, 6, 6,
-        6, 6, 8, 10, 10, 10, 8, 6, 6,
-        6, 6, 8, 10, 12, 10, 8, 6, 6,
-        6, 6, 8, 10, 10, 10, 8, 6, 6,
-        6, 6, 8,  8,  8,  8, 8, 6, 6,
-        6, 6, 6,  6,  6,  6, 6, 6, 6,
-        7, 6, 6,  6,  6,  6, 6, 6, 7,
+    static const uint16_t NumBitsSWNE[NumSquares] = {
+        0, 0, 1, 2, 3, 4, 5, 6, 7,
+        0, 0, 1, 2, 3, 4, 5, 6, 6,
+        1, 1, 2, 3, 4, 5, 6, 5, 5,
+        2, 2, 3, 4, 5, 6, 5, 4, 4,
+        3, 3, 4, 5, 6, 5, 4, 3, 3,
+        4, 4, 5, 6, 5, 4, 3, 2, 2,
+        5, 5, 6, 5, 4, 3, 2, 2, 1,
+        6, 6, 5, 4, 3, 2, 1, 0, 0,
+        7, 6, 5, 4, 3, 2, 1, 0, 0,
+    };
+    static const uint16_t NumBitsNWSE[NumSquares] = {
+        7, 6, 5, 4, 3, 2, 1, 0, 0,
+        6, 6, 5, 4, 3, 2, 1, 0, 0,
+        5, 5, 6, 5, 4, 3, 2, 2, 1,
+        4, 4, 5, 6, 5, 4, 3, 2, 2,
+        3, 3, 4, 5, 6, 5, 4, 3, 3,
+        2, 2, 3, 4, 5, 6, 5, 4, 4,
+        1, 1, 2, 3, 4, 5, 6, 5, 5,
+        0, 0, 1, 2, 3, 4, 5, 6, 6,
+        0, 0, 1, 2, 3, 4, 5, 6, 7,
     };
     // clang-format on
 
-    const uint64_t ShiftAmount = 64 - BishopMagicBits;
-    const uint16_t NumBit = NumBits[Sq];
+    const uint64_t ShiftAmount = 64 - DiagMagicBits;
+    {
+        const uint16_t NumBit = NumBitsSWNE[Sq];
+        for (uint16_t Pattern = 0; Pattern < (1 << NumBit); ++Pattern) {
+            const auto& [AttackBB, BB] = diagSWNEPatternBB(Sq, Pattern);
 
-    for (uint16_t Pattern = 0; Pattern < (1 << NumBit); ++Pattern) {
-        const auto& [AttackBB, BB] = diagPatternBB(Sq, Pattern);
+            const uint16_t Result =
+                (uint16_t)((BB.horizontalOr() * MagicNumber) >> ShiftAmount);
 
-        const uint16_t Result =
-            (uint16_t)((BB.horizontalOr() * MagicNumber) >> ShiftAmount);
+            if (AttackBBs1[Result].isZero()) {
+                AttackBBs1[Result].copyFrom(AttackBB);
+            } else if (AttackBBs1[Result] != AttackBB) {
+                return std::make_tuple(false, AttackBBs1, AttackBBs2);
+            }
+        }
+    }
+    {
+        const uint16_t NumBit = NumBitsNWSE[Sq];
+        for (uint16_t Pattern = 0; Pattern < (1 << NumBit); ++Pattern) {
+            const auto& [AttackBB, BB] = diagNWSEPatternBB(Sq, Pattern);
 
-        if (AttackBBs[Result].isZero()) {
-            AttackBBs[Result].copyFrom(AttackBB);
-        } else if (AttackBBs[Result] != AttackBB) {
-            return std::make_pair(false, AttackBBs);
+            const uint16_t Result =
+                (uint16_t)((BB.horizontalOr() * MagicNumber) >> ShiftAmount);
+
+            if (AttackBBs2[Result].isZero()) {
+                AttackBBs2[Result].copyFrom(AttackBB);
+            } else if (AttackBBs2[Result] != AttackBB) {
+                return std::make_tuple(false, AttackBBs1, AttackBBs2);
+            }
         }
     }
 
-    return std::make_pair(true, AttackBBs);
+    return std::make_tuple(true, AttackBBs1, AttackBBs2);
 }
 
 uint64_t generateMagicNumberCandidate() {
@@ -626,7 +667,7 @@ void setBishopMagicNumbers() {
     // clang-format on
 
     for (Square Sq : Squares) {
-        BishopMagicBB[Sq].MagicNumber = BishopMagicNumbers[Sq];
+        // BishopMagicBB[Sq].MagicNumber = BishopMagicNumbers[Sq];
     }
 };
 
@@ -668,11 +709,14 @@ void computeBishopMagicBitboard() {
 
             const auto& Result =
                 isBishopMagicNumberOK(Sq, MagicNumberCandidate);
-            if (Result.first) {
+            if (std::get<0>(Result)) {
                 BishopMagicBB[Sq].MagicNumber = MagicNumberCandidate;
-                std::memcpy(static_cast<void*>(BishopMagicBB[Sq].AttackBB),
-                            static_cast<const void*>(Result.second.data()),
-                            (1 << BishopMagicBits) * sizeof(Bitboard));
+                std::memcpy(static_cast<void*>(BishopMagicBB[Sq].AttackBB1),
+                            static_cast<const void*>(std::get<1>(Result).data()),
+                            (1 << DiagMagicBits) * sizeof(Bitboard));
+                std::memcpy(static_cast<void*>(BishopMagicBB[Sq].AttackBB2),
+                            static_cast<const void*>(std::get<2>(Result).data()),
+                            (1 << DiagMagicBits) * sizeof(Bitboard));
 
                 if (!IsPrecomputed) {
                     std::printf("OK (found 0x%016" PRIx64 " with %7" PRIu64 " trials).",

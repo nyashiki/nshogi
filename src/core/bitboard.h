@@ -404,8 +404,18 @@ template <uint64_t NumBits> struct MagicBitboard {
     Bitboard AttackBB[1 << NumBits];
 };
 
-constexpr uint64_t BishopMagicBits = 12;
-extern MagicBitboard<BishopMagicBits> BishopMagicBB[NumSquares];
+template <uint64_t NumBits> struct MagicBitboard2 {
+    MagicBitboard2(){};
+
+    uint64_t MagicNumber;
+    Bitboard Mask1;
+    Bitboard Mask2;
+    Bitboard AttackBB1[1 << NumBits];
+    Bitboard AttackBB2[1 << NumBits];
+};
+
+constexpr uint64_t DiagMagicBits = 7;
+extern MagicBitboard2<DiagMagicBits> BishopMagicBB[NumSquares];
 
 constexpr uint64_t RookMagicBits = 14;
 extern MagicBitboard<RookMagicBits> RookMagicBB[NumSquares];
@@ -472,16 +482,19 @@ inline Bitboard getBishopAttackBB(Square Sq, const Bitboard& OccupiedBB) {
         "the template parameter `Type` must be PTK_Bishop or PTK_ProBishop.");
 
     const auto& Magic = BishopMagicBB[Sq];
-    const uint16_t Pattern =
-        (uint16_t)(((OccupiedBB & Magic.Mask).horizontalOr() *
-                    Magic.MagicNumber) >>
-                   (64 - BishopMagicBits));
+    const uint16_t Pattern1 =
+        (uint16_t)(((OccupiedBB & Magic.Mask1).horizontalOr() *
+                    Magic.MagicNumber) >> (64 - DiagMagicBits));
+    const uint16_t Pattern2 =
+        (uint16_t)(((OccupiedBB & Magic.Mask2).horizontalOr() *
+                    Magic.MagicNumber) >> (64 - DiagMagicBits));
 
+    const auto AttackBB = Magic.AttackBB1[Pattern1] | Magic.AttackBB2[Pattern2];
     if constexpr (Type == PTK_ProBishop) {
-        return Magic.AttackBB[Pattern] | KingAttackBB[Sq];
+        return AttackBB | KingAttackBB[Sq];
     }
 
-    return Magic.AttackBB[Pattern];
+    return AttackBB;
 }
 
 template <PieceTypeKind Type>
