@@ -681,7 +681,7 @@ void computeBishopMagicBitboard() {
 
     for (Square Sq : Squares) {
         if (!IsPrecomputed) {
-            printf("Searching for a bishop magic number for square %2d ... ",
+            std::printf("Searching for a bishop magic number for square %2d ... ",
                    Sq);
             std::cout << std::flush;
         }
@@ -701,7 +701,7 @@ void computeBishopMagicBitboard() {
                             (1 << BishopMagicBits) * sizeof(Bitboard));
 
                 if (!IsPrecomputed) {
-                    printf("OK (found 0x%016lx with %7lu trials).",
+                    std::printf("OK (found 0x%016" PRIx64 " with %7" PRIu64 " trials).",
                            MagicNumberCandidate, Trial);
                     std::cout << std::endl;
                 }
@@ -711,15 +711,15 @@ void computeBishopMagicBitboard() {
     }
 
     if (!IsPrecomputed) {
-        printf("constexpr uint64_t BishopMagicNumbers[NumSquares] = {\n");
+        std::printf("constexpr uint64_t BishopMagicNumbers[NumSquares] = {\n");
         for (Square Sq : Squares) {
-            printf("0x%016lxULL, ", BishopMagicBB[Sq].MagicNumber);
+            std::printf("0x%016" PRIx64 "ULL, ", BishopMagicBB[Sq].MagicNumber);
 
             if (squareToRank(Sq) == RankA) {
-                printf("\n");
+                std::printf("\n");
             }
         }
-        printf("};\n");
+        std::printf("};\n");
     }
 }
 
@@ -770,7 +770,7 @@ void computeRookMagicBitboard() {
 
     for (Square Sq : Squares) {
         if (!IsPrecomputed) {
-            printf("Searching for a rook magic number for square %2d ... ", Sq);
+            std::printf("Searching for a rook magic number for square %2d ... ", Sq);
             std::cout << std::flush;
         }
 
@@ -787,7 +787,7 @@ void computeRookMagicBitboard() {
                             (1 << RookMagicBits) * sizeof(Bitboard));
 
                 if (!IsPrecomputed) {
-                    printf("OK (found 0x%016lx with %7lu trials).",
+                    std::printf("OK (found 0x%016" PRIx64 " with %7" PRIu64 " trials).",
                            MagicNumberCandidate, Trial);
                     std::cout << std::endl;
                 }
@@ -797,15 +797,15 @@ void computeRookMagicBitboard() {
     }
 
     if (!IsPrecomputed) {
-        printf("constexpr uint64_t RookMagicNumbers[NumSquares] = {\n");
+        std::printf("constexpr uint64_t RookMagicNumbers[NumSquares] = {\n");
         for (Square Sq : Squares) {
-            printf("0x%016lxULL, ", RookMagicBB[Sq].MagicNumber);
+            std::printf("0x%016" PRIx64 "ULL, ", RookMagicBB[Sq].MagicNumber);
 
             if (squareToRank(Sq) == RankA) {
-                printf("\n");
+                std::printf("\n");
             }
         }
-        printf("};\n");
+        std::printf("};\n");
     }
 }
 
