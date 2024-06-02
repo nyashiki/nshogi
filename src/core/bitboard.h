@@ -400,25 +400,16 @@ template <uint64_t NumBits> struct MagicBitboard {
     MagicBitboard(){};
 
     uint64_t MagicNumber;
-    Bitboard Mask;
-    Bitboard AttackBB[1 << NumBits];
-};
-
-template <uint64_t NumBits> struct MagicBitboard2 {
-    MagicBitboard2(){};
-
-    uint64_t MagicNumber;
-    Bitboard Mask1;
-    Bitboard Mask2;
+    Bitboard Masks[2];
     Bitboard AttackBB1[1 << NumBits];
     Bitboard AttackBB2[1 << NumBits];
 };
 
 constexpr uint64_t DiagMagicBits = 7;
-extern MagicBitboard2<DiagMagicBits> BishopMagicBB[NumSquares];
+extern MagicBitboard<DiagMagicBits> BishopMagicBB[NumSquares];
 
-constexpr uint64_t RookMagicBits = 14;
-extern MagicBitboard<RookMagicBits> RookMagicBB[NumSquares];
+constexpr uint64_t CrossMagicBits = 7;
+extern MagicBitboard<CrossMagicBits> RookMagicBB[NumSquares];
 
 template <Color C, PieceTypeKind Type>
 inline constexpr Bitboard getAttackBB(Square From) {
@@ -482,11 +473,12 @@ inline Bitboard getBishopAttackBB(Square Sq, const Bitboard& OccupiedBB) {
         "the template parameter `Type` must be PTK_Bishop or PTK_ProBishop.");
 
     const auto& Magic = BishopMagicBB[Sq];
+
     const uint16_t Pattern1 =
-        (uint16_t)(((OccupiedBB & Magic.Mask1).horizontalOr() *
+        (uint16_t)(((OccupiedBB & Magic.Masks[0]).horizontalOr() *
                     Magic.MagicNumber) >> (64 - DiagMagicBits));
     const uint16_t Pattern2 =
-        (uint16_t)(((OccupiedBB & Magic.Mask2).horizontalOr() *
+        (uint16_t)(((OccupiedBB & Magic.Masks[1]).horizontalOr() *
                     Magic.MagicNumber) >> (64 - DiagMagicBits));
 
     const auto AttackBB = Magic.AttackBB1[Pattern1] | Magic.AttackBB2[Pattern2];
@@ -504,19 +496,19 @@ inline Bitboard getRookAttackBB(Square Sq, const Bitboard& OccupiedBB) {
         "the template parameter `Type` must be PTK_Rook or PTK_ProRook.");
 
     const auto& Magic = RookMagicBB[Sq];
-    const uint16_t Pattern =
-        (uint16_t)(((OccupiedBB & Magic.Mask).horizontalOr() *
-                    Magic.MagicNumber) >>
-                   (64 - RookMagicBits));
+    const uint16_t Pattern1 =
+        (uint16_t)(((OccupiedBB & Magic.Masks[0]).horizontalOr() *
+                    Magic.MagicNumber) >> (64 - CrossMagicBits));
+    const uint16_t Pattern2 =
+        (uint16_t)(((OccupiedBB & Magic.Masks[1]).horizontalOr() *
+                    Magic.MagicNumber) >> (64 - CrossMagicBits));
 
-    assert(Pattern < ((uint16_t)1 << RookMagicBits));
-    assert(checkRange(Sq));
-
+    const auto AttackBB = Magic.AttackBB1[Pattern1] | Magic.AttackBB2[Pattern2];
     if constexpr (Type == PTK_ProRook) {
-        return Magic.AttackBB[Pattern] | KingAttackBB[Sq];
+        return AttackBB | KingAttackBB[Sq];
     }
 
-    return Magic.AttackBB[Pattern];
+    return AttackBB;
 }
 
 inline bool isAttacked(const Bitboard& AttackBB, const Bitboard& ExistBB) {
