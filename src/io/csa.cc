@@ -46,6 +46,10 @@ std::string pieceTypeToCSA(core::PieceTypeKind Type) {
         "NK", "NG", "UM", "RY",
     };
 
+    if ((uint8_t)Type >= 15) {
+        throw std::runtime_error(std::string("invalid piece type ") + std::to_string(Type) + ".");
+    }
+
     return std::string(Table[Type]);
 }
 
