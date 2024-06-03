@@ -639,7 +639,8 @@ class State {
     template <Color C>
     void setCheckerBB(StepHelper* SHelper);
 
-    template <Color C> inline bool isSuicideMoveImpl(const Move32& Move) const {
+    template <Color C>
+    inline bool isSuicideMoveImpl(const Move32& Move) const {
         if (Move.pieceType() == PTK_King) {
             // When moving the king, the square moving onto
             // must be not attacked by opponent pieces.

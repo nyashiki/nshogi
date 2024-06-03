@@ -69,8 +69,8 @@ Bitboard CrossStepAttackBB[NumSquares];
 Bitboard ForwardAttackBB[NumSquares][1 << 7];
 Bitboard BackwardAttackBB[NumSquares][1 << 7];
 
-MagicBitboard<BishopMagicBits> BishopMagicBB[NumSquares];
-MagicBitboard<RookMagicBits> RookMagicBB[NumSquares];
+MagicBitboard<DiagMagicBits> BishopMagicBB[NumSquares];
+MagicBitboard<CrossMagicBits> RookMagicBB[NumSquares];
 
 constexpr Bitboard FirstAndSecondFurthestBB[NumColors] = {
     RankBB[RankA] | RankBB[RankB],
@@ -508,92 +508,137 @@ getPatternBB(Square Sq, uint16_t Pattern, bool Blocked, uint8_t BitIndex) {
     return {AttackBB | NAttackBB, ExistBB | NExistBB, NBitIndex};
 }
 
-std::pair<Bitboard, Bitboard> diagPatternBB(Square Sq, const uint16_t Pattern) {
-    const auto& [A1, E1, B1] =
-        getPatternBB<NorthEast, true>(Sq, Pattern, false, 0);
-    const auto& [A2, E2, B2] =
-        getPatternBB<SouthEast, true>(Sq, Pattern, false, B1);
-    const auto& [A3, E3, B3] =
-        getPatternBB<SouthWest, true>(Sq, Pattern, false, B2);
-    const auto& [A4, E4, B4] =
-        getPatternBB<NorthWest, true>(Sq, Pattern, false, B3);
+std::pair<Bitboard, Bitboard> diagSWNEPatternBB(Square Sq, const uint16_t Pattern) {
+    const auto& [A1, E1, B1] = getPatternBB<NorthEast, true>(Sq, Pattern, false, 0);
+    const auto& [A2, E2, B2] = getPatternBB<SouthWest, true>(Sq, Pattern, false, B1);
 
-    assert(B4 <= 12);
-
-    const Bitboard AttackBB = (A1 | A2 | A3 | A4) & ~SquareBB[Sq];
-
-    const Bitboard ExistBB = (E1 | E2 | E3 | E4) & ~FileBB[File9] &
+    assert(B2 <= 7);
+    const Bitboard AttackBB = (A1 | A2) & ~SquareBB[Sq];
+    const Bitboard ExistBB = (E1 | E2) & ~FileBB[File9] &
                              ~FileBB[File1] & ~RankBB[RankI] & ~RankBB[RankA] &
                              ~SquareBB[Sq];
-
     return {AttackBB, ExistBB};
 }
 
-std::pair<Bitboard, Bitboard> crossPatternBB(Square Sq,
+std::pair<Bitboard, Bitboard> diagNWSEPatternBB(Square Sq, const uint16_t Pattern) {
+    const auto& [A1, E1, B1] = getPatternBB<SouthEast, true>(Sq, Pattern, false, 0);
+    const auto& [A2, E2, B2] = getPatternBB<NorthWest, true>(Sq, Pattern, false, B1);
+
+    assert(B2 <= 7);
+    const Bitboard AttackBB = (A1 | A2) & ~SquareBB[Sq];
+    const Bitboard ExistBB = (E1 | E2) & ~FileBB[File9] &
+                             ~FileBB[File1] & ~RankBB[RankI] & ~RankBB[RankA] &
+                             ~SquareBB[Sq];
+    return {AttackBB, ExistBB};
+}
+
+std::pair<Bitboard, Bitboard> verticalPatternBB(Square Sq,
                                              const uint16_t Pattern) {
     const auto& [A1, E1, B1] = getPatternBB<North, true>(Sq, Pattern, false, 0);
-    const auto& [A2, E2, B2] = getPatternBB<East, true>(Sq, Pattern, false, B1);
-    const auto& [A3, E3, B3] =
-        getPatternBB<South, true>(Sq, Pattern, false, B2);
-    const auto& [A4, E4, B4] = getPatternBB<West, true>(Sq, Pattern, false, B3);
+    const auto& [A2, E2, B2] = getPatternBB<South, true>(Sq, Pattern, false, B1);
 
-    assert(B4 <= 14);
-
-    const Bitboard AttackBB = (A1 | A2 | A3 | A4) & ~SquareBB[Sq];
-    const Bitboard ExistBB = (E1 | E2 | E3 | E4) & ~SquareBB[Sq];
-
+    assert(B2 <= 7);
+    const Bitboard AttackBB = (A1 | A2) & ~SquareBB[Sq];
+    const Bitboard ExistBB = (E1 | E2) & ~SquareBB[Sq] & ~RankBB[RankA] & ~RankBB[RankI];
     return {AttackBB, ExistBB};
 }
 
-Bitboard diagPatternMask(Square Sq) {
-    return diagPatternBB(Sq, (1 << 15) - 1).second;
+std::pair<Bitboard, Bitboard> horizontalPatternBB(Square Sq,
+                                             const uint16_t Pattern) {
+    const auto& [A1, E1, B1] = getPatternBB<East, true>(Sq, Pattern, false, 0);
+    const auto& [A2, E2, B2] = getPatternBB<West, true>(Sq, Pattern, false, B1);
+
+    assert(B2 <= 7);
+
+    const Bitboard AttackBB = (A1 | A2) & ~SquareBB[Sq];
+    const Bitboard ExistBB = (E1 | E2) & ~SquareBB[Sq];
+    return {AttackBB, ExistBB};
 }
 
-Bitboard crossPatternMask(Square Sq) {
-    return crossPatternBB(Sq, (1 << 15) - 1).second;
+Bitboard diagSWNEPatternMask(Square Sq) {
+    return diagSWNEPatternBB(Sq, (1 << 15) - 1).second;
+}
+
+Bitboard diagNWSEPatternMask(Square Sq) {
+    return diagNWSEPatternBB(Sq, (1 << 15) - 1).second;
+}
+
+Bitboard verticalPatternMask(Square Sq) {
+    return verticalPatternBB(Sq, (1 << 15) - 1).second;
+}
+
+Bitboard horizontalPatternBB(Square Sq) {
+    return horizontalPatternBB(Sq, (1 << 15) - 1).second;
 }
 
 void setBishopMagicMasks() {
     for (Square Sq : Squares) {
-        BishopMagicBB[Sq].Mask = diagPatternMask(Sq);
+        BishopMagicBB[Sq].Masks[0] = diagSWNEPatternMask(Sq);
+        BishopMagicBB[Sq].Masks[1] = diagNWSEPatternMask(Sq);
     }
 }
 
-std::pair<bool, std::vector<Bitboard>>
+std::tuple<bool, std::vector<Bitboard>, std::vector<Bitboard>>
 isBishopMagicNumberOK(Square Sq, uint64_t MagicNumber) {
-    std::vector<Bitboard> AttackBBs(1 << BishopMagicBits, {0, 0});
+    std::vector<Bitboard> AttackBBs1(1 << DiagMagicBits, {0, 0});
+    std::vector<Bitboard> AttackBBs2(1 << DiagMagicBits, {0, 0});
 
     // clang-format off
-    const uint16_t NumBits[NumSquares] = {
-        7, 6, 6,  6,  6,  6, 6, 6, 7,
-        6, 6, 6,  6,  6,  6, 6, 6, 6,
-        6, 6, 8,  8,  8,  8, 8, 6, 6,
-        6, 6, 8, 10, 10, 10, 8, 6, 6,
-        6, 6, 8, 10, 12, 10, 8, 6, 6,
-        6, 6, 8, 10, 10, 10, 8, 6, 6,
-        6, 6, 8,  8,  8,  8, 8, 6, 6,
-        6, 6, 6,  6,  6,  6, 6, 6, 6,
-        7, 6, 6,  6,  6,  6, 6, 6, 7,
+    static const uint16_t NumBitsSWNE[NumSquares] = {
+        0, 0, 1, 2, 3, 4, 5, 6, 7,
+        0, 0, 1, 2, 3, 4, 5, 6, 6,
+        1, 1, 2, 3, 4, 5, 6, 5, 5,
+        2, 2, 3, 4, 5, 6, 5, 4, 4,
+        3, 3, 4, 5, 6, 5, 4, 3, 3,
+        4, 4, 5, 6, 5, 4, 3, 2, 2,
+        5, 5, 6, 5, 4, 3, 2, 2, 1,
+        6, 6, 5, 4, 3, 2, 1, 0, 0,
+        7, 6, 5, 4, 3, 2, 1, 0, 0,
+    };
+    static const uint16_t NumBitsNWSE[NumSquares] = {
+        7, 6, 5, 4, 3, 2, 1, 0, 0,
+        6, 6, 5, 4, 3, 2, 1, 0, 0,
+        5, 5, 6, 5, 4, 3, 2, 2, 1,
+        4, 4, 5, 6, 5, 4, 3, 2, 2,
+        3, 3, 4, 5, 6, 5, 4, 3, 3,
+        2, 2, 3, 4, 5, 6, 5, 4, 4,
+        1, 1, 2, 3, 4, 5, 6, 5, 5,
+        0, 0, 1, 2, 3, 4, 5, 6, 6,
+        0, 0, 1, 2, 3, 4, 5, 6, 7,
     };
     // clang-format on
 
-    const uint64_t ShiftAmount = 64 - BishopMagicBits;
-    const uint16_t NumBit = NumBits[Sq];
+    const uint64_t ShiftAmount = 64 - DiagMagicBits;
+    {
+        const uint16_t NumBit = NumBitsSWNE[Sq];
+        for (uint16_t Pattern = 0; Pattern < (1 << NumBit); ++Pattern) {
+            const auto& [AttackBB, BB] = diagSWNEPatternBB(Sq, Pattern);
+            const uint16_t Result =
+                (uint16_t)((BB.horizontalOr() * MagicNumber) >> ShiftAmount);
 
-    for (uint16_t Pattern = 0; Pattern < (1 << NumBit); ++Pattern) {
-        const auto& [AttackBB, BB] = diagPatternBB(Sq, Pattern);
+            if (AttackBBs1[Result].isZero()) {
+                AttackBBs1[Result].copyFrom(AttackBB);
+            } else if (AttackBBs1[Result] != AttackBB) {
+                return std::make_tuple(false, AttackBBs1, AttackBBs2);
+            }
+        }
+    }
+    {
+        const uint16_t NumBit = NumBitsNWSE[Sq];
+        for (uint16_t Pattern = 0; Pattern < (1 << NumBit); ++Pattern) {
+            const auto& [AttackBB, BB] = diagNWSEPatternBB(Sq, Pattern);
+            const uint16_t Result =
+                (uint16_t)((BB.horizontalOr() * MagicNumber) >> ShiftAmount);
 
-        const uint16_t Result =
-            (uint16_t)((BB.horizontalOr() * MagicNumber) >> ShiftAmount);
-
-        if (AttackBBs[Result].isZero()) {
-            AttackBBs[Result].copyFrom(AttackBB);
-        } else if (AttackBBs[Result] != AttackBB) {
-            return std::make_pair(false, AttackBBs);
+            if (AttackBBs2[Result].isZero()) {
+                AttackBBs2[Result].copyFrom(AttackBB);
+            } else if (AttackBBs2[Result] != AttackBB) {
+                return std::make_tuple(false, AttackBBs1, AttackBBs2);
+            }
         }
     }
 
-    return std::make_pair(true, AttackBBs);
+    return std::make_tuple(true, AttackBBs1, AttackBBs2);
 }
 
 uint64_t generateMagicNumberCandidate() {
@@ -613,15 +658,15 @@ uint64_t generateMagicNumberCandidate() {
 void setBishopMagicNumbers() {
     // clang-format off
     constexpr uint64_t BishopMagicNumbers[NumSquares] = {
-        0x0048000200020004ULL, 0x001000200880a002ULL, 0x0010905093002882ULL, 0x00010040412a0010ULL, 0x1008210090200002ULL, 0x404080010500a000ULL, 0x0c0442100208040cULL, 0x0800002040010008ULL, 0xc095001003810640ULL,
-        0x1840880900004038ULL, 0x00080130c00c4081ULL, 0x00c014006000a002ULL, 0x0808020644001011ULL, 0x0208280432020108ULL, 0x2020014000900200ULL, 0x2070050220030004ULL, 0x20c8090090002080ULL, 0x022280190048204cULL,
-        0x0201300089080020ULL, 0x1080e2518080080bULL, 0x000984a400420008ULL, 0x000a200010400081ULL, 0xb020400089620020ULL, 0x2064002000841d80ULL, 0x8100400005005020ULL, 0x029000a00a000820ULL, 0xc022202000100201ULL,
-        0x468122431040c081ULL, 0x200d1001428040a0ULL, 0x8014054201090102ULL, 0x0282104002081082ULL, 0x0500094000012002ULL, 0x8009424402040080ULL, 0x0484028022001015ULL, 0x0005082044043001ULL, 0x41005202800a2204ULL,
-        0x8044803220110004ULL, 0x280002400088140cULL, 0x00a00201100a4020ULL, 0x0003008410400821ULL, 0x4a00408000421002ULL, 0x0040802100a00141ULL, 0x000a008294510842ULL, 0x3420200110004008ULL, 0x0118010018000b82ULL,
-        0x000c20200304c842ULL, 0x0100005100080282ULL, 0x1102230410800442ULL, 0x1000800280400021ULL, 0x0100049010008042ULL, 0x0010e52000400a08ULL, 0x47131410600208c1ULL, 0x00014208010080c1ULL, 0x24409000a0022034ULL,
-        0x010000c062011880ULL, 0x0020220b00c01008ULL, 0x0040168828040040ULL, 0x0100240060070008ULL, 0x0401880060040080ULL, 0x2480408008010048ULL, 0x4010000240100349ULL, 0x001a44002000a142ULL, 0x0094000080040114ULL,
-        0x4809884100c00414ULL, 0x0440002320820306ULL, 0x00148440f0200040ULL, 0x104e000900200410ULL, 0x0020c40042820041ULL, 0x0300010802020018ULL, 0x9004082005204202ULL, 0x0010041041068023ULL, 0x108005191c30360eULL,
-        0x0400048002002010ULL, 0x8a00044009500018ULL, 0x044000002430d420ULL, 0x0080040000012124ULL, 0x0040001000884007ULL, 0x0080052022104102ULL, 0xc052480080800010ULL, 0xc110706518204004ULL, 0x0098004804c07008ULL,
+        0x400c024100082012ULL, 0x0400502040880514ULL, 0x121a100820820300ULL, 0x0019010020038000ULL, 0x0000410801002410ULL, 0x044184014100020eULL, 0x4008c02380090000ULL, 0x008004d080082120ULL, 0x0800800804400220ULL,
+        0x8011004088101010ULL, 0x002060802c042214ULL, 0x040a105100040201ULL, 0xc30391a080088908ULL, 0xc108082042208004ULL, 0x0900027020420000ULL, 0x00004014300984d2ULL, 0x4001000250102804ULL, 0x2020000408012010ULL,
+        0x9024140100600a10ULL, 0x0852100042041002ULL, 0x3048844100280808ULL, 0x00101c0c04c2090aULL, 0x082620048cc80a20ULL, 0x5810a04ca4288011ULL, 0x40014042a4100288ULL, 0x0800c0540c024408ULL, 0x0a2880002020a104ULL,
+        0x0210004012001006ULL, 0x801100a0001d8214ULL, 0x0024004083022002ULL, 0x010a0081100aa004ULL, 0x0800a08c1301c404ULL, 0x0808420340080480ULL, 0x0119000800230390ULL, 0x0801002080481220ULL, 0x2251042300020811ULL,
+        0x008a09218a202040ULL, 0x00a090804002aa11ULL, 0x0042005031008810ULL, 0x0200841030040c08ULL, 0x580402c080052004ULL, 0x2213002920210442ULL, 0x13022010c4c80691ULL, 0x110200044140089aULL, 0x001218253000a881ULL,
+        0x2144084104800824ULL, 0x0901011222840052ULL, 0x1248d00440a80141ULL, 0x4045841031060008ULL, 0x810004490c080450ULL, 0x01010a0062061001ULL, 0x0042e19040018012ULL, 0xca880180040c0428ULL, 0x404040c001049084ULL,
+        0x0101284201001100ULL, 0x0c02800815004081ULL, 0x0230068088401000ULL, 0x1182100810222004ULL, 0x1490200041102000ULL, 0x4040501200498204ULL, 0x01a0002102208119ULL, 0x0100c04d40058404ULL, 0x10080850024a3102ULL,
+        0x0800480c0b001020ULL, 0x0800088020848210ULL, 0x000020142001080aULL, 0x01118000140820b1ULL, 0x80c8021040808616ULL, 0x0480102810101028ULL, 0x0080023011008601ULL, 0x800102084c803404ULL, 0x005400400820004cULL,
+        0x400404210802c010ULL, 0x0504800e14a00931ULL, 0x6422000590062003ULL, 0x0a03801421101048ULL, 0x0100000400400825ULL, 0x020010a404400402ULL, 0x8100044126022492ULL, 0x102002182004100cULL, 0x00a080c120800804ULL,
     };
     // clang-format on
 
@@ -633,15 +678,15 @@ void setBishopMagicNumbers() {
 void setRookMagicNumbers() {
     // clang-format off
     constexpr uint64_t RookMagicNumbers[NumSquares] = {
-        0x810002200a0210c1ULL, 0x0081000800008480ULL, 0x88004008c002408cULL, 0x0108004100020208ULL, 0x0a10008202011404ULL, 0x00100010a0084086ULL, 0x0020009020380184ULL, 0x0802020002040002ULL, 0x44400008c10b2202ULL,
-        0x8012a00000848105ULL, 0x0090080000818108ULL, 0xa200020020801040ULL, 0x1500080080202014ULL, 0x30c80500001ac508ULL, 0xe000420088804008ULL, 0x4202840200040014ULL, 0x1040600880d00012ULL, 0x0001200025020082ULL,
-        0x08c0800300820080ULL, 0x04842010004a00a1ULL, 0x681010020000e08aULL, 0x8901800200120040ULL, 0x208002200018a020ULL, 0x1200001080210010ULL, 0x0000804800200e52ULL, 0x8001028040010201ULL, 0x0408008800010841ULL,
-        0x0030028102000040ULL, 0x0100100060080040ULL, 0x0a00020006002082ULL, 0x0908001000a00090ULL, 0x0040002000802c10ULL, 0x1c41200404800810ULL, 0x4002001081000108ULL, 0x0008304604000421ULL, 0x020040420c000181ULL,
-        0x0403000101000840ULL, 0x100010002010c880ULL, 0x07422c0001201010ULL, 0x4880048004009008ULL, 0x0040510001414020ULL, 0x2000203040040010ULL, 0x0801000800809011ULL, 0x1140008002020402ULL, 0x0400208811010002ULL,
-        0x8480104010040090ULL, 0x008302000414c300ULL, 0x5020048002810088ULL, 0x0002400040000840ULL, 0x2026001800082020ULL, 0x010a80a100800810ULL, 0x0444204a04010008ULL, 0x0644c08010048102ULL, 0x0a4000820a094042ULL,
-        0x1540000808880042ULL, 0x000238101c004142ULL, 0x4010040000264201ULL, 0x002110c004004084ULL, 0x824280a000808012ULL, 0x30062100002019d2ULL, 0x0403000060040302ULL, 0x0000112082016408ULL, 0x4009011808908084ULL,
-        0x0508008020118020ULL, 0x0614020808004210ULL, 0x0218028101009011ULL, 0x0080812842010040ULL, 0x441000c000081020ULL, 0x1208208208540002ULL, 0x0828000980200004ULL, 0x0040040424080821ULL, 0x1004000c90004041ULL,
-        0x0010200000839100ULL, 0x00040400800280c0ULL, 0x0008800042020091ULL, 0xb100ca0000408010ULL, 0x0005040022020102ULL, 0x0180200080100448ULL, 0x480010008818004cULL, 0x0824600050008104ULL, 0x20802000622202c2ULL,
+        0x4c08021004220280ULL, 0x0810010029020428ULL, 0x4a04080a80100440ULL, 0x0188020420043010ULL, 0x8100270100880108ULL, 0xa810208020922410ULL, 0x0100488010421055ULL, 0x010c804c21280501ULL, 0x1020282200840072ULL,
+        0x800a220808210014ULL, 0x0210204144008180ULL, 0x0211412301003811ULL, 0xac08804102198801ULL, 0x20604042840c0c20ULL, 0x1040800422882110ULL, 0x0088c04014081009ULL, 0x208870130a100103ULL, 0x0060803002008022ULL,
+        0x04040c0808208210ULL, 0x400a0040c4102080ULL, 0x84008c90424048a2ULL, 0x0101214081001026ULL, 0x0310204020524002ULL, 0x04202440801022d8ULL, 0x0200440801428204ULL, 0x0010040805480024ULL, 0x0248102001004232ULL,
+        0x7806040502001241ULL, 0xa004044010688030ULL, 0x0104040020250022ULL, 0x0284040304042004ULL, 0x00202300c0801102ULL, 0x4a04403020020090ULL, 0x481c188020828404ULL, 0x08101021811b0244ULL, 0x00220400a0210202ULL,
+        0x8004080184108300ULL, 0x10845500c3050100ULL, 0xd0018a0010210006ULL, 0x0044008202500404ULL, 0xd300410040102905ULL, 0x00a0810012101c01ULL, 0x2100042003240238ULL, 0x0480800202202901ULL, 0x2028410800810081ULL,
+        0x2020241001400808ULL, 0x0220070034412040ULL, 0x0210002121011020ULL, 0x0080808100405021ULL, 0x84408058a0301802ULL, 0x0021890050410238ULL, 0x0089400c20211408ULL, 0x8900045464005016ULL, 0x2004220081028802ULL,
+        0x2122020a02608014ULL, 0x0104180801002104ULL, 0x0084210040114411ULL, 0x004208439080108aULL, 0x0082204860204004ULL, 0x0a01080810100222ULL, 0x0a010a082004004eULL, 0x404008a12001403cULL, 0x1180011009220124ULL,
+        0x0101220810512029ULL, 0x048910402020208aULL, 0x0102068100081004ULL, 0x1410220810602040ULL, 0x010010101880200aULL, 0x08102100051f0082ULL, 0x2100040802600902ULL, 0x10c02001011020c2ULL, 0x5100430242120031ULL,
+        0x2404080054040040ULL, 0x4028a08089004080ULL, 0x5000802480210020ULL, 0x100084a040400220ULL, 0x0802408080100503ULL, 0x0010802004202001ULL, 0x0280800801040488ULL, 0x0048200400a20802ULL, 0x000a040108020882ULL,
     };
     // clang-format on
 
@@ -655,24 +700,24 @@ void computeBishopMagicBitboard() {
 
     for (Square Sq : Squares) {
         if (!IsPrecomputed) {
-            std::printf("Searching for a bishop magic number for square %2d ... ",
-                   Sq);
+            std::printf("Searching for a bishop magic number for square %2d ... ", Sq);
             std::cout << std::flush;
         }
 
         for (uint64_t Trial = 0;; ++Trial) {
             const uint64_t MagicNumberCandidate =
-                (BishopMagicBB[Sq].MagicNumber != 0)
-                    ? BishopMagicBB[Sq].MagicNumber
-                    : generateMagicNumberCandidate();
+                (IsPrecomputed) ? BishopMagicBB[Sq].MagicNumber
+                                : generateMagicNumberCandidate();
 
-            const auto& Result =
-                isBishopMagicNumberOK(Sq, MagicNumberCandidate);
-            if (Result.first) {
+            const auto& Result = isBishopMagicNumberOK(Sq, MagicNumberCandidate);
+            if (std::get<0>(Result)) {
                 BishopMagicBB[Sq].MagicNumber = MagicNumberCandidate;
-                std::memcpy(static_cast<void*>(BishopMagicBB[Sq].AttackBB),
-                            static_cast<const void*>(Result.second.data()),
-                            (1 << BishopMagicBits) * sizeof(Bitboard));
+                std::memcpy(static_cast<void*>(BishopMagicBB[Sq].AttackBB1),
+                            static_cast<const void*>(std::get<1>(Result).data()),
+                            (1 << DiagMagicBits) * sizeof(Bitboard));
+                std::memcpy(static_cast<void*>(BishopMagicBB[Sq].AttackBB2),
+                            static_cast<const void*>(std::get<2>(Result).data()),
+                            (1 << DiagMagicBits) * sizeof(Bitboard));
 
                 if (!IsPrecomputed) {
                     std::printf("OK (found 0x%016" PRIx64 " with %7" PRIu64 " trials).",
@@ -699,44 +744,72 @@ void computeBishopMagicBitboard() {
 
 void setRookMagicMasks() {
     for (Square Sq : Squares) {
-        RookMagicBB[Sq].Mask = crossPatternMask(Sq);
+        RookMagicBB[Sq].Masks[0] = verticalPatternMask(Sq);
+        RookMagicBB[Sq].Masks[1] = horizontalPatternBB(Sq);
     }
 }
 
-std::pair<bool, std::vector<Bitboard>>
+std::tuple<bool, std::vector<Bitboard>, std::vector<Bitboard>>
 isRookMagicNumberOK(Square Sq, uint64_t MagicNumber) {
-    std::vector<Bitboard> AttackBBs(1 << RookMagicBits, {0, 0});
+    std::vector<Bitboard> AttackBBs1(1 << CrossMagicBits, {0, 0});
+    std::vector<Bitboard> AttackBBs2(1 << CrossMagicBits, {0, 0});
 
     // clang-format off
-    const uint16_t NumBits[NumSquares] = {
-        14, 13, 13, 13, 13, 13, 13, 13, 14,
-        13, 12, 12, 12, 12, 12, 12, 12, 13,
-        13, 12, 12, 12, 12, 12, 12, 12, 13,
-        13, 12, 12, 12, 12, 12, 12, 12, 13,
-        13, 12, 12, 12, 12, 12, 12, 12, 13,
-        13, 12, 12, 12, 12, 12, 12, 12, 13,
-        13, 12, 12, 12, 12, 12, 12, 12, 13,
-        13, 12, 12, 12, 12, 12, 12, 12, 13,
-        14, 13, 13, 13, 13, 13, 13, 13, 14,
+    const uint16_t NumBitsSN[NumSquares] = {
+        7, 6, 6, 6, 6, 6, 6, 6, 7,
+        7, 6, 6, 6, 6, 6, 6, 6, 7,
+        7, 6, 6, 6, 6, 6, 6, 6, 7,
+        7, 6, 6, 6, 6, 6, 6, 6, 7,
+        7, 6, 6, 6, 6, 6, 6, 6, 7,
+        7, 6, 6, 6, 6, 6, 6, 6, 7,
+        7, 6, 6, 6, 6, 6, 6, 6, 7,
+        7, 6, 6, 6, 6, 6, 6, 6, 7,
+        7, 6, 6, 6, 6, 6, 6, 6, 7,
+    };
+    const uint16_t NumBitsWE[NumSquares] = {
+        7, 7, 7, 7, 7, 7, 7, 7, 7,
+        6, 6, 6, 6, 6, 6, 6, 6, 6,
+        6, 6, 6, 6, 6, 6, 6, 6, 6,
+        6, 6, 6, 6, 6, 6, 6, 6, 6,
+        6, 6, 6, 6, 6, 6, 6, 6, 6,
+        6, 6, 6, 6, 6, 6, 6, 6, 6,
+        6, 6, 6, 6, 6, 6, 6, 6, 6,
+        6, 6, 6, 6, 6, 6, 6, 6, 6,
+        7, 7, 7, 7, 7, 7, 7, 7, 7,
     };
     // clang-format on
 
-    const uint64_t ShiftAmount = 64 - RookMagicBits;
-    const uint16_t NumBit = NumBits[Sq];
+    const uint64_t ShiftAmount = 64 - CrossMagicBits;
+    {
+        const uint16_t NumBit = NumBitsSN[Sq];
+        for (uint16_t Pattern = 0; Pattern < (1 << NumBit); ++Pattern) {
+            const auto& [AttackBB, BB] = verticalPatternBB(Sq, Pattern);
+            const uint16_t Result =
+                (uint16_t)((BB.horizontalOr() * MagicNumber) >> ShiftAmount);
 
-    for (uint16_t Pattern = 0; Pattern < (1 << NumBit); ++Pattern) {
-        const auto& [AttackBB, BB] = crossPatternBB(Sq, Pattern);
-        const uint16_t Result =
-            (uint16_t)((BB.horizontalOr() * MagicNumber) >> ShiftAmount);
+            if (AttackBBs1[Result].isZero()) {
+                AttackBBs1[Result].copyFrom(AttackBB);
+            } else if (AttackBBs1[Result] != AttackBB) {
+                return std::make_tuple(false, AttackBBs1, AttackBBs2);
+            }
+        }
+    }
+    {
+        const uint16_t NumBit = NumBitsWE[Sq];
+        for (uint16_t Pattern = 0; Pattern < (1 << NumBit); ++Pattern) {
+            const auto& [AttackBB, BB] = horizontalPatternBB(Sq, Pattern);
+            const uint16_t Result =
+                (uint16_t)((BB.horizontalOr() * MagicNumber) >> ShiftAmount);
 
-        if (AttackBBs[Result].isZero()) {
-            AttackBBs[Result].copyFrom(AttackBB);
-        } else if (AttackBBs[Result] != AttackBB) {
-            return std::make_pair(false, AttackBBs);
+            if (AttackBBs2[Result].isZero()) {
+                AttackBBs2[Result].copyFrom(AttackBB);
+            } else if (AttackBBs2[Result] != AttackBB) {
+                return std::make_tuple(false, AttackBBs1, AttackBBs2);
+            }
         }
     }
 
-    return std::make_pair(true, AttackBBs);
+    return std::make_tuple(true, AttackBBs1, AttackBBs2);
 }
 
 void computeRookMagicBitboard() {
@@ -754,11 +827,14 @@ void computeRookMagicBitboard() {
                                 : generateMagicNumberCandidate();
 
             const auto& Result = isRookMagicNumberOK(Sq, MagicNumberCandidate);
-            if (Result.first) {
+            if (std::get<0>(Result)) {
                 RookMagicBB[Sq].MagicNumber = MagicNumberCandidate;
-                std::memcpy(static_cast<void*>(RookMagicBB[Sq].AttackBB),
-                            static_cast<const void*>(Result.second.data()),
-                            (1 << RookMagicBits) * sizeof(Bitboard));
+                std::memcpy(static_cast<void*>(RookMagicBB[Sq].AttackBB1),
+                            static_cast<const void*>(std::get<1>(Result).data()),
+                            (1 << CrossMagicBits) * sizeof(Bitboard));
+                std::memcpy(static_cast<void*>(RookMagicBB[Sq].AttackBB2),
+                            static_cast<const void*>(std::get<2>(Result).data()),
+                            (1 << CrossMagicBits) * sizeof(Bitboard));
 
                 if (!IsPrecomputed) {
                     std::printf("OK (found 0x%016" PRIx64 " with %7" PRIu64 " trials).",
@@ -813,25 +889,25 @@ void initializeDirectionBB() {
 
     for (Square Sq : Squares) {
         DirectionBB[11 + North][Sq] = std::get<1>(
-            getPatternBB<North, true>(Sq, (1 << RookMagicBits) - 1, false, 0));
+            getPatternBB<North, true>(Sq, (1 << 15) - 1, false, 0));
         DirectionBB[11 + NorthEast][Sq] =
             std::get<1>(getPatternBB<NorthEast, true>(
-                Sq, (1 << RookMagicBits) - 1, false, 0));
+                Sq, (1 << 15) - 1, false, 0));
         DirectionBB[11 + East][Sq] = std::get<1>(
-            getPatternBB<East, true>(Sq, (1 << RookMagicBits) - 1, false, 0));
+            getPatternBB<East, true>(Sq, (1 << 15) - 1, false, 0));
         DirectionBB[11 + SouthEast][Sq] =
             std::get<1>(getPatternBB<SouthEast, true>(
-                Sq, (1 << RookMagicBits) - 1, false, 0));
+                Sq, (1 << 15) - 1, false, 0));
         DirectionBB[11 + South][Sq] = std::get<1>(
-            getPatternBB<South, true>(Sq, (1 << RookMagicBits) - 1, false, 0));
+            getPatternBB<South, true>(Sq, (1 << 15) - 1, false, 0));
         DirectionBB[11 + SouthWest][Sq] =
             std::get<1>(getPatternBB<SouthWest, true>(
-                Sq, (1 << RookMagicBits) - 1, false, 0));
+                Sq, (1 << 15) - 1, false, 0));
         DirectionBB[11 + West][Sq] = std::get<1>(
-            getPatternBB<West, true>(Sq, (1 << RookMagicBits) - 1, false, 0));
+            getPatternBB<West, true>(Sq, (1 << 15) - 1, false, 0));
         DirectionBB[11 + NorthWest][Sq] =
             std::get<1>(getPatternBB<NorthWest, true>(
-                Sq, (1 << RookMagicBits) - 1, false, 0));
+                Sq, (1 << 15) - 1, false, 0));
     }
 }
 
