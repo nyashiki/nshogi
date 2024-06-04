@@ -12,8 +12,8 @@ class SimpleTeacherIO : public ml::SimpleTeacher {
  public:
     SimpleTeacherIO() = default;
 
-    SimpleTeacherIO(const ml::SimpleTeacher& SimpleTeacher)
-        : ml::SimpleTeacher(SimpleTeacher) {
+    SimpleTeacherIO(const ml::SimpleTeacher& ST)
+        : ml::SimpleTeacher(ST) {
     }
 
     ml::SimpleTeacher load(std::ifstream& Ifs) {
