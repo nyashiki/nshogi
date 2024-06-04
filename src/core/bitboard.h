@@ -237,6 +237,20 @@ struct alignas(16) Bitboard {
 
     template <int Shift>
     constexpr Bitboard getRightShiftSi128() const {
+        // We can't use _mm_slli_si128 here when Shift % 8 == 0 holds because
+        // the bitboard is composed of two 64-bit variables.
+        // One of them uses 63 bits to represent the first 7 files (7 files * 9 squares = 63),
+        // and the other one uses 18 bits for the remaining 2 files (2 files * 9 squares = 18).
+        // Therefore, we must pay attention to the 1 bit of the former one.
+        // Using _mm_slli_si128 collapses this configuration.
+#if defined(USE_SSE2)
+        if (!std::is_constant_evaluated()) {
+            const uint64_t Carry = Primitive[1] << (63 - Shift);
+            Bitboard BB = getRightShiftEpi64(Shift);
+            BB.Primitive[0] |= Carry;
+            return BB;
+        }
+#endif
         return Bitboard(Primitive[1] >> Shift,
                         (Primitive[0] >> Shift) | (Primitive[1] << (63 - Shift)));
     }
@@ -262,6 +276,15 @@ struct alignas(16) Bitboard {
 
     template <int Shift>
     constexpr Bitboard getLeftShiftSi128() const {
+        // See the comment in getRightShiftSi128().
+#if defined(USE_SSE2)
+        if (!std::is_constant_evaluated()) {
+            const uint64_t Carry = Primitive[0] >> (63 - Shift);
+            Bitboard BB = getLeftShiftEpi64(Shift);
+            BB.Primitive[1] |= Carry;
+            return BB;
+        }
+#endif
         return Bitboard((Primitive[1] << Shift) | (Primitive[0] >> (63 - Shift)),
                         Primitive[0] << Shift);
     }
