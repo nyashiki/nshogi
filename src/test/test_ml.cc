@@ -873,62 +873,62 @@ TEST(ML, AZTeacherSaveAndLoad) {
 }
 
 TEST(ML, AZTeacherHandmade1) {
-    nshogi::ml::AZTeacher t1;
-    t1.corruptMyself();
+    nshogi::ml::AZTeacher T1;
+    T1.corruptMyself();
 
-    nshogi::ml::AZTeacher t2(t1);
+    nshogi::ml::AZTeacher T2(T1);
 
-    TEST_ASSERT_TRUE(t1.equals(t2));
-    TEST_ASSERT_TRUE(t2.equals(t1));
+    TEST_ASSERT_TRUE(T1.equals(T2));
+    TEST_ASSERT_TRUE(T2.equals(T1));
 
     // Change helpers.
-    t1.Declared = true;
-    t2.Declared = false;
+    T1.Declared = true;
+    T2.Declared = false;
 
-    TEST_ASSERT_FALSE(t1.equals(t2));
-    TEST_ASSERT_FALSE(t2.equals(t1));
+    TEST_ASSERT_FALSE(T1.equals(T2));
+    TEST_ASSERT_FALSE(T2.equals(T1));
 
     // Change configs.
-    t2.WhiteDrawValue = t2.WhiteDrawValue * 0.20230711f;
-    TEST_ASSERT_FALSE(t1.equals(t2));
-    TEST_ASSERT_FALSE(t2.equals(t1));
+    t2.WhiteDrawValue = T2.WhiteDrawValue * 0.20230711f;
+    TEST_ASSERT_FALSE(T1.equals(T2));
+    TEST_ASSERT_FALSE(T2.equals(T1));
 
     t2.BlackDrawValue = t2.BlackDrawValue * 0.1613f;
-    TEST_ASSERT_FALSE(t1.equals(t2));
-    TEST_ASSERT_FALSE(t2.equals(t1));
+    TEST_ASSERT_FALSE(T1.equals(T2));
+    TEST_ASSERT_FALSE(T2.equals(T1));
 
     t1.EndingRule = nshogi::core::NoRule_ER;
     t2.EndingRule = nshogi::core::Declare27_ER;
-    TEST_ASSERT_FALSE(t1.equals(t2));
-    TEST_ASSERT_FALSE(t2.equals(t1));
+    TEST_ASSERT_FALSE(T1.equals(T2));
+    TEST_ASSERT_FALSE(T2.equals(T1));
 
     t2.MaxPly = t2.MaxPly + 1;
-    TEST_ASSERT_FALSE(t1.equals(t2));
-    TEST_ASSERT_FALSE(t2.equals(t1));
+    TEST_ASSERT_FALSE(T1.equals(T2));
+    TEST_ASSERT_FALSE(T2.equals(T1));
 
     // Change targets.
-    t2.Visits[0] = t2.Visits[0] + 1;
-    TEST_ASSERT_FALSE(t1.equals(t2));
-    TEST_ASSERT_FALSE(t2.equals(t1));
+    T2.Visits[0] = T2.Visits[0] + 1;
+    TEST_ASSERT_FALSE(T1.equals(T2));
+    TEST_ASSERT_FALSE(T2.equals(T1));
 
-    t2.NumMoves = t2.NumMoves + 2;
-    TEST_ASSERT_FALSE(t1.equals(t2));
-    TEST_ASSERT_FALSE(t2.equals(t1));
+    T2.NumMoves = T2.NumMoves + 2;
+    TEST_ASSERT_FALSE(T1.equals(T2));
+    TEST_ASSERT_FALSE(T2.equals(T1));
 
-    t1.SideToMove = nshogi::core::Color::White;
-    t2.SideToMove = nshogi::core::Color::Black;
-    TEST_ASSERT_FALSE(t1.equals(t2));
-    TEST_ASSERT_FALSE(t2.equals(t1));
+    T1.SideToMove = nshogi::core::Color::White;
+    T2.SideToMove = nshogi::core::Color::Black;
+    TEST_ASSERT_FALSE(T1.equals(T2));
+    TEST_ASSERT_FALSE(T2.equals(T1));
 
-    t1.Winner = nshogi::core::Color::White;
-    t2.Winner = nshogi::core::Color::Black;
-    TEST_ASSERT_FALSE(t1.equals(t2));
-    TEST_ASSERT_FALSE(t2.equals(t1));
+    T1.Winner = nshogi::core::Color::White;
+    T2.Winner = nshogi::core::Color::Black;
+    TEST_ASSERT_FALSE(T1.equals(T2));
+    TEST_ASSERT_FALSE(T2.equals(T1));
 
-    std::strcpy(t1.Sfen, "lnsgkgsnl/9/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL w - 1");
-    std::strcpy(t2.Sfen, "lnsgkgsnl/1b5r1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL b - 1");
-    TEST_ASSERT_FALSE(t1.equals(t2));
-    TEST_ASSERT_FALSE(t2.equals(t1));
+    std::strcpy(T1.Sfen, "lnsgkgsnl/9/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL w - 1");
+    std::strcpy(T2.Sfen, "lnsgkgsnl/1b5r1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL b - 1");
+    TEST_ASSERT_FALSE(T1.equals(T2));
+    TEST_ASSERT_FALSE(T2.equals(T1));
 }
 
 TEST(ML, SimpleTeacherCopyConstructor) {
