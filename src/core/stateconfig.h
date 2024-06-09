@@ -10,8 +10,8 @@ namespace core {
 struct StateConfig {
     EndingRule Rule = NoRule_ER;
     uint16_t MaxPly = 256;
-    float BlackDrawValue = 0.5;
-    float WhiteDrawValue = 0.5;
+    float BlackDrawValue = 0.5f;
+    float WhiteDrawValue = 0.5f;
 };
 
 } // namespace core
