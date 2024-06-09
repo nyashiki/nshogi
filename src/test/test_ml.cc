@@ -8,6 +8,7 @@
 #include "../io/sfen.h"
 #include "../io/bitboard.h"
 #include "../io/huffman.h"
+#include "../io/file.h"
 #include "../ml/featurestack.h"
 #include "../ml/azteacher.h"
 #include "../ml/simpleteacher.h"
@@ -846,27 +847,27 @@ TEST(ML, FeatureTypeRandom) {
 }
 
 TEST(ML, AZTeacherSaveAndLoad) {
-    nshogi::ml::AZTeacher t1;
+    nshogi::ml::AZTeacher T1;
 
     const int N = 100;
 
     const std::string Path = std::filesystem::temp_directory_path().string() + "/az_teacher_test.bin";
 
     for (int I = 0; I < N; ++I) {
-        t1.corruptMyself();
+        T1.corruptMyself();
 
         {
             std::ofstream Ofs(Path, std::ios::out | std::ios::binary);
-            t1.dump(Ofs);
+            nshogi::io::file::save(Ofs, T1);
         }
 
         {
             std::ifstream Ifs(Path, std::ios::in | std::ios::binary);
 
-            auto t2 = nshogi::ml::AZTeacher::load(Ifs);
+            auto T2 = nshogi::io::file::load<nshogi::ml::AZTeacher>(Ifs);
 
-            TEST_ASSERT_TRUE(t1.equals(t2));
-            TEST_ASSERT_TRUE(t2.equals(t1));
+            TEST_ASSERT_TRUE(T1.equals(T2));
+            TEST_ASSERT_TRUE(T2.equals(T1));
         }
     }
 }
