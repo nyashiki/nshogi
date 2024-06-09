@@ -10,6 +10,7 @@
 
 #include "../io/sfen.h"
 #include "../io/csa.h"
+#include "../io/file.h"
 
 #include "../ml/common.h"
 #include "../ml/featurestack.h"
@@ -432,7 +433,7 @@ PYBIND11_MODULE(nshogi, Module) {
                     continue;
                 }
 
-                T.dump(Ofs);
+                nshogi::io::file::save(Ofs, T);
             }
         })
         .def("__len__", &nshogi::ml::TeacherLoaderForFixedSizeTeacher<nshogi::ml::AZTeacher>::size)
