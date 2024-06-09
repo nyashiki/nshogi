@@ -1,5 +1,6 @@
 #include "teacherwriter.h"
 #include "azteacher.h"
+#include "../io/file.h"
 
 #include <cstddef>
 #include <fstream>
@@ -20,7 +21,7 @@ void ThreadsafeTeacherWriter<TeacherType>::write(const TeacherType& Teacher) {
     std::lock_guard<std::mutex> lk(Mutex);
 
     std::ofstream Ofs(Path, std::ios::out | std::ios::app);
-    Teacher.dump(Ofs);
+    io::file::save(Ofs, Teacher);
 
     Ofs.flush();
 }
@@ -55,12 +56,15 @@ void ThreadsafeTeacherWriter<TeacherType>::shuffle(const TeacherLoaderForFixedSi
 
     for (const std::size_t Index : Indices) {
         const auto T = Loader[Index];
-        T.dump(Ofs);
+        io::file::save(Ofs, T);
     }
 }
 
 template
 class ThreadsafeTeacherWriter<AZTeacher>;
+
+template
+class ThreadsafeTeacherWriter<SimpleTeacher>;
 
 } // namespace ml
 } // namespace nshogi

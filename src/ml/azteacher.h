@@ -24,16 +24,7 @@ struct AZTeacher {
 
     AZTeacher(const AZTeacher& T);
 
-    void dump(std::ofstream& Ofs) const {
-        dump_0_1_0(Ofs);
-    }
-
-    void dump_0_1_0(std::ofstream& Ofs) const;
-
     bool checkSanity(int Level) const;
-
-    [[nodiscard]]
-    static AZTeacher load(std::ifstream& Ifs);
 
     // State.
     char Sfen[SfenCStrLength];
@@ -61,10 +52,6 @@ struct AZTeacher {
 
     [[maybe_unused]]
     bool equals(const AZTeacher& T) const;
-
- private:
-    [[nodiscard]]
-    static AZTeacher load_0_1_0(std::ifstream& Ifs);
 };
 
 } // namespace ml

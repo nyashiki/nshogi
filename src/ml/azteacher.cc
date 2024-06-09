@@ -5,9 +5,6 @@
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
-#include <fstream>
-#include <memory>
-#include <stdexcept>
 #include <string>
 #include <random>
 
@@ -120,74 +117,6 @@ bool AZTeacher::equals(const AZTeacher &T) const {
     }
 
     return true;
-}
-
-void AZTeacher::dump_0_1_0(std::ofstream &Ofs) const {
-    const char Version[8] = "0.1.0";
-
-    Ofs.write(Version, 8 * sizeof(char));
-    Ofs.write(Sfen, SfenCStrLength * sizeof(char));
-
-    Ofs.write(reinterpret_cast<const char*>(&SideToMove), sizeof(core::Color));
-    Ofs.write(reinterpret_cast<const char*>(&Winner), sizeof(core::Color));
-    Ofs.write(reinterpret_cast<const char*>(&NumMoves), sizeof(uint8_t));
-    for (std::size_t I = 0; I < NumSavedPlayouts; ++I) {
-        Ofs.write(Moves[I].data(), 6 * sizeof(char));
-    }
-    Ofs.write(reinterpret_cast<const char*>(Visits.data()), NumSavedPlayouts * sizeof(uint16_t));
-
-    Ofs.write(reinterpret_cast<const char*>(&EndingRule), sizeof(core::EndingRule));
-    Ofs.write(reinterpret_cast<const char*>(&MaxPly), sizeof(uint16_t));
-    Ofs.write(reinterpret_cast<const char*>(&BlackDrawValue), sizeof(float));
-    Ofs.write(reinterpret_cast<const char*>(&WhiteDrawValue), sizeof(float));
-
-    Ofs.write(reinterpret_cast<const char*>(&Declared), sizeof(bool));
-
-    int16_t Dummy = 0xabc;
-    Ofs.write(reinterpret_cast<const char*>(&Dummy), sizeof(int16_t));
-}
-
-AZTeacher AZTeacher::load(std::ifstream &Ifs) {
-    char Version[8];
-
-    Ifs.read(Version, 8 * sizeof(char));
-
-    if (std::strcmp(Version, "0.1.0") == 0) {
-        return load_0_1_0(Ifs);
-    }
-
-    const std::string ErrorMessage = "Unknown version (" + std::string(Version) + ").";
-    throw std::runtime_error(ErrorMessage.c_str());
-}
-
-AZTeacher AZTeacher::load_0_1_0(std::ifstream& Ifs) {
-    AZTeacher T;
-
-    Ifs.read(T.Sfen, SfenCStrLength * sizeof(char));
-
-    Ifs.read(reinterpret_cast<char*>(&T.SideToMove), sizeof(core::Color));
-    Ifs.read(reinterpret_cast<char*>(&T.Winner), sizeof(core::Color));
-    Ifs.read(reinterpret_cast<char*>(&T.NumMoves), sizeof(uint8_t));
-    for (std::size_t I = 0; I < NumSavedPlayouts; ++I) {
-        Ifs.read(T.Moves[I].data(), 6 * sizeof(char));
-    }
-    Ifs.read(reinterpret_cast<char*>(T.Visits.data()), NumSavedPlayouts * sizeof(uint16_t));
-
-    Ifs.read(reinterpret_cast<char*>(&T.EndingRule), sizeof(core::EndingRule));
-    Ifs.read(reinterpret_cast<char*>(&T.MaxPly), sizeof(uint16_t));
-    Ifs.read(reinterpret_cast<char*>(&T.BlackDrawValue), sizeof(float));
-    Ifs.read(reinterpret_cast<char*>(&T.WhiteDrawValue), sizeof(float));
-
-    Ifs.read(reinterpret_cast<char*>(&T.Declared), sizeof(bool));
-
-    int16_t Dummy = 0;
-    Ifs.read(reinterpret_cast<char*>(&Dummy), sizeof(int16_t));
-
-    if (Dummy != 0xabc) {
-        throw std::runtime_error("Parity incoincidence.");
-    }
-
-    return T;
 }
 
 bool AZTeacher::checkSanity(int Level) const {
