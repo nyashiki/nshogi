@@ -1,5 +1,7 @@
 #include "teacherloader.h"
 #include "azteacher.h"
+#include "simpleteacher.h"
+#include "../io/file.h"
 
 #include <cstdint>
 #include <fstream>
@@ -18,7 +20,7 @@ TeacherLoaderForFixedSizeTeacher<TeacherType>::TeacherLoaderForFixedSizeTeacher(
 
     // Load one teacher entry so that we can determine
     // the size of one teacher binary.
-    [[maybe_unused]] TeacherType T = TeacherType::load(Ifs);
+    [[maybe_unused]] TeacherType T = io::file::load<TeacherType>(Ifs);
 
     TeacherSizeUnit = (std::size_t)Ifs.tellg();
 
@@ -55,13 +57,16 @@ TeacherType TeacherLoaderForFixedSizeTeacher<TeacherType>::operator[](std::size_
 
     Ifs.seekg((long)(Index * TeacherSizeUnit), std::ios_base::beg);
 
-    TeacherType T = TeacherType::load(Ifs);
+    TeacherType T = io::file::load<TeacherType>(Ifs);
 
     return T;
 }
 
 template
 class TeacherLoaderForFixedSizeTeacher<AZTeacher>;
+
+template
+class TeacherLoaderForFixedSizeTeacher<SimpleTeacher>;
 
 } // namespace ml
 } // namespace nshogi
