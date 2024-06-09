@@ -889,20 +889,20 @@ TEST(ML, AZTeacherHandmade1) {
     TEST_ASSERT_FALSE(T2.equals(T1));
 
     // Change configs.
-    t2.WhiteDrawValue = T2.WhiteDrawValue * 0.20230711f;
+    T2.WhiteDrawValue = T2.WhiteDrawValue * 0.20230711f;
     TEST_ASSERT_FALSE(T1.equals(T2));
     TEST_ASSERT_FALSE(T2.equals(T1));
 
-    t2.BlackDrawValue = t2.BlackDrawValue * 0.1613f;
+    T2.BlackDrawValue = T2.BlackDrawValue * 0.1613f;
     TEST_ASSERT_FALSE(T1.equals(T2));
     TEST_ASSERT_FALSE(T2.equals(T1));
 
-    t1.EndingRule = nshogi::core::NoRule_ER;
-    t2.EndingRule = nshogi::core::Declare27_ER;
+    T1.EndingRule = nshogi::core::NoRule_ER;
+    T2.EndingRule = nshogi::core::Declare27_ER;
     TEST_ASSERT_FALSE(T1.equals(T2));
     TEST_ASSERT_FALSE(T2.equals(T1));
 
-    t2.MaxPly = t2.MaxPly + 1;
+    T2.MaxPly = T2.MaxPly + 1;
     TEST_ASSERT_FALSE(T1.equals(T2));
     TEST_ASSERT_FALSE(T2.equals(T1));
 
