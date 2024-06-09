@@ -16,6 +16,12 @@ Position::Position(const Position& Pos) {
                 sizeof(*this));
 }
 
+Position::Position(const Position& Pos, uint16_t Offset) {
+    std::memcpy(static_cast<void*>(this), static_cast<const void*>(&Pos),
+                sizeof(*this));
+    PlyOffset = Offset;
+}
+
 bool Position::equals(const Position &Pos, bool IgnorePlyOffset) const {
     if (SideToMove != Pos.SideToMove) {
         return false;

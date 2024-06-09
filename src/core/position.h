@@ -11,6 +11,7 @@ struct Position {
  public:
     Position();
     Position(const Position&);
+    Position(const Position&, uint16_t Offset);
 
     ~Position() = default;
 

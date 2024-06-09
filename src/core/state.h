@@ -86,15 +86,15 @@ class State {
     }
 
     uint16_t getPly() const {
-        return getPosition().getPlyOffset() + Helper.getPly();
+        return Helper.getPly();
     }
 
-    const Move32& getHistoryMove(uint16_t Ply) const {
+    Move32 getHistoryMove(uint16_t Ply) const {
         return Helper.getStepHelper(Ply).Move;
     }
 
-    const Move32& getLastMove() const {
-        return getHistoryMove(Helper.getPly() - 1);
+    Move32 getLastMove() const {
+        return getHistoryMove(Helper.getPly(false) - 1);
     }
 
     // Manipulations.

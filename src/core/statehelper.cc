@@ -10,14 +10,19 @@
 namespace nshogi {
 namespace core {
 
-StateHelper::StateHelper(const Position& Pos) : InitialPosition(Pos) {
-    const std::size_t DefaultReserveSize = 1024;
-
+StateHelper::StateHelper(const Position& Pos)
+    : InitialPosition(Pos)
+    , Ply(0) {
     SHelper.reserve(DefaultReserveSize);
-    Ply = 0;
-
     SHelper.emplace_back();
+    assert(SHelper.size() == 1);
+}
 
+StateHelper::StateHelper(const Position& Pos, uint16_t PlyOffset)
+    : InitialPosition(Pos, PlyOffset)
+    , Ply(0) {
+    SHelper.reserve(DefaultReserveSize);
+    SHelper.emplace_back();
     assert(SHelper.size() == 1);
 }
 

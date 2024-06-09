@@ -30,6 +30,7 @@ struct StepHelper {
 struct StateHelper {
  public:
     StateHelper(const Position& Pos);
+    StateHelper(const Position& Pos, uint16_t PlyOffset);
 
     StateHelper(const StateHelper&) = delete;
     StateHelper& operator=(const StateHelper&) = delete;
@@ -54,11 +55,17 @@ struct StateHelper {
         return InitialPosition;
     }
 
-    inline uint16_t getPly() const {
+    inline uint16_t getPly(bool IncludeOffset = true) const {
+        if (IncludeOffset) {
+            return InitialPosition.getPlyOffset() + Ply;
+        }
+
         return Ply;
     }
 
  private:
+    constexpr static std::size_t DefaultReserveSize = 1024;
+
     const Position InitialPosition;
     uint16_t Ply;
 

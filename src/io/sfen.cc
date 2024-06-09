@@ -267,10 +267,10 @@ std::string stateToSfen(const core::State& State) {
 
     SStream << positionToSfen(State.getInitialPosition());
 
-    if (State.getPly() > 0) {
+    if (State.getPly() > State.getPosition().getPlyOffset()) {
         SStream << " moves";
 
-        for (uint16_t Ply = 0; Ply < State.getPly(); ++Ply) {
+        for (uint16_t Ply = State.getPosition().getPlyOffset(); Ply < State.getPly(); ++Ply) {
             SStream << " " << move32ToSfen(State.getHistoryMove(Ply));
         }
     }
