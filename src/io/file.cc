@@ -92,6 +92,16 @@ class AZTeacherIO : public ml::AZTeacher {
 
 } // namespace
 
+ml::AZTeacher load(std::ifstream& Ifs) {
+    AZTeacherIO IO;
+    return IO.load(Ifs);
+}
+
+void save(std::ofstream& Ofs, const ml::AZTeacher& AT) {
+    AZTeacherIO IO(AT);
+    IO.save(Ofs);
+}
+
 } // namespace az_teacher
 
 namespace simple_teacher {
@@ -149,11 +159,21 @@ void save(std::ofstream& Ofs, const ml::SimpleTeacher& SimpleTeacher) {
 
 } // namespace simple_teacher
 
-template<> ml::AZTeacher load(std::ifstream& Ifs);
-template<> void save(std::ofstream& Ofs, const ml::AZTeacher&);
+template<> ml::AZTeacher load<ml::AZTeacher>(std::ifstream& Ifs) {
+    return az_teacher::load(Ifs);
+}
 
-template<> ml::SimpleTeacher load(std::ifstream& Ifs);
-template<> void save(std::ofstream& Ofs, const ml::SimpleTeacher&);
+template<> void save<ml::AZTeacher>(std::ofstream& Ofs, const ml::AZTeacher& AT) {
+    az_teacher::save(Ofs, AT);
+}
+
+template<> ml::SimpleTeacher load<ml::SimpleTeacher>(std::ifstream& Ifs) {
+    return simple_teacher::load(Ifs);
+}
+
+template<> void save<ml::SimpleTeacher>(std::ofstream& Ofs, const ml::SimpleTeacher& ST) {
+    simple_teacher::save(Ofs, ST);
+}
 
 } // namespace file
 } // namespace io
