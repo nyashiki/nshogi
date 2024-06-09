@@ -27,19 +27,6 @@ void ThreadsafeTeacherWriter<TeacherType>::write(const TeacherType& Teacher) {
 }
 
 template<typename TeacherType>
-void ThreadsafeTeacherWriter<TeacherType>::sanitize(const TeacherLoaderForFixedSizeTeacher<TeacherType> &Loader, const std::string& OutputPath) {
-    std::ofstream Ofs(OutputPath, std::ios::out | std::ios::app);
-
-    for (std::size_t I = 0; I < Loader.size(); ++I) {
-        const auto T = Loader[I];
-
-        if (T.checkSanity(2)) {
-            T.dump(Ofs);
-        }
-    }
-}
-
-template<typename TeacherType>
 void ThreadsafeTeacherWriter<TeacherType>::shuffle(const TeacherLoaderForFixedSizeTeacher<TeacherType> &Loader, const std::string& OutputPath, uint64_t Seed) {
     std::ofstream Ofs(OutputPath, std::ios::out | std::ios::app);
 

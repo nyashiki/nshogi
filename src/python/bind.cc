@@ -419,9 +419,6 @@ PYBIND11_MODULE(nshogi, Module) {
 
     pybind11::class_<nshogi::ml::TeacherLoaderForFixedSizeTeacher<nshogi::ml::AZTeacher>>(MLModule, "TeacherLoaderForFixedSizeTeacher")
         .def(pybind11::init<const std::string&>())
-        .def("sanitize", [](const nshogi::ml::TeacherLoaderForFixedSizeTeacher<nshogi::ml::AZTeacher>& Loader, const std::string& OutputPath) {
-            nshogi::ml::ThreadsafeTeacherWriter<nshogi::ml::AZTeacher>::sanitize(Loader, OutputPath);
-        })
         .def("shuffle", [](const nshogi::ml::TeacherLoaderForFixedSizeTeacher<nshogi::ml::AZTeacher>& Loader, const std::string& OutputPath, uint64_t Seed) {
             nshogi::ml::ThreadsafeTeacherWriter<nshogi::ml::AZTeacher>::shuffle(Loader, OutputPath, Seed);
         })
