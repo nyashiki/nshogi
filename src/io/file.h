@@ -12,6 +12,7 @@ namespace file {
 namespace simple_teacher {
 
 ml::SimpleTeacher load(std::ifstream&);
+void save(std::ofstream&, const ml::SimpleTeacher&);
 
 } // namespace simple_teacher
 
