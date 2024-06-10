@@ -85,8 +85,8 @@ class State {
         return Helper.getInitialPosition();
     }
 
-    uint16_t getPly() const {
-        return Helper.getPly();
+    uint16_t getPly(bool IncludeOffset = true) const {
+        return Helper.getPly(IncludeOffset);
     }
 
     Move32 getHistoryMove(uint16_t Ply) const {
@@ -94,7 +94,7 @@ class State {
     }
 
     Move32 getLastMove() const {
-        return getHistoryMove(Helper.getPly(false) - 1);
+        return getHistoryMove(getPly(false) - 1);
     }
 
     // Manipulations.
