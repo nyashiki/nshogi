@@ -306,7 +306,8 @@ PYBIND11_MODULE(nshogi, Module) {
         .value("MY_PIECE_SCORE", nshogi::ml::FeatureType::FT_MyPieceScore)
         .value("OP_PIECE_SCORE", nshogi::ml::FeatureType::FT_OpPieceScore);
 
-    MLModule.def("move_to_index", &nshogi::ml::getMoveIndex);
+    MLModule.def("move_to_index",
+            (std::size_t (*)(nshogi::core::Color, const nshogi::core::Move32))&nshogi::ml::getMoveIndex);
 
     pybind11::class_<PyFeatureStack>(MLModule, "FeatureStack")
         .def(pybind11::init<const std::vector<nshogi::ml::FeatureType>&, const nshogi::core::State&, const nshogi::core::StateConfig&>())
@@ -416,6 +417,71 @@ PYBIND11_MODULE(nshogi, Module) {
             }
 
             return 0.0;
+        });
+
+    pybind11::class_<nshogi::ml::SimpleTeacher>(MLModule, "SimpleTeacher")
+        .def("state", &nshogi::ml::SimpleTeacher::getState)
+        .def("config", &nshogi::ml::SimpleTeacher::getConfig)
+        .def("sfen", [](const nshogi::ml::SimpleTeacher& T) {
+            return nshogi::io::sfen::stateToSfen(T.getState());
+        })
+        .def("policy", [](const nshogi::ml::SimpleTeacher& T) {
+            auto NpArray = pybind11::array_t<float>((pybind11::ssize_t)nshogi::ml::MoveIndexMax);
+            auto Data = reinterpret_cast<float*>(NpArray.request().ptr);
+            std::memset(reinterpret_cast<char*>(Data), 0, nshogi::ml::MoveIndexMax * sizeof(float));
+
+            const std::size_t Index =
+                nshogi::ml::getMoveIndex(T.getState().getSideToMove(), T.getNextMove());
+            Data[Index] = 1.0f;
+            return NpArray;
+        })
+        .def("legal_moves", [](const nshogi::ml::SimpleTeacher& T) {
+            auto NpArray = pybind11::array_t<float>((pybind11::ssize_t)nshogi::ml::MoveIndexMax);
+            auto Data = reinterpret_cast<float*>(NpArray.request().ptr);
+            std::memset(reinterpret_cast<char*>(Data), 0, nshogi::ml::MoveIndexMax * sizeof(float));
+
+            const auto State = T.getState();
+            const auto LegalMoves = nshogi::core::MoveGenerator::generateLegalMoves(State);
+
+            for (const auto& Move : LegalMoves) {
+                const std::size_t Index = nshogi::ml::getMoveIndex(State.getSideToMove(), Move);
+                Data[Index] = 1.0f;
+            }
+            return NpArray;
+        })
+        .def("attacks", [](const nshogi::ml::SimpleTeacher& T) {
+            auto NpArray = pybind11::array_t<float>(2 * 81);
+            auto Data = reinterpret_cast<float*>(NpArray.request().ptr);
+            std::memset(reinterpret_cast<char*>(Data), 0, 2 * 81 * sizeof(float));
+
+            const auto State = T.getState();
+
+            if (State.getSideToMove() == nshogi::core::Black) {
+                const nshogi::core::bitboard::Bitboard MyAttackBB = State.getAttackBB<nshogi::core::Black>();
+                const nshogi::core::bitboard::Bitboard OpAttackBB = State.getAttackBB<nshogi::core::White>();
+                const nshogi::ml::FeatureBitboard MyAttackFB(MyAttackBB, 1.0f, false);
+                const nshogi::ml::FeatureBitboard OpAttackFB(OpAttackBB, 1.0f, false);
+                MyAttackFB.extract<nshogi::core::IterateOrder::ESWN>(Data);
+                OpAttackFB.extract<nshogi::core::IterateOrder::ESWN>(Data + 81);
+            } else {
+                const nshogi::core::bitboard::Bitboard MyAttackBB = State.getAttackBB<nshogi::core::White>();
+                const nshogi::core::bitboard::Bitboard OpAttackBB = State.getAttackBB<nshogi::core::Black>();
+                const nshogi::ml::FeatureBitboard MyAttackFB(MyAttackBB, 1.0f, true);
+                const nshogi::ml::FeatureBitboard OpAttackFB(OpAttackBB, 1.0f, true);
+                MyAttackFB.extract<nshogi::core::IterateOrder::ESWN>(Data);
+                OpAttackFB.extract<nshogi::core::IterateOrder::ESWN>(Data + 81);
+            }
+            return NpArray;
+        })
+        .def("value", [](const nshogi::ml::SimpleTeacher& T) {
+            if (T.getWinner() == nshogi::core::NoColor) {
+                return 0.5f;
+            }
+            const auto SideToMove = T.getState().getSideToMove();
+            return (T.getWinner() == SideToMove) ? 1.0f : 0.0f;
+        })
+        .def("draw", [](const nshogi::ml::SimpleTeacher& T) {
+            return (T.getWinner() == nshogi::core::NoColor) ? 1.0f : 0.0f;
         });
 
     pybind11::class_<nshogi::ml::TeacherLoaderForFixedSizeTeacher<nshogi::ml::AZTeacher>>(MLModule, "AZTeacherLoader")
