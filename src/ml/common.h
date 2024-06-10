@@ -36,7 +36,15 @@ inline std::size_t getMoveIndex(core::Move32 Move) {
 
 } // namespace
 
-inline std::size_t getMoveIndex(core::Color C, const core::Move32& Move) {
+inline std::size_t getMoveIndex(core::Color C, const core::Move32 Move) {
+    if (C == core::Black) {
+        return getMoveIndex<core::Black>(Move);
+    } else {
+        return getMoveIndex<core::White>(Move);
+    }
+}
+
+inline std::size_t getMoveIndex(core::Color C, const core::Move16 Move) {
     if (C == core::Black) {
         return getMoveIndex<core::Black>(Move);
     } else {
