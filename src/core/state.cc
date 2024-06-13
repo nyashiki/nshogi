@@ -87,7 +87,7 @@ State State::clone() const {
 }
 
 template <Color C>
-inline void State::doMove(const Move32& Move) {
+inline void State::doMove(Move32 Move) {
     Helper.proceedOneStep(Move, HashValue.getValue(), getPosition().getStand<Black>(), getPosition().getStand<White>());
     StepHelper* CurrentStepHelper = &Helper.SHelper[Helper.Ply];
 
@@ -175,7 +175,7 @@ inline void State::doMove(const Move32& Move) {
     Pos.changeSideToMove();
 }
 
-void State::doMove(const Move32& Move) {
+void State::doMove(Move32 Move) {
     if (getPosition().sideToMove() == Black) {
         doMove<Black>(Move);
     } else {

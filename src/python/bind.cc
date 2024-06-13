@@ -132,7 +132,7 @@ PYBIND11_MODULE(nshogi, Module) {
 
     pybind11::class_<nshogi::core::State>(Module, "State")
         .def("clone", &nshogi::core::State::clone)
-        .def("do_move", static_cast<void (nshogi::core::State::*)(const nshogi::core::Move32&)>(&nshogi::core::State::doMove))
+        .def("do_move", static_cast<void (nshogi::core::State::*)(nshogi::core::Move32)>(&nshogi::core::State::doMove))
         .def("undo_move", static_cast<nshogi::core::Move32 (nshogi::core::State::*)()>(&nshogi::core::State::undoMove))
         .def("to_sfen", [](const nshogi::core::State& S) {
             return nshogi::io::sfen::stateToSfen(S);
@@ -181,7 +181,7 @@ PYBIND11_MODULE(nshogi, Module) {
         return nshogi::io::sfen::StateBuilder::newState(Sfen);
     });
 
-    SfenModule.def("stringify", [](const nshogi::core::Move32& Move) {
+    SfenModule.def("stringify", [](nshogi::core::Move32 Move) {
         return nshogi::io::sfen::move32ToSfen(Move);
     });
 
@@ -195,7 +195,7 @@ PYBIND11_MODULE(nshogi, Module) {
         return nshogi::io::csa::StateBuilder::newState(CSA);
     });
 
-    CSAModule.def("stringify", [](const nshogi::core::Move32& Move, const nshogi::core::Color Color) {
+    CSAModule.def("stringify", [](nshogi::core::Move32 Move, const nshogi::core::Color Color) {
         return nshogi::io::csa::move32ToCSA(Move, Color);
     });
 

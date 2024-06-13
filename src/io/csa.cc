@@ -119,7 +119,7 @@ std::string squareToCSA(core::Square Sq) {
     return std::string(CSASq);
 }
 
-std::string move32ToCSA(const core::Move32& Move, core::Color Color) {
+std::string move32ToCSA(core::Move32 Move, core::Color Color) {
     if (Move.isNone()) {
         return "%TORYO";
     }

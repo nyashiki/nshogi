@@ -49,7 +49,7 @@ std::string pieceToSfen(core::PieceKind Piece) {
     return std::string(Table[Piece]);
 }
 
-std::string move16ToSfen(const core::Move16& Move) {
+std::string move16ToSfen(core::Move16 Move) {
     if (Move == core::Move16::MoveNone()) {
         return "resign";
     }
@@ -79,7 +79,7 @@ std::string move16ToSfen(const core::Move16& Move) {
     return SStream.str();
 }
 
-std::string move32ToSfen(const core::Move32& Move) {
+std::string move32ToSfen(core::Move32 Move) {
     return move16ToSfen(core::Move16(Move));
 }
 

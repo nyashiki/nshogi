@@ -96,7 +96,7 @@ void testRecomputeHelper(const nshogi::core::State& State) {
 }
 
 void testDoMoveAndUndoMove(nshogi::core::State& State,
-                           const nshogi::core::Move32& Move) {
+                           nshogi::core::Move32 Move) {
     const std::string OriginalSfen =
         nshogi::io::sfen::positionToSfen(State.getPosition());
 
@@ -110,7 +110,7 @@ void testDoMoveAndUndoMove(nshogi::core::State& State,
 }
 
 void testHashDoMoveAndUndoMove(nshogi::core::State& State,
-                           const nshogi::core::Move32& Move) {
+                           nshogi::core::Move32 Move) {
 
     uint64_t OriginalHashValue = State.getHash();
 

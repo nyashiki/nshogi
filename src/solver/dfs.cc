@@ -73,7 +73,7 @@ core::Move32 defence(core::State* S, int Limit) {
         IsCheckmatedBy1Ply = false;
     }
 
-    const core::Move32& LastMove = S->getLastMove();
+    const core::Move32 LastMove = S->getLastMove();
     if (IsCheckmatedBy1Ply && LastMove.drop() && LastMove.pieceType() == core::PTK_Pawn) {
         // Rule: utchifu-dume.
         return core::Move32::MoveWin();

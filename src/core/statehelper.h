@@ -40,7 +40,7 @@ struct StateHelper {
 
     ~StateHelper();
 
-    void proceedOneStep(const Move32& Move, uint64_t BoardHash, Stands BlackStand, Stands WhiteStand);
+    void proceedOneStep(Move32 Move, uint64_t BoardHash, Stands BlackStand, Stands WhiteStand);
     Move32 goBackOneStep();
 
     inline const StepHelper& getCurrentStepHelper() const {

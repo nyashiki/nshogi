@@ -23,7 +23,7 @@ core::File charToFile(char C);
 std::string pieceToCSA(core::PieceKind Piece);
 core::PieceKind charToPiece(char C, bool Promote) noexcept;
 
-std::string move32ToCSA(const core::Move32& Move, core::Color Color);
+std::string move32ToCSA(core::Move32 Move, core::Color Color);
 core::Move32 CSAToMove32(const core::Position& Pos, const std::string& CSA);
 
 std::string squareToCSA(core::Square Sq);

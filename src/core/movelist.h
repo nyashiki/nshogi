@@ -34,11 +34,11 @@ struct MoveList {
         return Tail;
     }
 
-    inline const Move32& operator[](std::size_t Index) const {
+    inline Move32 operator[](std::size_t Index) const {
         return Moves[Index];
     }
 
-    [[maybe_unused]] inline const Move32* find(const Move32& Move) const {
+    [[maybe_unused]] inline const Move32* find(Move32 Move) const {
         for (const auto& EachMove : *this) {
             if (EachMove == Move) {
                 return &EachMove;

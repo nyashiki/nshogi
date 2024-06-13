@@ -46,7 +46,7 @@ StateHelper::StateHelper(StateHelper&& Helper) noexcept
 StateHelper::~StateHelper() {
 }
 
-void StateHelper::proceedOneStep(const Move32& Move, uint64_t BoardHash, Stands BlackStand, Stands WhiteStand) {
+void StateHelper::proceedOneStep(Move32 Move, uint64_t BoardHash, Stands BlackStand, Stands WhiteStand) {
     SHelper.emplace_back();
 
     assert(Ply < SHelper.size());

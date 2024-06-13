@@ -98,8 +98,8 @@ class State {
     }
 
     // Manipulations.
-    template <Color C> void doMove(const Move32& Move);
-    void doMove(const Move32& Move);
+    template <Color C> void doMove(Move32 Move);
+    void doMove(Move32 Move);
 
     template <Color C> Move32 undoMove();
     Move32 undoMove();
@@ -111,7 +111,7 @@ class State {
 
     // Helper functions.
 
-    template <Color C> inline bool isSuicideMove(const Move32& Move) const {
+    template <Color C> inline bool isSuicideMove(Move32 Move) const {
         assert(Move.drop() ||
                getPieceType(Pos.pieceOn(Move.from())) == Move.pieceType());
 
@@ -122,7 +122,7 @@ class State {
         return isSuicideMoveImpl<C>(Move);
     }
 
-    inline bool isSuicideMove(const Move32& Move) const {
+    inline bool isSuicideMove(Move32 Move) const {
         if (getPosition().sideToMove() == Black) {
             return isSuicideMove<Black>(Move);
         } else {
@@ -640,7 +640,7 @@ class State {
     void setCheckerBB(StepHelper* SHelper);
 
     template <Color C>
-    inline bool isSuicideMoveImpl(const Move32& Move) const {
+    inline bool isSuicideMoveImpl(Move32 Move) const {
         if (Move.pieceType() == PTK_King) {
             // When moving the king, the square moving onto
             // must be not attacked by opponent pieces.
