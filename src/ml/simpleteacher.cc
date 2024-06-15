@@ -29,7 +29,7 @@ core::State SimpleTeacher::getState() const {
 
 core::StateConfig SimpleTeacher::getConfig() const {
     core::StateConfig Config;
-    Config.Rule = core::EndingRule::Declare27_ER;
+    Config.Rule = core::EndingRule::ER_Declare27;
     Config.MaxPly = MaxPly;
     Config.BlackDrawValue = DrawValues[0];
     Config.WhiteDrawValue = DrawValues[1];

@@ -402,11 +402,11 @@ struct FeatureStackComptime : FeatureStack {
         } else if constexpr (HeadType == FeatureType::FT_OpStandRook2) {
             *FB = processStand<~C, core::PTK_Rook, 2>(State);
         } else if constexpr (HeadType == FeatureType::FT_RuleDeclare27) {
-            *FB = processRule<core::EndingRule::Declare27_ER>(Config);
+            *FB = processRule<core::EndingRule::ER_Declare27>(Config);
         } else if constexpr (HeadType == FeatureType::FT_RuleDraw24) {
-            *FB = processRule<core::EndingRule::Draw24_ER>(Config);
+            *FB = processRule<core::EndingRule::ER_Draw24>(Config);
         } else if constexpr (HeadType == FeatureType::FT_RuleTrying) {
-            *FB = processRule<core::EndingRule::Trying_ER>(Config);
+            *FB = processRule<core::EndingRule::ER_Trying>(Config);
         } else if constexpr (HeadType == FeatureType::FT_MyDrawValue) {
             *FB = processDrawValue<C>(Config);
         } else if constexpr (HeadType == FeatureType::FT_OpDrawValue) {

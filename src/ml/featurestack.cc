@@ -212,11 +212,11 @@ void FeatureStackRuntime::process(const std::vector<FeatureType>& Types, const c
         } else if (Type == FeatureType::FT_OpStandRook2) {
             Features[I] = processStand<~C, core::PTK_Rook, 2>(State);
         } else if (Type == FeatureType::FT_RuleDeclare27) {
-            Features[I] = processRule<core::EndingRule::Declare27_ER>(Config);
+            Features[I] = processRule<core::EndingRule::ER_Declare27>(Config);
         } else if (Type == FeatureType::FT_RuleDraw24) {
-            Features[I] = processRule<core::EndingRule::Draw24_ER>(Config);
+            Features[I] = processRule<core::EndingRule::ER_Draw24>(Config);
         } else if (Type == FeatureType::FT_RuleTrying) {
-            Features[I] = processRule<core::EndingRule::Trying_ER>(Config);
+            Features[I] = processRule<core::EndingRule::ER_Trying>(Config);
         } else if (Type == FeatureType::FT_MyDrawValue) {
             Features[I] = processDrawValue<C>(Config);
         } else if (Type == FeatureType::FT_OpDrawValue) {

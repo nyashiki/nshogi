@@ -30,10 +30,10 @@ inline constexpr Color operator~(Color C) {
 }
 
 enum EndingRule : uint8_t {
-    NoRule_ER    = 0b00000000,
-    Declare27_ER = 0b00000001,
-    Draw24_ER    = 0b00000010,
-    Trying_ER    = 0b00000100,
+    ER_NoRule    = 0b00000000,
+    ER_Declare27 = 0b00000001,
+    ER_Draw24    = 0b00000010,
+    ER_Trying    = 0b00000100,
 };
 
 enum PieceTypeKind : uint8_t {

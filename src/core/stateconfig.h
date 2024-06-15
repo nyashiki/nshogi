@@ -8,7 +8,7 @@ namespace nshogi {
 namespace core {
 
 struct StateConfig {
-    EndingRule Rule = NoRule_ER;
+    EndingRule Rule = ER_NoRule;
     uint16_t MaxPly = 256;
     float BlackDrawValue = 0.5f;
     float WhiteDrawValue = 0.5f;

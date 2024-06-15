@@ -485,15 +485,15 @@ void checkFeatureTypeRule(const nshogi::core::State& State, const nshogi::core::
     TEST_ASSERT_EQ(Features.get(1).getBitboard(), nshogi::core::bitboard::Bitboard::AllBB());
     TEST_ASSERT_EQ(Features.get(2).getBitboard(), nshogi::core::bitboard::Bitboard::AllBB());
 
-    if (Config.Rule == nshogi::core::EndingRule::Declare27_ER) {
+    if (Config.Rule == nshogi::core::EndingRule::ER_Declare27) {
         TEST_ASSERT_EQ(Features.get(0).getValue(), 1.0f);
         TEST_ASSERT_EQ(Features.get(1).getValue(), 0.0f);
         TEST_ASSERT_EQ(Features.get(2).getValue(), 0.0f);
-    } else if (Config.Rule == nshogi::core::EndingRule::Draw24_ER) {
+    } else if (Config.Rule == nshogi::core::EndingRule::ER_Draw24) {
         TEST_ASSERT_EQ(Features.get(0).getValue(), 0.0f);
         TEST_ASSERT_EQ(Features.get(1).getValue(), 1.0f);
         TEST_ASSERT_EQ(Features.get(2).getValue(), 0.0f);
-    } else if (Config.Rule == nshogi::core::EndingRule::Trying_ER) {
+    } else if (Config.Rule == nshogi::core::EndingRule::ER_Trying) {
         TEST_ASSERT_EQ(Features.get(0).getValue(), 0.0f);
         TEST_ASSERT_EQ(Features.get(1).getValue(), 0.0f);
         TEST_ASSERT_EQ(Features.get(2).getValue(), 1.0f);
@@ -511,15 +511,15 @@ void checkFeatureTypeRuleRuntime(const nshogi::core::State& State, const nshogi:
     TEST_ASSERT_EQ(Features.get(1).getBitboard(), nshogi::core::bitboard::Bitboard::AllBB());
     TEST_ASSERT_EQ(Features.get(2).getBitboard(), nshogi::core::bitboard::Bitboard::AllBB());
 
-    if (Config.Rule == nshogi::core::EndingRule::Declare27_ER) {
+    if (Config.Rule == nshogi::core::EndingRule::ER_Declare27) {
         TEST_ASSERT_EQ(Features.get(0).getValue(), 1.0f);
         TEST_ASSERT_EQ(Features.get(1).getValue(), 0.0f);
         TEST_ASSERT_EQ(Features.get(2).getValue(), 0.0f);
-    } else if (Config.Rule == nshogi::core::EndingRule::Draw24_ER) {
+    } else if (Config.Rule == nshogi::core::EndingRule::ER_Draw24) {
         TEST_ASSERT_EQ(Features.get(0).getValue(), 0.0f);
         TEST_ASSERT_EQ(Features.get(1).getValue(), 1.0f);
         TEST_ASSERT_EQ(Features.get(2).getValue(), 0.0f);
-    } else if (Config.Rule == nshogi::core::EndingRule::Trying_ER) {
+    } else if (Config.Rule == nshogi::core::EndingRule::ER_Trying) {
         TEST_ASSERT_EQ(Features.get(0).getValue(), 0.0f);
         TEST_ASSERT_EQ(Features.get(1).getValue(), 0.0f);
         TEST_ASSERT_EQ(Features.get(2).getValue(), 1.0f);
@@ -897,8 +897,8 @@ TEST(ML, AZTeacherHandmade1) {
     TEST_ASSERT_FALSE(T1.equals(T2));
     TEST_ASSERT_FALSE(T2.equals(T1));
 
-    T1.EndingRule = nshogi::core::NoRule_ER;
-    T2.EndingRule = nshogi::core::Declare27_ER;
+    T1.EndingRule = nshogi::core::ER_NoRule;
+    T2.EndingRule = nshogi::core::ER_Declare27;
     TEST_ASSERT_FALSE(T1.equals(T2));
     TEST_ASSERT_FALSE(T2.equals(T1));
 
