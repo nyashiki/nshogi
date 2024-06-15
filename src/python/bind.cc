@@ -143,6 +143,13 @@ PYBIND11_MODULE(nshogi, Module) {
         .def("get_piece_on", [](const nshogi::core::State& S, int Square) {
             return S.getPosition().pieceOn(nshogi::core::Square(Square));
         })
+        .def("get_repetition", [](const nshogi::core::State& S, bool Strict) {
+            if (Strict) {
+                return S.getRepetitionStatus<true>();
+            } else {
+                return S.getRepetitionStatus<false>();
+            }
+        })
         .def_property_readonly("legal_moves", [](const nshogi::core::State& S) {
             auto Moves = nshogi::core::MoveGenerator::generateLegalMoves(S);
 
@@ -154,7 +161,6 @@ PYBIND11_MODULE(nshogi, Module) {
         .def_property_readonly("ply", &nshogi::core::State::getPly)
         .def_property_readonly("last_move", &nshogi::core::State::getLastMove)
         .def_property_readonly("hash", &nshogi::core::State::getHash)
-        .def_property_readonly("repetition", &nshogi::core::State::getRepetitionStatus)
         .def_property_readonly("side_to_move", &nshogi::core::State::getSideToMove)
         .def_property_readonly("initial_position", &nshogi::core::State::getInitialPosition)
         .def_property_readonly("position", &nshogi::core::State::getPosition)
