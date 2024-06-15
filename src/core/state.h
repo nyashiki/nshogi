@@ -130,6 +130,7 @@ class State {
         }
     }
 
+    template <bool Strict = false>
     inline RepetitionStatus getRepetitionStatus() const {
         const Color SideToMove = getPosition().sideToMove();
         const StepHelper& CurrentStepHelper = Helper.getCurrentStepHelper();
@@ -137,6 +138,7 @@ class State {
         const Stands MyStand = getPosition().getStand(SideToMove);
         const Stands OpStand = getPosition().getStand(~SideToMove);
 
+        uint16_t RepetitionCount = 0;
         for (int Ply = Helper.Ply - 4; Ply >= 0; Ply -= 2) {
             const StepHelper& SHelper = Helper.getStepHelper((uint16_t)Ply);
             const Stands MyStepStand = SHelper.EachStand[SideToMove];
@@ -144,15 +146,37 @@ class State {
 
             if (HashValue.getValue() == SHelper.BoardHash) {
                 if (MyStand == MyStepStand && OpStand == OpStepStand) {
-                    if (CurrentStepHelper.ContinuousCheckCounts[~SideToMove] * 2 >= Helper.Ply - Ply) {
-                        return RepetitionStatus::WinRepetition;
+                    if constexpr (Strict) {
+                        if (CurrentStepHelper.ContinuousCheckCounts[~SideToMove] >= 6 &&
+                                CurrentStepHelper.ContinuousCheckCounts[~SideToMove] * 2 >= Helper.Ply - Ply) {
+                            return RepetitionStatus::WinRepetition;
+                        }
+                    } else {
+                        if (CurrentStepHelper.ContinuousCheckCounts[~SideToMove] * 2 >= Helper.Ply - Ply) {
+                            return RepetitionStatus::WinRepetition;
+                        }
                     }
 
-                    if (CurrentStepHelper.ContinuousCheckCounts[SideToMove] * 2 >= Helper.Ply - Ply) {
-                        return RepetitionStatus::LossRepetition;
+                    if constexpr (Strict) {
+                        if (CurrentStepHelper.ContinuousCheckCounts[SideToMove] >= 6 &&
+                                CurrentStepHelper.ContinuousCheckCounts[SideToMove] * 2 >= Helper.Ply - Ply) {
+                            return RepetitionStatus::LossRepetition;
+                        }
+                    } else {
+                        if (CurrentStepHelper.ContinuousCheckCounts[SideToMove] * 2 >= Helper.Ply - Ply) {
+                            return RepetitionStatus::LossRepetition;
+                        }
                     }
 
-                    return RepetitionStatus::Repetition;
+                    if constexpr (Strict) {
+                        if (RepetitionCount == 2) {
+                            return RepetitionStatus::Repetition;
+                        }
+                        ++RepetitionCount;
+                        Ply -= 2;
+                    } else {
+                        return RepetitionStatus::Repetition;
+                    }
                 } else {
                     if (isSuperiorOrEqual(MyStand, MyStepStand)) {
                         return RepetitionStatus::SuperiorRepetition;

@@ -599,6 +599,96 @@ TEST(State, RepetitionHandmade14) {
     TEST_ASSERT_EQ(State.getRepetitionStatus(), nshogi::core::RepetitionStatus::NoRepetition);
 }
 
+TEST(State, RepetitionStrictHandmade1) {
+    const std::string Sfen =
+      "lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL b - 1 moves 2h3h 8b7b 3h2h 7b8b";
+    nshogi::core::State State = nshogi::io::sfen::StateBuilder::newState(Sfen);
+
+    TEST_ASSERT_EQ(State.getRepetitionStatus<true>(), nshogi::core::RepetitionStatus::NoRepetition);
+}
+
+TEST(State, RepetitionStrictHandmade2) {
+    const std::string Sfen =
+      "lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL b - 1 moves 2h3h 8b7b 3h2h 7b8b 2h3h 8b7b 3h2h 7b8b";
+    nshogi::core::State State = nshogi::io::sfen::StateBuilder::newState(Sfen);
+
+    TEST_ASSERT_EQ(State.getRepetitionStatus<true>(), nshogi::core::RepetitionStatus::NoRepetition);
+}
+
+TEST(State, RepetitionStrictHandmade3) {
+    const std::string Sfen =
+      "lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL b - 1 moves 2h3h 8b7b 3h2h 7b8b 2h3h 8b7b 3h2h 7b8b 2h3h 8b7b 3h2h 7b8b";
+    nshogi::core::State State = nshogi::io::sfen::StateBuilder::newState(Sfen);
+
+    TEST_ASSERT_EQ(State.getRepetitionStatus<true>(), nshogi::core::RepetitionStatus::Repetition);
+}
+
+TEST(State, RepetitionStrictHandmade4) {
+    const std::string Sfen =
+        "2k6/9/KR7/9/9/9/9/9/9 b - 1 moves 8c7c 7a8a 7c8c 8a7a 8c7c";
+    nshogi::core::State State = nshogi::io::sfen::StateBuilder::newState(Sfen);
+
+    TEST_ASSERT_EQ(State.getRepetitionStatus<true>(), nshogi::core::RepetitionStatus::NoRepetition);
+}
+
+TEST(State, RepetitionStrictHandmade5) {
+    const std::string Sfen =
+        "2k6/9/KR7/9/9/9/9/9/9 b - 1 moves 8c7c 7a8a 7c8c 8a7a 8c7c 7a8a 7c8c 8a4a 8c7c";
+    nshogi::core::State State = nshogi::io::sfen::StateBuilder::newState(Sfen);
+
+    TEST_ASSERT_EQ(State.getRepetitionStatus<true>(), nshogi::core::RepetitionStatus::NoRepetition);
+}
+
+TEST(State, RepetitionStrictHandmade6) {
+    const std::string Sfen =
+        "2k6/9/KR7/9/9/9/9/9/9 b - 1 moves 8c7c 7a8a 7c8c 8a7a 8c7c 7a8a 7c8c 8a7a 8c7c 7a8a 7c8c 8a7a 8c7c";
+    nshogi::core::State State = nshogi::io::sfen::StateBuilder::newState(Sfen);
+
+    TEST_ASSERT_EQ(State.getRepetitionStatus<true>(), nshogi::core::RepetitionStatus::WinRepetition);
+}
+
+TEST(State, RepetitionStrictHandmade7) {
+    const std::string Sfen =
+        "2k6/9/KR7/9/9/9/9/9/9 b - 1 moves 8c7c 7a8a 7c8c 8a7a";
+    nshogi::core::State State = nshogi::io::sfen::StateBuilder::newState(Sfen);
+
+    TEST_ASSERT_EQ(State.getRepetitionStatus<true>(), nshogi::core::RepetitionStatus::NoRepetition);
+}
+
+TEST(State, RepetitionStrictHandmade8) {
+    const std::string Sfen =
+        "2k6/9/KR7/9/9/9/9/9/9 b - 1 moves 8c7c 7a8a 7c8c 8a7a 8c7c 7a8a 7c8c 8a7a";
+    nshogi::core::State State = nshogi::io::sfen::StateBuilder::newState(Sfen);
+
+    TEST_ASSERT_EQ(State.getRepetitionStatus<true>(), nshogi::core::RepetitionStatus::NoRepetition);
+}
+
+TEST(State, RepetitionStrictHandmade9) {
+    const std::string Sfen =
+        "2k6/9/KR7/9/9/9/9/9/9 b - 1 moves 8c7c 7a8a 7c8c 8a7a 8c7c 7a8a 7c8c 8a7a 8c7c 7a8a 7c8c 8a7a";
+    nshogi::core::State State = nshogi::io::sfen::StateBuilder::newState(Sfen);
+
+    TEST_ASSERT_EQ(State.getRepetitionStatus<true>(), nshogi::core::RepetitionStatus::LossRepetition);
+}
+
+TEST(State, RepetitionStrictHandmade10) {
+    const std::string Sfen =
+      "l3k2Bl/1r1sg4/1l1pps2p/2P1np3/1P4p2/2G1RP1N1/+p1KPP3P/3S5/1+n2G2+bL b GPsn5p 1 moves G*4a "
+      "5a6a 4a5a 6a5a";
+    nshogi::core::State State = nshogi::io::sfen::StateBuilder::newState(Sfen);
+
+    TEST_ASSERT_EQ(State.getRepetitionStatus<true>(), nshogi::core::RepetitionStatus::InferiorRepetition);
+}
+
+TEST(State, RepetitionStrictHandmade11) {
+    const std::string Sfen =
+      "+Bn1g1g2l/2s1ks3/p1Ppppn1p/2+BP3r1/2pN5/1p4ppP/P2gPP3/8K/L5GNL w RL2s3p 1 moves S*2g 1h1g "
+      "2g1h+ 1g1h S*2g";
+    nshogi::core::State State = nshogi::io::sfen::StateBuilder::newState(Sfen);
+
+    TEST_ASSERT_EQ(State.getRepetitionStatus<true>(), nshogi::core::RepetitionStatus::SuperiorRepetition);
+}
+
 TEST(State, PlyOffset1) {
     const std::string Sfen =
       "lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL b - 100";
