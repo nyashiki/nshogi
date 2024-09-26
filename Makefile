@@ -200,11 +200,13 @@ install: $(SHARED_TARGET) $(STATIC_TARGET)
 	install -d $(PREFIX)/include/nshogi/io
 	install -d $(PREFIX)/include/nshogi/ml
 	install -d $(PREFIX)/include/nshogi/solver
+	install -d $(PREFIX)/include/nshogi/c_api
 	install -m 644 src/book/*.h $(PREFIX)/include/nshogi/book
 	install -m 644 src/core/*.h $(PREFIX)/include/nshogi/core
 	install -m 644 src/io/*.h $(PREFIX)/include/nshogi/io
 	install -m 644 src/ml/*.h $(PREFIX)/include/nshogi/ml
 	install -m 644 src/solver/*.h $(PREFIX)/include/nshogi/solver
+	install -m 644 src/c_api/*.h $(PREFIX)/include/nshogi/c_api
 
 .PHONY: test-static
 test-static: $(TEST_STATIC_TARGET)
