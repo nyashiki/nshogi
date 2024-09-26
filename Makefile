@@ -63,7 +63,12 @@ SOURCES :=                          \
 	src/io/huffman.cc           \
 	src/io/sfen.cc              \
 	src/io/csa.cc               \
-	src/io/file.cc
+	src/io/file.cc              \
+	src/c_api/c_api.cc          \
+	src/c_api/io.cc             \
+	src/c_api/movegenerator.cc  \
+	src/c_api/state.cc          \
+	src/c_api/types.cc
 
 TEST_SOURCES :=                         \
 	src/test/test_main.cc           \
