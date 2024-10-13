@@ -36,6 +36,15 @@ enum EndingRule : uint8_t {
     ER_Trying    = 0b00000100,
 };
 
+enum struct RepetitionStatus : uint8_t {
+    NoRepetition,
+    Repetition,
+    WinRepetition,
+    LossRepetition,
+    SuperiorRepetition,
+    InferiorRepetition,
+};
+
 enum PieceTypeKind : uint8_t {
     PTK_Empty   = 0,
     PTK_Pawn    = 1,     PTK_Lance = 2,     PTK_Knight = 3,    PTK_Silver =  4,     PTK_Bishop = 5,     PTK_Rook = 6, PTK_Gold = 7, PTK_King = 8,

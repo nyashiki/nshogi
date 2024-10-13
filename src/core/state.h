@@ -17,15 +17,6 @@
 namespace nshogi {
 namespace core {
 
-enum struct RepetitionStatus : uint8_t {
-    NoRepetition,
-    Repetition,
-    WinRepetition,
-    LossRepetition,
-    SuperiorRepetition,
-    InferiorRepetition,
-};
-
 class State {
  public:
     State(const State&) = delete;
