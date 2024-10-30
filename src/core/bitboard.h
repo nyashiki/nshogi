@@ -93,7 +93,7 @@ struct alignas(16) Bitboard {
 #endif
 
 #if defined(USE_SSE2)
-    constexpr Bitboard(const Bitboard& BB) : Bitboard_(BB.Bitboard_) {
+    Bitboard(const Bitboard& BB) : Bitboard_(BB.Bitboard_) {
     }
 #else
     constexpr Bitboard(const Bitboard& BB) : Primitive { BB.getPrimitive<false>(), BB.getPrimitive<true>() } {
@@ -160,60 +160,89 @@ struct alignas(16) Bitboard {
     }
 
     // Bit operations.
-    constexpr Bitboard operator|(const Bitboard& BB) const {
+    constexpr Bitboard& operator|=(const Bitboard& BB) {
 #if defined(USE_SSE2)
         if (!std::is_constant_evaluated()) {
-            return _mm_or_si128(Bitboard_, BB.Bitboard_);
+            Bitboard_ = _mm_or_si128(Bitboard_, BB.Bitboard_);
+            return *this;
         }
 #endif
-        return { Primitive[1] | BB.Primitive[1], Primitive[0] | BB.Primitive[0] };
+        Primitive[1] |= BB.Primitive[1];
+        Primitive[0] |= BB.Primitive[0];
+        return *this;
     }
 
-    constexpr Bitboard& operator|=(const Bitboard& BB) {
-        *this = *this | BB;
+    constexpr Bitboard operator|(const Bitboard& BB) const {
+        if (std::is_constant_evaluated()) {
+            Bitboard Res(Primitive[1], Primitive[0]);
+            Res |= BB;
+            return { Res.Primitive[1], Res.Primitive[0] };
+        } else {
+            Bitboard Res = *this;
+            Res |= BB;
+            return Res;
+        }
+    }
+
+    constexpr Bitboard& operator&=(const Bitboard& BB) {
+#if defined(USE_SSE2)
+        if (!std::is_constant_evaluated()) {
+            Bitboard_ = _mm_and_si128(Bitboard_, BB.Bitboard_);
+            return *this;
+        }
+#endif
+        Primitive[1] &= BB.Primitive[1];
+        Primitive[0] &= BB.Primitive[0];
         return *this;
     }
 
     constexpr Bitboard operator&(const Bitboard& BB) const {
-#if defined(USE_SSE2)
-        if (!std::is_constant_evaluated()) {
-            return _mm_and_si128(Bitboard_, BB.Bitboard_);
+        if (std::is_constant_evaluated()) {
+            Bitboard Res(Primitive[1], Primitive[0]);
+            Res &= BB;
+            return { Res.Primitive[1], Res.Primitive[0] };
+        } else {
+            Bitboard Res = *this;
+            Res &= BB;
+            return Res;
         }
-#endif
-        return { Primitive[1] & BB.Primitive[1], Primitive[0] & BB.Primitive[0] };
     }
 
-    constexpr Bitboard& operator&=(const Bitboard& BB) {
-        *this = *this & BB;
+    constexpr Bitboard& operator^=(const Bitboard& BB) {
+#if defined(USE_SSE2)
+        if (!std::is_constant_evaluated()) {
+            Bitboard_ = _mm_xor_si128(Bitboard_, BB.Bitboard_);
+            return *this;
+        }
+#endif
+        Primitive[1] ^= BB.Primitive[1];
+        Primitive[0] ^= BB.Primitive[0];
         return *this;
     }
 
     constexpr Bitboard operator^(const Bitboard& BB) const {
-#if defined(USE_SSE2)
-        if (!std::is_constant_evaluated()) {
-            return _mm_xor_si128(Bitboard_, BB.Bitboard_);
+        if (std::is_constant_evaluated()) {
+            Bitboard Res(Primitive[1], Primitive[0]);
+            Res ^= BB;
+            return { Res.Primitive[1], Res.Primitive[0] };
+        } else {
+            Bitboard Res = *this;
+            Res ^= BB;
+            return Res;
         }
-#endif
-        return { Primitive[1] ^ BB.Primitive[1], Primitive[0] ^ BB.Primitive[0] };
     }
 
-    constexpr Bitboard& operator^=(const Bitboard& BB) {
-        *this = *this ^ BB;
-        return *this;
+    constexpr Bitboard andNot(const Bitboard& BB) const {
+#if defined(USE_SSE2)
+        if (!std::is_constant_evaluated()) {
+            return _mm_andnot_si128(Bitboard_, BB.Bitboard_);
+        }
+#endif
+        return { ~Primitive[1] & BB.Primitive[1], ~Primitive[0] & BB.Primitive[0] };
     }
 
     constexpr Bitboard operator~() const {
-#if defined(USE_SSE2)
-        if (!std::is_constant_evaluated()) {
-            return _mm_andnot_si128(Bitboard_, AllBB().Bitboard_);
-        }
-#endif
-        Bitboard tmp;
-        tmp.Primitive[0] = ~Primitive[0];
-        tmp.Primitive[1] = ~Primitive[1];
-        tmp &= AllBB();
-
-        return tmp;
+        return andNot(AllBB());
     }
 
     template <int Shift>
