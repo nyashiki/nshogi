@@ -287,10 +287,10 @@ class State {
                            getBitboard<PTK_ProBishop>()));
 
         if (ExcludeSq != SqInvalid) {
-            NorthAttackCandidateBB &= ~bitboard::SquareBB[ExcludeSq];
+            NorthAttackCandidateBB = bitboard::SquareBB[ExcludeSq].andNot(NorthAttackCandidateBB);
         }
 
-        StepAttackBB |= (NorthAttackCandidateBB & ~bitboard::RankBB[RankA]).getLeftShiftEpi64<1>();
+        StepAttackBB |= bitboard::RankBB[RankA].andNot(NorthAttackCandidateBB).getLeftShiftEpi64<1>();
 
         // NorthEast attacks and NorthWest attacks.
         bitboard::Bitboard NorthEastAndNorthWestAttackCandidateBB = getBitboard<C>() &
@@ -308,11 +308,11 @@ class State {
                             getBitboard<PTK_ProRook>()));
 
         if (ExcludeSq != SqInvalid) {
-            NorthEastAndNorthWestAttackCandidateBB &= ~bitboard::SquareBB[ExcludeSq];
+            NorthEastAndNorthWestAttackCandidateBB = bitboard::SquareBB[ExcludeSq].andNot(NorthEastAndNorthWestAttackCandidateBB);
         }
 
-        StepAttackBB |= (NorthEastAndNorthWestAttackCandidateBB & ~bitboard::RankBB[RankA] & ~bitboard::FileBB[File1]).getRightShiftSi128<8>();
-        StepAttackBB |= (NorthEastAndNorthWestAttackCandidateBB & ~bitboard::RankBB[RankA] & ~bitboard::FileBB[File9]).getLeftShiftSi128<10>();
+        StepAttackBB |= (bitboard::FileBB[File1].andNot(bitboard::RankBB[RankA].andNot(NorthEastAndNorthWestAttackCandidateBB))).getRightShiftSi128<8>();
+        StepAttackBB |= (bitboard::FileBB[File9].andNot(bitboard::RankBB[RankA].andNot(NorthEastAndNorthWestAttackCandidateBB))).getLeftShiftSi128<10>();
 
         // East attacks and West attacks.
         bitboard::Bitboard EastAndWestAttackCandidateBB = getBitboard<C>() &
@@ -333,11 +333,11 @@ class State {
                             getBitboard<PTK_ProBishop>()));
 
         if (ExcludeSq != SqInvalid) {
-            EastAndWestAttackCandidateBB &= ~bitboard::SquareBB[ExcludeSq];
+            EastAndWestAttackCandidateBB = bitboard::SquareBB[ExcludeSq].andNot(EastAndWestAttackCandidateBB);
         }
 
-        StepAttackBB |= (EastAndWestAttackCandidateBB & ~bitboard::FileBB[File1]).getRightShiftSi128<9>();
-        StepAttackBB |= (EastAndWestAttackCandidateBB & ~bitboard::FileBB[File9]).getLeftShiftSi128<9>();
+        StepAttackBB |= (bitboard::FileBB[File1].andNot(EastAndWestAttackCandidateBB)).getRightShiftSi128<9>();
+        StepAttackBB |= (bitboard::FileBB[File9].andNot(EastAndWestAttackCandidateBB)).getLeftShiftSi128<9>();
 
         // SouthEast attacks and SouthWest attacks.
         bitboard::Bitboard SouthEastAndSouthWestAttackCandidateBB = getBitboard<C>() &
@@ -355,11 +355,11 @@ class State {
                            getBitboard<PTK_ProRook>()));
 
         if (ExcludeSq != SqInvalid) {
-            SouthEastAndSouthWestAttackCandidateBB &= ~bitboard::SquareBB[ExcludeSq];
+            SouthEastAndSouthWestAttackCandidateBB = bitboard::SquareBB[ExcludeSq].andNot(SouthEastAndSouthWestAttackCandidateBB);
         }
 
-        StepAttackBB |= (SouthEastAndSouthWestAttackCandidateBB & ~bitboard::RankBB[RankI] & ~bitboard::FileBB[File1]).getRightShiftSi128<10>();
-        StepAttackBB |= (SouthEastAndSouthWestAttackCandidateBB & ~bitboard::RankBB[RankI] & ~bitboard::FileBB[File9]).getLeftShiftSi128<8>();
+        StepAttackBB |= (bitboard::FileBB[File1].andNot(bitboard::RankBB[RankI].andNot(SouthEastAndSouthWestAttackCandidateBB))).getRightShiftSi128<10>();
+        StepAttackBB |= (bitboard::FileBB[File9].andNot(bitboard::RankBB[RankI].andNot(SouthEastAndSouthWestAttackCandidateBB))).getLeftShiftSi128<8>();
 
         // South attacks.
         bitboard::Bitboard SouthAttackCandidateBB = getBitboard<C>() &
@@ -382,24 +382,24 @@ class State {
                            getBitboard<PTK_ProBishop>()));
 
         if (ExcludeSq != SqInvalid) {
-            SouthAttackCandidateBB &= ~bitboard::SquareBB[ExcludeSq];
+            SouthAttackCandidateBB = bitboard::SquareBB[ExcludeSq].andNot(SouthAttackCandidateBB);
         }
 
-        StepAttackBB |= (SouthAttackCandidateBB & ~bitboard::RankBB[RankI]).getRightShiftEpi64<1>();
+        StepAttackBB |= (bitboard::RankBB[RankI].andNot(SouthAttackCandidateBB)).getRightShiftEpi64<1>();
 
         // Knight attacks.
         bitboard::Bitboard KnightBB = getBitboard<C, PTK_Knight>();
 
         if (ExcludeSq != SqInvalid) {
-            KnightBB &= ~bitboard::SquareBB[ExcludeSq];
+            KnightBB = bitboard::SquareBB[ExcludeSq].andNot(KnightBB);
         }
 
         if constexpr (C == Black) {
-            StepAttackBB |= (KnightBB & ~bitboard::FirstAndSecondFurthestBB[C] & ~bitboard::FileBB[File1]).getRightShiftSi128<7>();
-            StepAttackBB |= (KnightBB & ~bitboard::FirstAndSecondFurthestBB[C] & ~bitboard::FileBB[File9]).getLeftShiftSi128<11>();
+            StepAttackBB |= (bitboard::FileBB[File1].andNot(bitboard::FirstAndSecondFurthestBB[C].andNot(KnightBB))).getRightShiftSi128<7>();
+            StepAttackBB |= (bitboard::FileBB[File9].andNot(bitboard::FirstAndSecondFurthestBB[C].andNot(KnightBB))).getLeftShiftSi128<11>();
         } else {
-            StepAttackBB |= (KnightBB & ~bitboard::FirstAndSecondFurthestBB[White] & ~bitboard::FileBB[File1]).getRightShiftSi128<11>();
-            StepAttackBB |= (KnightBB & ~bitboard::FirstAndSecondFurthestBB[White] & ~bitboard::FileBB[File9]).getLeftShiftSi128<7>();
+            StepAttackBB |= (bitboard::FileBB[File1].andNot(bitboard::FirstAndSecondFurthestBB[White].andNot(KnightBB))).getRightShiftSi128<11>();
+            StepAttackBB |= (bitboard::FileBB[File9].andNot(bitboard::FirstAndSecondFurthestBB[White].andNot(KnightBB))).getLeftShiftSi128<7>();
         }
 
         return StepAttackBB;
@@ -419,7 +419,7 @@ class State {
         // Bishops.
         const bitboard::Bitboard BishopBB = getBitboard<C>() &
             ((ExcludeSq == SqInvalid)? (getBitboard<PTK_Bishop>() | getBitboard<PTK_ProBishop>())
-                                     : ((getBitboard<PTK_Bishop>() | getBitboard<PTK_ProBishop>()) & ~bitboard::SquareBB[ExcludeSq]));
+                                     : (bitboard::SquareBB[ExcludeSq].andNot(getBitboard<PTK_Bishop>() | getBitboard<PTK_ProBishop>())));
 
         const bitboard::Bitboard NotRankABB = ~bitboard::RankBB[RankA];
         const bitboard::Bitboard NotRankIBB = ~bitboard::RankBB[RankI];
@@ -488,11 +488,11 @@ class State {
 
         const bitboard::Bitboard RookBB = getBitboard<C>() &
             ((ExcludeSq == SqInvalid)? (getBitboard<PTK_Rook>() | getBitboard<PTK_ProRook>())
-                                    : ((getBitboard<PTK_Rook>() | getBitboard<PTK_ProRook>()) & ~bitboard::SquareBB[ExcludeSq]));
+                                    : (bitboard::SquareBB[ExcludeSq].andNot(getBitboard<PTK_Rook>() | getBitboard<PTK_ProRook>())));
 
         const bitboard::Bitboard LanceBB = getBitboard<C>() &
             ((ExcludeSq == SqInvalid)? getBitboard<PTK_Lance>()
-                                    : (getBitboard<PTK_Lance>() & ~bitboard::SquareBB[ExcludeSq]));
+                                    : (bitboard::SquareBB[ExcludeSq].andNot(getBitboard<PTK_Lance>())));
 
         const bitboard::Bitboard ForwardBB  = (C == Black)? (RookBB | LanceBB) : RookBB;
         const bitboard::Bitboard BackwardBB = (C == White)? (RookBB | LanceBB) : RookBB;
@@ -594,28 +594,40 @@ class State {
                 bitboard::getLanceAttackBB<C>(Sq, OccupiedBB),
                 getBitboard<~C, PTK_Lance>());
         } else if constexpr (Type == PTK_Bishop || Type == PTK_ProBishop) {
+            return
+                bitboard::isAttacked(
+                    bitboard::getBishopAttackBB<PTK_Bishop>(Sq, OccupiedBB),
+                    ((getBitboard<PTK_Bishop>() | getBitboard<PTK_ProBishop>()) & getBitboard<~C>())) ||
+                bitboard::isAttacked(
+                    bitboard::KingAttackBB[Sq], getBitboard<~C, PTK_ProBishop>());
             return bitboard::isAttacked(
                 bitboard::getBishopAttackBB<Type>(Sq, OccupiedBB),
                 getBitboard<~C, Type>());
         } else if constexpr (Type == PTK_Rook || Type == PTK_ProRook) {
-            return bitboard::isAttacked(
-                bitboard::getRookAttackBB<Type>(Sq, OccupiedBB),
-                getBitboard<~C, Type>());
+            return
+                bitboard::isAttacked(
+                    bitboard::getRookAttackBB<PTK_Rook>(Sq, OccupiedBB),
+                    ((getBitboard<PTK_Rook>() | getBitboard<PTK_ProRook>()) & getBitboard<~C>())) ||
+                bitboard::isAttacked(
+                    bitboard::KingAttackBB[Sq], getBitboard<~C, PTK_ProRook>());
+            // return bitboard::isAttacked(
+            //     bitboard::getRookAttackBB<Type>(Sq, OccupiedBB),
+            //     getBitboard<~C, Type>());
         }
     }
 
     template <Color C>
     inline bool isAttacked(Square Sq, Square ExcludeSq = SqInvalid) const {
-        if (isAttackedByOneStep<C, PTK_Pawn>(Sq) ||
-            isAttackedByOneStep<C, PTK_Knight>(Sq) ||
-            isAttackedByOneStep<C, PTK_Silver>(Sq) ||
-            isAttackedByOneStep<C, PTK_Gold>(Sq) ||
-            isAttackedByOneStep<C, PTK_King>(Sq) ||
-            isAttackedByOneStep<C, PTK_ProPawn>(Sq) ||
-            isAttackedByOneStep<C, PTK_ProLance>(Sq) ||
-            isAttackedByOneStep<C, PTK_ProKnight>(Sq) ||
-            isAttackedByOneStep<C, PTK_ProSilver>(Sq)) {
+        const bitboard::Bitboard UnderAttackedBB =
+            (bitboard::getAttackBB<C, PTK_Pawn>(Sq) & getBitboard<PTK_Pawn>()) |
+            (bitboard::getAttackBB<C, PTK_Knight>(Sq) & getBitboard<PTK_Knight>()) |
+            (bitboard::getAttackBB<C, PTK_Silver>(Sq) & getBitboard<PTK_Silver>()) |
+            (bitboard::getAttackBB<C, PTK_King>(Sq) & getBitboard<PTK_King>()) |
+            (bitboard::getAttackBB<C, PTK_Gold>(Sq) & (
+               getBitboard<PTK_Gold>() | getBitboard<PTK_ProPawn>() | getBitboard<PTK_ProLance>() |
+               getBitboard<PTK_ProKnight>() | getBitboard<PTK_ProSilver>()));
 
+        if (!(UnderAttackedBB & getBitboard<~C>()).isZero()) {
             return true;
         }
 
@@ -625,16 +637,10 @@ class State {
             OccupiedBB.toggleBit(ExcludeSq);
         }
 
-        if (isAttackedBySlider<C, PTK_Lance>(Sq, OccupiedBB) ||
+        return
+            isAttackedBySlider<C, PTK_Lance>(Sq, OccupiedBB) ||
             isAttackedBySlider<C, PTK_Bishop>(Sq, OccupiedBB) ||
-            isAttackedBySlider<C, PTK_Rook>(Sq, OccupiedBB) ||
-            isAttackedBySlider<C, PTK_ProBishop>(Sq, OccupiedBB) ||
-            isAttackedBySlider<C, PTK_ProRook>(Sq, OccupiedBB)) {
-
-            return true;
-        }
-
-        return false;
+            isAttackedBySlider<C, PTK_Rook>(Sq, OccupiedBB);
     }
 
  private:

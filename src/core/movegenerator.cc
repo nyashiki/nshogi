@@ -410,36 +410,14 @@ inline Move32* generateDroppingMovesImpl(const State& S, Move32* List,
     if (PawnExists) {
         const Bitboard PawnBB = S.getBitboard<C, PTK_Pawn>();
 
-        Bitboard PawnExistFilesBB = Bitboard::ZeroBB();
-        if (!(PawnBB & FileBB[File1]).isZero()) {
-            PawnExistFilesBB |= FileBB[File1];
-        }
-        if (!(PawnBB & FileBB[File2]).isZero()) {
-            PawnExistFilesBB |= FileBB[File2];
-        }
-        if (!(PawnBB & FileBB[File3]).isZero()) {
-            PawnExistFilesBB |= FileBB[File3];
-        }
-        if (!(PawnBB & FileBB[File4]).isZero()) {
-            PawnExistFilesBB |= FileBB[File4];
-        }
-        if (!(PawnBB & FileBB[File5]).isZero()) {
-            PawnExistFilesBB |= FileBB[File5];
-        }
-        if (!(PawnBB & FileBB[File6]).isZero()) {
-            PawnExistFilesBB |= FileBB[File6];
-        }
-        if (!(PawnBB & FileBB[File7]).isZero()) {
-            PawnExistFilesBB |= FileBB[File7];
-        }
-        if (!(PawnBB & FileBB[File8]).isZero()) {
-            PawnExistFilesBB |= FileBB[File8];
-        }
-        if (!(PawnBB & FileBB[File9]).isZero()) {
-            PawnExistFilesBB |= FileBB[File9];
+        // Figure out files on which a pawn does not exist.
+        const Bitboard Temp = RankBB[RankA].subtract(PawnBB) & RankBB[RankA];
+        Bitboard ToBB = Temp.subtract(Temp.getRightShiftEpi64(8));
+        if constexpr (C == White) {
+            ToBB = ToBB.getLeftShiftEpi64(1);
         }
 
-        Bitboard ToBB = ~PawnExistFilesBB & ~FurthermostBB[C] & TargetSquares;
+        ToBB &= TargetSquares;
         while (!ToBB.isZero()) {
             Square To = ToBB.popOne();
             assert(checkRange(To));
@@ -457,7 +435,7 @@ inline Move32* generateDroppingMovesImpl(const State& S, Move32* List,
 
     /* if (Stands exist) */ {
         // Dropping move onto squares where no rule violation occurs.
-        Bitboard ToBB = TargetSquares & ~FirstAndSecondFurthestBB[C];
+        Bitboard ToBB = FirstAndSecondFurthestBB[C].andNot(TargetSquares);
         while (!ToBB.isZero()) {
             Square To = ToBB.popOne();
             assert(checkRange(To));
@@ -544,7 +522,7 @@ inline Move32* generateDroppingStepCheckMovesImpl(const State& S, const Square O
 
         if ((PawnBB & FileBB[squareToFile(OpKingSq)]).isZero()) {
             if constexpr (C == Black) {
-                Bitboard ToBB = TargetBB & ((~FurthermostBB[White] & SquareBB[OpKingSq]).getRightShiftEpi64<1>());
+                Bitboard ToBB = TargetBB & ((FurthermostBB[White].andNot(SquareBB[OpKingSq])).getRightShiftEpi64<1>());
                 while (!ToBB.isZero()) {
                     Square To = ToBB.popOne();
                     assert(checkRange(To));
@@ -552,7 +530,7 @@ inline Move32* generateDroppingStepCheckMovesImpl(const State& S, const Square O
                     *List++ = Move32::droppingMove(To, PTK_Pawn);
                 }
             } else {
-                Bitboard ToBB = TargetBB & ((~FurthermostBB[Black] & SquareBB[OpKingSq]).getLeftShiftEpi64<1>());
+                Bitboard ToBB = TargetBB & ((FurthermostBB[Black].andNot(SquareBB[OpKingSq])).getLeftShiftEpi64<1>());
                 while (!ToBB.isZero()) {
                     Square To = ToBB.popOne();
                     assert(checkRange(To));
@@ -658,14 +636,14 @@ inline Move32* generateOnBoardOneStepNoPromoteCheckMovesImpl(const State& S, con
 
         if constexpr (Type == PTK_Pawn) {
             if constexpr (WilyPromote) {
-                TargetBB2 &= ~PromotableBB[C];
+                TargetBB2 = PromotableBB[C].andNot(TargetBB2);
             } else {
-                TargetBB2 &= ~FurthermostBB[C];
+                TargetBB2 = FurthermostBB[C].andNot(TargetBB2);
             }
         }
 
         if constexpr (Type == PTK_Knight) {
-            TargetBB2 &= ~FirstAndSecondFurthestBB[C];
+            TargetBB2 = FirstAndSecondFurthestBB[C].andNot(TargetBB2);
         }
 
         // clang-format on
@@ -731,9 +709,9 @@ inline Move32* generateOnBoardLanceNoPromoteCheckMovesImpl(const State& S, const
         Bitboard TargetBB2 = (Pinned)? ~LineBB[From][OpKingSq] : getLanceAttackBB<~C>(OpKingSq, OccupiedBB);
 
         if constexpr (WilyPromote) {
-            TargetBB2 &= ~FirstAndSecondFurthestBB[C];
+            TargetBB2 = FirstAndSecondFurthestBB[C].andNot(TargetBB2);
         } else {
-            TargetBB2 &= ~FurthermostBB[C];
+            TargetBB2 = FurthermostBB[C].andNot(TargetBB2);
         }
 
         TargetBB2 = TargetBB2 & getLanceAttackBB<C>(From, OccupiedBB) & TargetBB;
@@ -785,7 +763,7 @@ inline Move32* generateOnBoardBishopNoPromoteCheckMovesImpl(const State& S, cons
         TargetBB2 = TargetBB2 & getBishopAttackBB<Type>(From, OccupiedBB) & TargetBB;
 
         if constexpr (WilyPromote && Type == PTK_Bishop) {
-            TargetBB2 &= ~PromotableBB[C];
+            TargetBB2 = PromotableBB[C].andNot(TargetBB2);
         }
 
         // clang-format on
@@ -835,7 +813,7 @@ inline Move32* generateOnBoardRookNoPromoteCheckMovesImpl(const State& S, const 
         TargetBB2 = TargetBB2 & getRookAttackBB<Type>(From, OccupiedBB) & TargetBB;
 
         if constexpr (WilyPromote && Type == PTK_Rook) {
-            TargetBB2 &= ~PromotableBB[C];
+            TargetBB2 = PromotableBB[C].andNot(TargetBB2);
         }
 
         // clang-format on
@@ -1180,8 +1158,8 @@ inline Move32* generatePossiblyLegalCheckMovesImpl(const State& S, Move32* Moves
     if (CheckerBB.popCount() >= 2) {
         if (PinnedBB.isSet(S.getKingSquare<C>())) {
             const Bitboard KingLineBB = LineBB[MyKingSq][OpKingSq];
-            const Bitboard UnpinEmptyBB = EmptyBB & ~KingLineBB;
-            const Bitboard UnpinCaptureBB = S.getBitboard<~C>() & ~KingLineBB;
+            const Bitboard UnpinEmptyBB = KingLineBB.andNot(EmptyBB);
+            const Bitboard UnpinCaptureBB = KingLineBB.andNot(S.getBitboard<~C>());
 
             Moves = generateOnBoardOneStepNoPromoteCheckMovesImpl<C, PTK_King, false, true, WilyPromote>(S, OpKingSq, Moves, UnpinEmptyBB, PinnedBB);
             Moves = generateOnBoardOneStepNoPromoteCheckMovesImpl<C, PTK_King, true, true, WilyPromote>(S, OpKingSq, Moves, UnpinCaptureBB, PinnedBB);
@@ -1209,8 +1187,8 @@ inline Move32* generatePossiblyLegalCheckMovesImpl(const State& S, Move32* Moves
         if (PinnedExists) {
             if (PinnedBB.isSet(MyKingSq)) {
                 const Bitboard KingLineBB = LineBB[MyKingSq][OpKingSq];
-                const Bitboard UnpinEmptyBB = EmptyBB & ~KingLineBB;
-                const Bitboard UnpinCaptureBB = S.getBitboard<~C>() & ~KingLineBB;
+                const Bitboard UnpinEmptyBB = KingLineBB.andNot(EmptyBB);
+                const Bitboard UnpinCaptureBB = KingLineBB.andNot(S.getBitboard<~C>());
 
                 Moves = generateOnBoardOneStepNoPromoteCheckMovesImpl<C, PTK_King, false, true, WilyPromote>(S, OpKingSq, Moves, UnpinEmptyBB, PinnedBB);
                 Moves = generateOnBoardOneStepNoPromoteCheckMovesImpl<C, PTK_King, true, true, WilyPromote>(S, OpKingSq, Moves, UnpinCaptureBB, PinnedBB);
