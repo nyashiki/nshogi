@@ -315,14 +315,13 @@ State::setDefendingOpponentSliderBB(StepHelper* SHelper,
                                     const bitboard::Bitboard& OccupiedBB) {
     SHelper->DefendingOpponentSliderBB[C].clear();
 
-    bitboard::Bitboard Candidates =
+    const bitboard::Bitboard Candidates =
         ((getBitboard<PTK_Lance>() & bitboard::getForwardBB<C>(getKingSquare<C>()))
          | ((getBitboard<PTK_Bishop>() | getBitboard<PTK_ProBishop>()) & bitboard::getDiagBB(getKingSquare<C>()))
          | ((getBitboard<PTK_Rook>() | getBitboard<PTK_ProRook>()) & bitboard::getCrossBB(getKingSquare<C>())))
         & getBitboard<~C>();
 
-    while (!Candidates.isZero()) {
-        Square Sq = Candidates.popOne();
+    Candidates.forEach([&](Square Sq) {
         const bitboard::Bitboard BetweenOccupiedBB =
             bitboard::getBetweenBB(Sq, getKingSquare<C>()) & OccupiedBB;
 
@@ -333,7 +332,7 @@ State::setDefendingOpponentSliderBB(StepHelper* SHelper,
         } else if (BetweenOccupiedBB.popCount() == 1) {
             SHelper->DefendingOpponentSliderBB[C] |= BetweenOccupiedBB;
         }
-    }
+    });
 }
 
 template <Color C>

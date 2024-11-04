@@ -2,10 +2,11 @@
 #define NSHOGI_CORE_BITBOARD_H
 
 #include "types.h"
+#include <functional>
+#include <iostream>
 #include <cassert>
 #include <cinttypes>
 #include <cstdint>
-#include <iostream>
 
 #if defined(USE_SSE2)
 
@@ -386,7 +387,7 @@ struct alignas(16) Bitboard {
             Bitboard_ = _mm_and_si128(
                 Bitboard_, _mm_sub_epi64(Bitboard_, _mm_set_epi64x(0, 1)));
 #else
-            Primitive[0] = Primitive[0] & (Primitive[0] - 1);
+            Primitive[0] &= (Primitive[0] - 1);
 #endif
 
             return Sq;
@@ -399,10 +400,76 @@ struct alignas(16) Bitboard {
         Bitboard_ = _mm_and_si128(
             Bitboard_, _mm_sub_epi64(Bitboard_, _mm_set_epi64x(1, 0)));
 #else
-        Primitive[1] = Primitive[1] & (Primitive[1] - 1);
+        Primitive[1] &= (Primitive[1] - 1);
 #endif
 
         return Sq;
+    }
+
+    // Use template of a function since using
+    // std::function<void(Square)> can have overhead.
+    template <typename FuncType>
+    requires std::is_invocable_v<FuncType, Square>
+    void forEach(FuncType Func) const {
+        uint64_t B = getPrimitive<false>();
+
+        while (B != 0) {
+#if defined(USE_BMI1)
+            Square Sq = static_cast<Square>(_tzcnt_u64(B));
+#else
+            Square Sq = static_cast<Square>(__builtin_ctzll(B));
+#endif
+            B &= (B - 1);
+            Func(Sq);
+        }
+
+        B = getPrimitive<true>();
+        while (B != 0) {
+#if defined(USE_BMI1)
+            Square Sq = static_cast<Square>(63 + _tzcnt_u64(B));
+#else
+            Square Sq = static_cast<Square>(63 + __builtin_ctzll(B));
+#endif
+            B &= (B - 1);
+            Func(Sq);
+        }
+    }
+
+    template <typename FuncType>
+    requires std::is_invocable_r_v<bool, FuncType, Square>
+    bool forEachUntil(FuncType Func) const {
+        uint64_t B = getPrimitive<false>();
+
+        while (B != 0) {
+#if defined(USE_BMI1)
+            Square Sq = static_cast<Square>(_tzcnt_u64(B));
+#else
+            Square Sq = static_cast<Square>(__builtin_ctzll(B));
+#endif
+            B &= (B - 1);
+            const bool Result = Func(Sq);
+
+            if (Result) {
+                return true;
+            }
+        }
+
+        B = getPrimitive<true>();
+        while (B != 0) {
+#if defined(USE_BMI1)
+            Square Sq = static_cast<Square>(63 + _tzcnt_u64(B));
+#else
+            Square Sq = static_cast<Square>(63 + __builtin_ctzll(B));
+#endif
+            B &= (B - 1);
+            const bool Result = Func(Sq);
+
+            if (Result) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     [[maybe_unused]] [[nodiscard]] constexpr uint64_t horizontalOr() const {
