@@ -26,17 +26,13 @@ core::Move32 attack(core::State* S, int Limit) {
     const auto CheckMoves = [&]() {
         if (Limit > 3 && S->getStandCount<C, core::PTK_Pawn>() > 0) {
             // Generate non-promoting moves to avoid utifu-dume rule.
-            return core::MoveGenerator::generatePossiblyLegalCheckMoves<C, false>(*S);
+            return core::MoveGenerator::generateLegalCheckMoves<C, false>(*S);
         } else {
-            return core::MoveGenerator::generatePossiblyLegalCheckMoves<C, true>(*S);
+            return core::MoveGenerator::generateLegalCheckMoves<C, true>(*S);
         }
     }();
 
     for (const auto& Move : CheckMoves) {
-        if (S->isSuicideMove<C>(Move)) {
-            continue;
-        }
-
         S->doMove<C>(Move);
 
         const auto CounterMove = defence<~C>(S, Limit - 1);
@@ -53,14 +49,10 @@ core::Move32 attack(core::State* S, int Limit) {
 
 template<core::Color C>
 core::Move32 defence(core::State* S, int Limit) {
-    const auto DefenceMoves = core::MoveGenerator::generatePossiblyLegalEvasionMoves<C, true>(*S);
+    const auto DefenceMoves = core::MoveGenerator::generateLegalMoves<C, true>(*S);
 
     bool IsCheckmatedBy1Ply = true;
     for (const auto& Move : DefenceMoves) {
-        if (S->isSuicideMove<C>(Move)) {
-            continue;
-        }
-
         S->doMove<C>(Move);
 
         const auto CheckMove = attack<~C>(S, Limit - 1);

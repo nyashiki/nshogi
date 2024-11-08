@@ -19,7 +19,7 @@ template <bool WilyPromote>
 void testMoveGenerationNum(const std::string& Sfen, size_t Count) {
     nshogi::core::State State = nshogi::io::sfen::StateBuilder::newState(Sfen);
     const auto Moves =
-        nshogi::core::MoveGenerator::generatePossiblyLegalMoves<WilyPromote>(
+        nshogi::core::MoveGenerator::generateLegalMoves<WilyPromote>(
             State);
 
     TEST_ASSERT_EQ(Moves.size(), Count);
@@ -40,7 +40,7 @@ TEST(MoveGeneration, MaxMoveCountPosition) {
 TEST(MoveGeneration, MatsuriPosition) {
     testMoveGenerationNum<true>(
         "l6nl/5+P1gk/2np1S3/p1p4Pp/3P2Sp1/1PPb2P1P/P5GS1/R8/LN4bKL w RGgsn5p 1",
-        199);
+        198);
 }
 
 TEST(MoveGeneration, EvasionPosition1) {

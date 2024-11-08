@@ -141,6 +141,11 @@ struct alignas(16) Bitboard {
     }
 
     constexpr bool isSet(Square Sq) const {
+#if defined(USE_SSE41)
+        if (!std::is_constant_evaluated()) {
+            return !_mm_testz_si128(Bitboard_, SquareBB[Sq].Bitboard_);
+        }
+#endif
         return !(*this & SquareBB[Sq]).isZero();
     }
 
