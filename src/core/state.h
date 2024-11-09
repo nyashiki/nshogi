@@ -554,15 +554,22 @@ class State {
         return getStepAttackBB<C>(ExcludeSq) | getSliderAttackBB<C>(ExcludeSq);
     }
 
-    template <Color C, PieceTypeKind Type>
+    template <Color C>
     inline bool isAttackedByOneStep(Square Sq) const {
-        return bitboard::isAttacked(bitboard::getAttackBB<C, Type>(Sq),
-                                    getBitboard<~C, Type>());
+        const bitboard::Bitboard UnderAttackedBB =
+            (bitboard::getAttackBB<C, PTK_Pawn>(Sq) & getBitboard<PTK_Pawn>()) |
+            (bitboard::getAttackBB<C, PTK_Knight>(Sq) & getBitboard<PTK_Knight>()) |
+            (bitboard::getAttackBB<C, PTK_Silver>(Sq) & getBitboard<PTK_Silver>()) |
+            (bitboard::getAttackBB<C, PTK_King>(Sq) & getBitboard<PTK_King>()) |
+            (bitboard::getAttackBB<C, PTK_Gold>(Sq) & (
+               getBitboard<PTK_Gold>() | getBitboard<PTK_ProPawn>() | getBitboard<PTK_ProLance>() |
+               getBitboard<PTK_ProKnight>() | getBitboard<PTK_ProSilver>()));
+
+        return !(UnderAttackedBB & getBitboard<~C>()).isZero();
     }
 
     template <Color C, PieceTypeKind Type>
-    inline bool isAttackedBySlider(Square Sq,
-                                   const bitboard::Bitboard& OccupiedBB, Square VirtualSq = SqInvalid) const {
+    inline bool isAttackedBySlider(Square Sq, const bitboard::Bitboard& OccupiedBB, Square VirtualSq = SqInvalid) const {
         static_assert(Type == PTK_Lance || Type == PTK_Bishop ||
                           Type == PTK_ProBishop || Type == PTK_Rook ||
                           Type == PTK_ProRook,
@@ -571,76 +578,45 @@ class State {
                       "that must not be passed in.");
 
         if constexpr (Type == PTK_Lance) {
-            bool IsAttacked = false;
-            (getBitboard<~C, PTK_Lance>() & bitboard::getForwardBB<C>(Sq)).forEach([&](Square LanceSq) {
+            return (getBitboard<~C, PTK_Lance>() & bitboard::getForwardBB<C>(Sq)).any([&](Square LanceSq) {
                 if (VirtualSq != SqInvalid && LanceSq == VirtualSq) {
-                    return;
+                    return false;
                 }
                 const bitboard::Bitboard BetweenOccupiedBB =
                     bitboard::getBetweenBB(Sq, LanceSq) & OccupiedBB;
 
-                if (BetweenOccupiedBB.isZero()) {
-                    IsAttacked = true;
-                    return;
-                }
+                return BetweenOccupiedBB.isZero();
             });
-
-            return IsAttacked;
         } else if constexpr (Type == PTK_Bishop || Type == PTK_ProBishop) {
-            bool IsAttacked = false;
-            ((getBitboard<PTK_Bishop>() | getBitboard<PTK_ProBishop>()) & getBitboard<~C>() & bitboard::DiagBB[Sq]).forEach([&](Square BishopSq) {
+            if (((getBitboard<PTK_Bishop>() | getBitboard<PTK_ProBishop>()) & getBitboard<~C>() & bitboard::DiagBB[Sq]).any([&](Square BishopSq) {
                 if (VirtualSq != SqInvalid && BishopSq == VirtualSq) {
-                    return;
+                    return false;
                 }
                 const bitboard::Bitboard BetweenOccupiedBB =
                     bitboard::getBetweenBB(Sq, BishopSq) & OccupiedBB;
 
-                if (BetweenOccupiedBB.isZero()) {
-                    IsAttacked = true;
-                    return;
-                }
-            });
-
-            if (IsAttacked) {
+                return BetweenOccupiedBB.isZero();
+            })) {
                 return true;
             }
 
             return bitboard::isAttacked(
                     bitboard::KingAttackBB[Sq], getBitboard<~C, PTK_ProBishop>());
-            // return
-            //     bitboard::isAttacked(
-            //         bitboard::getBishopAttackBB<PTK_Bishop>(Sq, OccupiedBB),
-            //         ((getBitboard<PTK_Bishop>() | getBitboard<PTK_ProBishop>()) & getBitboard<~C>())) ||
-            //     bitboard::isAttacked(
-            //         bitboard::KingAttackBB[Sq], getBitboard<~C, PTK_ProBishop>());
         } else if constexpr (Type == PTK_Rook || Type == PTK_ProRook) {
-            bool IsAttacked = false;
-            ((getBitboard<PTK_Rook>() | getBitboard<PTK_ProRook>()) & getBitboard<~C>() & bitboard::CrossBB[Sq]).forEach([&](Square RookSq) {
+            if (((getBitboard<PTK_Rook>() | getBitboard<PTK_ProRook>()) & getBitboard<~C>() & bitboard::CrossBB[Sq]).any([&](Square RookSq) {
                 if (VirtualSq != SqInvalid && RookSq == VirtualSq) {
-                    return;
+                    return false;
                 }
                 const bitboard::Bitboard BetweenOccupiedBB =
                     bitboard::getBetweenBB(Sq, RookSq) & OccupiedBB;
 
-                if (BetweenOccupiedBB.isZero()) {
-                    IsAttacked = true;
-                    return;
-                }
-            });
-
-            if (IsAttacked) {
+                return BetweenOccupiedBB.isZero();
+            })) {
                 return true;
             }
 
             return bitboard::isAttacked(
                     bitboard::KingAttackBB[Sq], getBitboard<~C, PTK_ProRook>());
-
-            // return
-            //     bitboard::isAttacked(
-            //         bitboard::getRookAttackBB<PTK_Rook>(Sq, OccupiedBB),
-            //         ((getBitboard<PTK_Rook>() | getBitboard<PTK_ProRook>()) & getBitboard<~C>())) ||
-            //     bitboard::isAttacked(
-            //         bitboard::KingAttackBB[Sq], getBitboard<~C, PTK_ProRook>());
         }
     }
 
@@ -662,16 +638,7 @@ class State {
 
     template <Color C>
     inline bool isAttacked(Square Sq, Square ExcludeSq = SqInvalid, Square VirtualSq = SqInvalid) const {
-        const bitboard::Bitboard UnderAttackedBB =
-            (bitboard::getAttackBB<C, PTK_Pawn>(Sq) & getBitboard<PTK_Pawn>()) |
-            (bitboard::getAttackBB<C, PTK_Knight>(Sq) & getBitboard<PTK_Knight>()) |
-            (bitboard::getAttackBB<C, PTK_Silver>(Sq) & getBitboard<PTK_Silver>()) |
-            (bitboard::getAttackBB<C, PTK_King>(Sq) & getBitboard<PTK_King>()) |
-            (bitboard::getAttackBB<C, PTK_Gold>(Sq) & (
-               getBitboard<PTK_Gold>() | getBitboard<PTK_ProPawn>() | getBitboard<PTK_ProLance>() |
-               getBitboard<PTK_ProKnight>() | getBitboard<PTK_ProSilver>()));
-
-        if (!(UnderAttackedBB & getBitboard<~C>()).isZero()) {
+        if (isAttackedByOneStep<C>(Sq)) {
             return true;
         }
 

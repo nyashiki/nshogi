@@ -442,7 +442,7 @@ struct alignas(16) Bitboard {
 
     template <typename FuncType>
     requires std::is_invocable_r_v<bool, FuncType, Square>
-    bool forEachUntil(FuncType Func) const {
+    bool any(FuncType Func) const {
         uint64_t B = getPrimitive<false>();
 
         while (B != 0) {
