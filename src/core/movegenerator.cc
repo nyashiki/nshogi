@@ -438,9 +438,13 @@ inline Move32* generateDroppingMovesImplAVX2(const State& S, Move32* List,
         uint32_t Pack32[8];
     };
 
+    const __m256i FromOffset256 = _mm256_set1_epi32(NumSquares - 1);
+    const __m128i FromOffset128 = _mm_set1_epi32(NumSquares - 1);
+    const uint64_t FromOffset64 = (uint64_t)(NumSquares - 1) << 32 | (NumSquares - 1);
+    const uint32_t FromOffset32 = (uint32_t)(NumSquares - 1);
+
     /* if (Stands exist) */ {
         DroppingPack256 DP;
-        DP.Pack256 = _mm256_setzero_si256();
 
         // uint32_t DroppingCandidates[6];
         int MoveCount = 0;
@@ -474,27 +478,23 @@ inline Move32* generateDroppingMovesImplAVX2(const State& S, Move32* List,
         switch (MoveCount) {
             case 1: {
                 uint32_t PTs = DP.Pack32[0] << 15;
-                uint32_t Froms = DP.Pack32[0] + (NumSquares - 1);
+                uint32_t Froms = DP.Pack32[0] + FromOffset32;
                 Froms <<= 7;
                 DP.Pack32[0] = PTs | Froms;
                 ToBB.forEach([&](Square To) {
-                    DroppingPack256 Base;
-                    Base.Pack32[0] = DP.Pack32[0];
-                    Base.Pack32[0] |= (uint32_t)To;
-                    *List++ = Move32::fromValue(Base.Pack32[0]);
+                    *List++ = Move32::fromValue(DP.Pack32[0] | (uint32_t)To);
                 });
                 break;
             }
             case 2: {
                 uint64_t PTs = DP.Pack64[0] << 15;
-                uint64_t Froms = DP.Pack64[0] + ((uint64_t)(NumSquares - 1) << 32 | (uint64_t)(NumSquares - 1));
+                uint64_t Froms = DP.Pack64[0] + FromOffset64;
                 Froms <<= 7;
                 DP.Pack64[0] = PTs | Froms;
                 ToBB.forEach([&](Square To) {
                     DroppingPack256 Base;
-                    Base.Pack64[0] = DP.Pack64[0];
                     uint64_t Tos = ((uint64_t)To << 32 | (uint64_t)To);
-                    Base.Pack64[0] |= Tos;
+                    Base.Pack64[0] = DP.Pack64[0] | Tos;
                     *List++ = Move32::fromValue(Base.Pack32[0]);
                     *List++ = Move32::fromValue(Base.Pack32[1]);
                 });
@@ -502,14 +502,13 @@ inline Move32* generateDroppingMovesImplAVX2(const State& S, Move32* List,
             }
             case 3: {
                 __m128i PTs = _mm_slli_epi32(DP.Pack128[0], 15);
-                __m128i Froms = _mm_add_epi32(DP.Pack128[0], _mm_set1_epi32(NumSquares - 1));
+                __m128i Froms = _mm_add_epi32(DP.Pack128[0], FromOffset128);
                 Froms = _mm_slli_epi32(Froms, 7);
                 DP.Pack128[0] = _mm_or_si128(PTs, Froms);
                 ToBB.forEach([&](Square To) {
                     DroppingPack256 Base;
-                    Base.Pack128[0] = DP.Pack128[0];
                     __m128i Tos = _mm_set1_epi32((int32_t)To);
-                    Base.Pack128[0] = _mm_or_si128(Base.Pack128[0], Tos);
+                    Base.Pack128[0] = _mm_or_si128(DP.Pack128[0], Tos);
                     *List++ = Move32::fromValue(Base.Pack32[0]);
                     *List++ = Move32::fromValue(Base.Pack32[1]);
                     *List++ = Move32::fromValue(Base.Pack32[2]);
@@ -518,14 +517,13 @@ inline Move32* generateDroppingMovesImplAVX2(const State& S, Move32* List,
             }
             case 4: {
                 __m128i PTs = _mm_slli_epi32(DP.Pack128[0], 15);
-                __m128i Froms = _mm_add_epi32(DP.Pack128[0], _mm_set1_epi32(NumSquares - 1));
+                __m128i Froms = _mm_add_epi32(DP.Pack128[0], FromOffset128);
                 Froms = _mm_slli_epi32(Froms, 7);
                 DP.Pack128[0] = _mm_or_si128(PTs, Froms);
                 ToBB.forEach([&](Square To) {
                     DroppingPack256 Base;
-                    Base.Pack128[0] = DP.Pack128[0];
                     __m128i Tos = _mm_set1_epi32((int32_t)To);
-                    Base.Pack128[0] = _mm_or_si128(Base.Pack128[0], Tos);
+                    Base.Pack128[0] = _mm_or_si128(DP.Pack128[0], Tos);
                     *List++ = Move32::fromValue(Base.Pack32[0]);
                     *List++ = Move32::fromValue(Base.Pack32[1]);
                     *List++ = Move32::fromValue(Base.Pack32[2]);
@@ -535,14 +533,13 @@ inline Move32* generateDroppingMovesImplAVX2(const State& S, Move32* List,
             }
             case 5: {
                 __m256i PTs = _mm256_slli_epi32(DP.Pack256, 15);
-                __m256i Froms = _mm256_add_epi32(DP.Pack256, _mm256_set1_epi32(NumSquares - 1));
+                __m256i Froms = _mm256_add_epi32(DP.Pack256, FromOffset256);
                 Froms = _mm256_slli_epi32(Froms, 7);
                 DP.Pack256 = _mm256_or_si256(PTs, Froms);
                 ToBB.forEach([&](Square To) {
                     DroppingPack256 Base;
-                    Base.Pack256 = DP.Pack256;
                     __m256i Tos = _mm256_set1_epi32((int32_t)To);
-                    Base.Pack256 = _mm256_or_si256(Base.Pack256, Tos);
+                    Base.Pack256 = _mm256_or_si256(DP.Pack256, Tos);
                     *List++ = Move32::fromValue(Base.Pack32[0]);
                     *List++ = Move32::fromValue(Base.Pack32[1]);
                     *List++ = Move32::fromValue(Base.Pack32[2]);
@@ -553,14 +550,13 @@ inline Move32* generateDroppingMovesImplAVX2(const State& S, Move32* List,
             }
             case 6: {
                 __m256i PTs = _mm256_slli_epi32(DP.Pack256, 15);
-                __m256i Froms = _mm256_add_epi32(DP.Pack256, _mm256_set1_epi32(NumSquares - 1));
+                __m256i Froms = _mm256_add_epi32(DP.Pack256, FromOffset256);
                 Froms = _mm256_slli_epi32(Froms, 7);
                 DP.Pack256 = _mm256_or_si256(PTs, Froms);
                 ToBB.forEach([&](Square To) {
                     DroppingPack256 Base;
-                    Base.Pack256 = DP.Pack256;
                     __m256i Tos = _mm256_set1_epi32((int32_t)To);
-                    Base.Pack256 = _mm256_or_si256(Base.Pack256, Tos);
+                    Base.Pack256 = _mm256_or_si256(DP.Pack256, Tos);
                     *List++ = Move32::fromValue(Base.Pack32[0]);
                     *List++ = Move32::fromValue(Base.Pack32[1]);
                     *List++ = Move32::fromValue(Base.Pack32[2]);
@@ -575,7 +571,6 @@ inline Move32* generateDroppingMovesImplAVX2(const State& S, Move32* List,
 
     {
         DroppingPack256 DP;
-        DP.Pack256 = _mm256_setzero_si256();
 
         int MoveCount = 0;
         if (LanceExists) {
@@ -603,27 +598,23 @@ inline Move32* generateDroppingMovesImplAVX2(const State& S, Move32* List,
         switch (MoveCount) {
             case 1: {
                 uint32_t PTs = DP.Pack32[0] << 15;
-                uint32_t Froms = DP.Pack32[0] + (NumSquares - 1);
+                uint32_t Froms = DP.Pack32[0] + FromOffset32;
                 Froms <<= 7;
                 DP.Pack32[0] = PTs | Froms;
                 ToBB.forEach([&](Square To) {
-                    DroppingPack256 Base;
-                    Base.Pack32[0] = DP.Pack32[0];
-                    Base.Pack32[0] |= (uint32_t)To;
-                    *List++ = Move32::fromValue(Base.Pack32[0]);
+                    *List++ = Move32::fromValue(DP.Pack32[0] | (uint32_t)To);
                 });
                 break;
             }
             case 2: {
                 uint64_t PTs = DP.Pack64[0] << 15;
-                uint64_t Froms = DP.Pack64[0] + ((uint64_t)(NumSquares - 1) << 32 | (uint64_t)(NumSquares - 1));
+                uint64_t Froms = DP.Pack64[0] + FromOffset64;
                 Froms <<= 7;
                 DP.Pack64[0] = PTs | Froms;
                 ToBB.forEach([&](Square To) {
                     DroppingPack256 Base;
-                    Base.Pack64[0] = DP.Pack64[0];
                     uint64_t Tos = ((uint64_t)To << 32 | (uint64_t)To);
-                    Base.Pack64[0] |= Tos;
+                    Base.Pack64[0] = DP.Pack64[0] | Tos;
                     *List++ = Move32::fromValue(Base.Pack32[0]);
                     *List++ = Move32::fromValue(Base.Pack32[1]);
                 });
@@ -631,14 +622,13 @@ inline Move32* generateDroppingMovesImplAVX2(const State& S, Move32* List,
             }
             case 3: {
                 __m128i PTs = _mm_slli_epi32(DP.Pack128[0], 15);
-                __m128i Froms = _mm_add_epi32(DP.Pack128[0], _mm_set1_epi32(NumSquares - 1));
+                __m128i Froms = _mm_add_epi32(DP.Pack128[0], FromOffset128);
                 Froms = _mm_slli_epi32(Froms, 7);
                 DP.Pack128[0] = _mm_or_si128(PTs, Froms);
                 ToBB.forEach([&](Square To) {
                     DroppingPack256 Base;
-                    Base.Pack128[0] = DP.Pack128[0];
                     __m128i Tos = _mm_set1_epi32((int32_t)To);
-                    Base.Pack128[0] = _mm_or_si128(Base.Pack128[0], Tos);
+                    Base.Pack128[0] = _mm_or_si128(DP.Pack128[0], Tos);
                     *List++ = Move32::fromValue(Base.Pack32[0]);
                     *List++ = Move32::fromValue(Base.Pack32[1]);
                     *List++ = Move32::fromValue(Base.Pack32[2]);
@@ -647,14 +637,13 @@ inline Move32* generateDroppingMovesImplAVX2(const State& S, Move32* List,
             }
             case 4: {
                 __m128i PTs = _mm_slli_epi32(DP.Pack128[0], 15);
-                __m128i Froms = _mm_add_epi32(DP.Pack128[0], _mm_set1_epi32(NumSquares - 1));
+                __m128i Froms = _mm_add_epi32(DP.Pack128[0], FromOffset128);
                 Froms = _mm_slli_epi32(Froms, 7);
                 DP.Pack128[0] = _mm_or_si128(PTs, Froms);
                 ToBB.forEach([&](Square To) {
                     DroppingPack256 Base;
-                    Base.Pack128[0] = DP.Pack128[0];
                     __m128i Tos = _mm_set1_epi32((int32_t)To);
-                    Base.Pack128[0] = _mm_or_si128(Base.Pack128[0], Tos);
+                    Base.Pack128[0] = _mm_or_si128(DP.Pack128[0], Tos);
                     *List++ = Move32::fromValue(Base.Pack32[0]);
                     *List++ = Move32::fromValue(Base.Pack32[1]);
                     *List++ = Move32::fromValue(Base.Pack32[2]);
@@ -664,14 +653,13 @@ inline Move32* generateDroppingMovesImplAVX2(const State& S, Move32* List,
             }
             case 5: {
                 __m256i PTs = _mm256_slli_epi32(DP.Pack256, 15);
-                __m256i Froms = _mm256_add_epi32(DP.Pack256, _mm256_set1_epi32(NumSquares - 1));
+                __m256i Froms = _mm256_add_epi32(DP.Pack256, FromOffset256);
                 Froms = _mm256_slli_epi32(Froms, 7);
                 DP.Pack256 = _mm256_or_si256(PTs, Froms);
                 ToBB.forEach([&](Square To) {
                     DroppingPack256 Base;
-                    Base.Pack256 = DP.Pack256;
                     __m256i Tos = _mm256_set1_epi32((int32_t)To);
-                    Base.Pack256 = _mm256_or_si256(Base.Pack256, Tos);
+                    Base.Pack256 = _mm256_or_si256(DP.Pack256, Tos);
                     *List++ = Move32::fromValue(Base.Pack32[0]);
                     *List++ = Move32::fromValue(Base.Pack32[1]);
                     *List++ = Move32::fromValue(Base.Pack32[2]);
@@ -685,7 +673,6 @@ inline Move32* generateDroppingMovesImplAVX2(const State& S, Move32* List,
 
     {
         DroppingPack256 DP;
-        DP.Pack128[0] = _mm_setzero_si128();
         int MoveCount = 0;
         if (SilverExists) {
             DP.Pack32[MoveCount] = (int32_t)PTK_Silver;
@@ -709,27 +696,23 @@ inline Move32* generateDroppingMovesImplAVX2(const State& S, Move32* List,
         switch (MoveCount) {
             case 1: {
                 uint32_t PTs = DP.Pack32[0] << 15;
-                uint32_t Froms = DP.Pack32[0] + (NumSquares - 1);
+                uint32_t Froms = DP.Pack32[0] + FromOffset32;
                 Froms <<= 7;
                 DP.Pack32[0] = PTs | Froms;
                 ToBB.forEach([&](Square To) {
-                    DroppingPack256 Base;
-                    Base.Pack32[0] = DP.Pack32[0];
-                    Base.Pack32[0] |= (uint32_t)To;
-                    *List++ = Move32::fromValue(Base.Pack32[0]);
+                    *List++ = Move32::fromValue(DP.Pack32[0] | (uint32_t)To);
                 });
                 break;
             }
             case 2: {
                 uint64_t PTs = DP.Pack64[0] << 15;
-                uint64_t Froms = DP.Pack64[0] + ((uint64_t)(NumSquares - 1) << 32 | (uint64_t)(NumSquares - 1));
+                uint64_t Froms = DP.Pack64[0] + FromOffset64;
                 Froms <<= 7;
                 DP.Pack64[0] = PTs | Froms;
                 ToBB.forEach([&](Square To) {
                     DroppingPack256 Base;
-                    Base.Pack64[0] = DP.Pack64[0];
                     uint64_t Tos = ((uint64_t)To << 32 | (uint64_t)To);
-                    Base.Pack64[0] |= Tos;
+                    Base.Pack64[0] = DP.Pack64[0] | Tos;
                     *List++ = Move32::fromValue(Base.Pack32[0]);
                     *List++ = Move32::fromValue(Base.Pack32[1]);
                 });
@@ -737,14 +720,13 @@ inline Move32* generateDroppingMovesImplAVX2(const State& S, Move32* List,
             }
             case 3: {
                 __m128i PTs = _mm_slli_epi32(DP.Pack128[0], 15);
-                __m128i Froms = _mm_add_epi32(DP.Pack128[0], _mm_set1_epi32(NumSquares - 1));
+                __m128i Froms = _mm_add_epi32(DP.Pack128[0], FromOffset128);
                 Froms = _mm_slli_epi32(Froms, 7);
                 DP.Pack128[0] = _mm_or_si128(PTs, Froms);
                 ToBB.forEach([&](Square To) {
                     DroppingPack256 Base;
-                    Base.Pack128[0] = DP.Pack128[0];
                     __m128i Tos = _mm_set1_epi32((int32_t)To);
-                    Base.Pack128[0] = _mm_or_si128(Base.Pack128[0], Tos);
+                    Base.Pack128[0] = _mm_or_si128(DP.Pack128[0], Tos);
                     *List++ = Move32::fromValue(Base.Pack32[0]);
                     *List++ = Move32::fromValue(Base.Pack32[1]);
                     *List++ = Move32::fromValue(Base.Pack32[2]);
@@ -753,14 +735,13 @@ inline Move32* generateDroppingMovesImplAVX2(const State& S, Move32* List,
             }
             case 4: {
                 __m128i PTs = _mm_slli_epi32(DP.Pack128[0], 15);
-                __m128i Froms = _mm_add_epi32(DP.Pack128[0], _mm_set1_epi32(NumSquares - 1));
+                __m128i Froms = _mm_add_epi32(DP.Pack128[0], FromOffset128);
                 Froms = _mm_slli_epi32(Froms, 7);
                 DP.Pack128[0] = _mm_or_si128(PTs, Froms);
                 ToBB.forEach([&](Square To) {
                     DroppingPack256 Base;
-                    Base.Pack128[0] = DP.Pack128[0];
                     __m128i Tos = _mm_set1_epi32((int32_t)To);
-                    Base.Pack128[0] = _mm_or_si128(Base.Pack128[0], Tos);
+                    Base.Pack128[0] = _mm_or_si128(DP.Pack128[0], Tos);
                     *List++ = Move32::fromValue(Base.Pack32[0]);
                     *List++ = Move32::fromValue(Base.Pack32[1]);
                     *List++ = Move32::fromValue(Base.Pack32[2]);
