@@ -645,6 +645,22 @@ class State {
     }
 
     template <Color C>
+    inline bool isAttackedBySlider(Square Sq,
+                                   const bitboard::Bitboard& OccupiedBB, Square ExcludeSq = SqInvalid, Square VirtualSq = SqInvalid) const {
+        bitboard::Bitboard OccupiedBB2 = OccupiedBB;
+        if (ExcludeSq != SqInvalid) {
+            assert(OccupiedBB.isSet(ExcludeSq));
+            OccupiedBB2.toggleBit(ExcludeSq);
+        }
+        if (VirtualSq != SqInvalid) {
+            OccupiedBB2 |= bitboard::SquareBB[VirtualSq];
+        }
+        return isAttackedBySlider<C, PTK_Bishop>(Sq, OccupiedBB2, VirtualSq) ||
+            isAttackedBySlider<C, PTK_Rook>(Sq, OccupiedBB2, VirtualSq) ||
+            isAttackedBySlider<C, PTK_Lance>(Sq, OccupiedBB2, VirtualSq);
+    }
+
+    template <Color C>
     inline bool isAttacked(Square Sq, Square ExcludeSq = SqInvalid, Square VirtualSq = SqInvalid) const {
         const bitboard::Bitboard UnderAttackedBB =
             (bitboard::getAttackBB<C, PTK_Pawn>(Sq) & getBitboard<PTK_Pawn>()) |
@@ -659,20 +675,8 @@ class State {
             return true;
         }
 
-        bitboard::Bitboard OccupiedBB =
-            getBitboard<Black>() | getBitboard<White>();
-        if (ExcludeSq != SqInvalid) {
-            assert(OccupiedBB.isSet(ExcludeSq));
-            OccupiedBB.toggleBit(ExcludeSq);
-        }
-        if (VirtualSq != SqInvalid) {
-            OccupiedBB |= bitboard::SquareBB[VirtualSq];
-        }
-
-        return
-            isAttackedBySlider<C, PTK_Bishop>(Sq, OccupiedBB, VirtualSq) ||
-            isAttackedBySlider<C, PTK_Rook>(Sq, OccupiedBB, VirtualSq) ||
-            isAttackedBySlider<C, PTK_Lance>(Sq, OccupiedBB, VirtualSq);
+        const bitboard::Bitboard OccupiedBB = getBitboard<Black>() | getBitboard<White>();
+        return isAttackedBySlider<C>(Sq, OccupiedBB, ExcludeSq, VirtualSq);
     }
 
  private:
