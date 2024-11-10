@@ -11,20 +11,11 @@ class MoveGenerator {
  public:
     MoveGenerator() = delete;
 
-    template <bool WilyPromote = true>
-    static MoveList generatePossiblyLegalMoves(const State& S);
-
-    template <bool WilyPromote = true>
-    static MoveList generatePossiblyLegalCheckMoves(const State& S);
-
-    template <bool WilyPromote = true>
-    static MoveList generatePossiblyLegalEvasionMoves(const State& S);
+    template <Color C, bool WilyPromote = true>
+    static MoveList generateLegalMoves(const State& S);
 
     template <Color C, bool WilyPromote = true>
-    static MoveList generatePossiblyLegalCheckMoves(const State& S);
-
-    template <Color C, bool WilyPromote = true>
-    static MoveList generatePossiblyLegalEvasionMoves(const State& S);
+    static MoveList generateLegalCheckMoves(const State& S);
 
     template <bool WilyPromote = true>
     static MoveList generateLegalMoves(const State& S);

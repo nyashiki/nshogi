@@ -5,6 +5,8 @@
 #include "position.h"
 #include "types.h"
 
+#include "../io/sfen.h"
+
 namespace nshogi {
 namespace core {
 
@@ -18,7 +20,7 @@ enum struct GenerateType {
 
 template <Color C, bool Capture, bool WilyPromote = true>
 inline Move32* generateOnBoardOneStepPawnMovesImpl(const State& S, Move32* Moves,
-                                               const Bitboard& TargetSquares) {
+                                               const Bitboard& TargetSquares, const Bitboard& OccupiedBB) {
     Bitboard ToBB = S.getBitboard<C, PTK_Pawn>();
 
     if constexpr (C == Black) {
@@ -30,27 +32,22 @@ inline Move32* generateOnBoardOneStepPawnMovesImpl(const State& S, Move32* Moves
     ToBB &= TargetSquares;
 
     ToBB.forEach([&](Square To) {
+        const Square From = (C == Black) ? (To + South) : (To + North);
+
+        const bool IsDefendingPiece = S.getDefendingOpponentSliderBB<C>().isSet(From);
+        if (IsDefendingPiece && S.isAttackedBySlider<C>(S.getKingSquare<C>(), OccupiedBB, From, To)) {
+            return;
+        }
+
         if (PromotableBB[C].isSet(To)) {
-            if constexpr (C == Black) {
-                if constexpr (Capture) {
-                    const PieceTypeKind CaptureType =
-                        getPieceType(S.getPosition().pieceOn(To));
-                    *Moves++ = Move32::boardPromotingMove(
-                        To + South, To, PTK_Pawn, CaptureType);
-                } else {
-                    *Moves++ =
-                        Move32::boardPromotingMove(To + South, To, PTK_Pawn);
-                }
+            if constexpr (Capture) {
+                const PieceTypeKind CaptureType =
+                    getPieceType(S.getPosition().pieceOn(To));
+                *Moves++ = Move32::boardPromotingMove(
+                    From, To, PTK_Pawn, CaptureType);
             } else {
-                if constexpr (Capture) {
-                    const PieceTypeKind CaptureType =
-                        getPieceType(S.getPosition().pieceOn(To));
-                    *Moves++ = Move32::boardPromotingMove(
-                        To + North, To, PTK_Pawn, CaptureType);
-                } else {
-                    *Moves++ =
-                        Move32::boardPromotingMove(To + North, To, PTK_Pawn);
-                }
+                *Moves++ =
+                    Move32::boardPromotingMove(From, To, PTK_Pawn);
             }
 
             if (WilyPromote) {
@@ -86,16 +83,22 @@ inline Move32* generateOnBoardOneStepPawnMovesImpl(const State& S, Move32* Moves
 }
 
 template <Color C, bool Capture>
-inline Move32* generateOnBoardOneStepGoldKindsMovesImpl(const State& S, Move32* Moves, const Bitboard& TargetSquares) {
+inline Move32* generateOnBoardOneStepGoldKindsMovesImpl(const State& S, Move32* Moves, const Bitboard& TargetSquares, const Bitboard& OccupiedBB) {
     const Bitboard FromBB = (S.getBitboard<PTK_Gold>() | S.getBitboard<PTK_ProPawn>()
                         | S.getBitboard<PTK_ProLance>() | S.getBitboard<PTK_ProKnight>()
                         | S.getBitboard<PTK_ProSilver>()) & S.getBitboard<C>();
 
     FromBB.forEach([&](Square From) {
+        const bool IsDefendingPiece = S.getDefendingOpponentSliderBB<C>().isSet(From);
+
         const PieceTypeKind FromPieceType = getPieceType(S.getPosition().pieceOn(From));
 
         const Bitboard ToBB = TargetSquares & getAttackBB<C, PTK_Gold>(From);
         ToBB.forEach([&](Square To) {
+            if (IsDefendingPiece && S.isAttackedBySlider<C>(S.getKingSquare<C>(), OccupiedBB, From, To)) {
+                return;
+            }
+
             if constexpr (Capture) {
                 const PieceTypeKind CaptureType =
                     getPieceType(S.getPosition().pieceOn(To));
@@ -111,7 +114,7 @@ inline Move32* generateOnBoardOneStepGoldKindsMovesImpl(const State& S, Move32* 
 
 template <Color C, PieceTypeKind Type, bool Capture>
 inline Move32* generateOnBoardOneStepMovesImpl(const State& S, Move32* Moves,
-                                           const Bitboard& TargetSquares) {
+                                           const Bitboard& TargetSquares, const Bitboard& OccupiedBB) {
     static_assert(Type != PTK_Pawn,
                   "Pawn moves are handled in another function. "
                   "Do not use this function for pawns.");
@@ -132,8 +135,19 @@ inline Move32* generateOnBoardOneStepMovesImpl(const State& S, Move32* Moves,
                                       PromotableBB[C].isSet(From);
         assert(checkRange(From));
 
+        const bool IsDefendingPiece = S.getDefendingOpponentSliderBB<C>().isSet(From);
+
         const Bitboard ToBB = TargetSquares & getAttackBB<C, Type>(From);
         ToBB.forEach([&](Square To) {
+            if constexpr (Type == PTK_King) {
+                if (S.isAttacked<C>(To, From)) {
+                    return;
+                }
+            }
+            if (IsDefendingPiece && S.isAttackedBySlider<C>(S.getKingSquare<C>(), OccupiedBB, From, To)) {
+                return;
+            }
+
             // Handling regular promotion cases for all piece types.
             if constexpr (Type != PTK_King) {
                 if constexpr (Type == PTK_Knight) {
@@ -197,8 +211,14 @@ inline Move32* generateOnBoardLanceMovesImpl(const State& S, Move32* Moves,
                                          const Bitboard& OccupiedBB) {
     const Bitboard FromBB = S.getBitboard<C, PTK_Lance>();
     FromBB.forEach([&](Square From) {
+        const bool IsDefendingPiece = S.getDefendingOpponentSliderBB<C>().isSet(From);
+
         const Bitboard ToBB = getLanceAttackBB<C>(From, OccupiedBB) & TargetSquares;
         ToBB.forEach([&](Square To) {
+            if (IsDefendingPiece && S.isAttackedBySlider<C>(S.getKingSquare<C>(), OccupiedBB, From, To)) {
+                return;
+            }
+
             if constexpr (WilyPromote) {
                 if (FirstAndSecondFurthestBB[C].isSet(To)) {
                     if constexpr (Capture) {
@@ -278,12 +298,17 @@ inline Move32* generateOnBoardBishopMovesImpl(const State& S, Move32* Moves,
 
     const Bitboard FromBB = S.getBitboard<C, Type>();
     FromBB.forEach([&](Square From) {
+        const bool IsDefendingPiece = S.getDefendingOpponentSliderBB<C>().isSet(From);
         const bool IsPromotableFrom = PromotableBB[C].isSet(From);
 
         const Bitboard ToBB =
             getBishopAttackBB<Type>(From, OccupiedBB) & TargetSquares;
 
         ToBB.forEach([&](Square To) {
+            if (IsDefendingPiece && S.isAttackedBySlider<C>(S.getKingSquare<C>(), OccupiedBB, From, To)) {
+                return;
+            }
+
             if constexpr (Type == PTK_Bishop) {
                 if (IsPromotableFrom || PromotableBB[C].isSet(To)) {
                     // If the move starts or ends on a promotable square,
@@ -326,11 +351,16 @@ inline Move32* generateOnBoardRookMovesImpl(const State& S, Move32* Moves,
 
     const Bitboard FromBB = S.getBitboard<C, Type>();
     FromBB.forEach([&](Square From) {
+        const bool IsDefendingPiece = S.getDefendingOpponentSliderBB<C>().isSet(From);
         const bool IsPromotableFrom = PromotableBB[C].isSet(From);
 
         const Bitboard ToBB = getRookAttackBB<Type>(From, OccupiedBB) & TargetSquares;
 
         ToBB.forEach([&](Square To) {
+            if (IsDefendingPiece && S.isAttackedBySlider<C>(S.getKingSquare<C>(), OccupiedBB, From, To)) {
+                return;
+            }
+
             if constexpr (Type == PTK_Rook) {
                 if (IsPromotableFrom || PromotableBB[C].isSet(To)) {
                     // If the move starts or ends on a promotable square,
@@ -364,8 +394,10 @@ inline Move32* generateOnBoardRookMovesImpl(const State& S, Move32* Moves,
     return Moves;
 }
 
+#if defined(USE_AVX2)
+
 template <Color C>
-inline Move32* generateDroppingMovesImpl(const State& S, Move32* List,
+inline Move32* generateDroppingMovesImplAVX2(const State& S, Move32* List,
                                      const Bitboard& TargetSquares) {
     const Stands St = S.getPosition().getStand<C>();
 
@@ -399,96 +431,592 @@ inline Move32* generateDroppingMovesImpl(const State& S, Move32* List,
     const bool BishopExists = getStandCount<PTK_Bishop>(St) > 0;
     const bool RookExists = getStandCount<PTK_Rook>(St) > 0;
 
+    union alignas(32) DroppingPack256 {
+        __m256i Pack256;
+        __m128i Pack128[2];
+        uint64_t Pack64[4];
+        uint32_t Pack32[8];
+    };
+
+    const __m256i FromOffset256 = _mm256_set1_epi32(NumSquares - 1);
+    const __m128i FromOffset128 = _mm_set1_epi32(NumSquares - 1);
+    const uint64_t FromOffset64 = (uint64_t)(NumSquares - 1) << 32 | (NumSquares - 1);
+    const uint32_t FromOffset32 = (uint32_t)(NumSquares - 1);
+
     /* if (Stands exist) */ {
-        // Dropping move onto squares where no rule violation occurs.
+        DroppingPack256 DP;
+
+        // uint32_t DroppingCandidates[6];
+        int MoveCount = 0;
+        if (LanceExists) {
+            DP.Pack32[MoveCount] = (int32_t)PTK_Lance;
+            ++MoveCount;
+        }
+        if (KnightExists) {
+            DP.Pack32[MoveCount] = (int32_t)PTK_Knight;
+            ++MoveCount;
+        }
+        if (SilverExists) {
+            DP.Pack32[MoveCount] = (int32_t)PTK_Silver;
+            ++MoveCount;
+        }
+        if (GoldExists) {
+            DP.Pack32[MoveCount] = (int32_t)PTK_Gold;
+            ++MoveCount;
+        }
+        if (BishopExists) {
+            DP.Pack32[MoveCount] = (int32_t)PTK_Bishop;
+            ++MoveCount;
+        }
+        if (RookExists) {
+            DP.Pack32[MoveCount] = (int32_t)PTK_Rook;
+            ++MoveCount;
+        }
+
         const Bitboard ToBB = FirstAndSecondFurthestBB[C].andNot(TargetSquares);
-        ToBB.forEach([&](Square To) {
-            assert(checkRange(To));
-            if (LanceExists) {
-                *List++ = Move32::droppingMove(To, PTK_Lance);
+
+        switch (MoveCount) {
+            case 1: {
+                uint32_t PTs = DP.Pack32[0] << 15;
+                uint32_t Froms = DP.Pack32[0] + FromOffset32;
+                Froms <<= 7;
+                DP.Pack32[0] = PTs | Froms;
+                ToBB.forEach([&](Square To) {
+                    *List++ = Move32::fromValue(DP.Pack32[0] | (uint32_t)To);
+                });
+                break;
             }
-            if (KnightExists) {
-                *List++ = Move32::droppingMove(To, PTK_Knight);
+            case 2: {
+                uint64_t PTs = DP.Pack64[0] << 15;
+                uint64_t Froms = DP.Pack64[0] + FromOffset64;
+                Froms <<= 7;
+                DP.Pack64[0] = PTs | Froms;
+                ToBB.forEach([&](Square To) {
+                    DroppingPack256 Base;
+                    uint64_t Tos = ((uint64_t)To << 32 | (uint64_t)To);
+                    Base.Pack64[0] = DP.Pack64[0] | Tos;
+                    *List++ = Move32::fromValue(Base.Pack32[0]);
+                    *List++ = Move32::fromValue(Base.Pack32[1]);
+                });
+                break;
             }
-            if (SilverExists) {
-                *List++ = Move32::droppingMove(To, PTK_Silver);
+            case 3: {
+                __m128i PTs = _mm_slli_epi32(DP.Pack128[0], 15);
+                __m128i Froms = _mm_add_epi32(DP.Pack128[0], FromOffset128);
+                Froms = _mm_slli_epi32(Froms, 7);
+                DP.Pack128[0] = _mm_or_si128(PTs, Froms);
+                ToBB.forEach([&](Square To) {
+                    DroppingPack256 Base;
+                    __m128i Tos = _mm_set1_epi32((int32_t)To);
+                    Base.Pack128[0] = _mm_or_si128(DP.Pack128[0], Tos);
+                    *List++ = Move32::fromValue(Base.Pack32[0]);
+                    *List++ = Move32::fromValue(Base.Pack32[1]);
+                    *List++ = Move32::fromValue(Base.Pack32[2]);
+                });
+                break;
             }
-            if (GoldExists) {
-                *List++ = Move32::droppingMove(To, PTK_Gold);
+            case 4: {
+                __m128i PTs = _mm_slli_epi32(DP.Pack128[0], 15);
+                __m128i Froms = _mm_add_epi32(DP.Pack128[0], FromOffset128);
+                Froms = _mm_slli_epi32(Froms, 7);
+                DP.Pack128[0] = _mm_or_si128(PTs, Froms);
+                ToBB.forEach([&](Square To) {
+                    DroppingPack256 Base;
+                    __m128i Tos = _mm_set1_epi32((int32_t)To);
+                    Base.Pack128[0] = _mm_or_si128(DP.Pack128[0], Tos);
+                    *List++ = Move32::fromValue(Base.Pack32[0]);
+                    *List++ = Move32::fromValue(Base.Pack32[1]);
+                    *List++ = Move32::fromValue(Base.Pack32[2]);
+                    *List++ = Move32::fromValue(Base.Pack32[3]);
+                });
+                break;
             }
-            if (BishopExists) {
-                *List++ = Move32::droppingMove(To, PTK_Bishop);
+            case 5: {
+                __m256i PTs = _mm256_slli_epi32(DP.Pack256, 15);
+                __m256i Froms = _mm256_add_epi32(DP.Pack256, FromOffset256);
+                Froms = _mm256_slli_epi32(Froms, 7);
+                DP.Pack256 = _mm256_or_si256(PTs, Froms);
+                ToBB.forEach([&](Square To) {
+                    DroppingPack256 Base;
+                    __m256i Tos = _mm256_set1_epi32((int32_t)To);
+                    Base.Pack256 = _mm256_or_si256(DP.Pack256, Tos);
+                    *List++ = Move32::fromValue(Base.Pack32[0]);
+                    *List++ = Move32::fromValue(Base.Pack32[1]);
+                    *List++ = Move32::fromValue(Base.Pack32[2]);
+                    *List++ = Move32::fromValue(Base.Pack32[3]);
+                    *List++ = Move32::fromValue(Base.Pack32[4]);
+                });
+                break;
             }
-            if (RookExists) {
-                *List++ = Move32::droppingMove(To, PTK_Rook);
+            case 6: {
+                __m256i PTs = _mm256_slli_epi32(DP.Pack256, 15);
+                __m256i Froms = _mm256_add_epi32(DP.Pack256, FromOffset256);
+                Froms = _mm256_slli_epi32(Froms, 7);
+                DP.Pack256 = _mm256_or_si256(PTs, Froms);
+                ToBB.forEach([&](Square To) {
+                    DroppingPack256 Base;
+                    __m256i Tos = _mm256_set1_epi32((int32_t)To);
+                    Base.Pack256 = _mm256_or_si256(DP.Pack256, Tos);
+                    *List++ = Move32::fromValue(Base.Pack32[0]);
+                    *List++ = Move32::fromValue(Base.Pack32[1]);
+                    *List++ = Move32::fromValue(Base.Pack32[2]);
+                    *List++ = Move32::fromValue(Base.Pack32[3]);
+                    *List++ = Move32::fromValue(Base.Pack32[4]);
+                    *List++ = Move32::fromValue(Base.Pack32[5]);
+                });
+                break;
             }
-        });
+        }
     }
 
-    if (LanceExists || SilverExists || GoldExists || BishopExists ||
-        RookExists) {
-        // Dropping move onto the second-furthest squares.
+    {
+        DroppingPack256 DP;
+
+        int MoveCount = 0;
+        if (LanceExists) {
+            DP.Pack32[MoveCount] = (int32_t)PTK_Lance;
+            ++MoveCount;
+        }
+        if (SilverExists) {
+            DP.Pack32[MoveCount] = (int32_t)PTK_Silver;
+            ++MoveCount;
+        }
+        if (GoldExists) {
+            DP.Pack32[MoveCount] = (int32_t)PTK_Gold;
+            ++MoveCount;
+        }
+        if (BishopExists) {
+            DP.Pack32[MoveCount] = (int32_t)PTK_Bishop;
+            ++MoveCount;
+        }
+        if (RookExists) {
+            DP.Pack32[MoveCount] = (int32_t)PTK_Rook;
+            ++MoveCount;
+        }
+
         const Bitboard ToBB = TargetSquares & SecondFurthestBB[C];
-        ToBB.forEach([&](Square To) {
+        switch (MoveCount) {
+            case 1: {
+                uint32_t PTs = DP.Pack32[0] << 15;
+                uint32_t Froms = DP.Pack32[0] + FromOffset32;
+                Froms <<= 7;
+                DP.Pack32[0] = PTs | Froms;
+                ToBB.forEach([&](Square To) {
+                    *List++ = Move32::fromValue(DP.Pack32[0] | (uint32_t)To);
+                });
+                break;
+            }
+            case 2: {
+                uint64_t PTs = DP.Pack64[0] << 15;
+                uint64_t Froms = DP.Pack64[0] + FromOffset64;
+                Froms <<= 7;
+                DP.Pack64[0] = PTs | Froms;
+                ToBB.forEach([&](Square To) {
+                    DroppingPack256 Base;
+                    uint64_t Tos = ((uint64_t)To << 32 | (uint64_t)To);
+                    Base.Pack64[0] = DP.Pack64[0] | Tos;
+                    *List++ = Move32::fromValue(Base.Pack32[0]);
+                    *List++ = Move32::fromValue(Base.Pack32[1]);
+                });
+                break;
+            }
+            case 3: {
+                __m128i PTs = _mm_slli_epi32(DP.Pack128[0], 15);
+                __m128i Froms = _mm_add_epi32(DP.Pack128[0], FromOffset128);
+                Froms = _mm_slli_epi32(Froms, 7);
+                DP.Pack128[0] = _mm_or_si128(PTs, Froms);
+                ToBB.forEach([&](Square To) {
+                    DroppingPack256 Base;
+                    __m128i Tos = _mm_set1_epi32((int32_t)To);
+                    Base.Pack128[0] = _mm_or_si128(DP.Pack128[0], Tos);
+                    *List++ = Move32::fromValue(Base.Pack32[0]);
+                    *List++ = Move32::fromValue(Base.Pack32[1]);
+                    *List++ = Move32::fromValue(Base.Pack32[2]);
+                });
+                break;
+            }
+            case 4: {
+                __m128i PTs = _mm_slli_epi32(DP.Pack128[0], 15);
+                __m128i Froms = _mm_add_epi32(DP.Pack128[0], FromOffset128);
+                Froms = _mm_slli_epi32(Froms, 7);
+                DP.Pack128[0] = _mm_or_si128(PTs, Froms);
+                ToBB.forEach([&](Square To) {
+                    DroppingPack256 Base;
+                    __m128i Tos = _mm_set1_epi32((int32_t)To);
+                    Base.Pack128[0] = _mm_or_si128(DP.Pack128[0], Tos);
+                    *List++ = Move32::fromValue(Base.Pack32[0]);
+                    *List++ = Move32::fromValue(Base.Pack32[1]);
+                    *List++ = Move32::fromValue(Base.Pack32[2]);
+                    *List++ = Move32::fromValue(Base.Pack32[3]);
+                });
+                break;
+            }
+            case 5: {
+                __m256i PTs = _mm256_slli_epi32(DP.Pack256, 15);
+                __m256i Froms = _mm256_add_epi32(DP.Pack256, FromOffset256);
+                Froms = _mm256_slli_epi32(Froms, 7);
+                DP.Pack256 = _mm256_or_si256(PTs, Froms);
+                ToBB.forEach([&](Square To) {
+                    DroppingPack256 Base;
+                    __m256i Tos = _mm256_set1_epi32((int32_t)To);
+                    Base.Pack256 = _mm256_or_si256(DP.Pack256, Tos);
+                    *List++ = Move32::fromValue(Base.Pack32[0]);
+                    *List++ = Move32::fromValue(Base.Pack32[1]);
+                    *List++ = Move32::fromValue(Base.Pack32[2]);
+                    *List++ = Move32::fromValue(Base.Pack32[3]);
+                    *List++ = Move32::fromValue(Base.Pack32[4]);
+                });
+                break;
+            }
+        }
+    }
+
+    {
+        DroppingPack256 DP;
+        int MoveCount = 0;
+        if (SilverExists) {
+            DP.Pack32[MoveCount] = (int32_t)PTK_Silver;
+            ++MoveCount;
+        }
+        if (GoldExists) {
+            DP.Pack32[MoveCount] = (int32_t)PTK_Gold;
+            ++MoveCount;
+        }
+        if (BishopExists) {
+            DP.Pack32[MoveCount] = (int32_t)PTK_Bishop;
+            ++MoveCount;
+        }
+        if (RookExists) {
+            DP.Pack32[MoveCount] = (int32_t)PTK_Rook;
+            ++MoveCount;
+        }
+
+        const Bitboard ToBB = TargetSquares & FurthermostBB[C];
+
+        switch (MoveCount) {
+            case 1: {
+                uint32_t PTs = DP.Pack32[0] << 15;
+                uint32_t Froms = DP.Pack32[0] + FromOffset32;
+                Froms <<= 7;
+                DP.Pack32[0] = PTs | Froms;
+                ToBB.forEach([&](Square To) {
+                    *List++ = Move32::fromValue(DP.Pack32[0] | (uint32_t)To);
+                });
+                break;
+            }
+            case 2: {
+                uint64_t PTs = DP.Pack64[0] << 15;
+                uint64_t Froms = DP.Pack64[0] + FromOffset64;
+                Froms <<= 7;
+                DP.Pack64[0] = PTs | Froms;
+                ToBB.forEach([&](Square To) {
+                    DroppingPack256 Base;
+                    uint64_t Tos = ((uint64_t)To << 32 | (uint64_t)To);
+                    Base.Pack64[0] = DP.Pack64[0] | Tos;
+                    *List++ = Move32::fromValue(Base.Pack32[0]);
+                    *List++ = Move32::fromValue(Base.Pack32[1]);
+                });
+                break;
+            }
+            case 3: {
+                __m128i PTs = _mm_slli_epi32(DP.Pack128[0], 15);
+                __m128i Froms = _mm_add_epi32(DP.Pack128[0], FromOffset128);
+                Froms = _mm_slli_epi32(Froms, 7);
+                DP.Pack128[0] = _mm_or_si128(PTs, Froms);
+                ToBB.forEach([&](Square To) {
+                    DroppingPack256 Base;
+                    __m128i Tos = _mm_set1_epi32((int32_t)To);
+                    Base.Pack128[0] = _mm_or_si128(DP.Pack128[0], Tos);
+                    *List++ = Move32::fromValue(Base.Pack32[0]);
+                    *List++ = Move32::fromValue(Base.Pack32[1]);
+                    *List++ = Move32::fromValue(Base.Pack32[2]);
+                });
+                break;
+            }
+            case 4: {
+                __m128i PTs = _mm_slli_epi32(DP.Pack128[0], 15);
+                __m128i Froms = _mm_add_epi32(DP.Pack128[0], FromOffset128);
+                Froms = _mm_slli_epi32(Froms, 7);
+                DP.Pack128[0] = _mm_or_si128(PTs, Froms);
+                ToBB.forEach([&](Square To) {
+                    DroppingPack256 Base;
+                    __m128i Tos = _mm_set1_epi32((int32_t)To);
+                    Base.Pack128[0] = _mm_or_si128(DP.Pack128[0], Tos);
+                    *List++ = Move32::fromValue(Base.Pack32[0]);
+                    *List++ = Move32::fromValue(Base.Pack32[1]);
+                    *List++ = Move32::fromValue(Base.Pack32[2]);
+                    *List++ = Move32::fromValue(Base.Pack32[3]);
+                });
+                break;
+            }
+        }
+    }
+
+    return List;
+}
+
+#endif
+
+template <Color C>
+inline Move32* generateDroppingMovesImpl(const State& S, Move32* List,
+                                     const Bitboard& TargetSquares) {
+
+#if defined(USE_AVX2)
+    return generateDroppingMovesImplAVX2<C>(S, List, TargetSquares);
+#endif
+
+    const Stands St = S.getPosition().getStand<C>();
+
+    if (St == 0) {
+        return List;
+    }
+
+    const bool PawnExists = getStandCount<PTK_Pawn>(St) > 0;
+
+    if (PawnExists) {
+        const Bitboard PawnBB = S.getBitboard<C, PTK_Pawn>();
+
+        // Figure out files on which a pawn does not exist.
+        const Bitboard Temp = RankBB[RankA].subtract(PawnBB) & RankBB[RankA];
+        Bitboard ToBB = Temp.subtract(Temp.getRightShiftEpi64(8));
+        if constexpr (C == White) {
+            ToBB = ToBB.getLeftShiftEpi64(1);
+        }
+
+        ToBB &= TargetSquares;
+        ToBB.forEach([&List](Square To) {
             assert(checkRange(To));
-            if (LanceExists) {
-                *List++ = Move32::droppingMove(To, PTK_Lance);
-            }
-            if (SilverExists) {
-                *List++ = Move32::droppingMove(To, PTK_Silver);
-            }
-            if (GoldExists) {
-                *List++ = Move32::droppingMove(To, PTK_Gold);
-            }
-            if (BishopExists) {
-                *List++ = Move32::droppingMove(To, PTK_Bishop);
-            }
-            if (RookExists) {
-                *List++ = Move32::droppingMove(To, PTK_Rook);
-            }
+            *List++ = Move32::droppingMove(To, PTK_Pawn);
         });
     }
 
-    if (SilverExists || GoldExists || BishopExists || RookExists) {
-        // Dropping move onto the furthermost squares.
+    const bool LanceExists = getStandCount<PTK_Lance>(St) > 0;
+    const bool KnightExists = getStandCount<PTK_Knight>(St) > 0;
+    const bool SilverExists = getStandCount<PTK_Silver>(St) > 0;
+    const bool GoldExists = getStandCount<PTK_Gold>(St) > 0;
+    const bool BishopExists = getStandCount<PTK_Bishop>(St) > 0;
+    const bool RookExists = getStandCount<PTK_Rook>(St) > 0;
+
+    /* if (Stands exist) */ {
+        uint32_t DroppingCandidates[6];
+        int MoveCount = 0;
+        if (LanceExists) {
+            DroppingCandidates[MoveCount] = Move32::droppingMove((Square)0, PTK_Lance).value();
+            ++MoveCount;
+        }
+        if (KnightExists) {
+            DroppingCandidates[MoveCount] = Move32::droppingMove((Square)0, PTK_Knight).value();
+            ++MoveCount;
+        }
+        if (SilverExists) {
+            DroppingCandidates[MoveCount] = Move32::droppingMove((Square)0, PTK_Silver).value();
+            ++MoveCount;
+        }
+        if (GoldExists) {
+            DroppingCandidates[MoveCount] = Move32::droppingMove((Square)0, PTK_Gold).value();
+            ++MoveCount;
+        }
+        if (BishopExists) {
+            DroppingCandidates[MoveCount] = Move32::droppingMove((Square)0, PTK_Bishop).value();
+            ++MoveCount;
+        }
+        if (RookExists) {
+            DroppingCandidates[MoveCount] = Move32::droppingMove((Square)0, PTK_Rook).value();
+            ++MoveCount;
+        }
+
+        const Bitboard ToBB = FirstAndSecondFurthestBB[C].andNot(TargetSquares);
+
+        switch (MoveCount) {
+            case 1: {
+                ToBB.forEach([&](Square To) {
+                    *List++ = Move32::fromValue(DroppingCandidates[0] | (uint32_t)To);
+                });
+                break;
+            }
+            case 2: {
+                ToBB.forEach([&](Square To) {
+                    *List++ = Move32::fromValue(DroppingCandidates[0] | (uint32_t)To);
+                    *List++ = Move32::fromValue(DroppingCandidates[1] | (uint32_t)To);
+                });
+                break;
+            }
+            case 3: {
+                ToBB.forEach([&](Square To) {
+                    *List++ = Move32::fromValue(DroppingCandidates[0] | (uint32_t)To);
+                    *List++ = Move32::fromValue(DroppingCandidates[1] | (uint32_t)To);
+                    *List++ = Move32::fromValue(DroppingCandidates[2] | (uint32_t)To);
+                });
+                break;
+            }
+            case 4: {
+                ToBB.forEach([&](Square To) {
+                    *List++ = Move32::fromValue(DroppingCandidates[0] | (uint32_t)To);
+                    *List++ = Move32::fromValue(DroppingCandidates[1] | (uint32_t)To);
+                    *List++ = Move32::fromValue(DroppingCandidates[2] | (uint32_t)To);
+                    *List++ = Move32::fromValue(DroppingCandidates[3] | (uint32_t)To);
+                });
+                break;
+            }
+            case 5: {
+                ToBB.forEach([&](Square To) {
+                    *List++ = Move32::fromValue(DroppingCandidates[0] | (uint32_t)To);
+                    *List++ = Move32::fromValue(DroppingCandidates[1] | (uint32_t)To);
+                    *List++ = Move32::fromValue(DroppingCandidates[2] | (uint32_t)To);
+                    *List++ = Move32::fromValue(DroppingCandidates[3] | (uint32_t)To);
+                    *List++ = Move32::fromValue(DroppingCandidates[4] | (uint32_t)To);
+                });
+                break;
+            }
+            case 6: {
+                ToBB.forEach([&](Square To) {
+                    *List++ = Move32::fromValue(DroppingCandidates[0] | (uint32_t)To);
+                    *List++ = Move32::fromValue(DroppingCandidates[1] | (uint32_t)To);
+                    *List++ = Move32::fromValue(DroppingCandidates[2] | (uint32_t)To);
+                    *List++ = Move32::fromValue(DroppingCandidates[3] | (uint32_t)To);
+                    *List++ = Move32::fromValue(DroppingCandidates[4] | (uint32_t)To);
+                    *List++ = Move32::fromValue(DroppingCandidates[5] | (uint32_t)To);
+                });
+                break;
+            }
+        }
+    }
+
+    {
+        uint32_t DroppingCandidates[5];
+        int MoveCount = 0;
+        if (LanceExists) {
+            DroppingCandidates[MoveCount] = Move32::droppingMove((Square)0, PTK_Lance).value();
+            ++MoveCount;
+        }
+        if (SilverExists) {
+            DroppingCandidates[MoveCount] = Move32::droppingMove((Square)0, PTK_Silver).value();
+            ++MoveCount;
+        }
+        if (GoldExists) {
+            DroppingCandidates[MoveCount] = Move32::droppingMove((Square)0, PTK_Gold).value();
+            ++MoveCount;
+        }
+        if (BishopExists) {
+            DroppingCandidates[MoveCount] = Move32::droppingMove((Square)0, PTK_Bishop).value();
+            ++MoveCount;
+        }
+        if (RookExists) {
+            DroppingCandidates[MoveCount] = Move32::droppingMove((Square)0, PTK_Rook).value();
+            ++MoveCount;
+        }
+
+        const Bitboard ToBB = TargetSquares & SecondFurthestBB[C];
+        switch (MoveCount) {
+            case 1:
+                ToBB.forEach([&](Square To) {
+                    *List++ = Move32::fromValue(DroppingCandidates[0] | (uint32_t)To);
+                });
+                break;
+            case 2:
+                ToBB.forEach([&](Square To) {
+                    *List++ = Move32::fromValue(DroppingCandidates[0] | (uint32_t)To);
+                    *List++ = Move32::fromValue(DroppingCandidates[1] | (uint32_t)To);
+                });
+                break;
+            case 3:
+                ToBB.forEach([&](Square To) {
+                    *List++ = Move32::fromValue(DroppingCandidates[0] | (uint32_t)To);
+                    *List++ = Move32::fromValue(DroppingCandidates[1] | (uint32_t)To);
+                    *List++ = Move32::fromValue(DroppingCandidates[2] | (uint32_t)To);
+                });
+                break;
+            case 4:
+                ToBB.forEach([&](Square To) {
+                    *List++ = Move32::fromValue(DroppingCandidates[0] | (uint32_t)To);
+                    *List++ = Move32::fromValue(DroppingCandidates[1] | (uint32_t)To);
+                    *List++ = Move32::fromValue(DroppingCandidates[2] | (uint32_t)To);
+                    *List++ = Move32::fromValue(DroppingCandidates[3] | (uint32_t)To);
+                });
+                break;
+            case 5:
+                ToBB.forEach([&](Square To) {
+                    *List++ = Move32::fromValue(DroppingCandidates[0] | (uint32_t)To);
+                    *List++ = Move32::fromValue(DroppingCandidates[1] | (uint32_t)To);
+                    *List++ = Move32::fromValue(DroppingCandidates[2] | (uint32_t)To);
+                    *List++ = Move32::fromValue(DroppingCandidates[3] | (uint32_t)To);
+                    *List++ = Move32::fromValue(DroppingCandidates[4] | (uint32_t)To);
+                });
+                break;
+        }
+    }
+
+    {
+        uint32_t DroppingCandidates[4];
+        int MoveCount = 0;
+        if (SilverExists) {
+            DroppingCandidates[MoveCount] = Move32::droppingMove((Square)0, PTK_Silver).value();
+            ++MoveCount;
+        }
+        if (GoldExists) {
+            DroppingCandidates[MoveCount] = Move32::droppingMove((Square)0, PTK_Gold).value();
+            ++MoveCount;
+        }
+        if (BishopExists) {
+            DroppingCandidates[MoveCount] = Move32::droppingMove((Square)0, PTK_Bishop).value();
+            ++MoveCount;
+        }
+        if (RookExists) {
+            DroppingCandidates[MoveCount] = Move32::droppingMove((Square)0, PTK_Rook).value();
+            ++MoveCount;
+        }
+
         const Bitboard ToBB = TargetSquares & FurthermostBB[C];
-        ToBB.forEach([&](Square To) {
-            assert(checkRange(To));
-            if (SilverExists) {
-                *List++ = Move32::droppingMove(To, PTK_Silver);
-            }
-            if (GoldExists) {
-                *List++ = Move32::droppingMove(To, PTK_Gold);
-            }
-            if (BishopExists) {
-                *List++ = Move32::droppingMove(To, PTK_Bishop);
-            }
-            if (RookExists) {
-                *List++ = Move32::droppingMove(To, PTK_Rook);
-            }
-        });
+        switch (MoveCount) {
+            case 1:
+                ToBB.forEach([&](Square To) {
+                    *List++ = Move32::fromValue(DroppingCandidates[0] | (uint32_t)To);
+                });
+                break;
+            case 2:
+                ToBB.forEach([&](Square To) {
+                    *List++ = Move32::fromValue(DroppingCandidates[0] | (uint32_t)To);
+                    *List++ = Move32::fromValue(DroppingCandidates[1] | (uint32_t)To);
+                });
+                break;
+            case 3:
+                ToBB.forEach([&](Square To) {
+                    *List++ = Move32::fromValue(DroppingCandidates[0] | (uint32_t)To);
+                    *List++ = Move32::fromValue(DroppingCandidates[1] | (uint32_t)To);
+                    *List++ = Move32::fromValue(DroppingCandidates[2] | (uint32_t)To);
+                });
+                break;
+            case 4:
+                ToBB.forEach([&](Square To) {
+                    *List++ = Move32::fromValue(DroppingCandidates[0] | (uint32_t)To);
+                    *List++ = Move32::fromValue(DroppingCandidates[1] | (uint32_t)To);
+                    *List++ = Move32::fromValue(DroppingCandidates[2] | (uint32_t)To);
+                    *List++ = Move32::fromValue(DroppingCandidates[3] | (uint32_t)To);
+                });
+                break;
+        }
     }
 
     return List;
 }
 
 template <Color C>
-inline Move32* generateDroppingStepCheckMovesImpl(const State& S, const Square OpKingSq, Move32* List,
+inline Move32* generateDroppingStepCheckMovesImpl(const State& S, Move32* List,
                                      const Bitboard& TargetBB) {
     const Stands St = S.getPosition().getStand<C>();
 
     if (getStandCount<PTK_Pawn>(St) > 0) {
         const Bitboard PawnBB = S.getBitboard<C, PTK_Pawn>();
 
-        if ((PawnBB & FileBB[squareToFile(OpKingSq)]).isZero()) {
+        if ((PawnBB & FileBB[squareToFile(S.getKingSquare<~C>())]).isZero()) {
             if constexpr (C == Black) {
-                const Bitboard ToBB = TargetBB & ((FurthermostBB[White].andNot(SquareBB[OpKingSq])).getRightShiftEpi64<1>());
+                const Bitboard ToBB = TargetBB & ((FurthermostBB[White].andNot(SquareBB[S.getKingSquare<~C>()])).template getRightShiftEpi64<1>());
                 ToBB.forEach([&](Square To) {
                     assert(checkRange(To));
                     *List++ = Move32::droppingMove(To, PTK_Pawn);
                 });
             } else {
-                const Bitboard ToBB = TargetBB & ((FurthermostBB[Black].andNot(SquareBB[OpKingSq])).getLeftShiftEpi64<1>());
+                const Bitboard ToBB = TargetBB & ((FurthermostBB[Black].andNot(SquareBB[S.getKingSquare<~C>()])).template getLeftShiftEpi64<1>());
                 ToBB.forEach([&](Square To) {
                     assert(checkRange(To));
                     *List++ = Move32::droppingMove(To, PTK_Pawn);
@@ -498,7 +1026,7 @@ inline Move32* generateDroppingStepCheckMovesImpl(const State& S, const Square O
     }
 
     if (getStandCount<PTK_Knight>(St) > 0) {
-        const Bitboard ToBB = TargetBB & KnightAttackBB[~C][OpKingSq];
+        const Bitboard ToBB = TargetBB & KnightAttackBB[~C][S.getKingSquare<~C>()];
         ToBB.forEach([&](Square To) {
             assert(checkRange(To));
             *List++ = Move32::droppingMove(To, PTK_Knight);
@@ -506,7 +1034,7 @@ inline Move32* generateDroppingStepCheckMovesImpl(const State& S, const Square O
     }
 
     if (getStandCount<PTK_Silver>(St) > 0) {
-        const Bitboard ToBB = TargetBB & SilverAttackBB[~C][OpKingSq];
+        const Bitboard ToBB = TargetBB & SilverAttackBB[~C][S.getKingSquare<~C>()];
         ToBB.forEach([&](Square To) {
             assert(checkRange(To));
             *List++ = Move32::droppingMove(To, PTK_Silver);
@@ -514,7 +1042,7 @@ inline Move32* generateDroppingStepCheckMovesImpl(const State& S, const Square O
     }
 
     if (getStandCount<PTK_Gold>(St) > 0) {
-        const Bitboard ToBB = TargetBB & GoldAttackBB[~C][OpKingSq];
+        const Bitboard ToBB = TargetBB & GoldAttackBB[~C][S.getKingSquare<~C>()];
         ToBB.forEach([&](Square To) {
             assert(checkRange(To));
             *List++ = Move32::droppingMove(To, PTK_Gold);
@@ -525,12 +1053,12 @@ inline Move32* generateDroppingStepCheckMovesImpl(const State& S, const Square O
 }
 
 template <Color C>
-inline Move32* generateDroppingSliderCheckMovesImpl(const State& S, const Square OpKingSq, Move32* List,
+inline Move32* generateDroppingSliderCheckMovesImpl(const State& S, Move32* List,
                                      const Bitboard& TargetBB, const Bitboard& OccupiedBB) {
     const Stands St = S.getPosition().getStand<C>();
 
     if (getStandCount<PTK_Lance>(St) > 0) {
-        const Bitboard ToBB = getLanceAttackBB<~C>(OpKingSq, OccupiedBB) & TargetBB;
+        const Bitboard ToBB = getLanceAttackBB<~C>(S.getKingSquare<~C>(), OccupiedBB) & TargetBB;
         ToBB.forEach([&](Square To) {
             assert(checkRange(To));
             *List++ = Move32::droppingMove(To, PTK_Lance);
@@ -538,7 +1066,7 @@ inline Move32* generateDroppingSliderCheckMovesImpl(const State& S, const Square
     }
 
     if (getStandCount<PTK_Rook>(St) > 0) {
-        const Bitboard ToBB = getRookAttackBB<PTK_Rook>(OpKingSq, OccupiedBB) & TargetBB;
+        const Bitboard ToBB = getRookAttackBB<PTK_Rook>(S.getKingSquare<~C>(), OccupiedBB) & TargetBB;
         ToBB.forEach([&](Square To) {
             assert(checkRange(To));
             *List++ = Move32::droppingMove(To, PTK_Rook);
@@ -546,7 +1074,7 @@ inline Move32* generateDroppingSliderCheckMovesImpl(const State& S, const Square
     }
 
     if (getStandCount<PTK_Bishop>(St) > 0) {
-        const Bitboard ToBB = getBishopAttackBB<PTK_Bishop>(OpKingSq, OccupiedBB) & TargetBB;
+        const Bitboard ToBB = getBishopAttackBB<PTK_Bishop>(S.getKingSquare<~C>(), OccupiedBB) & TargetBB;
         ToBB.forEach([&](Square To) {
             assert(checkRange(To));
             *List++ = Move32::droppingMove(To, PTK_Bishop);
@@ -557,7 +1085,7 @@ inline Move32* generateDroppingSliderCheckMovesImpl(const State& S, const Square
 }
 
 template<Color C, PieceTypeKind Type, bool Capture, bool Pinned, bool WilyPromote>
-inline Move32* generateOnBoardOneStepNoPromoteCheckMovesImpl(const State& S, const Square OpKingSq, Move32* Moves, const Bitboard& TargetBB, const Bitboard& SourceFilter) {
+inline Move32* generateOnBoardOneStepNoPromoteCheckMovesImpl(const State& S, Move32* Moves, const Bitboard& TargetBB, const Bitboard& OccupiedBB, const Bitboard& SourceFilter) {
     static_assert(Type != PTK_Lance,     "PTK_Lance must not be passed as `Type` in generateCheckStepMoves().");
     static_assert(Type != PTK_Bishop,    "PTK_Bishop must not be passed as `Type` in generateCheckStepMoves().");
     static_assert(Type != PTK_Rook,      "PTK_Rook must not be passed as `Type` in generateCheckStepMoves().");
@@ -569,10 +1097,13 @@ inline Move32* generateOnBoardOneStepNoPromoteCheckMovesImpl(const State& S, con
     }
 
     const Bitboard FromBB = S.getBitboard<C, Type>() & SourceFilter;
+
     FromBB.forEach([&](Square From) {
+        const bool IsDefendingPiece = S.getDefendingOpponentSliderBB<C>().isSet(From);
+
         // clang-format off
-        Bitboard TargetBB2 = (Pinned? (~LineBB[From][OpKingSq] | getAttackBB<~C, Type>(OpKingSq))
-                                      : getAttackBB<~C, Type>(OpKingSq))
+        Bitboard TargetBB2 = (Pinned? (~LineBB[From][S.getKingSquare<~C>()] | getAttackBB<~C, Type>(S.getKingSquare<~C>()))
+                                      : getAttackBB<~C, Type>(S.getKingSquare<~C>()))
                              & getAttackBB<C, Type>(From) & TargetBB;
 
         if constexpr (Type == PTK_Pawn) {
@@ -589,6 +1120,16 @@ inline Move32* generateOnBoardOneStepNoPromoteCheckMovesImpl(const State& S, con
         // clang-format on
 
         TargetBB2.forEach([&](Square To) {
+            if constexpr (Type == PTK_King) {
+                if (S.isAttacked<C>(To, From)) {
+                    return;
+                }
+            }
+
+            if (IsDefendingPiece && S.isAttackedBySlider<C>(S.getKingSquare<C>(), OccupiedBB, From, To)) {
+                return;
+            }
+
             if constexpr (Capture) {
                 const PieceTypeKind CaptureType =
                     getPieceType(S.getPosition().pieceOn(To));
@@ -603,19 +1144,25 @@ inline Move32* generateOnBoardOneStepNoPromoteCheckMovesImpl(const State& S, con
 }
 
 template<Color C, bool Capture, bool Pinned>
-inline Move32* generateOnBoardOneStepNoPromoteCheckGoldKindsMovesImpl(const State& S, const Square OpKingSq, Move32* Moves, const Bitboard& TargetBB, const Bitboard& SourceFilter) {
+inline Move32* generateOnBoardOneStepNoPromoteCheckGoldKindsMovesImpl(const State& S, Move32* Moves, const Bitboard& TargetBB, const Bitboard& OccupiedBB, const Bitboard& SourceFilter) {
     const Bitboard FromBB = S.getBitboard<C>() & SourceFilter
                         & (S.getBitboard<PTK_Gold>() | S.getBitboard<PTK_ProPawn>()
                             | S.getBitboard<PTK_ProLance>() | S.getBitboard<PTK_ProKnight>() | S.getBitboard<PTK_ProSilver>());
 
     FromBB.forEach([&](Square From) {
+        const bool IsDefendingPiece = S.getDefendingOpponentSliderBB<C>().isSet(From);
+
         const PieceTypeKind Type = getPieceType(S.getPosition().pieceOn(From));
 
-        const Bitboard TargetBB2 = (Pinned? (~LineBB[From][OpKingSq] | getAttackBB<~C, PTK_Gold>(OpKingSq))
-                                      : getAttackBB<~C, PTK_Gold>(OpKingSq))
+        const Bitboard TargetBB2 = (Pinned? (~LineBB[From][S.getKingSquare<~C>()] | getAttackBB<~C, PTK_Gold>(S.getKingSquare<~C>()))
+                                      : getAttackBB<~C, PTK_Gold>(S.getKingSquare<~C>()))
                              & getAttackBB<C, PTK_Gold>(From) & TargetBB;
 
         TargetBB2.forEach([&](Square To) {
+            if (IsDefendingPiece && S.isAttackedBySlider<C>(S.getKingSquare<C>(), OccupiedBB, From, To)) {
+                return;
+            }
+
             if constexpr (Capture) {
                 const PieceTypeKind CaptureType =
                     getPieceType(S.getPosition().pieceOn(To));
@@ -630,7 +1177,7 @@ inline Move32* generateOnBoardOneStepNoPromoteCheckGoldKindsMovesImpl(const Stat
 }
 
 template<Color C, bool Capture, bool WilyPromote, bool Pinned>
-inline Move32* generateOnBoardLanceNoPromoteCheckMovesImpl(const State& S, const Square OpKingSq, Move32* Moves, const Bitboard& TargetBB, const Bitboard& OccupiedBB, const Bitboard& SourceFilter) {
+inline Move32* generateOnBoardLanceNoPromoteCheckMovesImpl(const State& S, Move32* Moves, const Bitboard& TargetBB, const Bitboard& OccupiedBB, const Bitboard& SourceFilter) {
     constexpr PieceTypeKind Type = PTK_Lance;
 
     if ((S.getBitboard<C, Type>() & SourceFilter).isZero()) {
@@ -639,7 +1186,9 @@ inline Move32* generateOnBoardLanceNoPromoteCheckMovesImpl(const State& S, const
 
     const Bitboard FromBB = S.getBitboard<C, Type>() & SourceFilter;
     FromBB.forEach([&](Square From) {
-        Bitboard TargetBB2 = (Pinned)? ~LineBB[From][OpKingSq] : getLanceAttackBB<~C>(OpKingSq, OccupiedBB);
+        const bool IsDefendingPiece = S.getDefendingOpponentSliderBB<C>().isSet(From);
+
+        Bitboard TargetBB2 = (Pinned)? ~LineBB[From][S.getKingSquare<~C>()] : getLanceAttackBB<~C>(S.getKingSquare<~C>(), OccupiedBB);
 
         if constexpr (WilyPromote) {
             TargetBB2 = FirstAndSecondFurthestBB[C].andNot(TargetBB2);
@@ -650,6 +1199,10 @@ inline Move32* generateOnBoardLanceNoPromoteCheckMovesImpl(const State& S, const
         TargetBB2 &= getLanceAttackBB<C>(From, OccupiedBB) & TargetBB;
 
         TargetBB2.forEach([&](Square To) {
+            if (IsDefendingPiece && S.isAttackedBySlider<C>(S.getKingSquare<C>(), OccupiedBB, From, To)) {
+                return;
+            }
+
             if constexpr (Capture) {
                 const PieceTypeKind CaptureType =
                     getPieceType(S.getPosition().pieceOn(To));
@@ -664,7 +1217,7 @@ inline Move32* generateOnBoardLanceNoPromoteCheckMovesImpl(const State& S, const
 }
 
 template<Color C, PieceTypeKind Type, bool Capture, bool Pinned, bool WilyPromote>
-inline Move32* generateOnBoardBishopNoPromoteCheckMovesImpl(const State& S, const Square OpKingSq, Move32* Moves, const Bitboard& TargetBB, const Bitboard& OccupiedBB, const Bitboard& SourceFilter) {
+inline Move32* generateOnBoardBishopNoPromoteCheckMovesImpl(const State& S, Move32* Moves, const Bitboard& TargetBB, const Bitboard& OccupiedBB, const Bitboard& SourceFilter) {
     static_assert(Type == PTK_Bishop || Type == PTK_ProBishop, "Only PTK_Bishop or PTK_ProBishop can be processed in this function.");
 
     if ((S.getBitboard<C, Type>() & SourceFilter).isZero()) {
@@ -673,6 +1226,8 @@ inline Move32* generateOnBoardBishopNoPromoteCheckMovesImpl(const State& S, cons
 
     const Bitboard FromBB = S.getBitboard<C, Type>() & SourceFilter;
     FromBB.forEach([&](Square From) {
+        const bool IsDefendingPiece = S.getDefendingOpponentSliderBB<C>().isSet(From);
+
         if constexpr (WilyPromote && Type == PTK_Bishop) {
             if (PromotableBB[C].isSet(From)) {
                 return;
@@ -683,9 +1238,9 @@ inline Move32* generateOnBoardBishopNoPromoteCheckMovesImpl(const State& S, cons
         Bitboard TargetBB2;
 
         if constexpr (Pinned) {
-            TargetBB2 = ~LineBB[From][OpKingSq] | getBishopAttackBB<Type>(OpKingSq, OccupiedBB);
+            TargetBB2 = ~LineBB[From][S.getKingSquare<~C>()] | getBishopAttackBB<Type>(S.getKingSquare<~C>(), OccupiedBB);
         } else {
-            TargetBB2 = getBishopAttackBB<Type>(OpKingSq, OccupiedBB);
+            TargetBB2 = getBishopAttackBB<Type>(S.getKingSquare<~C>(), OccupiedBB);
         }
         TargetBB2 = TargetBB2 & getBishopAttackBB<Type>(From, OccupiedBB) & TargetBB;
 
@@ -695,6 +1250,10 @@ inline Move32* generateOnBoardBishopNoPromoteCheckMovesImpl(const State& S, cons
         // clang-format on
 
         TargetBB2.forEach([&](Square To) {
+            if (IsDefendingPiece && S.isAttackedBySlider<C>(S.getKingSquare<C>(), OccupiedBB, From, To)) {
+                return;
+            }
+
             if constexpr (Capture) {
                 const PieceTypeKind CaptureType =
                     getPieceType(S.getPosition().pieceOn(To));
@@ -709,7 +1268,7 @@ inline Move32* generateOnBoardBishopNoPromoteCheckMovesImpl(const State& S, cons
 }
 
 template<Color C, PieceTypeKind Type, bool Capture, bool Pinned, bool WilyPromote>
-inline Move32* generateOnBoardRookNoPromoteCheckMovesImpl(const State& S, const Square OpKingSq, Move32* Moves, const Bitboard& TargetBB, const Bitboard& OccupiedBB, const Bitboard& SourceFilter) {
+inline Move32* generateOnBoardRookNoPromoteCheckMovesImpl(const State& S, Move32* Moves, const Bitboard& TargetBB, const Bitboard& OccupiedBB, const Bitboard& SourceFilter) {
     static_assert(Type == PTK_Rook || Type == PTK_ProRook, "Only PTK_Rook or PTK_ProRook can be processed in this function.");
 
     if ((S.getBitboard<C, Type>() & SourceFilter).isZero()) {
@@ -718,6 +1277,8 @@ inline Move32* generateOnBoardRookNoPromoteCheckMovesImpl(const State& S, const 
 
     const Bitboard FromBB = S.getBitboard<C, Type>() & SourceFilter;
     FromBB.forEach([&](Square From) {
+        const bool IsDefendingPiece = S.getDefendingOpponentSliderBB<C>().isSet(From);
+
         if constexpr (WilyPromote && Type == PTK_Rook) {
             if (PromotableBB[C].isSet(From)) {
                 return;
@@ -728,9 +1289,9 @@ inline Move32* generateOnBoardRookNoPromoteCheckMovesImpl(const State& S, const 
         Bitboard TargetBB2;
 
         if constexpr (Pinned) {
-            TargetBB2 = ~LineBB[From][OpKingSq] | getRookAttackBB<Type>(OpKingSq, OccupiedBB);
+            TargetBB2 = ~LineBB[From][S.getKingSquare<~C>()] | getRookAttackBB<Type>(S.getKingSquare<~C>(), OccupiedBB);
         } else {
-            TargetBB2 = getRookAttackBB<Type>(OpKingSq, OccupiedBB);
+            TargetBB2 = getRookAttackBB<Type>(S.getKingSquare<~C>(), OccupiedBB);
         }
         TargetBB2 = TargetBB2 & getRookAttackBB<Type>(From, OccupiedBB) & TargetBB;
 
@@ -740,6 +1301,10 @@ inline Move32* generateOnBoardRookNoPromoteCheckMovesImpl(const State& S, const 
         // clang-format on
 
         TargetBB2.forEach([&](Square To) {
+            if (IsDefendingPiece && S.isAttackedBySlider<C>(S.getKingSquare<C>(), OccupiedBB, From, To)) {
+                return;
+            }
+
             if constexpr (Capture) {
                 const PieceTypeKind CaptureType =
                     getPieceType(S.getPosition().pieceOn(To));
@@ -755,7 +1320,7 @@ inline Move32* generateOnBoardRookNoPromoteCheckMovesImpl(const State& S, const 
 
 
 template<Color C, PieceTypeKind Type, bool Capture, bool Pinned>
-inline Move32* generateOnBoardOneStepPromoteCheckMovesImpl(const State& S, const Square OpKingSq, Move32* Moves, const Bitboard& TargetBB, const Bitboard& SourceFilter) {
+inline Move32* generateOnBoardOneStepPromoteCheckMovesImpl(const State& S, Move32* Moves, const Bitboard& TargetBB, const Bitboard& OccupiedBB, const Bitboard& SourceFilter) {
     static_assert(Type != PTK_Lance,     "PTK_Lance must not be passed as `Type` in generateCheckStepMoves().");
     static_assert(Type != PTK_Bishop,    "PTK_Bishop must not be passed as `Type` in generateCheckStepMoves().");
     static_assert(Type != PTK_Rook,      "PTK_Rook must not be passed as `Type` in generateCheckStepMoves().");
@@ -765,9 +1330,11 @@ inline Move32* generateOnBoardOneStepPromoteCheckMovesImpl(const State& S, const
 
     const Bitboard FromBB = S.getBitboard<C, Type>() & SourceFilter;
     FromBB.forEach([&](Square From) {
+        const bool IsDefendingPiece = S.getDefendingOpponentSliderBB<C>().isSet(From);
+
         // clang-format off
-        Bitboard TargetBB2 = (Pinned? (~LineBB[From][OpKingSq] | getAttackBB<~C, PTK_Gold>(OpKingSq))
-                                    : getAttackBB<~C, PTK_Gold>(OpKingSq))
+        Bitboard TargetBB2 = (Pinned? (~LineBB[From][S.getKingSquare<~C>()] | getAttackBB<~C, PTK_Gold>(S.getKingSquare<~C>()))
+                                    : getAttackBB<~C, PTK_Gold>(S.getKingSquare<~C>()))
                              & getAttackBB<C, Type>(From) & TargetBB;
 
         if (!PromotableBB[C].isSet(From)) {
@@ -776,6 +1343,10 @@ inline Move32* generateOnBoardOneStepPromoteCheckMovesImpl(const State& S, const
         // clang-format on
 
         TargetBB2.forEach([&](Square To) {
+            if (IsDefendingPiece && S.isAttackedBySlider<C>(S.getKingSquare<C>(), OccupiedBB, From, To)) {
+                return;
+            }
+
             if constexpr (Capture) {
                 const PieceTypeKind CaptureType =
                     getPieceType(S.getPosition().pieceOn(To));
@@ -790,7 +1361,7 @@ inline Move32* generateOnBoardOneStepPromoteCheckMovesImpl(const State& S, const
 }
 
 template<Color C, bool Capture, bool Pinned>
-inline Move32* generateOnBoardLancePromoteCheckMovesImpl(const State& S, const Square OpKingSq, Move32* Moves, const Bitboard& TargetBB, const Bitboard& OccupiedBB, const Bitboard& SourceFilter) {
+inline Move32* generateOnBoardLancePromoteCheckMovesImpl(const State& S, Move32* Moves, const Bitboard& TargetBB, const Bitboard& OccupiedBB, const Bitboard& SourceFilter) {
     constexpr PieceTypeKind Type = PTK_Lance;
 
     if ((S.getBitboard<C, Type>() & SourceFilter).isZero()) {
@@ -799,11 +1370,17 @@ inline Move32* generateOnBoardLancePromoteCheckMovesImpl(const State& S, const S
 
     const Bitboard FromBB = S.getBitboard<C, Type>() & SourceFilter;
     FromBB.forEach([&](Square From) {
-        const Bitboard TargetBB2 = (Pinned? (~LineBB[From][OpKingSq] | getAttackBB<~C, PTK_Gold>(OpKingSq))
-                                    : getAttackBB<~C, PTK_Gold>(OpKingSq))
+        const bool IsDefendingPiece = S.getDefendingOpponentSliderBB<C>().isSet(From);
+
+        const Bitboard TargetBB2 = (Pinned? (~LineBB[From][S.getKingSquare<~C>()] | getAttackBB<~C, PTK_Gold>(S.getKingSquare<~C>()))
+                                    : getAttackBB<~C, PTK_Gold>(S.getKingSquare<~C>()))
                              & getLanceAttackBB<C>(From, OccupiedBB) & TargetBB & PromotableBB[C];
 
         TargetBB2.forEach([&](Square To) {
+            if (IsDefendingPiece && S.isAttackedBySlider<C>(S.getKingSquare<C>(), OccupiedBB, From, To)) {
+                return;
+            }
+
             if constexpr (Capture) {
                 const PieceTypeKind CaptureType =
                     getPieceType(S.getPosition().pieceOn(To));
@@ -818,7 +1395,7 @@ inline Move32* generateOnBoardLancePromoteCheckMovesImpl(const State& S, const S
 }
 
 template<Color C, bool Capture, bool Pinned>
-inline Move32* generateOnBoardBishopPromoteCheckMovesImpl(const State& S, const Square OpKingSq, Move32* Moves, const Bitboard& TargetBB, const Bitboard& OccupiedBB, const Bitboard& SourceFilter) {
+inline Move32* generateOnBoardBishopPromoteCheckMovesImpl(const State& S, Move32* Moves, const Bitboard& TargetBB, const Bitboard& OccupiedBB, const Bitboard& SourceFilter) {
     constexpr PieceTypeKind Type = PTK_Bishop;
 
     if ((S.getBitboard<C, Type>() & SourceFilter).isZero()) {
@@ -827,9 +1404,11 @@ inline Move32* generateOnBoardBishopPromoteCheckMovesImpl(const State& S, const 
 
     const Bitboard FromBB = S.getBitboard<C, Type>() & SourceFilter;
     FromBB.forEach([&](Square From) {
+        const bool IsDefendingPiece = S.getDefendingOpponentSliderBB<C>().isSet(From);
+
         // clang-format off
-        Bitboard TargetBB2 = (Pinned? (~LineBB[From][OpKingSq] | getBishopAttackBB<Type>(OpKingSq, OccupiedBB) | getAttackBB<~C, PTK_King>(OpKingSq))
-                                    : (getBishopAttackBB<Type>(OpKingSq, OccupiedBB) | getAttackBB<~C, PTK_King>(OpKingSq)))
+        Bitboard TargetBB2 = (Pinned? (~LineBB[From][S.getKingSquare<~C>()] | getBishopAttackBB<Type>(S.getKingSquare<~C>(), OccupiedBB) | getAttackBB<~C, PTK_King>(S.getKingSquare<~C>()))
+                                    : (getBishopAttackBB<Type>(S.getKingSquare<~C>(), OccupiedBB) | getAttackBB<~C, PTK_King>(S.getKingSquare<~C>())))
                              & getBishopAttackBB<Type>(From, OccupiedBB) & TargetBB;
 
         if (!PromotableBB[C].isSet(From)) {
@@ -838,6 +1417,10 @@ inline Move32* generateOnBoardBishopPromoteCheckMovesImpl(const State& S, const 
         // clang-format on
 
         TargetBB2.forEach([&](Square To) {
+            if (IsDefendingPiece && S.isAttackedBySlider<C>(S.getKingSquare<C>(), OccupiedBB, From, To)) {
+                return;
+            }
+
             if constexpr (Capture) {
                 const PieceTypeKind CaptureType =
                     getPieceType(S.getPosition().pieceOn(To));
@@ -852,7 +1435,7 @@ inline Move32* generateOnBoardBishopPromoteCheckMovesImpl(const State& S, const 
 }
 
 template<Color C, bool Capture, bool Pinned>
-inline Move32* generateOnBoardRookPromoteCheckMovesImpl(const State& S, const Square OpKingSq, Move32* Moves, const Bitboard& TargetBB, const Bitboard& OccupiedBB, const Bitboard& SourceFilter) {
+inline Move32* generateOnBoardRookPromoteCheckMovesImpl(const State& S, Move32* Moves, const Bitboard& TargetBB, const Bitboard& OccupiedBB, const Bitboard& SourceFilter) {
     constexpr PieceTypeKind Type = PTK_Rook;
 
     if ((S.getBitboard<C, Type>() & SourceFilter).isZero()) {
@@ -861,9 +1444,11 @@ inline Move32* generateOnBoardRookPromoteCheckMovesImpl(const State& S, const Sq
 
     const Bitboard FromBB = S.getBitboard<C, Type>() & SourceFilter;
     FromBB.forEach([&](Square From) {
+        const bool IsDefendingPiece = S.getDefendingOpponentSliderBB<C>().isSet(From);
+
         // clang-format off
-        Bitboard TargetBB2 = (Pinned? (~LineBB[From][OpKingSq] | getRookAttackBB<Type>(OpKingSq, OccupiedBB) | getAttackBB<~C, PTK_King>(OpKingSq))
-                                    : (getRookAttackBB<Type>(OpKingSq, OccupiedBB) | getAttackBB<~C, PTK_King>(OpKingSq)))
+        Bitboard TargetBB2 = (Pinned? (~LineBB[From][S.getKingSquare<~C>()] | getRookAttackBB<Type>(S.getKingSquare<~C>(), OccupiedBB) | getAttackBB<~C, PTK_King>(S.getKingSquare<~C>()))
+                                    : (getRookAttackBB<Type>(S.getKingSquare<~C>(), OccupiedBB) | getAttackBB<~C, PTK_King>(S.getKingSquare<~C>())))
                              & getRookAttackBB<Type>(From, OccupiedBB) & TargetBB;
 
         if (!PromotableBB[C].isSet(From)) {
@@ -872,6 +1457,10 @@ inline Move32* generateOnBoardRookPromoteCheckMovesImpl(const State& S, const Sq
         // clang-format on
 
         TargetBB2.forEach([&](Square To) {
+            if (IsDefendingPiece && S.isAttackedBySlider<C>(S.getKingSquare<C>(), OccupiedBB, From, To)) {
+                return;
+            }
+
             if constexpr (Capture) {
                 const PieceTypeKind CaptureType =
                     getPieceType(S.getPosition().pieceOn(To));
@@ -887,45 +1476,45 @@ inline Move32* generateOnBoardRookPromoteCheckMovesImpl(const State& S, const Sq
 
 template <Color C, bool Capture, bool WilyPromote = true>
 inline Move32* generateOnBoardOneStepMovesImpl(const State& S, Move32* Moves,
-                                           const Bitboard& TargetSquares) {
-    Moves = generateOnBoardOneStepPawnMovesImpl<C, Capture, WilyPromote>(S, Moves, TargetSquares);
-    Moves = generateOnBoardOneStepMovesImpl<C, PTK_Knight, Capture>(S, Moves, TargetSquares);
-    Moves = generateOnBoardOneStepMovesImpl<C, PTK_Silver, Capture>(S, Moves, TargetSquares);
-    Moves = generateOnBoardOneStepMovesImpl<C, PTK_King, Capture>(S, Moves, TargetSquares);
-    Moves = generateOnBoardOneStepGoldKindsMovesImpl<C, Capture>(S, Moves, TargetSquares);
+                                           const Bitboard& TargetSquares, const Bitboard& OccupiedBB) {
+    Moves = generateOnBoardOneStepPawnMovesImpl<C, Capture, WilyPromote>(S, Moves, TargetSquares, OccupiedBB);
+    Moves = generateOnBoardOneStepMovesImpl<C, PTK_Knight, Capture>(S, Moves, TargetSquares, OccupiedBB);
+    Moves = generateOnBoardOneStepMovesImpl<C, PTK_Silver, Capture>(S, Moves, TargetSquares, OccupiedBB);
+    Moves = generateOnBoardOneStepMovesImpl<C, PTK_King, Capture>(S, Moves, TargetSquares, OccupiedBB);
+    Moves = generateOnBoardOneStepGoldKindsMovesImpl<C, Capture>(S, Moves, TargetSquares, OccupiedBB);
 
     return Moves;
 }
 
 template <Color C, bool Capture, bool Pinned, bool WilyPromote, bool SkipKing = false>
-inline Move32* generateOnBoardOneStepCheckMovesImpl(const State& S, Move32* Moves, const Square OpKingSq, const Bitboard& TargetBB, const Bitboard& FromMask) {
+inline Move32* generateOnBoardOneStepCheckMovesImpl(const State& S, Move32* Moves, const Bitboard& TargetBB, const Bitboard& OccupiedBB, const Bitboard& FromMask) {
     if constexpr (!SkipKing) {
-        Moves = generateOnBoardOneStepNoPromoteCheckMovesImpl<C, PTK_King, Capture, Pinned, WilyPromote>(S, OpKingSq, Moves, TargetBB, FromMask);
+        Moves = generateOnBoardOneStepNoPromoteCheckMovesImpl<C, PTK_King, Capture, Pinned, WilyPromote>(S, Moves, TargetBB, OccupiedBB, FromMask);
     }
 
-    Moves = generateOnBoardOneStepNoPromoteCheckMovesImpl<C, PTK_Pawn, Capture, Pinned, WilyPromote>(S, OpKingSq, Moves, TargetBB, FromMask);
-    Moves = generateOnBoardOneStepNoPromoteCheckMovesImpl<C, PTK_Knight, Capture, Pinned, WilyPromote>(S, OpKingSq, Moves, TargetBB, FromMask);
-    Moves = generateOnBoardOneStepNoPromoteCheckMovesImpl<C, PTK_Silver, Capture, Pinned, WilyPromote>(S, OpKingSq, Moves, TargetBB, FromMask);
-    Moves = generateOnBoardOneStepNoPromoteCheckGoldKindsMovesImpl<C, Capture, Pinned>(S, OpKingSq, Moves, TargetBB, FromMask);
+    Moves = generateOnBoardOneStepNoPromoteCheckMovesImpl<C, PTK_Pawn, Capture, Pinned, WilyPromote>(S, Moves, TargetBB, OccupiedBB, FromMask);
+    Moves = generateOnBoardOneStepNoPromoteCheckMovesImpl<C, PTK_Knight, Capture, Pinned, WilyPromote>(S, Moves, TargetBB, OccupiedBB, FromMask);
+    Moves = generateOnBoardOneStepNoPromoteCheckMovesImpl<C, PTK_Silver, Capture, Pinned, WilyPromote>(S, Moves, TargetBB, OccupiedBB, FromMask);
+    Moves = generateOnBoardOneStepNoPromoteCheckGoldKindsMovesImpl<C, Capture, Pinned>(S, Moves, TargetBB, OccupiedBB, FromMask);
 
-    Moves = generateOnBoardOneStepPromoteCheckMovesImpl<C, PTK_Pawn, Capture, Pinned>(S, OpKingSq, Moves, TargetBB, FromMask);
-    Moves = generateOnBoardOneStepPromoteCheckMovesImpl<C, PTK_Knight, Capture, Pinned>(S, OpKingSq, Moves, TargetBB, FromMask);
-    Moves = generateOnBoardOneStepPromoteCheckMovesImpl<C, PTK_Silver, Capture, Pinned>(S, OpKingSq, Moves, TargetBB, FromMask);
+    Moves = generateOnBoardOneStepPromoteCheckMovesImpl<C, PTK_Pawn, Capture, Pinned>(S, Moves, TargetBB, OccupiedBB, FromMask);
+    Moves = generateOnBoardOneStepPromoteCheckMovesImpl<C, PTK_Knight, Capture, Pinned>(S, Moves, TargetBB, OccupiedBB, FromMask);
+    Moves = generateOnBoardOneStepPromoteCheckMovesImpl<C, PTK_Silver, Capture, Pinned>(S, Moves, TargetBB, OccupiedBB, FromMask);
 
     return Moves;
 }
 
 template <Color C, bool Capture, bool Pinned, bool WilyPromote>
-inline Move32* generateOnBoardSliderCheckMovesImpl(const State& S, Move32* Moves, const Square OpKingSq, const Bitboard& TargetBB, const Bitboard& OccupiedBB, const Bitboard& FromMask) {
-    Moves = generateOnBoardLanceNoPromoteCheckMovesImpl<C, Capture, WilyPromote, Pinned>(S, OpKingSq, Moves, TargetBB, OccupiedBB, FromMask);
-    Moves = generateOnBoardBishopNoPromoteCheckMovesImpl<C, PTK_Bishop, Capture, Pinned, WilyPromote>(S, OpKingSq, Moves, TargetBB, OccupiedBB, FromMask);
-    Moves = generateOnBoardBishopNoPromoteCheckMovesImpl<C, PTK_ProBishop, Capture, Pinned, WilyPromote>(S, OpKingSq, Moves, TargetBB, OccupiedBB, FromMask);
-    Moves = generateOnBoardRookNoPromoteCheckMovesImpl<C, PTK_Rook, Capture, Pinned, WilyPromote>(S, OpKingSq, Moves, TargetBB, OccupiedBB, FromMask);
-    Moves = generateOnBoardRookNoPromoteCheckMovesImpl<C, PTK_ProRook, Capture, Pinned, WilyPromote>(S, OpKingSq, Moves, TargetBB, OccupiedBB, FromMask);
+inline Move32* generateOnBoardSliderCheckMovesImpl(const State& S, Move32* Moves, const Bitboard& TargetBB, const Bitboard& OccupiedBB, const Bitboard& FromMask) {
+    Moves = generateOnBoardLanceNoPromoteCheckMovesImpl<C, Capture, WilyPromote, Pinned>(S, Moves, TargetBB, OccupiedBB, FromMask);
+    Moves = generateOnBoardBishopNoPromoteCheckMovesImpl<C, PTK_Bishop, Capture, Pinned, WilyPromote>(S, Moves, TargetBB, OccupiedBB, FromMask);
+    Moves = generateOnBoardBishopNoPromoteCheckMovesImpl<C, PTK_ProBishop, Capture, Pinned, WilyPromote>(S, Moves, TargetBB, OccupiedBB, FromMask);
+    Moves = generateOnBoardRookNoPromoteCheckMovesImpl<C, PTK_Rook, Capture, Pinned, WilyPromote>(S, Moves, TargetBB, OccupiedBB, FromMask);
+    Moves = generateOnBoardRookNoPromoteCheckMovesImpl<C, PTK_ProRook, Capture, Pinned, WilyPromote>(S, Moves, TargetBB, OccupiedBB, FromMask);
 
-    Moves = generateOnBoardLancePromoteCheckMovesImpl<C, Capture, Pinned>(S, OpKingSq, Moves, TargetBB, OccupiedBB, FromMask);
-    Moves = generateOnBoardBishopPromoteCheckMovesImpl<C, Capture, Pinned>(S, OpKingSq, Moves, TargetBB, OccupiedBB, FromMask);
-    Moves = generateOnBoardRookPromoteCheckMovesImpl<C, Capture, Pinned>(S, OpKingSq, Moves, TargetBB, OccupiedBB, FromMask);
+    Moves = generateOnBoardLancePromoteCheckMovesImpl<C, Capture, Pinned>(S, Moves, TargetBB, OccupiedBB, FromMask);
+    Moves = generateOnBoardBishopPromoteCheckMovesImpl<C, Capture, Pinned>(S, Moves, TargetBB, OccupiedBB, FromMask);
+    Moves = generateOnBoardRookPromoteCheckMovesImpl<C, Capture, Pinned>(S, Moves, TargetBB, OccupiedBB, FromMask);
 
     return Moves;
 }
@@ -949,13 +1538,13 @@ inline Move32* generateOnBoardSliderMovesImpl(const State& S, Move32* Moves,
 }
 
 template <Color C, bool WilyPromote = true>
-inline Move32* generatePossiblyLegalEvasionMovesImpl(const State& S, Move32* Moves,
+inline Move32* generateLegalEvasionMovesImpl(const State& S, Move32* Moves,
                                                  const Bitboard& CheckerBB,
                                                  const Bitboard& OpponentBB,
                                                  const Bitboard& OccupiedBB) {
     // Moving the king.
-    Moves = generateOnBoardOneStepMovesImpl<C, PTK_King, true>(S, Moves, OpponentBB);
-    Moves = generateOnBoardOneStepMovesImpl<C, PTK_King, false>(S, Moves, ~OccupiedBB);
+    Moves = generateOnBoardOneStepMovesImpl<C, PTK_King, true>(S, Moves, OpponentBB, OccupiedBB);
+    Moves = generateOnBoardOneStepMovesImpl<C, PTK_King, false>(S, Moves, ~OccupiedBB, OccupiedBB);
 
     // If there are more than one checkers,
     // no moves available but moving the king.
@@ -964,10 +1553,10 @@ inline Move32* generatePossiblyLegalEvasionMovesImpl(const State& S, Move32* Mov
     }
 
     // Capturing a checker.
-    Moves = generateOnBoardOneStepPawnMovesImpl<C, true, WilyPromote>(S, Moves, CheckerBB);
-    Moves = generateOnBoardOneStepMovesImpl<C, PTK_Knight, true>(S, Moves, CheckerBB);
-    Moves = generateOnBoardOneStepMovesImpl<C, PTK_Silver, true>(S, Moves, CheckerBB);
-    Moves = generateOnBoardOneStepGoldKindsMovesImpl<C, true>(S, Moves, CheckerBB);
+    Moves = generateOnBoardOneStepPawnMovesImpl<C, true, WilyPromote>(S, Moves, CheckerBB, OccupiedBB);
+    Moves = generateOnBoardOneStepMovesImpl<C, PTK_Knight, true>(S, Moves, CheckerBB, OccupiedBB);
+    Moves = generateOnBoardOneStepMovesImpl<C, PTK_Silver, true>(S, Moves, CheckerBB, OccupiedBB);
+    Moves = generateOnBoardOneStepGoldKindsMovesImpl<C, true>(S, Moves, CheckerBB, OccupiedBB);
 
     Moves = generateOnBoardSliderMovesImpl<C, true, WilyPromote>(S, Moves, CheckerBB,
                                                             OccupiedBB);
@@ -981,7 +1570,7 @@ inline Move32* generatePossiblyLegalEvasionMovesImpl(const State& S, Move32* Mov
 
     // Moving a piece.
     Moves =
-        generateOnBoardOneStepMovesImpl<C, false, WilyPromote>(S, Moves, BetweenBB);
+        generateOnBoardOneStepMovesImpl<C, false, WilyPromote>(S, Moves, BetweenBB, OccupiedBB);
     Moves = generateOnBoardSliderMovesImpl<C, false, WilyPromote>(S, Moves, BetweenBB,
                                                              OccupiedBB);
 
@@ -992,12 +1581,12 @@ inline Move32* generatePossiblyLegalEvasionMovesImpl(const State& S, Move32* Mov
 }
 
 template <Color C, bool WilyPromote>
-inline Move32* generatePossiblyLegalMovesImpl(const State& S, Move32* Moves,
+inline Move32* generateLegalMovesImpl(const State& S, Move32* Moves,
                                               const Bitboard& OpponentBB,
                                               const Bitboard& OccupiedBB) {
     // Captures.
     Moves =
-        generateOnBoardOneStepMovesImpl<C, true, WilyPromote>(S, Moves, OpponentBB);
+        generateOnBoardOneStepMovesImpl<C, true, WilyPromote>(S, Moves, OpponentBB, OccupiedBB);
     Moves = generateOnBoardSliderMovesImpl<C, true, WilyPromote>(S, Moves, OpponentBB,
                                                             OccupiedBB);
 
@@ -1006,7 +1595,7 @@ inline Move32* generatePossiblyLegalMovesImpl(const State& S, Move32* Moves,
     Moves = generateDroppingMovesImpl<C>(S, Moves, EmptyBB);
 
     // No captures.
-    Moves = generateOnBoardOneStepMovesImpl<C, false, WilyPromote>(S, Moves, EmptyBB);
+    Moves = generateOnBoardOneStepMovesImpl<C, false, WilyPromote>(S, Moves, EmptyBB, OccupiedBB);
     Moves = generateOnBoardSliderMovesImpl<C, false, WilyPromote>(S, Moves, EmptyBB,
                                                              OccupiedBB);
 
@@ -1014,7 +1603,7 @@ inline Move32* generatePossiblyLegalMovesImpl(const State& S, Move32* Moves,
 }
 
 template <Color C, bool WilyPromote>
-inline Move32* generatePossiblyLegalMovesImpl(const State& S, Move32* Moves) {
+inline Move32* generateLegalMovesImpl(const State& S, Move32* Moves) {
     const Bitboard CheckerBB = S.getCheckerBB();
     const Bitboard BlackBB = S.getBitboard<Black>();
     const Bitboard WhiteBB = S.getBitboard<White>();
@@ -1022,18 +1611,18 @@ inline Move32* generatePossiblyLegalMovesImpl(const State& S, Move32* Moves) {
 
     if constexpr (C == Black) {
         if (!CheckerBB.isZero()) {
-            Moves = generatePossiblyLegalEvasionMovesImpl<Black, WilyPromote>(
+            Moves = generateLegalEvasionMovesImpl<Black, WilyPromote>(
                 S, Moves, CheckerBB, WhiteBB, OccupiedBB);
         } else {
-            Moves = generatePossiblyLegalMovesImpl<Black, WilyPromote>(
+            Moves = generateLegalMovesImpl<Black, WilyPromote>(
                 S, Moves, WhiteBB, OccupiedBB);
         }
     } else {
         if (!CheckerBB.isZero()) {
-            Moves = generatePossiblyLegalEvasionMovesImpl<White, WilyPromote>(
+            Moves = generateLegalEvasionMovesImpl<White, WilyPromote>(
                 S, Moves, CheckerBB, BlackBB, OccupiedBB);
         } else {
-            Moves = generatePossiblyLegalMovesImpl<White, WilyPromote>(
+            Moves = generateLegalMovesImpl<White, WilyPromote>(
                 S, Moves, BlackBB, OccupiedBB);
         }
     }
@@ -1042,7 +1631,7 @@ inline Move32* generatePossiblyLegalMovesImpl(const State& S, Move32* Moves) {
 }
 
 template <Color C, bool WilyPromote>
-inline Move32* generatePossiblyLegalCheckMovesImpl(const State& S, Move32* Moves) {
+inline Move32* generateLegalCheckMovesImpl(const State& S, Move32* Moves) {
     const Bitboard BlackBB = S.getBitboard<Black>();
     const Bitboard WhiteBB = S.getBitboard<White>();
     const Bitboard OccupiedBB = BlackBB | WhiteBB;
@@ -1050,17 +1639,15 @@ inline Move32* generatePossiblyLegalCheckMovesImpl(const State& S, Move32* Moves
     const Bitboard CheckerBB = S.getCheckerBB();
     const Bitboard PinnedBB = S.getDefendingOpponentSliderBB<~C>();
     const Bitboard NoPinnedBB = ~PinnedBB;
-    const Square MyKingSq = S.getKingSquare<C>();
-    const Square OpKingSq = S.getKingSquare<~C>();
 
     if (CheckerBB.popCount() >= 2) {
         if (PinnedBB.isSet(S.getKingSquare<C>())) {
-            const Bitboard KingLineBB = LineBB[MyKingSq][OpKingSq];
+            const Bitboard KingLineBB = LineBB[S.getKingSquare<C>()][S.getKingSquare<~C>()];
             const Bitboard UnpinEmptyBB = KingLineBB.andNot(EmptyBB);
             const Bitboard UnpinCaptureBB = KingLineBB.andNot(S.getBitboard<~C>());
 
-            Moves = generateOnBoardOneStepNoPromoteCheckMovesImpl<C, PTK_King, false, true, WilyPromote>(S, OpKingSq, Moves, UnpinEmptyBB, PinnedBB);
-            Moves = generateOnBoardOneStepNoPromoteCheckMovesImpl<C, PTK_King, true, true, WilyPromote>(S, OpKingSq, Moves, UnpinCaptureBB, PinnedBB);
+            Moves = generateOnBoardOneStepNoPromoteCheckMovesImpl<C, PTK_King, false, true, WilyPromote>(S, Moves, UnpinEmptyBB, PinnedBB, OccupiedBB);
+            Moves = generateOnBoardOneStepNoPromoteCheckMovesImpl<C, PTK_King, true, true, WilyPromote>(S, Moves, UnpinCaptureBB, PinnedBB, OccupiedBB);
         }
 
         return Moves;
@@ -1071,55 +1658,55 @@ inline Move32* generatePossiblyLegalCheckMovesImpl(const State& S, Move32* Moves
 
     if (!CheckerBB.isZero()) {
         const Square CheckerSq = CheckerBB.getOne();
-        const Bitboard BetweenTarget = BetweenBB[CheckerSq][MyKingSq];
+        const Bitboard BetweenTarget = BetweenBB[CheckerSq][S.getKingSquare<C>()];
 
         if (St != 0) {
-            Moves = generateDroppingStepCheckMovesImpl<C>(S, OpKingSq, Moves, BetweenTarget);
-            Moves = generateDroppingSliderCheckMovesImpl<C>(S, OpKingSq, Moves, BetweenTarget, OccupiedBB);
+            Moves = generateDroppingStepCheckMovesImpl<C>(S,  Moves, BetweenTarget);
+            Moves = generateDroppingSliderCheckMovesImpl<C>(S, Moves, BetweenTarget, OccupiedBB);
         }
 
         // Capturing moves.
 
-        const Bitboard CheckerMyKingBetweenBB = BetweenBB[CheckerSq][MyKingSq];
+        const Bitboard CheckerMyKingBetweenBB = BetweenBB[CheckerSq][S.getKingSquare<C>()];
 
         if (PinnedExists) {
-            if (PinnedBB.isSet(MyKingSq)) {
-                const Bitboard KingLineBB = LineBB[MyKingSq][OpKingSq];
+            if (PinnedBB.isSet(S.getKingSquare<C>())) {
+                const Bitboard KingLineBB = LineBB[S.getKingSquare<C>()][S.getKingSquare<~C>()];
                 const Bitboard UnpinEmptyBB = KingLineBB.andNot(EmptyBB);
                 const Bitboard UnpinCaptureBB = KingLineBB.andNot(S.getBitboard<~C>());
 
-                Moves = generateOnBoardOneStepNoPromoteCheckMovesImpl<C, PTK_King, false, true, WilyPromote>(S, OpKingSq, Moves, UnpinEmptyBB, PinnedBB);
-                Moves = generateOnBoardOneStepNoPromoteCheckMovesImpl<C, PTK_King, true, true, WilyPromote>(S, OpKingSq, Moves, UnpinCaptureBB, PinnedBB);
+                Moves = generateOnBoardOneStepNoPromoteCheckMovesImpl<C, PTK_King, false, true, WilyPromote>(S, Moves, UnpinEmptyBB, PinnedBB, OccupiedBB);
+                Moves = generateOnBoardOneStepNoPromoteCheckMovesImpl<C, PTK_King, true, true, WilyPromote>(S, Moves, UnpinCaptureBB, PinnedBB, OccupiedBB);
             }
 
-            Moves = generateOnBoardOneStepCheckMovesImpl<C, false, true, WilyPromote, true>(S, Moves, OpKingSq, CheckerMyKingBetweenBB, PinnedBB);
-            Moves = generateOnBoardOneStepCheckMovesImpl<C, true, true, WilyPromote, true>(S, Moves, OpKingSq, CheckerBB, PinnedBB);
+            Moves = generateOnBoardOneStepCheckMovesImpl<C, false, true, WilyPromote, true>(S, Moves, CheckerMyKingBetweenBB, OccupiedBB, PinnedBB);
+            Moves = generateOnBoardOneStepCheckMovesImpl<C, true, true, WilyPromote, true>(S, Moves, CheckerBB, OccupiedBB, PinnedBB);
 
-            Moves = generateOnBoardSliderCheckMovesImpl<C, false, true, WilyPromote>(S, Moves, OpKingSq, CheckerMyKingBetweenBB, OccupiedBB, PinnedBB);
-            Moves = generateOnBoardSliderCheckMovesImpl<C, true, true, WilyPromote>(S, Moves, OpKingSq, CheckerBB, OccupiedBB, PinnedBB);
+            Moves = generateOnBoardSliderCheckMovesImpl<C, false, true, WilyPromote>(S, Moves, CheckerMyKingBetweenBB, OccupiedBB, PinnedBB);
+            Moves = generateOnBoardSliderCheckMovesImpl<C, true, true, WilyPromote>(S, Moves, CheckerBB, OccupiedBB, PinnedBB);
         }
 
-        Moves = generateOnBoardOneStepCheckMovesImpl<C, false, false, WilyPromote>(S, Moves, OpKingSq, CheckerMyKingBetweenBB, NoPinnedBB);
-        Moves = generateOnBoardOneStepCheckMovesImpl<C, true, false, WilyPromote>(S, Moves, OpKingSq, CheckerBB, NoPinnedBB);
-        Moves = generateOnBoardSliderCheckMovesImpl<C, false, false, WilyPromote>(S, Moves, OpKingSq, CheckerMyKingBetweenBB, OccupiedBB, NoPinnedBB);
-        Moves = generateOnBoardSliderCheckMovesImpl<C, true, false, WilyPromote>(S, Moves, OpKingSq, CheckerBB, OccupiedBB, NoPinnedBB);
+        Moves = generateOnBoardOneStepCheckMovesImpl<C, false, false, WilyPromote>(S, Moves, CheckerMyKingBetweenBB, OccupiedBB, NoPinnedBB);
+        Moves = generateOnBoardOneStepCheckMovesImpl<C, true, false, WilyPromote>(S, Moves, CheckerBB, OccupiedBB, NoPinnedBB);
+        Moves = generateOnBoardSliderCheckMovesImpl<C, false, false, WilyPromote>(S, Moves, CheckerMyKingBetweenBB, OccupiedBB, NoPinnedBB);
+        Moves = generateOnBoardSliderCheckMovesImpl<C, true, false, WilyPromote>(S, Moves, CheckerBB, OccupiedBB, NoPinnedBB);
     } else {
         if (St != 0) {
-            Moves = generateDroppingStepCheckMovesImpl<C>(S, OpKingSq, Moves, EmptyBB);
-            Moves = generateDroppingSliderCheckMovesImpl<C>(S, OpKingSq, Moves, EmptyBB, OccupiedBB);
+            Moves = generateDroppingStepCheckMovesImpl<C>(S, Moves, EmptyBB);
+            Moves = generateDroppingSliderCheckMovesImpl<C>(S, Moves, EmptyBB, OccupiedBB);
         }
 
         if (PinnedExists) {
-            Moves = generateOnBoardOneStepCheckMovesImpl<C, false, true, WilyPromote>(S, Moves, OpKingSq, EmptyBB, PinnedBB);
-            Moves = generateOnBoardOneStepCheckMovesImpl<C, true, true, WilyPromote>(S, Moves, OpKingSq, S.getBitboard<~C>(), PinnedBB);
-            Moves = generateOnBoardSliderCheckMovesImpl<C, false, true, WilyPromote>(S, Moves, OpKingSq, EmptyBB, OccupiedBB, PinnedBB);
-            Moves = generateOnBoardSliderCheckMovesImpl<C, true, true, WilyPromote>(S, Moves, OpKingSq, S.getBitboard<~C>(), OccupiedBB, PinnedBB);
+            Moves = generateOnBoardOneStepCheckMovesImpl<C, false, true, WilyPromote>(S, Moves, EmptyBB, OccupiedBB, PinnedBB);
+            Moves = generateOnBoardOneStepCheckMovesImpl<C, true, true, WilyPromote>(S, Moves, S.getBitboard<~C>(), OccupiedBB, PinnedBB);
+            Moves = generateOnBoardSliderCheckMovesImpl<C, false, true, WilyPromote>(S, Moves, EmptyBB, OccupiedBB, PinnedBB);
+            Moves = generateOnBoardSliderCheckMovesImpl<C, true, true, WilyPromote>(S, Moves, S.getBitboard<~C>(), OccupiedBB, PinnedBB);
         }
 
-        Moves = generateOnBoardOneStepCheckMovesImpl<C, false, false, WilyPromote>(S, Moves, OpKingSq, EmptyBB, NoPinnedBB);
-        Moves = generateOnBoardOneStepCheckMovesImpl<C, true, false, WilyPromote>(S, Moves, OpKingSq, S.getBitboard<~C>(), NoPinnedBB);
-        Moves = generateOnBoardSliderCheckMovesImpl<C, false, false, WilyPromote>(S, Moves, OpKingSq, EmptyBB, OccupiedBB, NoPinnedBB);
-        Moves = generateOnBoardSliderCheckMovesImpl<C, true, false, WilyPromote>(S, Moves, OpKingSq, S.getBitboard<~C>(), OccupiedBB, NoPinnedBB);
+        Moves = generateOnBoardOneStepCheckMovesImpl<C, false, false, WilyPromote>(S, Moves, EmptyBB, OccupiedBB, NoPinnedBB);
+        Moves = generateOnBoardOneStepCheckMovesImpl<C, true, false, WilyPromote>(S, Moves, S.getBitboard<~C>(), OccupiedBB, NoPinnedBB);
+        Moves = generateOnBoardSliderCheckMovesImpl<C, false, false, WilyPromote>(S, Moves, EmptyBB, OccupiedBB, NoPinnedBB);
+        Moves = generateOnBoardSliderCheckMovesImpl<C, true, false, WilyPromote>(S, Moves, S.getBitboard<~C>(), OccupiedBB, NoPinnedBB);
     }
 
     return Moves;
@@ -1127,127 +1714,54 @@ inline Move32* generatePossiblyLegalCheckMovesImpl(const State& S, Move32* Moves
 
 template <GenerateType GenType, Color C, bool WilyPromote>
 inline Move32* generateLegalMovesImpl(const State& S, Move32* Moves) {
-    Move32* const MovesHead = Moves;
-
     if constexpr (GenType == GenerateType::Normal) {
-        Moves = generatePossiblyLegalMovesImpl<C, WilyPromote>(S, Moves);
+        Moves = generateLegalMovesImpl<C, WilyPromote>(S, Moves);
     } else if constexpr (GenType == GenerateType::Check) {
-        Moves = generatePossiblyLegalCheckMovesImpl<C, WilyPromote>(S, Moves);
+        Moves = generateLegalCheckMovesImpl<C, WilyPromote>(S, Moves);
     }
 
-    Move32* Reader = MovesHead;
-    Move32* Writer = MovesHead;
-
-    while (Reader != Moves) {
-        if (!S.isSuicideMove<C>(*Reader)) {
-            *Writer = *Reader;
-            ++Writer;
-        }
-
-        ++Reader;
-    }
-
-    return Writer;
+    return Moves;
 }
 
 } // namespace
 
 template <Color C, bool WilyPromote>
-MoveList MoveGenerator::generatePossiblyLegalCheckMoves(const State& S) {
+MoveList MoveGenerator::generateLegalMoves(const State& S) {
     MoveList List;
-    List.Tail = generatePossiblyLegalCheckMovesImpl<C, WilyPromote>(S, List.Tail);
-    return List;
-}
-
-template <bool WilyPromote>
-MoveList MoveGenerator::generatePossiblyLegalMoves(const State& S) {
-    MoveList List;
-
-    List.Tail = (S.getPosition().sideToMove() == Black)
-                    ? generatePossiblyLegalMovesImpl<Black, WilyPromote>(S, List.Tail)
-                    : generatePossiblyLegalMovesImpl<White, WilyPromote>(S, List.Tail);
-
-    return List;
-}
-
-template <bool WilyPromote>
-MoveList MoveGenerator::generatePossiblyLegalCheckMoves(const State& S) {
-    return (S.getPosition().sideToMove() == Black)
-                ? generatePossiblyLegalCheckMoves<Black, WilyPromote>(S)
-                : generatePossiblyLegalCheckMoves<White, WilyPromote>(S);
-}
-
-template <bool WilyPromote>
-MoveList MoveGenerator::generatePossiblyLegalEvasionMoves(const State& S) {
-    return (S.getPosition().sideToMove() == Black)
-                ? generatePossiblyLegalEvasionMoves<Black, WilyPromote>(S)
-                : generatePossiblyLegalEvasionMoves<White, WilyPromote>(S);
-}
-
-template <Color C, bool WilyPromote>
-MoveList MoveGenerator::generatePossiblyLegalEvasionMoves(const State& S) {
-    MoveList List;
-    const Bitboard CheckerBB = S.getCheckerBB();
-    const Bitboard MyBB = S.getBitboard<C>();
-    const Bitboard OpponentBB = S.getBitboard<~C>();
-    const Bitboard OccupiedBB = MyBB | OpponentBB;
-
-    List.Tail = generatePossiblyLegalEvasionMovesImpl<C, WilyPromote>(S, List.Tail, CheckerBB, OpponentBB, OccupiedBB);
+    List.Tail = generateLegalMovesImpl<GenerateType::Normal, C, WilyPromote>(S, List.Tail);
     return List;
 }
 
 template <bool WilyPromote>
 MoveList MoveGenerator::generateLegalMoves(const State& S) {
+    return (S.getPosition().sideToMove() == Black)
+        ? generateLegalMoves<Black, WilyPromote>(S)
+        : generateLegalMoves<White, WilyPromote>(S);
+}
+
+template <Color C, bool WilyPromote>
+MoveList MoveGenerator::generateLegalCheckMoves(const State& S) {
     MoveList List;
-
-    List.Tail = (S.getPosition().sideToMove() == Black)
-                    ? generateLegalMovesImpl<GenerateType::Normal, Black, WilyPromote>(S, List.Tail)
-                    : generateLegalMovesImpl<GenerateType::Normal, White, WilyPromote>(S, List.Tail);
-
+    List.Tail = generateLegalMovesImpl<GenerateType::Check, C, WilyPromote>(S, List.Tail);
     return List;
 }
 
 template <bool WilyPromote>
 MoveList MoveGenerator::generateLegalCheckMoves(const State& S) {
-    MoveList List;
-
-    List.Tail = (S.getPosition().sideToMove() == Black)
-                    ? generateLegalMovesImpl<GenerateType::Check, Black, WilyPromote>(S, List.Tail)
-                    : generateLegalMovesImpl<GenerateType::Check, White, WilyPromote>(S, List.Tail);
-
-    return List;
+    return (S.getPosition().sideToMove() == Black)
+        ? generateLegalCheckMoves<Black, WilyPromote>(S)
+        : generateLegalCheckMoves<White, WilyPromote>(S);
 }
 
-template MoveList
-MoveGenerator::generatePossiblyLegalMoves<false>(const State& S);
-template MoveList
-MoveGenerator::generatePossiblyLegalMoves<true>(const State& S);
+template MoveList MoveGenerator::generateLegalMoves<Black, false>(const State& S);
+template MoveList MoveGenerator::generateLegalMoves<Black, true>(const State& S);
+template MoveList MoveGenerator::generateLegalMoves<White, false>(const State& S);
+template MoveList MoveGenerator::generateLegalMoves<White, true>(const State& S);
 
-template MoveList
-MoveGenerator::generatePossiblyLegalCheckMoves<false>(const State& S);
-template MoveList
-MoveGenerator::generatePossiblyLegalCheckMoves<true>(const State& S);
-template MoveList
-MoveGenerator::generatePossiblyLegalCheckMoves<core::Black, true>(const State& S);
-template MoveList
-MoveGenerator::generatePossiblyLegalCheckMoves<core::White, true>(const State& S);
-template MoveList
-MoveGenerator::generatePossiblyLegalCheckMoves<core::Black, false>(const State& S);
-template MoveList
-MoveGenerator::generatePossiblyLegalCheckMoves<core::White, false>(const State& S);
-
-template MoveList
-MoveGenerator::generatePossiblyLegalEvasionMoves<true>(const State& S);
-template MoveList
-MoveGenerator::generatePossiblyLegalEvasionMoves<false>(const State& S);
-template MoveList
-MoveGenerator::generatePossiblyLegalEvasionMoves<core::Black, true>(const State& S);
-template MoveList
-MoveGenerator::generatePossiblyLegalEvasionMoves<core::White, true>(const State& S);
-template MoveList
-MoveGenerator::generatePossiblyLegalEvasionMoves<core::Black, false>(const State& S);
-template MoveList
-MoveGenerator::generatePossiblyLegalEvasionMoves<core::White, false>(const State& S);
+template MoveList MoveGenerator::generateLegalCheckMoves<Black, false>(const State& S);
+template MoveList MoveGenerator::generateLegalCheckMoves<Black, true>(const State& S);
+template MoveList MoveGenerator::generateLegalCheckMoves<White, false>(const State& S);
+template MoveList MoveGenerator::generateLegalCheckMoves<White, true>(const State& S);
 
 template MoveList MoveGenerator::generateLegalMoves<false>(const State& S);
 template MoveList MoveGenerator::generateLegalMoves<true>(const State& S);

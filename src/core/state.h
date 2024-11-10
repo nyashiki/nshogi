@@ -102,25 +102,6 @@ class State {
 
     // Helper functions.
 
-    template <Color C> inline bool isSuicideMove(Move32 Move) const {
-        assert(Move.drop() ||
-               getPieceType(Pos.pieceOn(Move.from())) == Move.pieceType());
-
-        if (Move.drop()) {
-            return false;
-        }
-
-        return isSuicideMoveImpl<C>(Move);
-    }
-
-    inline bool isSuicideMove(Move32 Move) const {
-        if (getPosition().sideToMove() == Black) {
-            return isSuicideMove<Black>(Move);
-        } else {
-            return isSuicideMove<White>(Move);
-        }
-    }
-
     template <bool Strict = false>
     inline RepetitionStatus getRepetitionStatus() const {
         const Color SideToMove = getPosition().sideToMove();
@@ -573,51 +554,8 @@ class State {
         return getStepAttackBB<C>(ExcludeSq) | getSliderAttackBB<C>(ExcludeSq);
     }
 
-    template <Color C, PieceTypeKind Type>
-    inline bool isAttackedByOneStep(Square Sq) const {
-        return bitboard::isAttacked(bitboard::getAttackBB<C, Type>(Sq),
-                                    getBitboard<~C, Type>());
-    }
-
-    template <Color C, PieceTypeKind Type>
-    inline bool isAttackedBySlider(Square Sq,
-                                   const bitboard::Bitboard& OccupiedBB) const {
-        static_assert(Type == PTK_Lance || Type == PTK_Bishop ||
-                          Type == PTK_ProBishop || Type == PTK_Rook ||
-                          Type == PTK_ProRook,
-                      "possibly caused by calling isAttackedBySlider() with a "
-                      "template parameter "
-                      "that must not be passed in.");
-
-        if constexpr (Type == PTK_Lance) {
-            return bitboard::isAttacked(
-                bitboard::getLanceAttackBB<C>(Sq, OccupiedBB),
-                getBitboard<~C, PTK_Lance>());
-        } else if constexpr (Type == PTK_Bishop || Type == PTK_ProBishop) {
-            return
-                bitboard::isAttacked(
-                    bitboard::getBishopAttackBB<PTK_Bishop>(Sq, OccupiedBB),
-                    ((getBitboard<PTK_Bishop>() | getBitboard<PTK_ProBishop>()) & getBitboard<~C>())) ||
-                bitboard::isAttacked(
-                    bitboard::KingAttackBB[Sq], getBitboard<~C, PTK_ProBishop>());
-            return bitboard::isAttacked(
-                bitboard::getBishopAttackBB<Type>(Sq, OccupiedBB),
-                getBitboard<~C, Type>());
-        } else if constexpr (Type == PTK_Rook || Type == PTK_ProRook) {
-            return
-                bitboard::isAttacked(
-                    bitboard::getRookAttackBB<PTK_Rook>(Sq, OccupiedBB),
-                    ((getBitboard<PTK_Rook>() | getBitboard<PTK_ProRook>()) & getBitboard<~C>())) ||
-                bitboard::isAttacked(
-                    bitboard::KingAttackBB[Sq], getBitboard<~C, PTK_ProRook>());
-            // return bitboard::isAttacked(
-            //     bitboard::getRookAttackBB<Type>(Sq, OccupiedBB),
-            //     getBitboard<~C, Type>());
-        }
-    }
-
     template <Color C>
-    inline bool isAttacked(Square Sq, Square ExcludeSq = SqInvalid) const {
+    inline bool isAttackedByOneStep(Square Sq) const {
         const bitboard::Bitboard UnderAttackedBB =
             (bitboard::getAttackBB<C, PTK_Pawn>(Sq) & getBitboard<PTK_Pawn>()) |
             (bitboard::getAttackBB<C, PTK_Knight>(Sq) & getBitboard<PTK_Knight>()) |
@@ -627,20 +565,85 @@ class State {
                getBitboard<PTK_Gold>() | getBitboard<PTK_ProPawn>() | getBitboard<PTK_ProLance>() |
                getBitboard<PTK_ProKnight>() | getBitboard<PTK_ProSilver>()));
 
-        if (!(UnderAttackedBB & getBitboard<~C>()).isZero()) {
+        return !(UnderAttackedBB & getBitboard<~C>()).isZero();
+    }
+
+    template <Color C, PieceTypeKind Type>
+    inline bool isAttackedBySlider(Square Sq, const bitboard::Bitboard& OccupiedBB, Square VirtualSq = SqInvalid) const {
+        static_assert(Type == PTK_Lance || Type == PTK_Bishop ||
+                          Type == PTK_ProBishop || Type == PTK_Rook ||
+                          Type == PTK_ProRook,
+                      "possibly caused by calling isAttackedBySlider() with a "
+                      "template parameter "
+                      "that must not be passed in.");
+
+        if constexpr (Type == PTK_Lance) {
+            return (getBitboard<~C, PTK_Lance>() & bitboard::getForwardBB<C>(Sq)).any([&](Square LanceSq) {
+                if (VirtualSq != SqInvalid && LanceSq == VirtualSq) {
+                    return false;
+                }
+                const bitboard::Bitboard BetweenOccupiedBB =
+                    bitboard::getBetweenBB(Sq, LanceSq) & OccupiedBB;
+
+                return BetweenOccupiedBB.isZero();
+            });
+        } else if constexpr (Type == PTK_Bishop || Type == PTK_ProBishop) {
+            if (((getBitboard<PTK_Bishop>() | getBitboard<PTK_ProBishop>()) & getBitboard<~C>() & bitboard::DiagBB[Sq]).any([&](Square BishopSq) {
+                if (VirtualSq != SqInvalid && BishopSq == VirtualSq) {
+                    return false;
+                }
+                const bitboard::Bitboard BetweenOccupiedBB =
+                    bitboard::getBetweenBB(Sq, BishopSq) & OccupiedBB;
+
+                return BetweenOccupiedBB.isZero();
+            })) {
+                return true;
+            }
+
+            return bitboard::isAttacked(
+                    bitboard::KingAttackBB[Sq], getBitboard<~C, PTK_ProBishop>());
+        } else if constexpr (Type == PTK_Rook || Type == PTK_ProRook) {
+            if (((getBitboard<PTK_Rook>() | getBitboard<PTK_ProRook>()) & getBitboard<~C>() & bitboard::CrossBB[Sq]).any([&](Square RookSq) {
+                if (VirtualSq != SqInvalid && RookSq == VirtualSq) {
+                    return false;
+                }
+                const bitboard::Bitboard BetweenOccupiedBB =
+                    bitboard::getBetweenBB(Sq, RookSq) & OccupiedBB;
+
+                return BetweenOccupiedBB.isZero();
+            })) {
+                return true;
+            }
+
+            return bitboard::isAttacked(
+                    bitboard::KingAttackBB[Sq], getBitboard<~C, PTK_ProRook>());
+        }
+    }
+
+    template <Color C>
+    inline bool isAttackedBySlider(Square Sq,
+                                   const bitboard::Bitboard& OccupiedBB, Square ExcludeSq = SqInvalid, Square VirtualSq = SqInvalid) const {
+        bitboard::Bitboard OccupiedBB2 = OccupiedBB;
+        if (ExcludeSq != SqInvalid) {
+            assert(OccupiedBB.isSet(ExcludeSq));
+            OccupiedBB2.toggleBit(ExcludeSq);
+        }
+        if (VirtualSq != SqInvalid) {
+            OccupiedBB2 |= bitboard::SquareBB[VirtualSq];
+        }
+        return isAttackedBySlider<C, PTK_Bishop>(Sq, OccupiedBB2, VirtualSq) ||
+            isAttackedBySlider<C, PTK_Rook>(Sq, OccupiedBB2, VirtualSq) ||
+            isAttackedBySlider<C, PTK_Lance>(Sq, OccupiedBB2, VirtualSq);
+    }
+
+    template <Color C>
+    inline bool isAttacked(Square Sq, Square ExcludeSq = SqInvalid, Square VirtualSq = SqInvalid) const {
+        if (isAttackedByOneStep<C>(Sq)) {
             return true;
         }
 
-        bitboard::Bitboard OccupiedBB =
-            getBitboard<Black>() | getBitboard<White>();
-        if (ExcludeSq != SqInvalid) {
-            OccupiedBB.toggleBit(ExcludeSq);
-        }
-
-        return
-            isAttackedBySlider<C, PTK_Lance>(Sq, OccupiedBB) ||
-            isAttackedBySlider<C, PTK_Bishop>(Sq, OccupiedBB) ||
-            isAttackedBySlider<C, PTK_Rook>(Sq, OccupiedBB);
+        const bitboard::Bitboard OccupiedBB = getBitboard<Black>() | getBitboard<White>();
+        return isAttackedBySlider<C>(Sq, OccupiedBB, ExcludeSq, VirtualSq);
     }
 
  private:
@@ -659,30 +662,6 @@ class State {
 
     template <Color C>
     void setCheckerBB(StepHelper* SHelper);
-
-    template <Color C>
-    inline bool isSuicideMoveImpl(Move32 Move) const {
-        if (Move.pieceType() == PTK_King) {
-            // When moving the king, the square moving onto
-            // must be not attacked by opponent pieces.
-            return isAttacked<C>(Move.to(), Move.from());
-        }
-
-        // Here, we check the other pieces (i.e., excluding king) moves.
-        // If the piece is defending an opponent slider attack,
-        // it must move onto a square that is on the same line.
-        // Note: it cannot be true that one piece is defending
-        // more than one opponent slider attacks by the rule.
-        const Square From = Move.from();
-        if (!getDefendingOpponentSliderBB<C>().isSet(From)) {
-            // This piece is irrelevant defending an opponent slider attack.
-            return false;
-        }
-
-        // Now, this piece is defending opponent slider attacks.
-        // Therefore this piece must go onto a square on the same line.
-        return !utils::isSameLine(From, Move.to(), getKingSquare<C>());
-    }
 
     friend class StateBuilder;
 };
