@@ -451,13 +451,13 @@ struct Move32 {
         return Move32((1 << FromShift) | (1 << ToShift));
     }
 
-    static Move32 boardMove(Square From, Square To, PieceTypeKind Pt) {
+    static constexpr Move32 boardMove(Square From, Square To, PieceTypeKind Pt) {
         return Move32(((uint32_t)Pt   << PieceTypeShift) |
                       ((uint32_t)From << FromShift)      |
                       ((uint32_t)To));
     }
 
-    static Move32 boardMove(Square From, Square To, PieceTypeKind Pt, PieceTypeKind Capture) {
+    static constexpr Move32 boardMove(Square From, Square To, PieceTypeKind Pt, PieceTypeKind Capture) {
         return Move32(((uint32_t)Capture << CaptureTypeShift) |
                       ((uint32_t)Pt      << PieceTypeShift)   |
                       ((uint32_t)From    << FromShift)        |
@@ -465,14 +465,14 @@ struct Move32 {
     }
 
 
-    static Move32 boardPromotingMove(Square From, Square To, PieceTypeKind Pt) {
+    static constexpr Move32 boardPromotingMove(Square From, Square To, PieceTypeKind Pt) {
         return Move32(((uint32_t)1    << PromoteShift)   |
                       ((uint32_t)Pt   << PieceTypeShift) |
                       ((uint32_t)From << FromShift)      |
                       ((uint32_t)To));
     }
 
-    static Move32 boardPromotingMove(Square From, Square To, PieceTypeKind Pt, PieceTypeKind Capture) {
+    static constexpr Move32 boardPromotingMove(Square From, Square To, PieceTypeKind Pt, PieceTypeKind Capture) {
         return Move32(((uint32_t)Capture << CaptureTypeShift) |
                       ((uint32_t)1       << PromoteShift)     |
                       ((uint32_t)Pt      << PieceTypeShift)   |
@@ -480,7 +480,7 @@ struct Move32 {
                       ((uint32_t)To));
     }
 
-    static Move32 droppingMove(Square To, PieceTypeKind Pt) {
+    static constexpr Move32 droppingMove(Square To, PieceTypeKind Pt) {
         return Move32((uint32_t)Pt                             << PieceTypeShift |
                      ((uint32_t)Pt + (uint32_t)NumSquares - 1) << FromShift      |
                      ((uint32_t)To));
