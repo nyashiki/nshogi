@@ -335,6 +335,12 @@ struct alignas(16) Bitboard {
     }
 
     constexpr bool operator!=(const Bitboard& BB) const {
+#if defined(USE_SSE2)
+        if (!std::is_constant_evaluated()) {
+            __m128i Result = _mm_cmpeq_epi8(Bitboard_, BB.Bitboard_); // Compare
+            return _mm_movemask_epi8(Result) != 0xFFFF;
+        }
+#endif
         return (Primitive[0] != BB.Primitive[0]) || (Primitive[1] != BB.Primitive[1]);
     }
 
