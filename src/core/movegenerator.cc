@@ -438,59 +438,44 @@ inline Move32* generateDroppingMovesImplAVX2(const State& S, Move32* List,
         uint32_t Pack32[8];
     };
 
-    const __m256i FromOffset256 = _mm256_set1_epi32(NumSquares - 1);
-    const __m128i FromOffset128 = _mm_set1_epi32(NumSquares - 1);
-    const uint64_t FromOffset64 = (uint64_t)(NumSquares - 1) << 32 | (NumSquares - 1);
-    const uint32_t FromOffset32 = (uint32_t)(NumSquares - 1);
+    DroppingPack256 DP;
+    int MoveCount = 0;
+    if (SilverExists) {
+        DP.Pack32[MoveCount] = Move32::droppingMove((Square)0, PTK_Silver).value();
+        ++MoveCount;
+    }
+    if (GoldExists) {
+        DP.Pack32[MoveCount] = Move32::droppingMove((Square)0, PTK_Gold).value();
+        ++MoveCount;
+    }
+    if (BishopExists) {
+        DP.Pack32[MoveCount] = Move32::droppingMove((Square)0, PTK_Bishop).value();
+        ++MoveCount;
+    }
+    if (RookExists) {
+        DP.Pack32[MoveCount] = Move32::droppingMove((Square)0, PTK_Rook).value();
+        ++MoveCount;
+    }
+    if (LanceExists) {
+        DP.Pack32[MoveCount] = Move32::droppingMove((Square)0, PTK_Lance).value();
+        ++MoveCount;
+    }
+    if (KnightExists) {
+        DP.Pack32[MoveCount] = Move32::droppingMove((Square)0, PTK_Knight).value();
+        ++MoveCount;
+    }
 
     /* if (Stands exist) */ {
-        DroppingPack256 DP;
-
-        // uint32_t DroppingCandidates[6];
-        int MoveCount = 0;
-        if (LanceExists) {
-            DP.Pack32[MoveCount] = (int32_t)PTK_Lance;
-            ++MoveCount;
-        }
-        if (KnightExists) {
-            DP.Pack32[MoveCount] = (int32_t)PTK_Knight;
-            ++MoveCount;
-        }
-        if (SilverExists) {
-            DP.Pack32[MoveCount] = (int32_t)PTK_Silver;
-            ++MoveCount;
-        }
-        if (GoldExists) {
-            DP.Pack32[MoveCount] = (int32_t)PTK_Gold;
-            ++MoveCount;
-        }
-        if (BishopExists) {
-            DP.Pack32[MoveCount] = (int32_t)PTK_Bishop;
-            ++MoveCount;
-        }
-        if (RookExists) {
-            DP.Pack32[MoveCount] = (int32_t)PTK_Rook;
-            ++MoveCount;
-        }
-
         const Bitboard ToBB = FirstAndSecondFurthestBB[C].andNot(TargetSquares);
 
         switch (MoveCount) {
             case 1: {
-                uint32_t PTs = DP.Pack32[0] << 15;
-                uint32_t Froms = DP.Pack32[0] + FromOffset32;
-                Froms <<= 7;
-                DP.Pack32[0] = PTs | Froms;
                 ToBB.forEach([&](Square To) {
                     *List++ = Move32::fromValue(DP.Pack32[0] | (uint32_t)To);
                 });
                 break;
             }
             case 2: {
-                uint64_t PTs = DP.Pack64[0] << 15;
-                uint64_t Froms = DP.Pack64[0] + FromOffset64;
-                Froms <<= 7;
-                DP.Pack64[0] = PTs | Froms;
                 ToBB.forEach([&](Square To) {
                     DroppingPack256 Base;
                     uint64_t Tos = ((uint64_t)To << 32 | (uint64_t)To);
@@ -501,10 +486,6 @@ inline Move32* generateDroppingMovesImplAVX2(const State& S, Move32* List,
                 break;
             }
             case 3: {
-                __m128i PTs = _mm_slli_epi32(DP.Pack128[0], 15);
-                __m128i Froms = _mm_add_epi32(DP.Pack128[0], FromOffset128);
-                Froms = _mm_slli_epi32(Froms, 7);
-                DP.Pack128[0] = _mm_or_si128(PTs, Froms);
                 ToBB.forEach([&](Square To) {
                     DroppingPack256 Base;
                     __m128i Tos = _mm_set1_epi32((int32_t)To);
@@ -516,10 +497,6 @@ inline Move32* generateDroppingMovesImplAVX2(const State& S, Move32* List,
                 break;
             }
             case 4: {
-                __m128i PTs = _mm_slli_epi32(DP.Pack128[0], 15);
-                __m128i Froms = _mm_add_epi32(DP.Pack128[0], FromOffset128);
-                Froms = _mm_slli_epi32(Froms, 7);
-                DP.Pack128[0] = _mm_or_si128(PTs, Froms);
                 ToBB.forEach([&](Square To) {
                     DroppingPack256 Base;
                     __m128i Tos = _mm_set1_epi32((int32_t)To);
@@ -532,10 +509,6 @@ inline Move32* generateDroppingMovesImplAVX2(const State& S, Move32* List,
                 break;
             }
             case 5: {
-                __m256i PTs = _mm256_slli_epi32(DP.Pack256, 15);
-                __m256i Froms = _mm256_add_epi32(DP.Pack256, FromOffset256);
-                Froms = _mm256_slli_epi32(Froms, 7);
-                DP.Pack256 = _mm256_or_si256(PTs, Froms);
                 ToBB.forEach([&](Square To) {
                     DroppingPack256 Base;
                     __m256i Tos = _mm256_set1_epi32((int32_t)To);
@@ -549,10 +522,6 @@ inline Move32* generateDroppingMovesImplAVX2(const State& S, Move32* List,
                 break;
             }
             case 6: {
-                __m256i PTs = _mm256_slli_epi32(DP.Pack256, 15);
-                __m256i Froms = _mm256_add_epi32(DP.Pack256, FromOffset256);
-                Froms = _mm256_slli_epi32(Froms, 7);
-                DP.Pack256 = _mm256_or_si256(PTs, Froms);
                 ToBB.forEach([&](Square To) {
                     DroppingPack256 Base;
                     __m256i Tos = _mm256_set1_epi32((int32_t)To);
@@ -570,47 +539,19 @@ inline Move32* generateDroppingMovesImplAVX2(const State& S, Move32* List,
     }
 
     {
-        DroppingPack256 DP;
-
-        int MoveCount = 0;
-        if (LanceExists) {
-            DP.Pack32[MoveCount] = (int32_t)PTK_Lance;
-            ++MoveCount;
-        }
-        if (SilverExists) {
-            DP.Pack32[MoveCount] = (int32_t)PTK_Silver;
-            ++MoveCount;
-        }
-        if (GoldExists) {
-            DP.Pack32[MoveCount] = (int32_t)PTK_Gold;
-            ++MoveCount;
-        }
-        if (BishopExists) {
-            DP.Pack32[MoveCount] = (int32_t)PTK_Bishop;
-            ++MoveCount;
-        }
-        if (RookExists) {
-            DP.Pack32[MoveCount] = (int32_t)PTK_Rook;
-            ++MoveCount;
+        if (KnightExists) {
+            --MoveCount;
         }
 
         const Bitboard ToBB = TargetSquares & SecondFurthestBB[C];
         switch (MoveCount) {
             case 1: {
-                uint32_t PTs = DP.Pack32[0] << 15;
-                uint32_t Froms = DP.Pack32[0] + FromOffset32;
-                Froms <<= 7;
-                DP.Pack32[0] = PTs | Froms;
                 ToBB.forEach([&](Square To) {
                     *List++ = Move32::fromValue(DP.Pack32[0] | (uint32_t)To);
                 });
                 break;
             }
             case 2: {
-                uint64_t PTs = DP.Pack64[0] << 15;
-                uint64_t Froms = DP.Pack64[0] + FromOffset64;
-                Froms <<= 7;
-                DP.Pack64[0] = PTs | Froms;
                 ToBB.forEach([&](Square To) {
                     DroppingPack256 Base;
                     uint64_t Tos = ((uint64_t)To << 32 | (uint64_t)To);
@@ -621,10 +562,6 @@ inline Move32* generateDroppingMovesImplAVX2(const State& S, Move32* List,
                 break;
             }
             case 3: {
-                __m128i PTs = _mm_slli_epi32(DP.Pack128[0], 15);
-                __m128i Froms = _mm_add_epi32(DP.Pack128[0], FromOffset128);
-                Froms = _mm_slli_epi32(Froms, 7);
-                DP.Pack128[0] = _mm_or_si128(PTs, Froms);
                 ToBB.forEach([&](Square To) {
                     DroppingPack256 Base;
                     __m128i Tos = _mm_set1_epi32((int32_t)To);
@@ -636,10 +573,6 @@ inline Move32* generateDroppingMovesImplAVX2(const State& S, Move32* List,
                 break;
             }
             case 4: {
-                __m128i PTs = _mm_slli_epi32(DP.Pack128[0], 15);
-                __m128i Froms = _mm_add_epi32(DP.Pack128[0], FromOffset128);
-                Froms = _mm_slli_epi32(Froms, 7);
-                DP.Pack128[0] = _mm_or_si128(PTs, Froms);
                 ToBB.forEach([&](Square To) {
                     DroppingPack256 Base;
                     __m128i Tos = _mm_set1_epi32((int32_t)To);
@@ -652,10 +585,6 @@ inline Move32* generateDroppingMovesImplAVX2(const State& S, Move32* List,
                 break;
             }
             case 5: {
-                __m256i PTs = _mm256_slli_epi32(DP.Pack256, 15);
-                __m256i Froms = _mm256_add_epi32(DP.Pack256, FromOffset256);
-                Froms = _mm256_slli_epi32(Froms, 7);
-                DP.Pack256 = _mm256_or_si256(PTs, Froms);
                 ToBB.forEach([&](Square To) {
                     DroppingPack256 Base;
                     __m256i Tos = _mm256_set1_epi32((int32_t)To);
@@ -672,43 +601,20 @@ inline Move32* generateDroppingMovesImplAVX2(const State& S, Move32* List,
     }
 
     {
-        DroppingPack256 DP;
-        int MoveCount = 0;
-        if (SilverExists) {
-            DP.Pack32[MoveCount] = (int32_t)PTK_Silver;
-            ++MoveCount;
-        }
-        if (GoldExists) {
-            DP.Pack32[MoveCount] = (int32_t)PTK_Gold;
-            ++MoveCount;
-        }
-        if (BishopExists) {
-            DP.Pack32[MoveCount] = (int32_t)PTK_Bishop;
-            ++MoveCount;
-        }
-        if (RookExists) {
-            DP.Pack32[MoveCount] = (int32_t)PTK_Rook;
-            ++MoveCount;
+        if (LanceExists) {
+            --MoveCount;
         }
 
         const Bitboard ToBB = TargetSquares & FurthermostBB[C];
 
         switch (MoveCount) {
             case 1: {
-                uint32_t PTs = DP.Pack32[0] << 15;
-                uint32_t Froms = DP.Pack32[0] + FromOffset32;
-                Froms <<= 7;
-                DP.Pack32[0] = PTs | Froms;
                 ToBB.forEach([&](Square To) {
                     *List++ = Move32::fromValue(DP.Pack32[0] | (uint32_t)To);
                 });
                 break;
             }
             case 2: {
-                uint64_t PTs = DP.Pack64[0] << 15;
-                uint64_t Froms = DP.Pack64[0] + FromOffset64;
-                Froms <<= 7;
-                DP.Pack64[0] = PTs | Froms;
                 ToBB.forEach([&](Square To) {
                     DroppingPack256 Base;
                     uint64_t Tos = ((uint64_t)To << 32 | (uint64_t)To);
@@ -719,10 +625,6 @@ inline Move32* generateDroppingMovesImplAVX2(const State& S, Move32* List,
                 break;
             }
             case 3: {
-                __m128i PTs = _mm_slli_epi32(DP.Pack128[0], 15);
-                __m128i Froms = _mm_add_epi32(DP.Pack128[0], FromOffset128);
-                Froms = _mm_slli_epi32(Froms, 7);
-                DP.Pack128[0] = _mm_or_si128(PTs, Froms);
                 ToBB.forEach([&](Square To) {
                     DroppingPack256 Base;
                     __m128i Tos = _mm_set1_epi32((int32_t)To);
@@ -734,10 +636,6 @@ inline Move32* generateDroppingMovesImplAVX2(const State& S, Move32* List,
                 break;
             }
             case 4: {
-                __m128i PTs = _mm_slli_epi32(DP.Pack128[0], 15);
-                __m128i Froms = _mm_add_epi32(DP.Pack128[0], FromOffset128);
-                Froms = _mm_slli_epi32(Froms, 7);
-                DP.Pack128[0] = _mm_or_si128(PTs, Froms);
                 ToBB.forEach([&](Square To) {
                     DroppingPack256 Base;
                     __m128i Tos = _mm_set1_epi32((int32_t)To);
@@ -790,41 +688,41 @@ inline Move32* generateDroppingMovesImpl(const State& S, Move32* List,
         });
     }
 
-    const bool LanceExists = getStandCount<PTK_Lance>(St) > 0;
-    const bool KnightExists = getStandCount<PTK_Knight>(St) > 0;
     const bool SilverExists = getStandCount<PTK_Silver>(St) > 0;
     const bool GoldExists = getStandCount<PTK_Gold>(St) > 0;
     const bool BishopExists = getStandCount<PTK_Bishop>(St) > 0;
     const bool RookExists = getStandCount<PTK_Rook>(St) > 0;
+    const bool LanceExists = getStandCount<PTK_Lance>(St) > 0;
+    const bool KnightExists = getStandCount<PTK_Knight>(St) > 0;
+
+    uint32_t DroppingCandidates[6];
+    int MoveCount = 0;
+    if (SilverExists) {
+        DroppingCandidates[MoveCount] = Move32::droppingMove((Square)0, PTK_Silver).value();
+        ++MoveCount;
+    }
+    if (GoldExists) {
+        DroppingCandidates[MoveCount] = Move32::droppingMove((Square)0, PTK_Gold).value();
+        ++MoveCount;
+    }
+    if (BishopExists) {
+        DroppingCandidates[MoveCount] = Move32::droppingMove((Square)0, PTK_Bishop).value();
+        ++MoveCount;
+    }
+    if (RookExists) {
+        DroppingCandidates[MoveCount] = Move32::droppingMove((Square)0, PTK_Rook).value();
+        ++MoveCount;
+    }
+    if (LanceExists) {
+        DroppingCandidates[MoveCount] = Move32::droppingMove((Square)0, PTK_Lance).value();
+        ++MoveCount;
+    }
+    if (KnightExists) {
+        DroppingCandidates[MoveCount] = Move32::droppingMove((Square)0, PTK_Knight).value();
+        ++MoveCount;
+    }
 
     /* if (Stands exist) */ {
-        uint32_t DroppingCandidates[6];
-        int MoveCount = 0;
-        if (LanceExists) {
-            DroppingCandidates[MoveCount] = Move32::droppingMove((Square)0, PTK_Lance).value();
-            ++MoveCount;
-        }
-        if (KnightExists) {
-            DroppingCandidates[MoveCount] = Move32::droppingMove((Square)0, PTK_Knight).value();
-            ++MoveCount;
-        }
-        if (SilverExists) {
-            DroppingCandidates[MoveCount] = Move32::droppingMove((Square)0, PTK_Silver).value();
-            ++MoveCount;
-        }
-        if (GoldExists) {
-            DroppingCandidates[MoveCount] = Move32::droppingMove((Square)0, PTK_Gold).value();
-            ++MoveCount;
-        }
-        if (BishopExists) {
-            DroppingCandidates[MoveCount] = Move32::droppingMove((Square)0, PTK_Bishop).value();
-            ++MoveCount;
-        }
-        if (RookExists) {
-            DroppingCandidates[MoveCount] = Move32::droppingMove((Square)0, PTK_Rook).value();
-            ++MoveCount;
-        }
-
         const Bitboard ToBB = FirstAndSecondFurthestBB[C].andNot(TargetSquares);
 
         switch (MoveCount) {
@@ -883,27 +781,8 @@ inline Move32* generateDroppingMovesImpl(const State& S, Move32* List,
     }
 
     {
-        uint32_t DroppingCandidates[5];
-        int MoveCount = 0;
-        if (LanceExists) {
-            DroppingCandidates[MoveCount] = Move32::droppingMove((Square)0, PTK_Lance).value();
-            ++MoveCount;
-        }
-        if (SilverExists) {
-            DroppingCandidates[MoveCount] = Move32::droppingMove((Square)0, PTK_Silver).value();
-            ++MoveCount;
-        }
-        if (GoldExists) {
-            DroppingCandidates[MoveCount] = Move32::droppingMove((Square)0, PTK_Gold).value();
-            ++MoveCount;
-        }
-        if (BishopExists) {
-            DroppingCandidates[MoveCount] = Move32::droppingMove((Square)0, PTK_Bishop).value();
-            ++MoveCount;
-        }
-        if (RookExists) {
-            DroppingCandidates[MoveCount] = Move32::droppingMove((Square)0, PTK_Rook).value();
-            ++MoveCount;
+        if (KnightExists) {
+            --MoveCount;
         }
 
         const Bitboard ToBB = TargetSquares & SecondFurthestBB[C];
@@ -947,23 +826,8 @@ inline Move32* generateDroppingMovesImpl(const State& S, Move32* List,
     }
 
     {
-        uint32_t DroppingCandidates[4];
-        int MoveCount = 0;
-        if (SilverExists) {
-            DroppingCandidates[MoveCount] = Move32::droppingMove((Square)0, PTK_Silver).value();
-            ++MoveCount;
-        }
-        if (GoldExists) {
-            DroppingCandidates[MoveCount] = Move32::droppingMove((Square)0, PTK_Gold).value();
-            ++MoveCount;
-        }
-        if (BishopExists) {
-            DroppingCandidates[MoveCount] = Move32::droppingMove((Square)0, PTK_Bishop).value();
-            ++MoveCount;
-        }
-        if (RookExists) {
-            DroppingCandidates[MoveCount] = Move32::droppingMove((Square)0, PTK_Rook).value();
-            ++MoveCount;
+        if (LanceExists) {
+            --MoveCount;
         }
 
         const Bitboard ToBB = TargetSquares & FurthermostBB[C];
