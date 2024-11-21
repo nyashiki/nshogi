@@ -867,6 +867,267 @@ inline Move32* generateDroppingMovesImplAVX2(const State& S, Move32* List,
     return List;
 }
 
+#elif defined(USE_NEON)
+
+template <Color C>
+inline Move32* generateDroppingMovesImplNeon(const State& S, Move32* List,
+                                     const Bitboard& TargetSquares) {
+    const Stands St = S.getPosition().getStand<C>();
+
+    if (St == 0) {
+        return List;
+    }
+
+    const bool PawnExists = getStandCount<PTK_Pawn>(St) > 0;
+
+    if (PawnExists) {
+        const Bitboard PawnBB = S.getBitboard<C, PTK_Pawn>();
+
+        // Figure out files on which a pawn does not exist.
+        const Bitboard Temp = RankBB[RankA].subtract(PawnBB) & RankBB[RankA];
+        Bitboard ToBB = Temp.subtract(Temp.getRightShiftEpi64(8));
+        if constexpr (C == White) {
+            ToBB = ToBB.getLeftShiftEpi64(1);
+        }
+
+        ToBB &= TargetSquares;
+        ToBB.forEach([&List](Square To) {
+            assert(checkRange(To));
+            *List++ = Move32::droppingMove(To, PTK_Pawn);
+        });
+    }
+
+    const bool LanceExists = getStandCount<PTK_Lance>(St) > 0;
+    const bool KnightExists = getStandCount<PTK_Knight>(St) > 0;
+    const bool SilverExists = getStandCount<PTK_Silver>(St) > 0;
+    const bool GoldExists = getStandCount<PTK_Gold>(St) > 0;
+    const bool BishopExists = getStandCount<PTK_Bishop>(St) > 0;
+    const bool RookExists = getStandCount<PTK_Rook>(St) > 0;
+
+    union alignas(32) DroppingPack256 {
+        uint32x4_t Pack128[2];
+        uint32x2_t Pack64[4];
+        uint32_t Pack32[8];
+    };
+
+    DroppingPack256 DP;
+    int MoveCount = 0;
+    if (SilverExists) {
+        DP.Pack32[MoveCount] = Move32::droppingMove((Square)0, PTK_Silver).value();
+        ++MoveCount;
+    }
+    if (GoldExists) {
+        DP.Pack32[MoveCount] = Move32::droppingMove((Square)0, PTK_Gold).value();
+        ++MoveCount;
+    }
+    if (BishopExists) {
+        DP.Pack32[MoveCount] = Move32::droppingMove((Square)0, PTK_Bishop).value();
+        ++MoveCount;
+    }
+    if (RookExists) {
+        DP.Pack32[MoveCount] = Move32::droppingMove((Square)0, PTK_Rook).value();
+        ++MoveCount;
+    }
+    if (LanceExists) {
+        DP.Pack32[MoveCount] = Move32::droppingMove((Square)0, PTK_Lance).value();
+        ++MoveCount;
+    }
+    if (KnightExists) {
+        DP.Pack32[MoveCount] = Move32::droppingMove((Square)0, PTK_Knight).value();
+        ++MoveCount;
+    }
+
+    /* if (Stands exist) */ {
+        const Bitboard ToBB = FirstAndSecondFurthestBB[C].andNot(TargetSquares);
+
+        switch (MoveCount) {
+            case 1: {
+                ToBB.forEach([&](Square To) {
+                    *List++ = Move32::fromValue(DP.Pack32[0] | (uint32_t)To);
+                });
+                break;
+            }
+            case 2: {
+                ToBB.forEach([&](Square To) {
+                    DroppingPack256 Base;
+                    uint32x2_t Tos = vdup_n_u32((uint32_t)To);
+                    Base.Pack64[0] = vorr_u32(DP.Pack64[0], Tos);
+                    *List++ = Move32::fromValue(Base.Pack32[0]);
+                    *List++ = Move32::fromValue(Base.Pack32[1]);
+                });
+                break;
+            }
+            case 3: {
+                ToBB.forEach([&](Square To) {
+                    DroppingPack256 Base;
+                    uint32x4_t Tos = vdupq_n_u32((uint32_t)To);
+                    Base.Pack128[0] = vorrq_u32(DP.Pack128[0], Tos);
+                    *List++ = Move32::fromValue(Base.Pack32[0]);
+                    *List++ = Move32::fromValue(Base.Pack32[1]);
+                    *List++ = Move32::fromValue(Base.Pack32[2]);
+                });
+                break;
+            }
+            case 4: {
+                ToBB.forEach([&](Square To) {
+                    DroppingPack256 Base;
+                    uint32x4_t Tos = vdupq_n_u32((uint32_t)To);
+                    Base.Pack128[0] = vorrq_u32(DP.Pack128[0], Tos);
+                    *List++ = Move32::fromValue(Base.Pack32[0]);
+                    *List++ = Move32::fromValue(Base.Pack32[1]);
+                    *List++ = Move32::fromValue(Base.Pack32[2]);
+                    *List++ = Move32::fromValue(Base.Pack32[3]);
+                });
+                break;
+            }
+            case 5: {
+                ToBB.forEach([&](Square To) {
+                    DroppingPack256 Base;
+                    uint32x4_t Tos = vdupq_n_u32((uint32_t)To);
+                    Base.Pack128[0] = vorrq_u32(DP.Pack128[0], Tos);
+                    Base.Pack128[1] = vorrq_u32(DP.Pack128[1], Tos);
+                    *List++ = Move32::fromValue(Base.Pack32[0]);
+                    *List++ = Move32::fromValue(Base.Pack32[1]);
+                    *List++ = Move32::fromValue(Base.Pack32[2]);
+                    *List++ = Move32::fromValue(Base.Pack32[3]);
+                    *List++ = Move32::fromValue(Base.Pack32[4]);
+                });
+                break;
+            }
+            case 6: {
+                ToBB.forEach([&](Square To) {
+                    DroppingPack256 Base;
+                    uint32x4_t Tos = vdupq_n_u32((uint32_t)To);
+                    Base.Pack128[0] = vorrq_u32(DP.Pack128[0], Tos);
+                    Base.Pack128[1] = vorrq_u32(DP.Pack128[1], Tos);
+                    *List++ = Move32::fromValue(Base.Pack32[0]);
+                    *List++ = Move32::fromValue(Base.Pack32[1]);
+                    *List++ = Move32::fromValue(Base.Pack32[2]);
+                    *List++ = Move32::fromValue(Base.Pack32[3]);
+                    *List++ = Move32::fromValue(Base.Pack32[4]);
+                    *List++ = Move32::fromValue(Base.Pack32[5]);
+                });
+                break;
+            }
+        }
+    }
+
+    {
+        if (KnightExists) {
+            --MoveCount;
+        }
+
+        const Bitboard ToBB = TargetSquares & SecondFurthestBB[C];
+        switch (MoveCount) {
+            case 1: {
+                ToBB.forEach([&](Square To) {
+                    *List++ = Move32::fromValue(DP.Pack32[0] | (uint32_t)To);
+                });
+                break;
+            }
+            case 2: {
+                ToBB.forEach([&](Square To) {
+                    DroppingPack256 Base;
+                    uint32x2_t Tos = vdup_n_u32((uint32_t)To);
+                    Base.Pack64[0] = vorr_u32(DP.Pack64[0], Tos);
+                    *List++ = Move32::fromValue(Base.Pack32[0]);
+                    *List++ = Move32::fromValue(Base.Pack32[1]);
+                });
+                break;
+            }
+            case 3: {
+                ToBB.forEach([&](Square To) {
+                    DroppingPack256 Base;
+                    uint32x4_t Tos = vdupq_n_u32((uint32_t)To);
+                    Base.Pack128[0] = vorrq_u32(DP.Pack128[0], Tos);
+                    *List++ = Move32::fromValue(Base.Pack32[0]);
+                    *List++ = Move32::fromValue(Base.Pack32[1]);
+                    *List++ = Move32::fromValue(Base.Pack32[2]);
+                });
+                break;
+            }
+            case 4: {
+                ToBB.forEach([&](Square To) {
+                    DroppingPack256 Base;
+                    uint32x4_t Tos = vdupq_n_u32((uint32_t)To);
+                    Base.Pack128[0] = vorrq_u32(DP.Pack128[0], Tos);
+                    *List++ = Move32::fromValue(Base.Pack32[0]);
+                    *List++ = Move32::fromValue(Base.Pack32[1]);
+                    *List++ = Move32::fromValue(Base.Pack32[2]);
+                    *List++ = Move32::fromValue(Base.Pack32[3]);
+                });
+                break;
+            }
+            case 5: {
+                ToBB.forEach([&](Square To) {
+                    DroppingPack256 Base;
+                    uint32x4_t Tos = vdupq_n_u32((uint32_t)To);
+                    Base.Pack128[0] = vorrq_u32(DP.Pack128[0], Tos);
+                    Base.Pack128[1] = vorrq_u32(DP.Pack128[1], Tos);
+                    *List++ = Move32::fromValue(Base.Pack32[0]);
+                    *List++ = Move32::fromValue(Base.Pack32[1]);
+                    *List++ = Move32::fromValue(Base.Pack32[2]);
+                    *List++ = Move32::fromValue(Base.Pack32[3]);
+                    *List++ = Move32::fromValue(Base.Pack32[4]);
+                });
+                break;
+            }
+        }
+    }
+
+    {
+        if (LanceExists) {
+            --MoveCount;
+        }
+
+        const Bitboard ToBB = TargetSquares & FurthermostBB[C];
+
+        switch (MoveCount) {
+            case 1: {
+                ToBB.forEach([&](Square To) {
+                    *List++ = Move32::fromValue(DP.Pack32[0] | (uint32_t)To);
+                });
+                break;
+            }
+            case 2: {
+                ToBB.forEach([&](Square To) {
+                    DroppingPack256 Base;
+                    uint32x2_t Tos = vdup_n_u32((uint32_t)To);
+                    Base.Pack64[0] = vorr_u32(DP.Pack64[0], Tos);
+                    *List++ = Move32::fromValue(Base.Pack32[0]);
+                    *List++ = Move32::fromValue(Base.Pack32[1]);
+                });
+                break;
+            }
+            case 3: {
+                ToBB.forEach([&](Square To) {
+                    DroppingPack256 Base;
+                    uint32x4_t Tos = vdupq_n_u32((uint32_t)To);
+                    Base.Pack128[0] = vorrq_u32(DP.Pack128[0], Tos);
+                    *List++ = Move32::fromValue(Base.Pack32[0]);
+                    *List++ = Move32::fromValue(Base.Pack32[1]);
+                    *List++ = Move32::fromValue(Base.Pack32[2]);
+                });
+                break;
+            }
+            case 4: {
+                ToBB.forEach([&](Square To) {
+                    DroppingPack256 Base;
+                    uint32x4_t Tos = vdupq_n_u32((uint32_t)To);
+                    Base.Pack128[0] = vorrq_u32(DP.Pack128[0], Tos);
+                    *List++ = Move32::fromValue(Base.Pack32[0]);
+                    *List++ = Move32::fromValue(Base.Pack32[1]);
+                    *List++ = Move32::fromValue(Base.Pack32[2]);
+                    *List++ = Move32::fromValue(Base.Pack32[3]);
+                });
+                break;
+            }
+        }
+    }
+
+    return List;
+}
+
 #endif
 
 template <Color C>
@@ -875,6 +1136,8 @@ inline Move32* generateDroppingMovesImpl(const State& S, Move32* List,
 
 #if defined(USE_AVX2)
     return generateDroppingMovesImplAVX2<C>(S, List, TargetSquares);
+#elif defined(USE_NEON)
+    return generateDroppingMovesImplNeon<C>(S, List, TargetSquares);
 #endif
 
     const Stands St = S.getPosition().getStand<C>();

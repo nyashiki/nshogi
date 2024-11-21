@@ -2,6 +2,8 @@
 #define NSHOGI_CORE_BITBOARD_H
 
 #include "types.h"
+
+#include <bit>
 #include <functional>
 #include <iostream>
 #include <cassert>
@@ -23,6 +25,12 @@
 #if defined(USE_BMI1) || defined(USE_BMI2) || defined(USE_AVX2)
 
 #include <immintrin.h>
+
+#endif
+
+#if defined(USE_NEON)
+
+#include <arm_neon.h>
 
 #endif
 
@@ -72,7 +80,12 @@ struct alignas(16) Bitboard {
         if (!std::is_constant_evaluated()) {
             return _mm_setzero_si128();
         }
+#elif defined(USE_NEON)
+        if (!std::is_constant_evaluated()) {
+            return vdupq_n_u64(0);
+        }
 #endif
+
         return Bitboard(0, 0);
     }
 
@@ -81,7 +94,14 @@ struct alignas(16) Bitboard {
         if (!std::is_constant_evaluated()) {
             return _mm_set_epi64x(0x3ffff, 0x7fffffffffffffff);
         }
+#elif defined(USE_NEON)
+        if (!std::is_constant_evaluated()) {
+            return vcombine_u64(
+                    vcreate_u64(0x7fffffffffffffff),
+                    vcreate_u64(0x3ffff));
+        }
 #endif
+
         return Bitboard(0x3ffff, 0x7fffffffffffffff);
     }
 
@@ -91,9 +111,13 @@ struct alignas(16) Bitboard {
 #if defined(USE_SSE2)
     constexpr Bitboard(const __m128i& BB) : Bitboard_(BB) {
     }
+#elif defined(USE_NEON)
+    constexpr Bitboard(const uint64x2_t& BB) : Bitboard_(BB) {
+    }
 #endif
 
-#if defined(USE_SSE2)
+
+#if defined(USE_SSE2) || defined(USE_NEON)
     Bitboard(const Bitboard& BB) : Bitboard_(BB.Bitboard_) {
     }
 #else
@@ -102,7 +126,7 @@ struct alignas(16) Bitboard {
 #endif
 
     void copyFrom(const Bitboard& BB) {
-#if defined(USE_SSE2)
+#if defined(USE_SSE2) || defined(USE_NEON)
         Bitboard_ = BB.Bitboard_;
 #else
         Primitive[0] = BB.getPrimitive<false>();
@@ -111,7 +135,7 @@ struct alignas(16) Bitboard {
     }
 
     constexpr Bitboard& operator=(Bitboard&& BB) noexcept {
-#if defined(USE_SSE2)
+#if defined(USE_SSE2) || defined(USE_NEON)
         Bitboard_ = BB.Bitboard_;
 #else
         Primitive[0] = BB.Primitive[0];
@@ -121,7 +145,7 @@ struct alignas(16) Bitboard {
     }
 
     constexpr Bitboard& operator=(const Bitboard& BB) noexcept {
-#if defined(USE_SSE2)
+#if defined(USE_SSE2) || defined(USE_NEON)
         Bitboard_ = BB.Bitboard_;
 #else
         Primitive[0] = BB.Primitive[0];
@@ -136,6 +160,11 @@ struct alignas(16) Bitboard {
         if (!std::is_constant_evaluated()) {
             return _mm_testz_si128(Bitboard_, Bitboard_);
         }
+#elif defined(USE_NEON)
+        if (!std::is_constant_evaluated()) {
+            uint64x2_t Temp = vandq_u64(Bitboard_, Bitboard_);
+            return (vgetq_lane_u64(Temp, 0) == 0) && (vgetq_lane_u64(Temp, 1) == 0);
+        }
 #endif
         return Primitive[0] == 0 && Primitive[1] == 0;
     }
@@ -144,6 +173,11 @@ struct alignas(16) Bitboard {
 #if defined(USE_SSE41)
         if (!std::is_constant_evaluated()) {
             return !_mm_testz_si128(Bitboard_, SquareBB[Sq].Bitboard_);
+        }
+#elif defined(USE_NEON)
+        if (!std::is_constant_evaluated()) {
+            uint64x2_t Temp = vandq_u64(Bitboard_, SquareBB[Sq].Bitboard_);
+            return (vgetq_lane_u64(Temp, 0) != 0) || (vgetq_lane_u64(Temp, 1) != 0);
         }
 #endif
         return !(*this & SquareBB[Sq]).isZero();
@@ -154,6 +188,10 @@ struct alignas(16) Bitboard {
 #if defined(USE_SSE2)
         if (!std::is_constant_evaluated()) {
             Bitboard_ = _mm_setzero_si128();
+        }
+#elif defined(USE_NEON)
+        if (!std::is_constant_evaluated()) {
+            Bitboard_ = vdupq_n_u64(0);
         }
 #else
         Primitive[0] = 0;
@@ -170,6 +208,11 @@ struct alignas(16) Bitboard {
 #if defined(USE_SSE2)
         if (!std::is_constant_evaluated()) {
             Bitboard_ = _mm_or_si128(Bitboard_, BB.Bitboard_);
+            return *this;
+        }
+#elif defined(USE_NEON)
+        if (!std::is_constant_evaluated()) {
+            Bitboard_ = vorrq_u64(Bitboard_, BB.Bitboard_);
             return *this;
         }
 #endif
@@ -196,6 +239,11 @@ struct alignas(16) Bitboard {
             Bitboard_ = _mm_and_si128(Bitboard_, BB.Bitboard_);
             return *this;
         }
+#elif defined(USE_NEON)
+        if (!std::is_constant_evaluated()) {
+            Bitboard_ = vandq_u64(Bitboard_, BB.Bitboard_);
+            return *this;
+        }
 #endif
         Primitive[1] &= BB.Primitive[1];
         Primitive[0] &= BB.Primitive[0];
@@ -218,6 +266,11 @@ struct alignas(16) Bitboard {
 #if defined(USE_SSE2)
         if (!std::is_constant_evaluated()) {
             Bitboard_ = _mm_xor_si128(Bitboard_, BB.Bitboard_);
+            return *this;
+        }
+#elif defined(USE_NEON)
+        if (!std::is_constant_evaluated()) {
+            Bitboard_ = veorq_u64(Bitboard_, BB.Bitboard_);
             return *this;
         }
 #endif
@@ -243,6 +296,10 @@ struct alignas(16) Bitboard {
         if (!std::is_constant_evaluated()) {
             return _mm_andnot_si128(Bitboard_, BB.Bitboard_);
         }
+#elif defined(USE_NEON)
+        if (!std::is_constant_evaluated()) {
+            return vbicq_u64(BB.Bitboard_, Bitboard_);
+        }
 #endif
         return { ~Primitive[1] & BB.Primitive[1], ~Primitive[0] & BB.Primitive[0] };
     }
@@ -257,6 +314,10 @@ struct alignas(16) Bitboard {
         if (!std::is_constant_evaluated()) {
             return _mm_srli_epi64(Bitboard_, Shift);
         }
+#elif defined(USE_NEON)
+        if (!std::is_constant_evaluated()) {
+            return vshrq_n_u64(Bitboard_, Shift);
+        }
 #endif
         return Bitboard(Primitive[1] >> Shift, Primitive[0] >> Shift);
     }
@@ -265,6 +326,11 @@ struct alignas(16) Bitboard {
 #if defined(USE_SSE2)
         if (!std::is_constant_evaluated()) {
             return _mm_srli_epi64(Bitboard_, Shift);
+        }
+#elif defined(USE_NEON)
+        if (!std::is_constant_evaluated()) {
+            uint64x2_t ShiftVector = vdupq_n_s64(-Shift);
+            return vshlq_u64(Bitboard_, ShiftVector);
         }
 #endif
         return Bitboard(Primitive[1] >> Shift, Primitive[0] >> Shift);
@@ -296,6 +362,10 @@ struct alignas(16) Bitboard {
         if (!std::is_constant_evaluated()) {
             return _mm_slli_epi64(Bitboard_, Shift);
         }
+#elif defined(USE_NEON)
+        if (!std::is_constant_evaluated()) {
+            return vshlq_n_u64(Bitboard_, Shift);
+        }
 #endif
         return Bitboard(Primitive[1] << Shift, Primitive[0] << Shift);
     }
@@ -304,6 +374,11 @@ struct alignas(16) Bitboard {
 #if defined(USE_SSE2)
         if (!std::is_constant_evaluated()) {
             return _mm_slli_epi64(Bitboard_, Shift);
+        }
+#elif defined(USE_NEON)
+        if (!std::is_constant_evaluated()) {
+            uint64x2_t ShiftVector = vdupq_n_s64(Shift);
+            return vshlq_u64(Bitboard_, ShiftVector);
         }
 #endif
         return Bitboard(Primitive[1] << Shift, Primitive[0] << Shift);
@@ -330,6 +405,9 @@ struct alignas(16) Bitboard {
             __m128i Result = _mm_cmpeq_epi8(Bitboard_, BB.Bitboard_); // Compare
             return _mm_movemask_epi8(Result) == 0xFFFF;
         }
+#elif defined(USE_NEON)
+        uint8x16_t Compare = vceqq_u8(Bitboard_, BB.Bitboard_);
+        return vminvq_u8(Compare) == 0xFF;
 #endif
         return Primitive[0] == BB.Primitive[0] && Primitive[1] == BB.Primitive[1];
     }
@@ -340,6 +418,9 @@ struct alignas(16) Bitboard {
             __m128i Result = _mm_cmpeq_epi8(Bitboard_, BB.Bitboard_); // Compare
             return _mm_movemask_epi8(Result) != 0xFFFF;
         }
+#elif defined(USE_NEON)
+        uint8x16_t Compare = vceqq_u8(Bitboard_, BB.Bitboard_);
+        return vminvq_u8(Compare) != 0xFF;
 #endif
         return (Primitive[0] != BB.Primitive[0]) || (Primitive[1] != BB.Primitive[1]);
     }
@@ -348,6 +429,10 @@ struct alignas(16) Bitboard {
 #if defined(USE_SSE2)
         if (!std::is_constant_evaluated()) {
             return _mm_sub_epi64(Bitboard_, BB.Bitboard_);
+        }
+#elif defined(USE_NEON)
+        if (!std::is_constant_evaluated()) {
+            return vsubq_u64(Bitboard_, BB.Bitboard_);
         }
 #endif
         return Bitboard(Primitive[1] - BB.Primitive[1], Primitive[0] - BB.Primitive[0]);
@@ -362,54 +447,61 @@ struct alignas(16) Bitboard {
             return High ? (uint64_t)_mm_extract_epi64(Bitboard_, 1)
                         : (uint64_t)_mm_cvtsi128_si64(Bitboard_);
         }
+#elif defined(USE_NEON)
+        if (!std::is_constant_evaluated()) {
+            return High ? vgetq_lane_u64(Bitboard_, 1)
+                        : vgetq_lane_u64(Bitboard_, 0);
+        }
 #endif
         return High? Primitive[1] : Primitive[0];
+    }
+
+    inline int countTrailingZero(uint64_t Value) const {
+#if defined(USE_BMI1)
+        return (int)_tzcnt_u64(Value);
+#endif
+        return std::countr_zero(Value);
     }
 
     [[maybe_unused]] [[nodiscard]]
     Square getOne() const {
         uint64_t Low = getPrimitive<false>();
         if (Low > 0) {
-#if defined(USE_BMI1)
-            return static_cast<Square>(_tzcnt_u64(Low));
-#else
-            return static_cast<Square>(__builtin_ctzll(Low));
-#endif
+            return static_cast<Square>(countTrailingZero(Low));
         }
 
         uint64_t High = getPrimitive<true>();
         assert(High > 0);
 
-#if defined(USE_BMI1)
-        return static_cast<Square>(63 + _tzcnt_u64(High));
-#else
-        return static_cast<Square>(63 + __builtin_ctzll(High));
-#endif
+        return static_cast<Square>(63 + countTrailingZero(High));
     }
 
     Square popOne() {
         const uint64_t Low = getPrimitive<false>();
-        // 63 bits in `Low` is used while only 18 bits in `High` is used
-        // so Low > 0 is more likely to happen.
-        if (__builtin_expect((Low > 0), 1)) {
-            Square Sq = static_cast<Square>(__builtin_ctzll(Low));
+        if (Low > 0) {
+            Square Sq = static_cast<Square>(countTrailingZero(Low));
 
 #if defined(USE_SSE2)
             Bitboard_ = _mm_and_si128(
                 Bitboard_, _mm_sub_epi64(Bitboard_, _mm_set_epi64x(0, 1)));
+#elif defined(USE_NEON)
+            Bitboard_ = vandq_u64(Bitboard_,
+                    vsubq_u64(Bitboard_, vcombine_u64(vdup_n_u64(1), vdup_n_u64(0))));
 #else
             Primitive[0] &= (Primitive[0] - 1);
 #endif
-
             return Sq;
         }
 
         const uint64_t High = getPrimitive<true>();
+        Square Sq = static_cast<Square>(63 + countTrailingZero(High));
 
-        Square Sq = static_cast<Square>(63 + __builtin_ctzll(High));
 #if defined(USE_SSE2)
         Bitboard_ = _mm_and_si128(
             Bitboard_, _mm_sub_epi64(Bitboard_, _mm_set_epi64x(1, 0)));
+#elif defined(USE_NEON)
+            Bitboard_ = vandq_u64(Bitboard_,
+                    vsubq_u64(Bitboard_, vcombine_u64(vdup_n_u64(0), vdup_n_u64(1))));
 #else
         Primitive[1] &= (Primitive[1] - 1);
 #endif
@@ -425,22 +517,14 @@ struct alignas(16) Bitboard {
         uint64_t B = getPrimitive<false>();
 
         while (B != 0) {
-#if defined(USE_BMI1)
-            Square Sq = static_cast<Square>(_tzcnt_u64(B));
-#else
-            Square Sq = static_cast<Square>(__builtin_ctzll(B));
-#endif
+            Square Sq = static_cast<Square>(countTrailingZero(B));
             B &= (B - 1);
             Func(Sq);
         }
 
         B = getPrimitive<true>();
         while (B != 0) {
-#if defined(USE_BMI1)
-            Square Sq = static_cast<Square>(63 + _tzcnt_u64(B));
-#else
-            Square Sq = static_cast<Square>(63 + __builtin_ctzll(B));
-#endif
+            Square Sq = static_cast<Square>(63 + countTrailingZero(B));
             B &= (B - 1);
             Func(Sq);
         }
@@ -452,11 +536,7 @@ struct alignas(16) Bitboard {
         uint64_t B = getPrimitive<false>();
 
         while (B != 0) {
-#if defined(USE_BMI1)
-            Square Sq = static_cast<Square>(_tzcnt_u64(B));
-#else
-            Square Sq = static_cast<Square>(__builtin_ctzll(B));
-#endif
+            Square Sq = static_cast<Square>(countTrailingZero(B));
             B &= (B - 1);
             const bool Result = Func(Sq);
 
@@ -467,11 +547,7 @@ struct alignas(16) Bitboard {
 
         B = getPrimitive<true>();
         while (B != 0) {
-#if defined(USE_BMI1)
-            Square Sq = static_cast<Square>(63 + _tzcnt_u64(B));
-#else
-            Square Sq = static_cast<Square>(63 + __builtin_ctzll(B));
-#endif
+            Square Sq = static_cast<Square>(63 + countTrailingZero(B));
             B &= (B - 1);
             const bool Result = Func(Sq);
 
@@ -500,8 +576,8 @@ struct alignas(16) Bitboard {
         const auto Count1 = _mm_popcnt_u64(getPrimitive<false>());
         const auto Count2 = _mm_popcnt_u64(getPrimitive<true>());
 #else
-        const auto Count1 = __builtin_popcountll(getPrimitive<false>());
-        const auto Count2 = __builtin_popcountll(getPrimitive<true>());
+        const auto Count1 = std::popcount(getPrimitive<false>());
+        const auto Count2 = std::popcount(getPrimitive<true>());
 #endif
 
         return (uint8_t)(Count1 + Count2);
@@ -509,6 +585,10 @@ struct alignas(16) Bitboard {
 
 #if defined(USE_SSE2)
     constexpr __m128i getRaw() const {
+        return Bitboard_;
+    }
+#elif defined(USE_NEON)
+    constexpr uint64x2_t getRaw() const {
         return Bitboard_;
     }
 #endif
@@ -520,6 +600,8 @@ struct alignas(16) Bitboard {
     union {
 #if defined(USE_SSE2)
         __m128i Bitboard_;
+#elif defined(USE_NEON)
+        uint64x2_t Bitboard_;
 #endif
         uint64_t Primitive[2];
     };
