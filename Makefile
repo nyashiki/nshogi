@@ -98,7 +98,7 @@ DEPENDINGS = $(patsubst %.cc,$(OBJDIR)/%.d,$(SOURCES))
 
 ARCH_FLAGS :=
 
-ifeq ($(SSENATIVE),1)
+ifeq ($(TUNENATIVE),1)
 	ARCH_FLAGS += -march=native -mtune=native
 else
 	ifeq ($(SSE2), 1)
@@ -120,6 +120,10 @@ else
 	ifeq ($(AVX2),1)
 		ARCH_FLAGS += -msse2 -msse4.1 -msse4.2 -mbmi -mbmi2 -mavx -mavx2
 		CXX_FLAGS += -DUSE_SSE2 -DUSE_SSE41 -DUSE_SSE42 -DUSE_BMI1 -DUSE_BMI2 -DUSE_AVX -DUSE_AVX2
+	endif
+	ifeq ($(NEON),1)
+		ARCH_FLAGS += -march=armv8
+		CXX_FLAGS += -DUSE_NEON
 	endif
 endif
 
