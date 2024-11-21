@@ -458,7 +458,7 @@ struct alignas(16) Bitboard {
 
     inline int countTrailingZero(uint64_t Value) const {
 #if defined(USE_BMI1)
-        return _tzcnt_u64(Value);
+        return (int)_tzcnt_u64(Value);
 #endif
         return std::countr_zero(Value);
     }
