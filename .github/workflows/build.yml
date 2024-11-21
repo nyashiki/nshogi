@@ -14,11 +14,11 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - name: Set environment variable
-        if: ${{ matrix.os == 'macos-latest' }}
-        run: echo 'SIMD=NEON' >> $GITHUB_ENV
+      if: ${{ matrix.os == 'macos-latest' }}
+      run: echo 'SIMD=NEON' >> $GITHUB_ENV
     - name: Set environment variable
-        if: ${{ matrix.os == 'ubuntu-22.04' }}
-        run: echo 'SIMD=AVX2' >> $GITHUB_ENV
+      if: ${{ matrix.os == 'ubuntu-22.04' }}
+      run: echo 'SIMD=AVX2' >> $GITHUB_ENV
     - name: make library
       working-directory: ${{ env.working-directory }}
       run: make $SIMD=1 libnshogi
