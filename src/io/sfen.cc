@@ -281,8 +281,11 @@ std::string stateToSfen(const core::State& State) {
 core::Position PositionBuilder::newPosition(const std::string& Sfen) {
     using namespace core;
 
-    PositionBuilder Builder;
+    if (Sfen.substr(0, 8) == "startpos") {
+        return core::PositionBuilder::getInitialPosition();
+    }
 
+    PositionBuilder Builder;
     SquareIterator<IterateOrder::NWSE> SquareIt;
     bool Promote = false;
     std::size_t Cursor = 0;
@@ -426,20 +429,24 @@ core::Position PositionBuilder::newPosition(const std::string& Sfen) {
 StateBuilder::StateBuilder(const std::string& Sfen)
     : core::StateBuilder(PositionBuilder::newPosition(Sfen)) {
 
-    int WhiteSpaceCount = 0;
     std::size_t Cursor = 0;
 
-    while (WhiteSpaceCount < 4) {
-        if (Cursor == Sfen.size()) {
-            return;
-        }
+    if (Sfen.substr(0, 8) == "startpos") {
+        Cursor = 9;
+    } else {
+        int WhiteSpaceCount = 0;
+        while (WhiteSpaceCount < 4) {
+            if (Cursor == Sfen.size()) {
+                return;
+            }
 
-        if (Sfen[Cursor++] == ' ') {
-            ++WhiteSpaceCount;
+            if (Sfen[Cursor++] == ' ') {
+                ++WhiteSpaceCount;
+            }
         }
     }
 
-    if (Cursor == Sfen.size()) {
+    if (Cursor >= Sfen.size()) {
         return;
     }
 
