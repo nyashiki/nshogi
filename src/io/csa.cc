@@ -255,6 +255,8 @@ core::Position PositionBuilder::newPosition(const std::string& CSA) {
 
     std::vector<std::string> CSASplitted = utils::split(CSA, '\n');
 
+    int InputRowCount = 0;
+
     for (const auto& CSALine : CSASplitted) {
         if (CSALine == "+") {
             Builder.setColor(core::Black);
@@ -271,22 +273,31 @@ core::Position PositionBuilder::newPosition(const std::string& CSA) {
 
         if (Token == "P1") {
             R = RankA;
+            ++InputRowCount;
         } else if (Token == "P2") {
             R = RankB;
+            ++InputRowCount;
         } else if (Token == "P3") {
             R = RankC;
+            ++InputRowCount;
         } else if (Token == "P4") {
             R = RankD;
+            ++InputRowCount;
         } else if (Token == "P5") {
             R = RankE;
+            ++InputRowCount;
         } else if (Token == "P6") {
             R = RankF;
+            ++InputRowCount;
         } else if (Token == "P7") {
             R = RankG;
+            ++InputRowCount;
         } else if (Token == "P8") {
             R = RankH;
+            ++InputRowCount;
         } else if (Token == "P9") {
             R = RankI;
+            ++InputRowCount;
         } else if (Token == "P+") {
             std::size_t Cursor = 2;
             uint32_t StandCounts[16] = { };
@@ -343,15 +354,16 @@ core::Position PositionBuilder::newPosition(const std::string& CSA) {
         }
     }
 
+    if (InputRowCount != 9) {
+        throw std::runtime_error("Invalid CSA string.");
+    }
+
     return Builder.build();
 }
 
-StateBuilder::StateBuilder(const std::string& CSA):
-    core::StateBuilder(PositionBuilder::newPosition(CSA)) {
-
+StateBuilder::StateBuilder(const std::string& CSA)
+    : core::StateBuilder(PositionBuilder::newPosition(CSA)) {
     using namespace core;
-
-    PositionBuilder Builder;
 
     std::vector<std::string> CSASplitted = utils::split(CSA, '\n');
 
