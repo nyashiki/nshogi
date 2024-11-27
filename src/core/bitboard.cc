@@ -807,27 +807,13 @@ void initializeLineBB() {
 void initializeDirectionBB() {
     std::memset(static_cast<void*>(DirectionBB), 0, sizeof(DirectionBB));
 
-    for (Square Sq : Squares) {
-        DirectionBB[11 + North][Sq] = std::get<1>(
-            getPatternBB<North, true>(Sq, (1 << 15) - 1, false, 0));
-        DirectionBB[11 + NorthEast][Sq] =
-            std::get<1>(getPatternBB<NorthEast, true>(
-                Sq, (1 << 15) - 1, false, 0));
-        DirectionBB[11 + East][Sq] = std::get<1>(
-            getPatternBB<East, true>(Sq, (1 << 15) - 1, false, 0));
-        DirectionBB[11 + SouthEast][Sq] =
-            std::get<1>(getPatternBB<SouthEast, true>(
-                Sq, (1 << 15) - 1, false, 0));
-        DirectionBB[11 + South][Sq] = std::get<1>(
-            getPatternBB<South, true>(Sq, (1 << 15) - 1, false, 0));
-        DirectionBB[11 + SouthWest][Sq] =
-            std::get<1>(getPatternBB<SouthWest, true>(
-                Sq, (1 << 15) - 1, false, 0));
-        DirectionBB[11 + West][Sq] = std::get<1>(
-            getPatternBB<West, true>(Sq, (1 << 15) - 1, false, 0));
-        DirectionBB[11 + NorthWest][Sq] =
-            std::get<1>(getPatternBB<NorthWest, true>(
-                Sq, (1 << 15) - 1, false, 0));
+    for (Square From : Squares) {
+        for (Square To : Squares) {
+            Direction D = SquareDirection[From][To];
+            if (D != Direction(0)) {
+                DirectionBB[11 + D][From] |= SquareBB[To];
+            }
+        }
     }
 }
 
@@ -841,21 +827,29 @@ void initializeBetweenBB() {
             }
 
             BetweenBB[Sq1][Sq2] |=
-                DirectionBB[11 + North][Sq1] & DirectionBB[11 + South][Sq2];
-            BetweenBB[Sq1][Sq2] |= DirectionBB[11 + NorthEast][Sq1] &
-                                   DirectionBB[11 + SouthWest][Sq2];
+                DirectionBB[11 + North][Sq1] & DirectionBB[11 + South][Sq2] &
+                ~SquareBB[Sq1] & ~SquareBB[Sq2];
             BetweenBB[Sq1][Sq2] |=
-                DirectionBB[11 + East][Sq1] & DirectionBB[11 + West][Sq2];
-            BetweenBB[Sq1][Sq2] |= DirectionBB[11 + SouthEast][Sq1] &
-                                   DirectionBB[11 + NorthWest][Sq2];
+                DirectionBB[11 + NorthEast][Sq1] & DirectionBB[11 + SouthWest][Sq2] &
+                ~SquareBB[Sq1] & ~SquareBB[Sq2];
             BetweenBB[Sq1][Sq2] |=
-                DirectionBB[11 + South][Sq1] & DirectionBB[11 + North][Sq2];
-            BetweenBB[Sq1][Sq2] |= DirectionBB[11 + SouthWest][Sq1] &
-                                   DirectionBB[11 + NorthEast][Sq2];
+                DirectionBB[11 + East][Sq1] & DirectionBB[11 + West][Sq2] &
+                ~SquareBB[Sq1] & ~SquareBB[Sq2];
             BetweenBB[Sq1][Sq2] |=
-                DirectionBB[11 + West][Sq1] & DirectionBB[11 + East][Sq2];
-            BetweenBB[Sq1][Sq2] |= DirectionBB[11 + NorthWest][Sq1] &
-                                   DirectionBB[11 + SouthEast][Sq2];
+                DirectionBB[11 + SouthEast][Sq1] & DirectionBB[11 + NorthWest][Sq2] &
+                ~SquareBB[Sq1] & ~SquareBB[Sq2];
+            BetweenBB[Sq1][Sq2] |=
+                DirectionBB[11 + South][Sq1] & DirectionBB[11 + North][Sq2] &
+                ~SquareBB[Sq1] & ~SquareBB[Sq2];
+            BetweenBB[Sq1][Sq2] |=
+                DirectionBB[11 + SouthWest][Sq1] & DirectionBB[11 + NorthEast][Sq2] &
+                ~SquareBB[Sq1] & ~SquareBB[Sq2];
+            BetweenBB[Sq1][Sq2] |=
+                DirectionBB[11 + West][Sq1] & DirectionBB[11 + East][Sq2] &
+                ~SquareBB[Sq1] & ~SquareBB[Sq2];
+            BetweenBB[Sq1][Sq2] |=
+                DirectionBB[11 + NorthWest][Sq1] & DirectionBB[11 + SouthEast][Sq2] &
+                ~SquareBB[Sq1] & ~SquareBB[Sq2];
         }
     }
 }
