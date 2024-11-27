@@ -54,9 +54,6 @@ extern Bitboard KingAttackBB[NumSquares];
 extern Bitboard DiagStepAttackBB[NumSquares];
 extern Bitboard CrossStepAttackBB[NumSquares];
 
-extern Bitboard ForwardAttackBB[NumSquares][1 << 7];
-extern Bitboard BackwardAttackBB[NumSquares][1 << 7];
-
 //  Useful bitboards.
 extern const Bitboard FirstAndSecondFurthestBB[NumColors];
 extern const Bitboard FurthermostBB[NumColors];
@@ -476,6 +473,17 @@ struct alignas(16) Bitboard {
         return static_cast<Square>(63 + countTrailingZero(High));
     }
 
+    Bitboard pickUpMostSignificantBB() const {
+        uint64_t High = getPrimitive<true>();
+
+        if (High > 0) {
+            return SquareBB[63 + (63 - std::countl_zero(High))];
+        }
+
+        uint64_t Low = getPrimitive<false>();
+        return SquareBB[63 - std::countl_zero(Low)];
+    }
+
     Square popOne() {
         const uint64_t Low = getPrimitive<false>();
         if (Low > 0) {
@@ -658,23 +666,18 @@ inline constexpr Bitboard getAttackBB(Square From) {
     return KingAttackBB[From];
 }
 
-inline constexpr uint8_t pickUpFileBitPattern(Square Sq, const Bitboard& OccupiedBB) {
-    const int ShiftTable[NumFiles] = {1, 10, 19, 28, 37, 46, 55, 1, 10};
-
-    const File F = squareToFile(Sq);
-    const Bitboard ShiftedBB = (OccupiedBB & FileBB[F]).getRightShiftEpi64(ShiftTable[F]);
-
-    return ShiftedBB.horizontalOr() & 0x7f; // Pick up seven bits.
-}
-
 template <Color C>
 inline Bitboard getLanceAttackBB(Square Sq, const Bitboard& OccupiedBB) {
-    const uint8_t Pattern = pickUpFileBitPattern(Sq, OccupiedBB);
+    if (FurthermostBB[C].isSet(Sq)) {
+        return bitboard::Bitboard::ZeroBB();
+    }
 
     if constexpr (C == Black) {
-        return ForwardAttackBB[Sq][Pattern];
+        auto Temp = OccupiedBB ^ (OccupiedBB.subtract(SquareBB[Sq + North]));
+        return Temp & ForwardBB[Sq];
     } else {
-        return BackwardAttackBB[Sq][Pattern];
+        auto Temp = (BackwardBB[Sq] & (OccupiedBB | RankBB[RankI])).pickUpMostSignificantBB();
+        return SquareBB[Sq].subtract(Temp);
     }
 }
 

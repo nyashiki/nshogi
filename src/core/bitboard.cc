@@ -66,9 +66,6 @@ Bitboard KingAttackBB[NumSquares];
 Bitboard DiagStepAttackBB[NumSquares];
 Bitboard CrossStepAttackBB[NumSquares];
 
-Bitboard ForwardAttackBB[NumSquares][1 << 7];
-Bitboard BackwardAttackBB[NumSquares][1 << 7];
-
 MagicBitboard<DiagMagicBits> BishopMagicBB[NumSquares];
 MagicBitboard<CrossMagicBits> RookMagicBB[NumSquares];
 
@@ -386,83 +383,6 @@ void initializeDiagStepAttacks() {
 void initializeCrossStepAttacks() {
     for (Square sq : Squares) {
         CrossStepAttackBB[sq] = getCrossStepAttack(sq);
-    }
-}
-
-/// Forward means the RankI --> RankA direction.
-void computeForwardAttacks() {
-    std::memset(static_cast<void*>(ForwardAttackBB), 0,
-                NumSquares * (1 << 7) * sizeof(Bitboard));
-
-    for (Square Sq : Squares) {
-        if (squareToRank(Sq) == RankA) {
-            continue;
-        }
-
-        const File F = squareToFile(Sq);
-
-        // clang-format off
-        // This bit pattern represents for (RankH, RankG, ..., RankB) occupations.
-        //                   (RankH) lower <--                    --> higher
-        //                   (RankB)
-        // clang-format on
-        for (uint8_t Pattern = 0; Pattern < (1 << 7); ++Pattern) {
-            // Going north.
-            for (Rank R = (Rank)(squareToRank(Sq) + 1);; R = (Rank)(R + 1)) {
-                ForwardAttackBB[Sq][Pattern] |=
-                    SquareBB[makeSquare(R, F)];
-
-                if (R == RankA) {
-                    break;
-                }
-
-                if ((Pattern & (1 << (R - 1))) != 0) {
-                    break;
-                }
-
-                if (R == RankB) {
-                    ForwardAttackBB[Sq][Pattern] |=
-                        SquareBB[makeSquare(RankA, F)];
-                }
-            }
-        }
-    }
-}
-
-/// Backward means the RankA --> RankI direction.
-void computeBackwardAttacks() {
-    std::memset(static_cast<void*>(BackwardAttackBB), 0,
-                NumSquares * (1 << 7) * sizeof(Bitboard));
-
-    for (Square Sq : Squares) {
-        if (squareToRank(Sq) == RankI) {
-            continue;
-        }
-
-        const File F = squareToFile(Sq);
-
-        // This bit pattern represents for (RankH, RankG, ..., RankB)
-        // occupations.
-        for (uint8_t Pattern = 0; Pattern < (1 << 7); ++Pattern) {
-            // Going north.
-            for (Rank R = (Rank)(squareToRank(Sq) - 1);; R = (Rank)(R - 1)) {
-                BackwardAttackBB[Sq][Pattern] |=
-                    SquareBB[makeSquare(R, F)];
-
-                if (R == RankI) {
-                    break;
-                }
-
-                if ((Pattern & (1 << (R - 1))) != 0) {
-                    break;
-                }
-
-                if (R == RankH) {
-                    BackwardAttackBB[Sq][Pattern] |=
-                        SquareBB[makeSquare(RankI, F)];
-                }
-            }
-        }
     }
 }
 
@@ -1034,9 +954,6 @@ void initializeBitboards() {
     setRookMagicMasks();
     setRookMagicNumbers();
     computeRookMagicBitboard();
-
-    computeForwardAttacks();
-    computeBackwardAttacks();
 
     initializeLineBB();
     initializeDirectionBB();
