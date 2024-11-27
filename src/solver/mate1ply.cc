@@ -8,7 +8,7 @@ namespace {
 template<core::Color C>
 bool isEvadable(core::Square KingSq, const core::bitboard::Bitboard& AttackedBB, const core::bitboard::Bitboard& MyOccupiedBB) {
     const core::bitboard::Bitboard& KingAttackBB = core::bitboard::KingAttackBB[KingSq];
-    const core::bitboard::Bitboard PossibleEvadableBB = KingAttackBB & ~MyOccupiedBB;
+    const core::bitboard::Bitboard PossibleEvadableBB = MyOccupiedBB.andNot(KingAttackBB);
 
     // If all possibly-evadable squares are attacked, the king is captured.
     return (PossibleEvadableBB & AttackedBB) != PossibleEvadableBB;
@@ -38,7 +38,7 @@ core::Move32 checkmateByDrop(const core::State& S, core::Stands St, core::bitboa
     } else if constexpr (Type == core::PTK_Rook) {
         ToBB &= core::bitboard::CrossStepAttackBB[OpKingSq];
     } else if constexpr (Type == core::PTK_Lance) {
-        ToBB &= ~core::bitboard::FurthermostBB[C];
+        ToBB = core::bitboard::FurthermostBB[C].andNot(ToBB);
         ToBB &= (C == core::Black)? (S.getBitboard<~C, core::PTK_King>().template getRightShiftEpi64<1>()) : (S.getBitboard<~C, core::PTK_King>().template getLeftShiftEpi64<1>());
     }
 
@@ -101,7 +101,7 @@ core::Move32 checkmateByOneStepMove(const core::State& S, const core::bitboard::
     } else {
         PossiblyCheckmateToBB &= core::bitboard::getAttackBB<~C, Type>(OpKingSq);
         if constexpr (Type == core::PTK_Pawn) {
-            PossiblyCheckmateToBB &= ~core::bitboard::PromotableBB[C];
+            PossiblyCheckmateToBB = core::bitboard::PromotableBB[C].andNot(PossiblyCheckmateToBB);
         }
     }
 
@@ -343,12 +343,12 @@ core::Move32 checkmateBySliderMove(const core::State& S, const core::bitboard::B
         } else if constexpr (Type == core::PTK_Bishop) {
             PossiblyCheckmateToBB &= core::bitboard::DiagStepAttackBB[OpKingSq];
             if constexpr (!Promote) {
-                PossiblyCheckmateToBB &= ~core::bitboard::PromotableBB[C];
+                PossiblyCheckmateToBB = core::bitboard::PromotableBB[C].andNot(PossiblyCheckmateToBB);
             }
         } else if constexpr (Type == core::PTK_Rook) {
             PossiblyCheckmateToBB &= core::bitboard::CrossStepAttackBB[OpKingSq];
             if constexpr (!Promote) {
-                PossiblyCheckmateToBB &= ~core::bitboard::PromotableBB[C];
+                PossiblyCheckmateToBB = core::bitboard::PromotableBB[C].andNot(PossiblyCheckmateToBB);
             }
         }
     }
@@ -599,8 +599,7 @@ core::Move32 solveImpl(const core::State& S) {
     const core::bitboard::Bitboard OpAttackBB = S.getStepAttackBB<~C>(OpKingSq) | S.getSliderAttackBB<~C>();
     const core::bitboard::Bitboard OccupiedBB = S.getBitboard<core::Black>() | S.getBitboard<core::White>();
 
-    const core::bitboard::Bitboard EmptyBB = ~OccupiedBB;
-    const core::bitboard::Bitboard EmptyAndNotOpAttackBB = EmptyBB & ~OpAttackBB;
+    const core::bitboard::Bitboard EmptyAndNotOpAttackBB = OccupiedBB.andNot(~OpAttackBB);
 
     const core::Stands St = S.getPosition().getStand<C>();
 
@@ -609,8 +608,8 @@ core::Move32 solveImpl(const core::State& S) {
         const core::bitboard::Bitboard MyStepAttackBB = S.getStepAttackBB<C>();
         const core::bitboard::Bitboard MySliderAttackBB = S.getSliderAttackBB<C>();
         const core::bitboard::Bitboard MyStepOrSliderAttackBB = MyStepAttackBB | MySliderAttackBB;
-        const core::bitboard::Bitboard EmptyAndAttackBB = EmptyBB & (MyStepAttackBB | MySliderAttackBB);
-        const core::bitboard::Bitboard EmptyAndAttackAndNotOpAttackBB = EmptyAndAttackBB & ~OpAttackBB;
+        const core::bitboard::Bitboard EmptyAndAttackBB = OccupiedBB.andNot(MyStepAttackBB | MySliderAttackBB);
+        const core::bitboard::Bitboard EmptyAndAttackAndNotOpAttackBB = OpAttackBB.andNot(EmptyAndAttackBB);
 
         const core::Move32 CheckmateByKnightDrop =
             checkmateByDrop<C, core::PTK_Knight>(S, St, EmptyAndNotOpAttackBB, OpKingSq, MyStepAttackBB, MySliderAttackBB, MyStepOrSliderAttackBB);
@@ -628,7 +627,7 @@ core::Move32 solveImpl(const core::State& S) {
         }
     }
 
-    const core::bitboard::Bitboard OpOccupiedAndNotOpAttackBB = S.getBitboard<~C>() & ~OpAttackBB;
+    const core::bitboard::Bitboard OpOccupiedAndNotOpAttackBB = OpAttackBB.andNot(S.getBitboard<~C>());
     const core::bitboard::Bitboard NotPinnedBB = ~S.getDefendingOpponentSliderBB<C>();
 
     // Checkmate by on-board moves.

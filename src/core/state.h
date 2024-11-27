@@ -402,10 +402,8 @@ class State {
             ((ExcludeSq == SqInvalid)? (getBitboard<PTK_Bishop>() | getBitboard<PTK_ProBishop>())
                                      : (bitboard::SquareBB[ExcludeSq].andNot(getBitboard<PTK_Bishop>() | getBitboard<PTK_ProBishop>())));
 
-        const bitboard::Bitboard NotRankABB = ~bitboard::RankBB[RankA];
-        const bitboard::Bitboard NotRankIBB = ~bitboard::RankBB[RankI];
-        const bitboard::Bitboard NotRankAAndEmptyBB = NotRankABB & EmptyBB;
-        const bitboard::Bitboard NotRankIAndEmptyBB = NotRankIBB & EmptyBB;
+        const bitboard::Bitboard NotRankAAndEmptyBB = bitboard::RankBB[RankA].andNot(EmptyBB);
+        const bitboard::Bitboard NotRankIAndEmptyBB = bitboard::RankBB[RankI].andNot(EmptyBB);
 
         bitboard::Bitboard GeneratorBB;
         bitboard::Bitboard TempBB;
@@ -413,7 +411,7 @@ class State {
         if (!BishopBB.isZero()) {
             // clang-format off
             GeneratorBB = BishopBB;
-            SliderAttackBB |= GeneratorBB = (GeneratorBB & NotRankABB).getRightShiftSi128<8>();
+            SliderAttackBB |= GeneratorBB = bitboard::RankBB[RankA].andNot(GeneratorBB).getRightShiftSi128<8>();
             SliderAttackBB |= GeneratorBB = (GeneratorBB & NotRankAAndEmptyBB).getRightShiftSi128<8>();
             SliderAttackBB |= GeneratorBB = (GeneratorBB & NotRankAAndEmptyBB).getRightShiftSi128<8>();
             SliderAttackBB |= GeneratorBB = (GeneratorBB & NotRankAAndEmptyBB).getRightShiftSi128<8>();
@@ -427,7 +425,7 @@ class State {
             }
 
             GeneratorBB = BishopBB;
-            SliderAttackBB |= GeneratorBB = (GeneratorBB & NotRankIBB).getRightShiftSi128<10>();
+            SliderAttackBB |= GeneratorBB = bitboard::RankBB[RankI].andNot(GeneratorBB).getRightShiftSi128<10>();
             SliderAttackBB |= GeneratorBB = (GeneratorBB & NotRankIAndEmptyBB).getRightShiftSi128<10>();
             SliderAttackBB |= GeneratorBB = (GeneratorBB & NotRankIAndEmptyBB).getRightShiftSi128<10>();
             SliderAttackBB |= GeneratorBB = (GeneratorBB & NotRankIAndEmptyBB).getRightShiftSi128<10>();
@@ -440,7 +438,7 @@ class State {
             }
 
             GeneratorBB = BishopBB;
-            SliderAttackBB |= GeneratorBB = (GeneratorBB & NotRankIBB).getLeftShiftSi128<8>();
+            SliderAttackBB |= GeneratorBB = bitboard::RankBB[RankI].andNot(GeneratorBB).getLeftShiftSi128<8>();
             SliderAttackBB |= GeneratorBB = (GeneratorBB & NotRankIAndEmptyBB).getLeftShiftSi128<8>();
             SliderAttackBB |= GeneratorBB = (GeneratorBB & NotRankIAndEmptyBB).getLeftShiftSi128<8>();
             SliderAttackBB |= GeneratorBB = (GeneratorBB & NotRankIAndEmptyBB).getLeftShiftSi128<8>();
@@ -453,7 +451,7 @@ class State {
             }
 
             GeneratorBB = BishopBB;
-            SliderAttackBB |= GeneratorBB = (GeneratorBB & NotRankABB).getLeftShiftSi128<10>();
+            SliderAttackBB |= GeneratorBB = bitboard::RankBB[RankA].andNot(GeneratorBB).getLeftShiftSi128<10>();
             SliderAttackBB |= GeneratorBB = (GeneratorBB & NotRankAAndEmptyBB).getLeftShiftSi128<10>();
             SliderAttackBB |= GeneratorBB = (GeneratorBB & NotRankAAndEmptyBB).getLeftShiftSi128<10>();
             SliderAttackBB |= GeneratorBB = (GeneratorBB & NotRankAAndEmptyBB).getLeftShiftSi128<10>();
@@ -482,7 +480,7 @@ class State {
             GeneratorBB = ForwardBB;
 
             // clang-format off
-            SliderAttackBB |= GeneratorBB = (GeneratorBB & NotRankABB).getLeftShiftEpi64<1>();
+            SliderAttackBB |= GeneratorBB = bitboard::RankBB[RankA].andNot(GeneratorBB).getLeftShiftEpi64<1>();
             SliderAttackBB |= GeneratorBB = (GeneratorBB & NotRankAAndEmptyBB).getLeftShiftEpi64<1>();
             SliderAttackBB |= GeneratorBB = (GeneratorBB & NotRankAAndEmptyBB).getLeftShiftEpi64<1>();
             SliderAttackBB |= GeneratorBB = (GeneratorBB & NotRankAAndEmptyBB).getLeftShiftEpi64<1>();
@@ -500,7 +498,7 @@ class State {
             GeneratorBB = BackwardBB;
 
             // clang-format off
-            SliderAttackBB |= GeneratorBB = (GeneratorBB & NotRankIBB).getRightShiftEpi64<1>();
+            SliderAttackBB |= GeneratorBB = bitboard::RankBB[RankI].andNot(GeneratorBB).getRightShiftEpi64<1>();
             SliderAttackBB |= GeneratorBB = (GeneratorBB & NotRankIAndEmptyBB).getRightShiftEpi64<1>();
             SliderAttackBB |= GeneratorBB = (GeneratorBB & NotRankIAndEmptyBB).getRightShiftEpi64<1>();
             SliderAttackBB |= GeneratorBB = (GeneratorBB & NotRankIAndEmptyBB).getRightShiftEpi64<1>();
