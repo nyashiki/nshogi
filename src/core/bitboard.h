@@ -621,13 +621,17 @@ template <uint64_t NumBits> struct MagicBitboard {
 
     uint64_t MagicNumber;
     Bitboard Masks[2];
-    Bitboard AttackBB1[1 << NumBits];
-    Bitboard AttackBB2[1 << NumBits];
+    Bitboard *AttackBB1[1 << NumBits];
+    Bitboard *AttackBB2[1 << NumBits];
 };
 
+static constexpr uint16_t BishopMagicMasterCountMax = 880;
+extern Bitboard BishopMagicMaster[BishopMagicMasterCountMax];
 constexpr uint64_t DiagMagicBits = 7;
 extern MagicBitboard<DiagMagicBits> BishopMagicBB[NumSquares];
 
+static constexpr uint16_t RookMagicMasterCountMax = 1779;
+extern Bitboard RookMagicMaster[RookMagicMasterCountMax];
 constexpr uint64_t CrossMagicBits = 7;
 extern MagicBitboard<CrossMagicBits> RookMagicBB[NumSquares];
 
@@ -696,7 +700,8 @@ inline Bitboard getBishopAttackBB(Square Sq, const Bitboard& OccupiedBB) {
         (uint16_t)(((OccupiedBB & Magic.Masks[1]).horizontalOr() *
                     Magic.MagicNumber) >> (64 - DiagMagicBits));
 
-    const auto AttackBB = Magic.AttackBB1[Pattern1] | Magic.AttackBB2[Pattern2];
+    const auto AttackBB = *Magic.AttackBB1[Pattern1] | *Magic.AttackBB2[Pattern2];
+
     if constexpr (Type == PTK_ProBishop) {
         return AttackBB | KingAttackBB[Sq];
     }
@@ -711,6 +716,7 @@ inline Bitboard getRookAttackBB(Square Sq, const Bitboard& OccupiedBB) {
         "the template parameter `Type` must be PTK_Rook or PTK_ProRook.");
 
     const auto& Magic = RookMagicBB[Sq];
+
     const uint16_t Pattern1 =
         (uint16_t)(((OccupiedBB & Magic.Masks[0]).horizontalOr() *
                     Magic.MagicNumber) >> (64 - CrossMagicBits));
@@ -718,7 +724,8 @@ inline Bitboard getRookAttackBB(Square Sq, const Bitboard& OccupiedBB) {
         (uint16_t)(((OccupiedBB & Magic.Masks[1]).horizontalOr() *
                     Magic.MagicNumber) >> (64 - CrossMagicBits));
 
-    const auto AttackBB = Magic.AttackBB1[Pattern1] | Magic.AttackBB2[Pattern2];
+    const auto AttackBB = *Magic.AttackBB1[Pattern1] | *Magic.AttackBB2[Pattern2];
+
     if constexpr (Type == PTK_ProRook) {
         return AttackBB | KingAttackBB[Sq];
     }

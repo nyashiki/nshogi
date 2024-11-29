@@ -66,7 +66,9 @@ Bitboard KingAttackBB[NumSquares];
 Bitboard DiagStepAttackBB[NumSquares];
 Bitboard CrossStepAttackBB[NumSquares];
 
+Bitboard BishopMagicMaster[BishopMagicMasterCountMax];
 MagicBitboard<DiagMagicBits> BishopMagicBB[NumSquares];
+Bitboard RookMagicMaster[RookMagicMasterCountMax];
 MagicBitboard<CrossMagicBits> RookMagicBB[NumSquares];
 
 constexpr Bitboard FirstAndSecondFurthestBB[NumColors] = {
@@ -498,10 +500,12 @@ void setBishopMagicMasks() {
     }
 }
 
-std::tuple<bool, std::vector<Bitboard>, std::vector<Bitboard>>
-isBishopMagicNumberOK(Square Sq, uint64_t MagicNumber) {
-    std::vector<Bitboard> AttackBBs1(1 << DiagMagicBits, {0, 0});
-    std::vector<Bitboard> AttackBBs2(1 << DiagMagicBits, {0, 0});
+std::tuple<bool, std::vector<Bitboard*>, std::vector<Bitboard*>>
+isBishopMagicNumberOK(Square Sq, uint64_t MagicNumber, uint16_t *BishopMasterCount) {
+    std::vector<Bitboard*> Target1(1 << DiagMagicBits, nullptr);
+    std::vector<Bitboard*> Target2(1 << DiagMagicBits, nullptr);
+    std::vector<bool> IsUsed1(1 << DiagMagicBits, false);
+    std::vector<bool> IsUsed2(1 << DiagMagicBits, false);
 
     // clang-format off
     static const uint16_t NumBitsSWNE[NumSquares] = {
@@ -536,10 +540,30 @@ isBishopMagicNumberOK(Square Sq, uint64_t MagicNumber) {
             const uint16_t Result =
                 (uint16_t)((BB.horizontalOr() * MagicNumber) >> ShiftAmount);
 
-            if (AttackBBs1[Result].isZero()) {
-                AttackBBs1[Result].copyFrom(AttackBB);
-            } else if (AttackBBs1[Result] != AttackBB) {
-                return std::make_tuple(false, AttackBBs1, AttackBBs2);
+            uint16_t TargetIndex = 0;
+            bool TargetFound = false;
+            for (uint16_t I = 0; I < *BishopMasterCount; ++I) {
+                if (BishopMagicMaster[I] == AttackBB) {
+                    TargetIndex = I;
+                    TargetFound = true;
+                    break;
+                }
+            }
+            if (!TargetFound) {
+                if (*BishopMasterCount == BishopMagicMasterCountMax - 1) {
+                    throw std::runtime_error("No room to store BishopMagicMaster.");
+                }
+
+                BishopMagicMaster[*BishopMasterCount] = AttackBB;
+                TargetIndex = *BishopMasterCount;
+                ++*BishopMasterCount;
+            }
+
+            if (!IsUsed1[Result]) {
+                Target1[Result] = &BishopMagicMaster[TargetIndex];
+                IsUsed1[Result] = true;
+            } else if (Target1[Result] != &BishopMagicMaster[TargetIndex]) {
+                return std::make_tuple(false, Target1, Target2);
             }
         }
     }
@@ -550,15 +574,35 @@ isBishopMagicNumberOK(Square Sq, uint64_t MagicNumber) {
             const uint16_t Result =
                 (uint16_t)((BB.horizontalOr() * MagicNumber) >> ShiftAmount);
 
-            if (AttackBBs2[Result].isZero()) {
-                AttackBBs2[Result].copyFrom(AttackBB);
-            } else if (AttackBBs2[Result] != AttackBB) {
-                return std::make_tuple(false, AttackBBs1, AttackBBs2);
+            uint16_t TargetIndex = 0;
+            bool TargetFound = false;
+            for (uint16_t I = 0; I < *BishopMasterCount; ++I) {
+                if (BishopMagicMaster[I] == AttackBB) {
+                    TargetIndex = I;
+                    TargetFound = true;
+                    break;
+                }
+            }
+            if (!TargetFound) {
+                if (*BishopMasterCount == BishopMagicMasterCountMax - 1) {
+                    throw std::runtime_error("No room to store BishopMagicMaster.");
+                }
+
+                BishopMagicMaster[*BishopMasterCount] = AttackBB;
+                TargetIndex = *BishopMasterCount;
+                ++*BishopMasterCount;
+            }
+
+            if (!IsUsed2[Result]) {
+                Target2[Result] = &BishopMagicMaster[TargetIndex];
+                IsUsed2[Result] = true;
+            } else if (Target2[Result] != &BishopMagicMaster[TargetIndex]) {
+                return std::make_tuple(false, Target1, Target2);
             }
         }
     }
 
-    return std::make_tuple(true, AttackBBs1, AttackBBs2);
+    return std::make_tuple(true, Target1, Target2);
 }
 
 uint64_t generateMagicNumberCandidate() {
@@ -617,6 +661,7 @@ void setRookMagicNumbers() {
 
 void computeBishopMagicBitboard() {
     bool IsPrecomputed = BishopMagicBB[0].MagicNumber != 0;
+    uint16_t BishopMasterCount = 0;
 
     for (Square Sq : Squares) {
         if (!IsPrecomputed) {
@@ -624,20 +669,20 @@ void computeBishopMagicBitboard() {
             std::cout << std::flush;
         }
 
-        for (uint64_t Trial = 0;; ++Trial) {
+        for (uint64_t Trial = 0; ; ++Trial) {
             const uint64_t MagicNumberCandidate =
                 (IsPrecomputed) ? BishopMagicBB[Sq].MagicNumber
                                 : generateMagicNumberCandidate();
 
-            const auto& Result = isBishopMagicNumberOK(Sq, MagicNumberCandidate);
-            if (std::get<0>(Result)) {
+            const auto& [Result, Target1, Target2] = isBishopMagicNumberOK(Sq, MagicNumberCandidate, &BishopMasterCount);
+            if (Result) {
                 BishopMagicBB[Sq].MagicNumber = MagicNumberCandidate;
                 std::memcpy(static_cast<void*>(BishopMagicBB[Sq].AttackBB1),
-                            static_cast<const void*>(std::get<1>(Result).data()),
-                            (1 << DiagMagicBits) * sizeof(Bitboard));
+                            static_cast<const void*>(Target1.data()),
+                            (1 << DiagMagicBits) * sizeof(Bitboard*));
                 std::memcpy(static_cast<void*>(BishopMagicBB[Sq].AttackBB2),
-                            static_cast<const void*>(std::get<2>(Result).data()),
-                            (1 << DiagMagicBits) * sizeof(Bitboard));
+                            static_cast<const void*>(Target2.data()),
+                            (1 << DiagMagicBits) * sizeof(Bitboard*));
 
                 if (!IsPrecomputed) {
                     std::printf("OK (found 0x%016" PRIx64 " with %7" PRIu64 " trials).",
@@ -659,6 +704,7 @@ void computeBishopMagicBitboard() {
             }
         }
         std::printf("};\n");
+        std::printf("BishopMasterCount: %" PRIu16 ".\n", BishopMasterCount);
     }
 }
 
@@ -669,10 +715,12 @@ void setRookMagicMasks() {
     }
 }
 
-std::tuple<bool, std::vector<Bitboard>, std::vector<Bitboard>>
-isRookMagicNumberOK(Square Sq, uint64_t MagicNumber) {
-    std::vector<Bitboard> AttackBBs1(1 << CrossMagicBits, {0, 0});
-    std::vector<Bitboard> AttackBBs2(1 << CrossMagicBits, {0, 0});
+std::tuple<bool, std::vector<Bitboard*>, std::vector<Bitboard*>>
+isRookMagicNumberOK(Square Sq, uint64_t MagicNumber, uint16_t *RookMasterCount) {
+    std::vector<Bitboard*> Target1(1 << CrossMagicBits, nullptr);
+    std::vector<Bitboard*> Target2(1 << CrossMagicBits, nullptr);
+    std::vector<bool> IsUsed1(1 << DiagMagicBits, false);
+    std::vector<bool> IsUsed2(1 << DiagMagicBits, false);
 
     // clang-format off
     const uint16_t NumBitsSN[NumSquares] = {
@@ -707,10 +755,30 @@ isRookMagicNumberOK(Square Sq, uint64_t MagicNumber) {
             const uint16_t Result =
                 (uint16_t)((BB.horizontalOr() * MagicNumber) >> ShiftAmount);
 
-            if (AttackBBs1[Result].isZero()) {
-                AttackBBs1[Result].copyFrom(AttackBB);
-            } else if (AttackBBs1[Result] != AttackBB) {
-                return std::make_tuple(false, AttackBBs1, AttackBBs2);
+            uint16_t TargetIndex = 0;
+            bool TargetFound = false;
+            for (uint16_t I = 0; I < *RookMasterCount; ++I) {
+                if (RookMagicMaster[I] == AttackBB) {
+                    TargetIndex = I;
+                    TargetFound = true;
+                    break;
+                }
+            }
+            if (!TargetFound) {
+                if (*RookMasterCount == RookMagicMasterCountMax - 1) {
+                    throw std::runtime_error("No room to store RookMagicMaster.");
+                }
+
+                RookMagicMaster[*RookMasterCount] = AttackBB;
+                TargetIndex = *RookMasterCount;
+                ++*RookMasterCount;
+            }
+
+            if (!IsUsed1[Result]) {
+                Target1[Result] = &RookMagicMaster[TargetIndex];
+                IsUsed1[Result] = true;
+            } else if (Target1[Result] != &RookMagicMaster[TargetIndex]) {
+                return std::make_tuple(false, Target1, Target2);
             }
         }
     }
@@ -721,19 +789,40 @@ isRookMagicNumberOK(Square Sq, uint64_t MagicNumber) {
             const uint16_t Result =
                 (uint16_t)((BB.horizontalOr() * MagicNumber) >> ShiftAmount);
 
-            if (AttackBBs2[Result].isZero()) {
-                AttackBBs2[Result].copyFrom(AttackBB);
-            } else if (AttackBBs2[Result] != AttackBB) {
-                return std::make_tuple(false, AttackBBs1, AttackBBs2);
+            uint16_t TargetIndex = 0;
+            bool TargetFound = false;
+            for (uint16_t I = 0; I < *RookMasterCount; ++I) {
+                if (RookMagicMaster[I] == AttackBB) {
+                    TargetIndex = I;
+                    TargetFound = true;
+                    break;
+                }
+            }
+            if (!TargetFound) {
+                if (*RookMasterCount == RookMagicMasterCountMax - 1) {
+                    throw std::runtime_error("No room to store RookMagicMaster.");
+                }
+
+                RookMagicMaster[*RookMasterCount] = AttackBB;
+                TargetIndex = *RookMasterCount;
+                ++*RookMasterCount;
+            }
+
+            if (!IsUsed2[Result]) {
+                Target2[Result] = &RookMagicMaster[TargetIndex];
+                IsUsed2[Result] = true;
+            } else if (Target2[Result] != &RookMagicMaster[TargetIndex]) {
+                return std::make_tuple(false, Target1, Target2);
             }
         }
     }
 
-    return std::make_tuple(true, AttackBBs1, AttackBBs2);
+    return std::make_tuple(true, Target1, Target2);
 }
 
 void computeRookMagicBitboard() {
     bool IsPrecomputed = RookMagicBB[0].MagicNumber != 0;
+    uint16_t RookMasterCount = 0;
 
     for (Square Sq : Squares) {
         if (!IsPrecomputed) {
@@ -746,15 +835,15 @@ void computeRookMagicBitboard() {
                 (IsPrecomputed) ? RookMagicBB[Sq].MagicNumber
                                 : generateMagicNumberCandidate();
 
-            const auto& Result = isRookMagicNumberOK(Sq, MagicNumberCandidate);
-            if (std::get<0>(Result)) {
+            const auto& [Result, Target1, Target2] = isRookMagicNumberOK(Sq, MagicNumberCandidate, &RookMasterCount);
+            if (Result) {
                 RookMagicBB[Sq].MagicNumber = MagicNumberCandidate;
                 std::memcpy(static_cast<void*>(RookMagicBB[Sq].AttackBB1),
-                            static_cast<const void*>(std::get<1>(Result).data()),
-                            (1 << CrossMagicBits) * sizeof(Bitboard));
+                            static_cast<const void*>(Target1.data()),
+                            (1 << CrossMagicBits) * sizeof(Bitboard*));
                 std::memcpy(static_cast<void*>(RookMagicBB[Sq].AttackBB2),
-                            static_cast<const void*>(std::get<2>(Result).data()),
-                            (1 << CrossMagicBits) * sizeof(Bitboard));
+                            static_cast<const void*>(Target2.data()),
+                            (1 << CrossMagicBits) * sizeof(Bitboard*));
 
                 if (!IsPrecomputed) {
                     std::printf("OK (found 0x%016" PRIx64 " with %7" PRIu64 " trials).",
@@ -776,6 +865,7 @@ void computeRookMagicBitboard() {
             }
         }
         std::printf("};\n");
+        std::printf("RookMasterCount: %" PRIu16 ".\n", RookMasterCount);
     }
 }
 
