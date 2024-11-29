@@ -899,7 +899,7 @@ void initializeDirectionBB() {
 
     for (Square From : Squares) {
         for (Square To : Squares) {
-            Direction D = SquareDirection[From][To];
+            Direction D = SquareDirection[(std::size_t)From][(std::size_t)To];
             if (D != Direction(0)) {
                 DirectionBB[11 + D][From] |= SquareBB[To];
             }
