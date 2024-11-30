@@ -619,10 +619,15 @@ struct alignas(16) Bitboard {
 template <uint64_t NumBits> struct MagicBitboard {
     MagicBitboard(){};
 
+#if defined(USE_BMI2) && defined(USE_PEXT)
+    uint64_t MagicNumber[2];
+    Bitboard Mask;
+#else
     uint64_t MagicNumber;
     Bitboard Masks[2];
-    Bitboard *AttackBB1[1 << NumBits];
-    Bitboard *AttackBB2[1 << NumBits];
+#endif
+
+    Bitboard *AttackBB[2][1 << NumBits];
 };
 
 static constexpr uint16_t BishopMagicMasterCountMax = 880;
@@ -693,14 +698,20 @@ inline Bitboard getBishopAttackBB(Square Sq, const Bitboard& OccupiedBB) {
 
     const auto& Magic = BishopMagicBB[Sq];
 
+#if defined(USE_BMI2) && defined(USE_PEXT)
+    const uint64_t Base = (OccupiedBB & Magic.Mask).horizontalOr();
+    const uint64_t Pattern1 = _pext_u64(Base, Magic.MagicNumber[0]);
+    const uint64_t Pattern2 = _pext_u64(Base, Magic.MagicNumber[1]);
+#else
     const uint16_t Pattern1 =
         (uint16_t)(((OccupiedBB & Magic.Masks[0]).horizontalOr() *
                     Magic.MagicNumber) >> (64 - DiagMagicBits));
     const uint16_t Pattern2 =
         (uint16_t)(((OccupiedBB & Magic.Masks[1]).horizontalOr() *
                     Magic.MagicNumber) >> (64 - DiagMagicBits));
+#endif
 
-    const auto AttackBB = *Magic.AttackBB1[Pattern1] | *Magic.AttackBB2[Pattern2];
+    const auto AttackBB = *Magic.AttackBB[0][Pattern1] | *Magic.AttackBB[1][Pattern2];
 
     if constexpr (Type == PTK_ProBishop) {
         return AttackBB | KingAttackBB[Sq];
@@ -717,14 +728,20 @@ inline Bitboard getRookAttackBB(Square Sq, const Bitboard& OccupiedBB) {
 
     const auto& Magic = RookMagicBB[Sq];
 
+#if defined(USE_BMI2) && defined(USE_PEXT)
+    const uint64_t Base = (OccupiedBB & Magic.Mask).horizontalOr();
+    const uint64_t Pattern1 = _pext_u64(Base, Magic.MagicNumber[0]);
+    const uint64_t Pattern2 = _pext_u64(Base, Magic.MagicNumber[1]);
+#else
     const uint16_t Pattern1 =
         (uint16_t)(((OccupiedBB & Magic.Masks[0]).horizontalOr() *
                     Magic.MagicNumber) >> (64 - CrossMagicBits));
     const uint16_t Pattern2 =
         (uint16_t)(((OccupiedBB & Magic.Masks[1]).horizontalOr() *
                     Magic.MagicNumber) >> (64 - CrossMagicBits));
+#endif
 
-    const auto AttackBB = *Magic.AttackBB1[Pattern1] | *Magic.AttackBB2[Pattern2];
+    const auto AttackBB = *Magic.AttackBB[0][Pattern1] | *Magic.AttackBB[1][Pattern2];
 
     if constexpr (Type == PTK_ProRook) {
         return AttackBB | KingAttackBB[Sq];

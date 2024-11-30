@@ -430,6 +430,47 @@ getPatternBB(Square Sq, uint16_t Pattern, bool Blocked, uint8_t BitIndex) {
     return {AttackBB | NAttackBB, ExistBB | NExistBB, NBitIndex};
 }
 
+#if defined(USE_BMI2) && defined(USE_PEXT)
+
+std::pair<Bitboard, Bitboard> diagPatternBB(Square Sq, const uint16_t Pattern) {
+    const auto& [A1, E1, B1] =
+        getPatternBB<NorthEast, true>(Sq, Pattern, false, 0);
+    const auto& [A2, E2, B2] =
+        getPatternBB<SouthWest, true>(Sq, Pattern, false, B1);
+    const auto& [A3, E3, B3] =
+        getPatternBB<SouthEast, true>(Sq, Pattern, false, B2);
+    const auto& [A4, E4, B4] =
+        getPatternBB<NorthWest, true>(Sq, Pattern, false, B3);
+
+    assert(B4 <= 12);
+
+    const Bitboard AttackBB = (A1 | A2 | A3 | A4) & ~SquareBB[Sq];
+
+    const Bitboard ExistBB = (E1 | E2 | E3 | E4) & ~FileBB[File9] &
+                             ~FileBB[File1] & ~RankBB[RankI] & ~RankBB[RankA] &
+                             ~SquareBB[Sq];
+
+    return {AttackBB, ExistBB};
+}
+
+std::pair<Bitboard, Bitboard> crossPatternBB(Square Sq,
+                                             const uint16_t Pattern) {
+    const auto& [A1, E1, B1] = getPatternBB<North, true>(Sq, Pattern, false, 0);
+    const auto& [A2, E2, B2] = getPatternBB<East, true>(Sq, Pattern, false, B1);
+    const auto& [A3, E3, B3] =
+        getPatternBB<South, true>(Sq, Pattern, false, B2);
+    const auto& [A4, E4, B4] = getPatternBB<West, true>(Sq, Pattern, false, B3);
+
+    assert(B4 <= 14);
+
+    const Bitboard AttackBB = (A1 | A2 | A3 | A4) & ~SquareBB[Sq];
+    const Bitboard ExistBB = (E1 | E2 | E3 | E4) & ~SquareBB[Sq];
+
+    return {AttackBB, ExistBB};
+}
+
+#endif
+
 std::pair<Bitboard, Bitboard> diagSWNEPatternBB(Square Sq, const uint16_t Pattern) {
     const auto& [A1, E1, B1] = getPatternBB<NorthEast, true>(Sq, Pattern, false, 0);
     const auto& [A2, E2, B2] = getPatternBB<SouthWest, true>(Sq, Pattern, false, B1);
@@ -477,6 +518,18 @@ std::pair<Bitboard, Bitboard> horizontalPatternBB(Square Sq,
     return {AttackBB, ExistBB};
 }
 
+#if defined(USE_BMI2) && defined(USE_PEXT)
+
+Bitboard diagPatternMask(Square Sq) {
+    return diagPatternBB(Sq, (1 << 15) - 1).second;
+}
+
+Bitboard crossPatternMask(Square Sq) {
+    return crossPatternBB(Sq, (1 << 15) - 1).second;
+}
+
+#endif
+
 Bitboard diagSWNEPatternMask(Square Sq) {
     return diagSWNEPatternBB(Sq, (1 << 15) - 1).second;
 }
@@ -489,16 +542,22 @@ Bitboard verticalPatternMask(Square Sq) {
     return verticalPatternBB(Sq, (1 << 15) - 1).second;
 }
 
-Bitboard horizontalPatternBB(Square Sq) {
+Bitboard horizontalPatternMask(Square Sq) {
     return horizontalPatternBB(Sq, (1 << 15) - 1).second;
 }
 
 void setBishopMagicMasks() {
     for (Square Sq : Squares) {
+#if defined(USE_BMI2) && defined(USE_PEXT)
+        BishopMagicBB[Sq].Mask = diagPatternMask(Sq);
+#else
         BishopMagicBB[Sq].Masks[0] = diagSWNEPatternMask(Sq);
         BishopMagicBB[Sq].Masks[1] = diagNWSEPatternMask(Sq);
+#endif
     }
 }
+
+#if !defined(USE_BMI2) || !defined(USE_PEXT)
 
 std::tuple<bool, std::vector<Bitboard*>, std::vector<Bitboard*>>
 isBishopMagicNumberOK(Square Sq, uint64_t MagicNumber, uint16_t *BishopMasterCount) {
@@ -605,6 +664,10 @@ isBishopMagicNumberOK(Square Sq, uint64_t MagicNumber, uint16_t *BishopMasterCou
     return std::make_tuple(true, Target1, Target2);
 }
 
+#endif
+
+#if !defined(USE_BMI2) || !defined(USE_PEXT)
+
 uint64_t generateMagicNumberCandidate() {
     // clang-format off
     static std::mt19937_64 Mt(
@@ -618,6 +681,10 @@ uint64_t generateMagicNumberCandidate() {
 
     return Mt() & Mt() & Mt();
 }
+
+#endif
+
+#if !defined(USE_BMI2) || !defined(USE_PEXT)
 
 void setBishopMagicNumbers() {
     // clang-format off
@@ -639,6 +706,10 @@ void setBishopMagicNumbers() {
     }
 };
 
+#endif
+
+#if !defined(USE_BMI2) || !defined(USE_PEXT)
+
 void setRookMagicNumbers() {
     // clang-format off
     constexpr uint64_t RookMagicNumbers[NumSquares] = {
@@ -659,6 +730,10 @@ void setRookMagicNumbers() {
     }
 }
 
+#endif
+
+#if !defined(USE_BMI2) || !defined(USE_PEXT)
+
 void computeBishopMagicBitboard() {
     bool IsPrecomputed = BishopMagicBB[0].MagicNumber != 0;
     uint16_t BishopMasterCount = 0;
@@ -677,10 +752,10 @@ void computeBishopMagicBitboard() {
             const auto& [Result, Target1, Target2] = isBishopMagicNumberOK(Sq, MagicNumberCandidate, &BishopMasterCount);
             if (Result) {
                 BishopMagicBB[Sq].MagicNumber = MagicNumberCandidate;
-                std::memcpy(static_cast<void*>(BishopMagicBB[Sq].AttackBB1),
+                std::memcpy(static_cast<void*>(BishopMagicBB[Sq].AttackBB[0]),
                             static_cast<const void*>(Target1.data()),
                             (1 << DiagMagicBits) * sizeof(Bitboard*));
-                std::memcpy(static_cast<void*>(BishopMagicBB[Sq].AttackBB2),
+                std::memcpy(static_cast<void*>(BishopMagicBB[Sq].AttackBB[1]),
                             static_cast<const void*>(Target2.data()),
                             (1 << DiagMagicBits) * sizeof(Bitboard*));
 
@@ -708,12 +783,85 @@ void computeBishopMagicBitboard() {
     }
 }
 
-void setRookMagicMasks() {
+#endif
+
+#if defined(USE_BMI2) && defined(USE_PEXT)
+void setBishopPextTable() {
+    // clang-format off
+    const uint16_t NumBits[NumSquares] = {
+        7, 6, 6,  6,  6,  6, 6, 6, 7,
+        6, 6, 6,  6,  6,  6, 6, 6, 6,
+        6, 6, 8,  8,  8,  8, 8, 6, 6,
+        6, 6, 8, 10, 10, 10, 8, 6, 6,
+        6, 6, 8, 10, 12, 10, 8, 6, 6,
+        6, 6, 8, 10, 10, 10, 8, 6, 6,
+        6, 6, 8,  8,  8,  8, 8, 6, 6,
+        6, 6, 6,  6,  6,  6, 6, 6, 6,
+        7, 6, 6,  6,  6,  6, 6, 6, 7,
+    };
+    // clang-format on
+
+    uint16_t BishopMasterCount = 0;
     for (Square Sq : Squares) {
-        RookMagicBB[Sq].Masks[0] = verticalPatternMask(Sq);
-        RookMagicBB[Sq].Masks[1] = horizontalPatternBB(Sq);
+        BishopMagicBB[Sq].MagicNumber[0] = diagSWNEPatternMask(Sq).horizontalOr();
+        BishopMagicBB[Sq].MagicNumber[1] = diagNWSEPatternMask(Sq).horizontalOr();
+
+        {
+            const uint16_t NumBit = NumBits[Sq];
+            for (uint16_t Pattern = 0; Pattern < (1 << NumBit); ++Pattern) {
+                const auto& [AttackBB, BB] = diagPatternBB(Sq, Pattern);
+
+                const uint64_t Base = (BB & BishopMagicBB[Sq].Mask).horizontalOr();
+
+                const Bitboard AttackBBs[2] = {
+                    AttackBB & (DirectionBB[11 + NorthEast][Sq] | DirectionBB[11 + SouthWest][Sq]),
+                    AttackBB & (DirectionBB[11 + SouthEast][Sq] | DirectionBB[11 + NorthWest][Sq]),
+                };
+
+                for (int I = 0; I < 2; ++I) {
+                    uint16_t TargetIndex = 0;
+                    bool TargetFound = false;
+                    for (uint16_t J = 0; J < BishopMasterCount; ++J) {
+                        if (BishopMagicMaster[J] == AttackBBs[I]) {
+                            TargetIndex = J;
+                            TargetFound = true;
+                            break;
+                        }
+                    }
+                    if (!TargetFound) {
+                        if (BishopMasterCount == BishopMagicMasterCountMax - 1) {
+                            throw std::runtime_error("No room to store BishopMagicMaster.");
+                        }
+
+                        BishopMagicMaster[BishopMasterCount] = AttackBBs[I];
+                        TargetIndex = BishopMasterCount;
+                        ++BishopMasterCount;
+                    }
+
+                    uint64_t Index = (I == 0)
+                        ? _pext_u64(Base, BishopMagicBB[Sq].MagicNumber[0])
+                        : _pext_u64(Base, BishopMagicBB[Sq].MagicNumber[1]);
+
+                    BishopMagicBB[Sq].AttackBB[I][Index] = &BishopMagicMaster[TargetIndex];
+                }
+            }
+        }
     }
 }
+#endif
+
+void setRookMagicMasks() {
+    for (Square Sq : Squares) {
+#if defined(USE_BMI2) && defined(USE_PEXT)
+        RookMagicBB[Sq].Mask = crossPatternMask(Sq);
+#else
+        RookMagicBB[Sq].Masks[0] = verticalPatternMask(Sq);
+        RookMagicBB[Sq].Masks[1] = horizontalPatternMask(Sq);
+#endif
+    }
+}
+
+#if !defined(USE_BMI2) || !defined(USE_PEXT)
 
 std::tuple<bool, std::vector<Bitboard*>, std::vector<Bitboard*>>
 isRookMagicNumberOK(Square Sq, uint64_t MagicNumber, uint16_t *RookMasterCount) {
@@ -820,6 +968,10 @@ isRookMagicNumberOK(Square Sq, uint64_t MagicNumber, uint16_t *RookMasterCount) 
     return std::make_tuple(true, Target1, Target2);
 }
 
+#endif
+
+#if !defined(USE_BMI2) || !defined(USE_PEXT)
+
 void computeRookMagicBitboard() {
     bool IsPrecomputed = RookMagicBB[0].MagicNumber != 0;
     uint16_t RookMasterCount = 0;
@@ -838,10 +990,10 @@ void computeRookMagicBitboard() {
             const auto& [Result, Target1, Target2] = isRookMagicNumberOK(Sq, MagicNumberCandidate, &RookMasterCount);
             if (Result) {
                 RookMagicBB[Sq].MagicNumber = MagicNumberCandidate;
-                std::memcpy(static_cast<void*>(RookMagicBB[Sq].AttackBB1),
+                std::memcpy(static_cast<void*>(RookMagicBB[Sq].AttackBB[0]),
                             static_cast<const void*>(Target1.data()),
                             (1 << CrossMagicBits) * sizeof(Bitboard*));
-                std::memcpy(static_cast<void*>(RookMagicBB[Sq].AttackBB2),
+                std::memcpy(static_cast<void*>(RookMagicBB[Sq].AttackBB[1]),
                             static_cast<const void*>(Target2.data()),
                             (1 << CrossMagicBits) * sizeof(Bitboard*));
 
@@ -869,6 +1021,73 @@ void computeRookMagicBitboard() {
     }
 }
 
+#endif
+
+#if defined(USE_BMI2) && defined(USE_PEXT)
+void setRookPextTable() {
+    // clang-format off
+    const uint16_t NumBits[NumSquares] = {
+        14, 13, 13, 13, 13, 13, 13, 13, 14,
+        13, 12, 12, 12, 12, 12, 12, 12, 13,
+        13, 12, 12, 12, 12, 12, 12, 12, 13,
+        13, 12, 12, 12, 12, 12, 12, 12, 13,
+        13, 12, 12, 12, 12, 12, 12, 12, 13,
+        13, 12, 12, 12, 12, 12, 12, 12, 13,
+        13, 12, 12, 12, 12, 12, 12, 12, 13,
+        13, 12, 12, 12, 12, 12, 12, 12, 13,
+        14, 13, 13, 13, 13, 13, 13, 13, 14,
+    };
+    // clang-format on
+
+    uint16_t RookMasterCount = 0;
+    for (Square Sq : Squares) {
+        RookMagicBB[Sq].MagicNumber[0] = verticalPatternMask(Sq).horizontalOr();
+        RookMagicBB[Sq].MagicNumber[1] = horizontalPatternMask(Sq).horizontalOr();
+
+        {
+            const uint16_t NumBit = NumBits[Sq];
+            for (uint16_t Pattern = 0; Pattern < (1 << NumBit); ++Pattern) {
+                const auto& [AttackBB, BB] = crossPatternBB(Sq, Pattern);
+
+                const uint64_t Base = (BB & RookMagicBB[Sq].Mask).horizontalOr();
+
+                const Bitboard AttackBBs[2] = {
+                    AttackBB & (DirectionBB[11 + North][Sq] | DirectionBB[11 + South][Sq]),
+                    AttackBB & (DirectionBB[11 + East][Sq] | DirectionBB[11 + West][Sq]),
+                };
+
+                for (int I = 0; I < 2; ++I) {
+                    uint16_t TargetIndex = 0;
+                    bool TargetFound = false;
+                    for (uint16_t J = 0; J < RookMasterCount; ++J) {
+                        if (RookMagicMaster[J] == AttackBBs[I]) {
+                            TargetIndex = J;
+                            TargetFound = true;
+                            break;
+                        }
+                    }
+                    if (!TargetFound) {
+                        if (RookMasterCount == RookMagicMasterCountMax - 1) {
+                            throw std::runtime_error("No room to store RookMagicMaster.");
+                        }
+
+                        RookMagicMaster[RookMasterCount] = AttackBBs[I];
+                        TargetIndex = RookMasterCount;
+                        ++RookMasterCount;
+                    }
+
+                    uint64_t Index = (I == 0)
+                        ? _pext_u64(Base, RookMagicBB[Sq].MagicNumber[0])
+                        : _pext_u64(Base, RookMagicBB[Sq].MagicNumber[1]);
+
+                    RookMagicBB[Sq].AttackBB[I][Index] = &RookMagicMaster[TargetIndex];
+                }
+            }
+        }
+    }
+}
+#endif
+
 void initializeLineBB() {
     std::memset(static_cast<void*>(LineBB), 0, sizeof(LineBB));
 
@@ -880,11 +1099,13 @@ void initializeLineBB() {
 
             if ((std::abs(squareToFile(Sq1) - squareToFile(Sq2))) ==
                 std::abs(squareToRank(Sq1) - squareToRank(Sq2))) {
-                LineBB[Sq1][Sq2].copyFrom(
-                    (SquareBB[Sq1] |
-                     getBishopAttackBB<PTK_Bishop>(Sq1, Bitboard::ZeroBB())) &
-                    (SquareBB[Sq2] |
-                     getBishopAttackBB<PTK_Bishop>(Sq2, Bitboard::ZeroBB())));
+                LineBB[Sq1][Sq2] = Bitboard::ZeroBB();
+                LineBB[Sq1][Sq2] |=
+                    (SquareBB[Sq1] | DirectionBB[11 + NorthEast][Sq1] | DirectionBB[11 + SouthWest][Sq1]) &
+                    (SquareBB[Sq2] | DirectionBB[11 + NorthEast][Sq2] | DirectionBB[11 + SouthWest][Sq2]);
+                LineBB[Sq1][Sq2] |=
+                    (SquareBB[Sq1] | DirectionBB[11 + SouthEast][Sq1] | DirectionBB[11 + NorthWest][Sq1]) &
+                    (SquareBB[Sq2] | DirectionBB[11 + SouthEast][Sq2] | DirectionBB[11 + NorthWest][Sq2]);
             } else if (squareToFile(Sq1) == squareToFile(Sq2)) {
                 LineBB[Sq1][Sq2].copyFrom(FileBB[squareToFile(Sq1)]);
             } else if (squareToRank(Sq1) == squareToRank(Sq2)) {
@@ -1029,23 +1250,31 @@ void initializeBitboards() {
     initializeDiagStepAttacks();
     initializeCrossStepAttacks();
 
-    std::memset(static_cast<void*>(BishopMagicBB), 0, sizeof(BishopMagicBB));
-    setBishopMagicMasks();
-    setBishopMagicNumbers();
-    computeBishopMagicBitboard();
-
-    std::memset(static_cast<void*>(RookMagicBB), 0, sizeof(RookMagicBB));
-    setRookMagicMasks();
-    setRookMagicNumbers();
-    computeRookMagicBitboard();
-
-    initializeLineBB();
     initializeDirectionBB();
+    initializeLineBB();
     initializeBetweenBB();
     initializeDiagBB();
     initializeCrossBB();
     initializeForwardBB();
     initializeBackwardBB();
+
+    std::memset(static_cast<void*>(BishopMagicBB), 0, sizeof(BishopMagicBB));
+    setBishopMagicMasks();
+#if defined(USE_BMI2) && defined(USE_PEXT)
+    setBishopPextTable();
+#else
+    setBishopMagicNumbers();
+    computeBishopMagicBitboard();
+#endif
+
+    std::memset(static_cast<void*>(RookMagicBB), 0, sizeof(RookMagicBB));
+    setRookMagicMasks();
+#if defined(USE_BMI2) && defined(USE_PEXT)
+    setRookPextTable();
+#else
+    setRookMagicNumbers();
+    computeRookMagicBitboard();
+#endif
 }
 
 } // namespace bitboard
