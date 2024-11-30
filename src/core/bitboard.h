@@ -54,9 +54,6 @@ extern Bitboard KingAttackBB[NumSquares];
 extern Bitboard DiagStepAttackBB[NumSquares];
 extern Bitboard CrossStepAttackBB[NumSquares];
 
-extern Bitboard ForwardAttackBB[NumSquares][1 << 7];
-extern Bitboard BackwardAttackBB[NumSquares][1 << 7];
-
 //  Useful bitboards.
 extern const Bitboard FirstAndSecondFurthestBB[NumColors];
 extern const Bitboard FurthermostBB[NumColors];
@@ -476,6 +473,17 @@ struct alignas(16) Bitboard {
         return static_cast<Square>(63 + countTrailingZero(High));
     }
 
+    Bitboard pickUpMostSignificantBB() const {
+        uint64_t High = getPrimitive<true>();
+
+        if (High > 0) {
+            return SquareBB[63 + (63 - std::countl_zero(High))];
+        }
+
+        uint64_t Low = getPrimitive<false>();
+        return SquareBB[63 - std::countl_zero(Low)];
+    }
+
     Square popOne() {
         const uint64_t Low = getPrimitive<false>();
         if (Low > 0) {
@@ -611,15 +619,24 @@ struct alignas(16) Bitboard {
 template <uint64_t NumBits> struct MagicBitboard {
     MagicBitboard(){};
 
+#if defined(USE_BMI2) && defined(USE_PEXT)
+    uint64_t MagicNumber[2];
+    Bitboard Mask;
+#else
     uint64_t MagicNumber;
     Bitboard Masks[2];
-    Bitboard AttackBB1[1 << NumBits];
-    Bitboard AttackBB2[1 << NumBits];
+#endif
+
+    Bitboard *AttackBB[2][1 << NumBits];
 };
 
+static constexpr uint16_t BishopMagicMasterCountMax = 880;
+extern Bitboard BishopMagicMaster[BishopMagicMasterCountMax];
 constexpr uint64_t DiagMagicBits = 7;
 extern MagicBitboard<DiagMagicBits> BishopMagicBB[NumSquares];
 
+static constexpr uint16_t RookMagicMasterCountMax = 1779;
+extern Bitboard RookMagicMaster[RookMagicMasterCountMax];
 constexpr uint64_t CrossMagicBits = 7;
 extern MagicBitboard<CrossMagicBits> RookMagicBB[NumSquares];
 
@@ -658,23 +675,18 @@ inline constexpr Bitboard getAttackBB(Square From) {
     return KingAttackBB[From];
 }
 
-inline constexpr uint8_t pickUpFileBitPattern(Square Sq, const Bitboard& OccupiedBB) {
-    const int ShiftTable[NumFiles] = {1, 10, 19, 28, 37, 46, 55, 1, 10};
-
-    const File F = squareToFile(Sq);
-    const Bitboard ShiftedBB = (OccupiedBB & FileBB[F]).getRightShiftEpi64(ShiftTable[F]);
-
-    return ShiftedBB.horizontalOr() & 0x7f; // Pick up seven bits.
-}
-
 template <Color C>
 inline Bitboard getLanceAttackBB(Square Sq, const Bitboard& OccupiedBB) {
-    const uint8_t Pattern = pickUpFileBitPattern(Sq, OccupiedBB);
+    if (FurthermostBB[C].isSet(Sq)) {
+        return bitboard::Bitboard::ZeroBB();
+    }
 
     if constexpr (C == Black) {
-        return ForwardAttackBB[Sq][Pattern];
+        auto Temp = OccupiedBB ^ (OccupiedBB.subtract(SquareBB[Sq + North]));
+        return Temp & ForwardBB[Sq];
     } else {
-        return BackwardAttackBB[Sq][Pattern];
+        auto Temp = (BackwardBB[Sq] & (OccupiedBB | RankBB[RankI])).pickUpMostSignificantBB();
+        return SquareBB[Sq].subtract(Temp);
     }
 }
 
@@ -686,14 +698,21 @@ inline Bitboard getBishopAttackBB(Square Sq, const Bitboard& OccupiedBB) {
 
     const auto& Magic = BishopMagicBB[Sq];
 
+#if defined(USE_BMI2) && defined(USE_PEXT)
+    const uint64_t Base = (OccupiedBB & Magic.Mask).horizontalOr();
+    const uint64_t Pattern1 = _pext_u64(Base, Magic.MagicNumber[0]);
+    const uint64_t Pattern2 = _pext_u64(Base, Magic.MagicNumber[1]);
+#else
     const uint16_t Pattern1 =
         (uint16_t)(((OccupiedBB & Magic.Masks[0]).horizontalOr() *
                     Magic.MagicNumber) >> (64 - DiagMagicBits));
     const uint16_t Pattern2 =
         (uint16_t)(((OccupiedBB & Magic.Masks[1]).horizontalOr() *
                     Magic.MagicNumber) >> (64 - DiagMagicBits));
+#endif
 
-    const auto AttackBB = Magic.AttackBB1[Pattern1] | Magic.AttackBB2[Pattern2];
+    const auto AttackBB = *Magic.AttackBB[0][Pattern1] | *Magic.AttackBB[1][Pattern2];
+
     if constexpr (Type == PTK_ProBishop) {
         return AttackBB | KingAttackBB[Sq];
     }
@@ -708,14 +727,22 @@ inline Bitboard getRookAttackBB(Square Sq, const Bitboard& OccupiedBB) {
         "the template parameter `Type` must be PTK_Rook or PTK_ProRook.");
 
     const auto& Magic = RookMagicBB[Sq];
+
+#if defined(USE_BMI2) && defined(USE_PEXT)
+    const uint64_t Base = (OccupiedBB & Magic.Mask).horizontalOr();
+    const uint64_t Pattern1 = _pext_u64(Base, Magic.MagicNumber[0]);
+    const uint64_t Pattern2 = _pext_u64(Base, Magic.MagicNumber[1]);
+#else
     const uint16_t Pattern1 =
         (uint16_t)(((OccupiedBB & Magic.Masks[0]).horizontalOr() *
                     Magic.MagicNumber) >> (64 - CrossMagicBits));
     const uint16_t Pattern2 =
         (uint16_t)(((OccupiedBB & Magic.Masks[1]).horizontalOr() *
                     Magic.MagicNumber) >> (64 - CrossMagicBits));
+#endif
 
-    const auto AttackBB = Magic.AttackBB1[Pattern1] | Magic.AttackBB2[Pattern2];
+    const auto AttackBB = *Magic.AttackBB[0][Pattern1] | *Magic.AttackBB[1][Pattern2];
+
     if constexpr (Type == PTK_ProRook) {
         return AttackBB | KingAttackBB[Sq];
     }
