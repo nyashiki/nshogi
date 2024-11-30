@@ -128,6 +128,12 @@ else
 	endif
 endif
 
+PEXT ?= 1
+
+ifeq ($(PEXT),1)
+	CXX_FLAGS += -DUSE_PEXT
+endif
+
 ifneq ($(MAKECMDGOALS),clean)
     -include $(DEPENDINGS)
 endif
