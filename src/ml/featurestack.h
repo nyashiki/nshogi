@@ -5,6 +5,7 @@
 #include "featuretype.h"
 #include "../core/state.h"
 #include "../core/stateconfig.h"
+#include "../core/internal/stateadapter.h"
 
 #include <cstddef>
 #include <cstdint>
@@ -26,12 +27,12 @@ template<core::Color C>
 
 template<>
 [[maybe_unused]] FeatureBitboard processIsBlackTurn<core::Black>() {
-    return FeatureBitboard(core::bitboard::Bitboard::AllBB(), 1, false);
+    return FeatureBitboard(core::internal::bitboard::Bitboard::AllBB(), 1, false);
 }
 
 template<>
 [[maybe_unused]] FeatureBitboard processIsBlackTurn<core::White>() {
-    return FeatureBitboard(core::bitboard::Bitboard::ZeroBB(), 0, false);
+    return FeatureBitboard(core::internal::bitboard::Bitboard::ZeroBB(), 0, false);
 }
 
 template<core::Color C>
@@ -39,104 +40,109 @@ template<core::Color C>
 
 template<>
 [[maybe_unused]] FeatureBitboard processIsWhiteTurn<core::Black>() {
-    return FeatureBitboard(core::bitboard::Bitboard::ZeroBB(), 0, false);
+    return FeatureBitboard(core::internal::bitboard::Bitboard::ZeroBB(), 0, false);
 }
 
 template<>
 [[maybe_unused]] FeatureBitboard processIsWhiteTurn<core::White>() {
-    return FeatureBitboard(core::bitboard::Bitboard::AllBB(), 1, false);
+    return FeatureBitboard(core::internal::bitboard::Bitboard::AllBB(), 1, false);
 }
 
 template<core::Color C>
 [[maybe_unused]] FeatureBitboard processCheck(const core::State& State) {
-    if (!State.getCheckerBB().isZero()) {
-        return FeatureBitboard(core::bitboard::Bitboard::AllBB(), 1, false);
+    core::internal::ImmutableStateAdapter Adapter(State);
+    if (!Adapter->getCheckerBB().isZero()) {
+        return FeatureBitboard(core::internal::bitboard::Bitboard::AllBB(), 1, false);
     }
 
-    return FeatureBitboard(core::bitboard::Bitboard::ZeroBB(), 0, false);
+    return FeatureBitboard(core::internal::bitboard::Bitboard::ZeroBB(), 0, false);
 }
 
 template<core::Color MyColor, core::Color TargetColor>
 [[maybe_unused]] FeatureBitboard processNoPawnFile(const core::State& State) {
-    const core::bitboard::Bitboard PawnBB = State.getBitboard<TargetColor, core::PTK_Pawn>();
-    core::bitboard::Bitboard PawnExistFilesBB = core::bitboard::Bitboard::ZeroBB();
+    core::internal::ImmutableStateAdapter Adapter(State);
+    const core::internal::bitboard::Bitboard PawnBB = Adapter->getBitboard<TargetColor, core::PTK_Pawn>();
+    core::internal::bitboard::Bitboard PawnExistFilesBB = core::internal::bitboard::Bitboard::ZeroBB();
 
-    if (!(PawnBB & core::bitboard::FileBB[core::File1]).isZero()) {
-        PawnExistFilesBB |= core::bitboard::FileBB[core::File1];
+    if (!(PawnBB & core::internal::bitboard::FileBB[core::File1]).isZero()) {
+        PawnExistFilesBB |= core::internal::bitboard::FileBB[core::File1];
     }
-    if (!(PawnBB & core::bitboard::FileBB[core::File2]).isZero()) {
-        PawnExistFilesBB |= core::bitboard::FileBB[core::File2];
+    if (!(PawnBB & core::internal::bitboard::FileBB[core::File2]).isZero()) {
+        PawnExistFilesBB |= core::internal::bitboard::FileBB[core::File2];
     }
-    if (!(PawnBB & core::bitboard::FileBB[core::File3]).isZero()) {
-        PawnExistFilesBB |= core::bitboard::FileBB[core::File3];
+    if (!(PawnBB & core::internal::bitboard::FileBB[core::File3]).isZero()) {
+        PawnExistFilesBB |= core::internal::bitboard::FileBB[core::File3];
     }
-    if (!(PawnBB & core::bitboard::FileBB[core::File4]).isZero()) {
-        PawnExistFilesBB |= core::bitboard::FileBB[core::File4];
+    if (!(PawnBB & core::internal::bitboard::FileBB[core::File4]).isZero()) {
+        PawnExistFilesBB |= core::internal::bitboard::FileBB[core::File4];
     }
-    if (!(PawnBB & core::bitboard::FileBB[core::File5]).isZero()) {
-        PawnExistFilesBB |= core::bitboard::FileBB[core::File5];
+    if (!(PawnBB & core::internal::bitboard::FileBB[core::File5]).isZero()) {
+        PawnExistFilesBB |= core::internal::bitboard::FileBB[core::File5];
     }
-    if (!(PawnBB & core::bitboard::FileBB[core::File6]).isZero()) {
-        PawnExistFilesBB |= core::bitboard::FileBB[core::File6];
+    if (!(PawnBB & core::internal::bitboard::FileBB[core::File6]).isZero()) {
+        PawnExistFilesBB |= core::internal::bitboard::FileBB[core::File6];
     }
-    if (!(PawnBB & core::bitboard::FileBB[core::File7]).isZero()) {
-        PawnExistFilesBB |= core::bitboard::FileBB[core::File7];
+    if (!(PawnBB & core::internal::bitboard::FileBB[core::File7]).isZero()) {
+        PawnExistFilesBB |= core::internal::bitboard::FileBB[core::File7];
     }
-    if (!(PawnBB & core::bitboard::FileBB[core::File8]).isZero()) {
-        PawnExistFilesBB |= core::bitboard::FileBB[core::File8];
+    if (!(PawnBB & core::internal::bitboard::FileBB[core::File8]).isZero()) {
+        PawnExistFilesBB |= core::internal::bitboard::FileBB[core::File8];
     }
-    if (!(PawnBB & core::bitboard::FileBB[core::File9]).isZero()) {
-        PawnExistFilesBB |= core::bitboard::FileBB[core::File9];
+    if (!(PawnBB & core::internal::bitboard::FileBB[core::File9]).isZero()) {
+        PawnExistFilesBB |= core::internal::bitboard::FileBB[core::File9];
     }
 
     return FeatureBitboard(~PawnExistFilesBB, 1, MyColor == core::White);
 }
 
 [[maybe_unused]] FeatureBitboard processProgress(const core::State& State, const core::StateConfig& Config) {
-    return FeatureBitboard(core::bitboard::Bitboard::AllBB(), (float)State.getPly() / Config.MaxPly, false);
+    return FeatureBitboard(core::internal::bitboard::Bitboard::AllBB(), (float)State.getPly() / Config.MaxPly, false);
 }
 
 [[maybe_unused]] FeatureBitboard processProgressUnit(const core::StateConfig& Config) {
-    return FeatureBitboard(core::bitboard::Bitboard::AllBB(), 1.0f / Config.MaxPly, false);
+    return FeatureBitboard(core::internal::bitboard::Bitboard::AllBB(), 1.0f / Config.MaxPly, false);
 }
 
 template<core::Color MyColor, core::Color PieceColor, core::PieceTypeKind Type>
 [[maybe_unused]] FeatureBitboard processPiece(const core::State& State) {
-    return FeatureBitboard(State.getBitboard<PieceColor, Type>(), 1, MyColor == core::White);
+    core::internal::ImmutableStateAdapter Adapter(State);
+    return FeatureBitboard(Adapter->getBitboard<PieceColor, Type>(), 1, MyColor == core::White);
 }
 
 template<core::Color MyColor, core::PieceTypeKind Type, uint8_t Count>
 [[maybe_unused]] FeatureBitboard processStand(const core::State& State) {
     uint8_t TypeStandCount = State.getPosition().getStandCount<MyColor, Type>();
-    return FeatureBitboard(core::bitboard::Bitboard::AllBB(), (TypeStandCount >= Count), false);
+    return FeatureBitboard(core::internal::bitboard::Bitboard::AllBB(), (TypeStandCount >= Count), false);
 }
 
 template<core::EndingRule Rule>
 [[maybe_unused]] FeatureBitboard processRule(const core::StateConfig& Config) {
-    return FeatureBitboard(core::bitboard::Bitboard::AllBB(), (Config.Rule == Rule), false);
+    return FeatureBitboard(core::internal::bitboard::Bitboard::AllBB(), (Config.Rule == Rule), false);
 }
 
 template<core::Color MyColor>
 [[maybe_unused]] FeatureBitboard processDrawValue(const core::StateConfig& Config) {
     if constexpr (MyColor == core::Black) {
-        return FeatureBitboard(core::bitboard::Bitboard::AllBB(), Config.BlackDrawValue, false);
+        return FeatureBitboard(core::internal::bitboard::Bitboard::AllBB(), Config.BlackDrawValue, false);
     } else {
-        return FeatureBitboard(core::bitboard::Bitboard::AllBB(), Config.WhiteDrawValue, false);
+        return FeatureBitboard(core::internal::bitboard::Bitboard::AllBB(), Config.WhiteDrawValue, false);
     }
 }
 
 template <core::Color C>
 FeatureBitboard processDeclarationScore(const core::State& State) {
+    core::internal::ImmutableStateAdapter Adapter(State);
     if constexpr (C == core::Black) {
-        return FeatureBitboard(core::bitboard::Bitboard::AllBB(), (float)State.computeDeclarationScore<C>() / 28.0f, false);
+        return FeatureBitboard(core::internal::bitboard::Bitboard::AllBB(), (float)Adapter->computeDeclarationScore<C>() / 28.0f, false);
     } else {
-        return FeatureBitboard(core::bitboard::Bitboard::AllBB(), (float)State.computeDeclarationScore<C>() / 27.0f, false);
+        return FeatureBitboard(core::internal::bitboard::Bitboard::AllBB(), (float)Adapter->computeDeclarationScore<C>() / 27.0f, false);
     }
 }
 
 template <core::Color C>
 FeatureBitboard processPieceScore(const core::State& State) {
-    return FeatureBitboard(core::bitboard::Bitboard::AllBB(), (float)State.computePieceScore<C, 5, 1, false>() / 54.0f, false);
+    core::internal::ImmutableStateAdapter Adapter(State);
+    return FeatureBitboard(core::internal::bitboard::Bitboard::AllBB(), (float)Adapter->computePieceScore<C>(5, 1, false) / 54.0f, false);
 }
 
 } // namespace

@@ -7,7 +7,7 @@ namespace nshogi {
 namespace io {
 namespace bitboard {
 
-void print(const core::bitboard::Bitboard& BB) {
+void print(const core::internal::bitboard::Bitboard& BB) {
     auto SquareIt = core::SquareIterator<core::IterateOrder::NWSE>();
 
     for (auto It = SquareIt.begin(); It != SquareIt.end(); ++It) {

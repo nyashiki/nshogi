@@ -2,18 +2,17 @@
 
 #include "../core/positionbuilder.h"
 #include "../core/statebuilder.h"
-#include "../io/bitboard.h"
+#include "../core/movegenerator.h"
+#include "../core/internal/stateadapter.h"
+#include "../core/internal/hash.h"
 #include "../io/sfen.h"
+
+#include <iostream>
+#include <random>
+#include <map>
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
-#include <iostream>
-#include <random>
-#include <vector>
-#include <map>
-
-#include "../core/movegenerator.h"
-#include <iostream>
 
 namespace {
 
@@ -21,10 +20,11 @@ template <nshogi::core::Color C>
 void testDefenderImpl(const std::string& Sfen, nshogi::core::Square Defender) {
     nshogi::core::State State = nshogi::io::sfen::StateBuilder::newState(Sfen);
 
+    nshogi::core::internal::ImmutableStateAdapter Adapter(State);
     if (Defender == nshogi::core::SqInvalid) {
-        TEST_ASSERT_TRUE(State.getDefendingOpponentSliderBB<C>().isZero());
+        TEST_ASSERT_TRUE(Adapter->getDefendingOpponentSliderBB<C>().isZero());
     } else {
-        TEST_ASSERT_TRUE(State.getDefendingOpponentSliderBB<C>().isSet(Defender));
+        TEST_ASSERT_TRUE(Adapter->getDefendingOpponentSliderBB<C>().isSet(Defender));
     }
 }
 
@@ -32,67 +32,70 @@ void testRecomputeHelper(const nshogi::core::State& State) {
     nshogi::core::State DummyState =
         nshogi::core::StateBuilder::newState(State.getPosition());
 
-    TEST_ASSERT_EQ(State.getKingSquare<nshogi::core::Black>(),
-                    DummyState.getKingSquare<nshogi::core::Black>());
+    nshogi::core::internal::ImmutableStateAdapter Adapter(State);
+    nshogi::core::internal::ImmutableStateAdapter DummyAdapter(DummyState);
 
-    TEST_ASSERT_EQ(State.getKingSquare<nshogi::core::White>(),
-                    DummyState.getKingSquare<nshogi::core::White>());
+    TEST_ASSERT_EQ(Adapter->getKingSquare<nshogi::core::Black>(),
+                    DummyAdapter->getKingSquare<nshogi::core::Black>());
 
-    TEST_ASSERT_EQ(State.getDefendingOpponentSliderBB<nshogi::core::Black>(),
-                    DummyState.getDefendingOpponentSliderBB<nshogi::core::Black>());
+    TEST_ASSERT_EQ(Adapter->getKingSquare<nshogi::core::White>(),
+                    DummyAdapter->getKingSquare<nshogi::core::White>());
 
-    TEST_ASSERT_EQ(State.getDefendingOpponentSliderBB<nshogi::core::White>(),
-                    DummyState.getDefendingOpponentSliderBB<nshogi::core::White>());
+    TEST_ASSERT_EQ(Adapter->getDefendingOpponentSliderBB<nshogi::core::Black>(),
+                    DummyAdapter->getDefendingOpponentSliderBB<nshogi::core::Black>());
 
-    TEST_ASSERT_EQ(State.getCheckerBB(), DummyState.getCheckerBB());
+    TEST_ASSERT_EQ(Adapter->getDefendingOpponentSliderBB<nshogi::core::White>(),
+                    DummyAdapter->getDefendingOpponentSliderBB<nshogi::core::White>());
 
-    TEST_ASSERT_EQ(State.getBitboard<nshogi::core::Black>(),
-                    DummyState.getBitboard<nshogi::core::Black>());
+    TEST_ASSERT_EQ(Adapter->getCheckerBB(), DummyAdapter->getCheckerBB());
 
-    TEST_ASSERT_EQ(State.getBitboard<nshogi::core::White>(),
-                    DummyState.getBitboard<nshogi::core::White>());
+    TEST_ASSERT_EQ(Adapter->getBitboard<nshogi::core::Black>(),
+                    DummyAdapter->getBitboard<nshogi::core::Black>());
 
-    TEST_ASSERT_EQ(State.getBitboard<nshogi::core::PTK_Pawn>(),
-                    DummyState.getBitboard<nshogi::core::PTK_Pawn>());
+    TEST_ASSERT_EQ(Adapter->getBitboard<nshogi::core::White>(),
+                    DummyAdapter->getBitboard<nshogi::core::White>());
 
-    TEST_ASSERT_EQ(State.getBitboard<nshogi::core::PTK_Lance>(),
-                    DummyState.getBitboard<nshogi::core::PTK_Lance>());
+    TEST_ASSERT_EQ(Adapter->getBitboard<nshogi::core::PTK_Pawn>(),
+                    DummyAdapter->getBitboard<nshogi::core::PTK_Pawn>());
 
-    TEST_ASSERT_EQ(State.getBitboard<nshogi::core::PTK_Knight>(),
-                    DummyState.getBitboard<nshogi::core::PTK_Knight>());
+    TEST_ASSERT_EQ(Adapter->getBitboard<nshogi::core::PTK_Lance>(),
+                    DummyAdapter->getBitboard<nshogi::core::PTK_Lance>());
 
-    TEST_ASSERT_EQ(State.getBitboard<nshogi::core::PTK_Silver>(),
-                    DummyState.getBitboard<nshogi::core::PTK_Silver>());
+    TEST_ASSERT_EQ(Adapter->getBitboard<nshogi::core::PTK_Knight>(),
+                    DummyAdapter->getBitboard<nshogi::core::PTK_Knight>());
 
-    TEST_ASSERT_EQ(State.getBitboard<nshogi::core::PTK_Gold>(),
-                    DummyState.getBitboard<nshogi::core::PTK_Gold>());
+    TEST_ASSERT_EQ(Adapter->getBitboard<nshogi::core::PTK_Silver>(),
+                    DummyAdapter->getBitboard<nshogi::core::PTK_Silver>());
 
-    TEST_ASSERT_EQ(State.getBitboard<nshogi::core::PTK_King>(),
-                    DummyState.getBitboard<nshogi::core::PTK_King>());
+    TEST_ASSERT_EQ(Adapter->getBitboard<nshogi::core::PTK_Gold>(),
+                    DummyAdapter->getBitboard<nshogi::core::PTK_Gold>());
 
-    TEST_ASSERT_EQ(State.getBitboard<nshogi::core::PTK_Bishop>(),
-                    DummyState.getBitboard<nshogi::core::PTK_Bishop>());
+    TEST_ASSERT_EQ(Adapter->getBitboard<nshogi::core::PTK_King>(),
+                    DummyAdapter->getBitboard<nshogi::core::PTK_King>());
 
-    TEST_ASSERT_EQ(State.getBitboard<nshogi::core::PTK_Rook>(),
-                    DummyState.getBitboard<nshogi::core::PTK_Rook>());
+    TEST_ASSERT_EQ(Adapter->getBitboard<nshogi::core::PTK_Bishop>(),
+                    DummyAdapter->getBitboard<nshogi::core::PTK_Bishop>());
 
-    TEST_ASSERT_EQ(State.getBitboard<nshogi::core::PTK_ProPawn>(),
-                    DummyState.getBitboard<nshogi::core::PTK_ProPawn>());
+    TEST_ASSERT_EQ(Adapter->getBitboard<nshogi::core::PTK_Rook>(),
+                    DummyAdapter->getBitboard<nshogi::core::PTK_Rook>());
 
-    TEST_ASSERT_EQ(State.getBitboard<nshogi::core::PTK_ProLance>(),
-                    DummyState.getBitboard<nshogi::core::PTK_ProLance>());
+    TEST_ASSERT_EQ(Adapter->getBitboard<nshogi::core::PTK_ProPawn>(),
+                    DummyAdapter->getBitboard<nshogi::core::PTK_ProPawn>());
 
-    TEST_ASSERT_EQ(State.getBitboard<nshogi::core::PTK_ProKnight>(),
-                    DummyState.getBitboard<nshogi::core::PTK_ProKnight>());
+    TEST_ASSERT_EQ(Adapter->getBitboard<nshogi::core::PTK_ProLance>(),
+                    DummyAdapter->getBitboard<nshogi::core::PTK_ProLance>());
 
-    TEST_ASSERT_EQ(State.getBitboard<nshogi::core::PTK_ProSilver>(),
-                    DummyState.getBitboard<nshogi::core::PTK_ProSilver>());
+    TEST_ASSERT_EQ(Adapter->getBitboard<nshogi::core::PTK_ProKnight>(),
+                    DummyAdapter->getBitboard<nshogi::core::PTK_ProKnight>());
 
-    TEST_ASSERT_EQ(State.getBitboard<nshogi::core::PTK_ProBishop>(),
-                    DummyState.getBitboard<nshogi::core::PTK_ProBishop>());
+    TEST_ASSERT_EQ(Adapter->getBitboard<nshogi::core::PTK_ProSilver>(),
+                    DummyAdapter->getBitboard<nshogi::core::PTK_ProSilver>());
 
-    TEST_ASSERT_EQ(State.getBitboard<nshogi::core::PTK_ProRook>(),
-                    DummyState.getBitboard<nshogi::core::PTK_ProRook>());
+    TEST_ASSERT_EQ(Adapter->getBitboard<nshogi::core::PTK_ProBishop>(),
+                    DummyAdapter->getBitboard<nshogi::core::PTK_ProBishop>());
+
+    TEST_ASSERT_EQ(Adapter->getBitboard<nshogi::core::PTK_ProRook>(),
+                    DummyAdapter->getBitboard<nshogi::core::PTK_ProRook>());
 }
 
 void testDoMoveAndUndoMove(nshogi::core::State& State,
@@ -112,17 +115,20 @@ void testDoMoveAndUndoMove(nshogi::core::State& State,
 void testHashDoMoveAndUndoMove(nshogi::core::State& State,
                            nshogi::core::Move32 Move) {
 
-    uint64_t OriginalHashValue = State.getHash();
+    nshogi::core::internal::ImmutableStateAdapter Adapter(State);
+
+    uint64_t OriginalHashValue = Adapter->getHash();
 
     State.doMove(Move);
     State.undoMove();
 
-    TEST_ASSERT_EQ(OriginalHashValue, State.getHash());
+    TEST_ASSERT_EQ(OriginalHashValue, Adapter->getHash());
 }
 
 void testPieceScore(const nshogi::core::State& S, uint8_t BlackScore, uint8_t WhiteScore) {
-    const uint8_t BlackScoreComputed = S.computePieceScore<nshogi::core::Black, 5, 1, false>();
-    const uint8_t WhiteScoreComputed = S.computePieceScore<nshogi::core::White, 5, 1, false>();
+    nshogi::core::internal::ImmutableStateAdapter Adapter(S);
+    const uint8_t BlackScoreComputed = Adapter->computePieceScore<nshogi::core::Black>(5, 1, false);
+    const uint8_t WhiteScoreComputed = Adapter->computePieceScore<nshogi::core::White>(5, 1, false);
 
     if (BlackScoreComputed != BlackScore) {
         std::cout << (int)BlackScoreComputed << ", " << (int)BlackScore << std::endl;
@@ -136,8 +142,9 @@ void testPieceScore(const nshogi::core::State& S, uint8_t BlackScore, uint8_t Wh
 }
 
 void testEntryingScore(const nshogi::core::State& S, uint8_t BlackScore, uint8_t WhiteScore) {
-    TEST_ASSERT_EQ(S.computeDeclarationScore<nshogi::core::Black>(), BlackScore);
-    TEST_ASSERT_EQ(S.computeDeclarationScore<nshogi::core::White>(), WhiteScore);
+    nshogi::core::internal::ImmutableStateAdapter Adapter(S);
+    TEST_ASSERT_EQ(Adapter->computeDeclarationScore<nshogi::core::Black>(), BlackScore);
+    TEST_ASSERT_EQ(Adapter->computeDeclarationScore<nshogi::core::White>(), WhiteScore);
 }
 
 } // namespace
@@ -418,6 +425,8 @@ TEST(State, HashRecomputeRandom) {
         nshogi::core::State State =
             nshogi::core::StateBuilder::getInitialState();
 
+        nshogi::core::internal::ImmutableStateAdapter Adapter(State);
+
         for (uint16_t Ply = 0; Ply < 1024; ++Ply) {
             const auto Moves =
                 nshogi::core::MoveGenerator::generateLegalMoves(State);
@@ -431,8 +440,9 @@ TEST(State, HashRecomputeRandom) {
 
             const std::string CurrentSfen = nshogi::io::sfen::positionToSfen(State.getPosition());
             const auto DummyState = nshogi::io::sfen::StateBuilder::newState(CurrentSfen);
+            nshogi::core::internal::ImmutableStateAdapter DummyAdapter(DummyState);
 
-            TEST_ASSERT_EQ(State.getHash(), DummyState.getHash());
+            TEST_ASSERT_EQ(Adapter->getHash(), DummyAdapter->getHash());
         }
     }
 }
@@ -444,9 +454,11 @@ TEST(State, CloneRandom) {
     for (int I = 0; I < N; ++I) {
         nshogi::core::State State =
             nshogi::core::StateBuilder::getInitialState();
+        nshogi::core::internal::ImmutableStateAdapter Adapter(State);
 
         for (uint16_t Ply = 0; Ply < 256; ++Ply) {
             const auto StateCloned = State.clone();
+            nshogi::core::internal::ImmutableStateAdapter ClonedAdapter(StateCloned);
 
             const auto Moves =
                 nshogi::core::MoveGenerator::generateLegalMoves(State);
@@ -455,7 +467,7 @@ TEST(State, CloneRandom) {
                 nshogi::core::MoveGenerator::generateLegalMoves(StateCloned);
 
             TEST_ASSERT_EQ(Moves.size(), MovesByCloned.size());
-            TEST_ASSERT_EQ(State.getHash(), StateCloned.getHash());
+            TEST_ASSERT_EQ(Adapter->getHash(), ClonedAdapter->getHash());
 
             if (Moves.size() == 0) {
                 break;
@@ -480,12 +492,12 @@ TEST(State, RepetitionHandmade1) {
       "lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL b - 1 moves 2h3h 8b7b 3h2h 7b8b";
     nshogi::core::State State = nshogi::io::sfen::StateBuilder::newState(Sfen);
 
-    TEST_ASSERT_EQ(State.getRepetitionStatus(), nshogi::core::RepetitionStatus::Repetition);
+    TEST_ASSERT_EQ(State.getRepetitionStatus(false), nshogi::core::RepetitionStatus::Repetition);
 }
 
 TEST(State, RepetitionHandmade2) {
     nshogi::core::State State = nshogi::core::StateBuilder::getInitialState();
-    TEST_ASSERT_EQ(State.getRepetitionStatus(), nshogi::core::RepetitionStatus::NoRepetition);
+    TEST_ASSERT_EQ(State.getRepetitionStatus(false), nshogi::core::RepetitionStatus::NoRepetition);
 }
 
 TEST(State, RepetitionHandmade3) {
@@ -494,7 +506,7 @@ TEST(State, RepetitionHandmade3) {
       "5a6a 4a5a 6a5a";
     nshogi::core::State State = nshogi::io::sfen::StateBuilder::newState(Sfen);
 
-    TEST_ASSERT_EQ(State.getRepetitionStatus(), nshogi::core::RepetitionStatus::InferiorRepetition);
+    TEST_ASSERT_EQ(State.getRepetitionStatus(false), nshogi::core::RepetitionStatus::InferiorRepetition);
 }
 
 TEST(State, RepetitionHandmade4) {
@@ -503,7 +515,7 @@ TEST(State, RepetitionHandmade4) {
       "2g1h+ 1g1h S*2g";
     nshogi::core::State State = nshogi::io::sfen::StateBuilder::newState(Sfen);
 
-    TEST_ASSERT_EQ(State.getRepetitionStatus(), nshogi::core::RepetitionStatus::SuperiorRepetition);
+    TEST_ASSERT_EQ(State.getRepetitionStatus(false), nshogi::core::RepetitionStatus::SuperiorRepetition);
 }
 
 TEST(State, RepetitionHandmade5) {
@@ -518,21 +530,21 @@ TEST(State, RepetitionHandmade5) {
       "3f2g 2h2g S*3g R*9h 4i8i 9h5h 8i4i 5h7h 4i8i 7h5h 8i4i 5h7h 4i8i 7h5h";
     nshogi::core::State State = nshogi::io::sfen::StateBuilder::newState(Sfen);
 
-    TEST_ASSERT_EQ(State.getRepetitionStatus(), nshogi::core::RepetitionStatus::Repetition);
+    TEST_ASSERT_EQ(State.getRepetitionStatus(false), nshogi::core::RepetitionStatus::Repetition);
 }
 
 TEST(State, RepetitionHandmade6) {
     const std::string Sfen = "2k6/9/KR7/9/9/9/9/9/9 b - 1 moves 8c7c 7a8a 7c8c 8a7a 8c7c";
     nshogi::core::State State = nshogi::io::sfen::StateBuilder::newState(Sfen);
 
-    TEST_ASSERT_EQ(State.getRepetitionStatus(), nshogi::core::RepetitionStatus::WinRepetition);
+    TEST_ASSERT_EQ(State.getRepetitionStatus(false), nshogi::core::RepetitionStatus::WinRepetition);
 }
 
 TEST(State, RepetitionHandmade7) {
     const std::string Sfen = "2k6/9/KR7/9/9/9/9/9/9 b - 1 moves 8c7c 7a8a 7c8c 8a7a";
     nshogi::core::State State = nshogi::io::sfen::StateBuilder::newState(Sfen);
 
-    TEST_ASSERT_EQ(State.getRepetitionStatus(), nshogi::core::RepetitionStatus::LossRepetition);
+    TEST_ASSERT_EQ(State.getRepetitionStatus(false), nshogi::core::RepetitionStatus::LossRepetition);
 }
 
 TEST(State, RepetitionHandmade8) {
@@ -541,7 +553,7 @@ TEST(State, RepetitionHandmade8) {
     State.undoMove();
     State.undoMove();
 
-    TEST_ASSERT_EQ(State.getRepetitionStatus(), nshogi::core::RepetitionStatus::NoRepetition);
+    TEST_ASSERT_EQ(State.getRepetitionStatus(false), nshogi::core::RepetitionStatus::NoRepetition);
 }
 
 TEST(State, RepetitionHandmade9) {
@@ -551,28 +563,28 @@ TEST(State, RepetitionHandmade9) {
     State.undoMove();
     State.doMove(nshogi::io::sfen::sfenToMove32(State.getPosition(), "8c7c"));
 
-    TEST_ASSERT_EQ(State.getRepetitionStatus(), nshogi::core::RepetitionStatus::WinRepetition);
+    TEST_ASSERT_EQ(State.getRepetitionStatus(false), nshogi::core::RepetitionStatus::WinRepetition);
 }
 
 TEST(State, RepetitionHandmade10) {
     const std::string Sfen = "9/9/9/9/9/9/1rk6/9/K8 w - 1 moves 8g9g 9i8i 9g8g 8i9i";
     nshogi::core::State State = nshogi::io::sfen::StateBuilder::newState(Sfen);
 
-    TEST_ASSERT_EQ(State.getRepetitionStatus(), nshogi::core::RepetitionStatus::LossRepetition);
+    TEST_ASSERT_EQ(State.getRepetitionStatus(false), nshogi::core::RepetitionStatus::LossRepetition);
 }
 
 TEST(State, RepetitionHandmade11) {
     const std::string Sfen = "9/9/9/9/9/9/1rk6/9/K8 w - 1 moves 8g9g 9i8i 9g8g 8i9i 8g9g";
     nshogi::core::State State = nshogi::io::sfen::StateBuilder::newState(Sfen);
 
-    TEST_ASSERT_EQ(State.getRepetitionStatus(), nshogi::core::RepetitionStatus::WinRepetition);
+    TEST_ASSERT_EQ(State.getRepetitionStatus(false), nshogi::core::RepetitionStatus::WinRepetition);
 }
 
 TEST(State, RepetitionHandmade12) {
     const std::string Sfen = "9/9/9/9/9/9/1rk6/9/K8 w - 1 moves 8g9g 9i8i 9g8g 8i9i 8g8a";
     nshogi::core::State State = nshogi::io::sfen::StateBuilder::newState(Sfen);
 
-    TEST_ASSERT_EQ(State.getRepetitionStatus(), nshogi::core::RepetitionStatus::NoRepetition);
+    TEST_ASSERT_EQ(State.getRepetitionStatus(false), nshogi::core::RepetitionStatus::NoRepetition);
 }
 
 TEST(State, RepetitionHandmade13) {
@@ -588,7 +600,7 @@ TEST(State, RepetitionHandmade13) {
       "2f3e 3c4d 3e2d 4d3c 2d3e";
     nshogi::core::State State = nshogi::io::sfen::StateBuilder::newState(Sfen);
 
-    TEST_ASSERT_EQ(State.getRepetitionStatus(), nshogi::core::RepetitionStatus::LossRepetition);
+    TEST_ASSERT_EQ(State.getRepetitionStatus(false), nshogi::core::RepetitionStatus::LossRepetition);
 }
 
 TEST(State, RepetitionHandmade14) {
@@ -596,7 +608,7 @@ TEST(State, RepetitionHandmade14) {
       "lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL b - 1 moves 2g2f 3c3d 7g7f 8c8d 2f2e 8d8e 2e2d 2c2d 6i7h 2b8h+ 7i8h 8b2b B*7g B*3c 7g3c+ 2a3c B*8c 2d2e 8c5f+ 2b2d 3i3h 2e2f 5f4f 2d2a 4f3f 5a6b 8h7g 9c9d 5i6h 7a8b 3f2f 3a3b P*2b P*2g 2h2g 2a2b 2f5c 6b5c 2g2b+ P*5f 5g5f B*3e 6h5i 5c6b 2b1a 3c4e P*2c 3e4d 2c2b+ 4e5g+ L*6f B*3c 2b3b 3c1a 3b4a 6b7b R*3b 6a6b S*5a 8b7a G*6h 5g6h 7g6h 7c7d 5a6b+ 7a6b N*5d S*5c 5d6b+ 5c6b";
     nshogi::core::State State = nshogi::io::sfen::StateBuilder::newState(Sfen);
 
-    TEST_ASSERT_EQ(State.getRepetitionStatus(), nshogi::core::RepetitionStatus::NoRepetition);
+    TEST_ASSERT_EQ(State.getRepetitionStatus(false), nshogi::core::RepetitionStatus::NoRepetition);
 }
 
 TEST(State, RepetitionStrictHandmade1) {
@@ -604,7 +616,7 @@ TEST(State, RepetitionStrictHandmade1) {
       "lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL b - 1 moves 2h3h 8b7b 3h2h 7b8b";
     nshogi::core::State State = nshogi::io::sfen::StateBuilder::newState(Sfen);
 
-    TEST_ASSERT_EQ(State.getRepetitionStatus<true>(), nshogi::core::RepetitionStatus::NoRepetition);
+    TEST_ASSERT_EQ(State.getRepetitionStatus(true), nshogi::core::RepetitionStatus::NoRepetition);
 }
 
 TEST(State, RepetitionStrictHandmade2) {
@@ -612,7 +624,7 @@ TEST(State, RepetitionStrictHandmade2) {
       "lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL b - 1 moves 2h3h 8b7b 3h2h 7b8b 2h3h 8b7b 3h2h 7b8b";
     nshogi::core::State State = nshogi::io::sfen::StateBuilder::newState(Sfen);
 
-    TEST_ASSERT_EQ(State.getRepetitionStatus<true>(), nshogi::core::RepetitionStatus::NoRepetition);
+    TEST_ASSERT_EQ(State.getRepetitionStatus(true), nshogi::core::RepetitionStatus::NoRepetition);
 }
 
 TEST(State, RepetitionStrictHandmade3) {
@@ -620,7 +632,7 @@ TEST(State, RepetitionStrictHandmade3) {
       "lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL b - 1 moves 2h3h 8b7b 3h2h 7b8b 2h3h 8b7b 3h2h 7b8b 2h3h 8b7b 3h2h 7b8b";
     nshogi::core::State State = nshogi::io::sfen::StateBuilder::newState(Sfen);
 
-    TEST_ASSERT_EQ(State.getRepetitionStatus<true>(), nshogi::core::RepetitionStatus::Repetition);
+    TEST_ASSERT_EQ(State.getRepetitionStatus(true), nshogi::core::RepetitionStatus::Repetition);
 }
 
 TEST(State, RepetitionStrictHandmade4) {
@@ -628,7 +640,7 @@ TEST(State, RepetitionStrictHandmade4) {
         "2k6/9/KR7/9/9/9/9/9/9 b - 1 moves 8c7c 7a8a 7c8c 8a7a 8c7c";
     nshogi::core::State State = nshogi::io::sfen::StateBuilder::newState(Sfen);
 
-    TEST_ASSERT_EQ(State.getRepetitionStatus<true>(), nshogi::core::RepetitionStatus::NoRepetition);
+    TEST_ASSERT_EQ(State.getRepetitionStatus(true), nshogi::core::RepetitionStatus::NoRepetition);
 }
 
 TEST(State, RepetitionStrictHandmade5) {
@@ -636,7 +648,7 @@ TEST(State, RepetitionStrictHandmade5) {
         "2k6/9/KR7/9/9/9/9/9/9 b - 1 moves 8c7c 7a8a 7c8c 8a7a 8c7c 7a8a 7c8c 8a4a 8c7c";
     nshogi::core::State State = nshogi::io::sfen::StateBuilder::newState(Sfen);
 
-    TEST_ASSERT_EQ(State.getRepetitionStatus<true>(), nshogi::core::RepetitionStatus::NoRepetition);
+    TEST_ASSERT_EQ(State.getRepetitionStatus(true), nshogi::core::RepetitionStatus::NoRepetition);
 }
 
 TEST(State, RepetitionStrictHandmade6) {
@@ -644,7 +656,7 @@ TEST(State, RepetitionStrictHandmade6) {
         "2k6/9/KR7/9/9/9/9/9/9 b - 1 moves 8c7c 7a8a 7c8c 8a7a 8c7c 7a8a 7c8c 8a7a 8c7c 7a8a 7c8c 8a7a 8c7c";
     nshogi::core::State State = nshogi::io::sfen::StateBuilder::newState(Sfen);
 
-    TEST_ASSERT_EQ(State.getRepetitionStatus<true>(), nshogi::core::RepetitionStatus::WinRepetition);
+    TEST_ASSERT_EQ(State.getRepetitionStatus(true), nshogi::core::RepetitionStatus::WinRepetition);
 }
 
 TEST(State, RepetitionStrictHandmade7) {
@@ -652,7 +664,7 @@ TEST(State, RepetitionStrictHandmade7) {
         "2k6/9/KR7/9/9/9/9/9/9 b - 1 moves 8c7c 7a8a 7c8c 8a7a";
     nshogi::core::State State = nshogi::io::sfen::StateBuilder::newState(Sfen);
 
-    TEST_ASSERT_EQ(State.getRepetitionStatus<true>(), nshogi::core::RepetitionStatus::NoRepetition);
+    TEST_ASSERT_EQ(State.getRepetitionStatus(true), nshogi::core::RepetitionStatus::NoRepetition);
 }
 
 TEST(State, RepetitionStrictHandmade8) {
@@ -660,7 +672,7 @@ TEST(State, RepetitionStrictHandmade8) {
         "2k6/9/KR7/9/9/9/9/9/9 b - 1 moves 8c7c 7a8a 7c8c 8a7a 8c7c 7a8a 7c8c 8a7a";
     nshogi::core::State State = nshogi::io::sfen::StateBuilder::newState(Sfen);
 
-    TEST_ASSERT_EQ(State.getRepetitionStatus<true>(), nshogi::core::RepetitionStatus::NoRepetition);
+    TEST_ASSERT_EQ(State.getRepetitionStatus(true), nshogi::core::RepetitionStatus::NoRepetition);
 }
 
 TEST(State, RepetitionStrictHandmade9) {
@@ -668,7 +680,7 @@ TEST(State, RepetitionStrictHandmade9) {
         "2k6/9/KR7/9/9/9/9/9/9 b - 1 moves 8c7c 7a8a 7c8c 8a7a 8c7c 7a8a 7c8c 8a7a 8c7c 7a8a 7c8c 8a7a";
     nshogi::core::State State = nshogi::io::sfen::StateBuilder::newState(Sfen);
 
-    TEST_ASSERT_EQ(State.getRepetitionStatus<true>(), nshogi::core::RepetitionStatus::LossRepetition);
+    TEST_ASSERT_EQ(State.getRepetitionStatus(true), nshogi::core::RepetitionStatus::LossRepetition);
 }
 
 TEST(State, RepetitionStrictHandmade10) {
@@ -677,7 +689,7 @@ TEST(State, RepetitionStrictHandmade10) {
       "5a6a 4a5a 6a5a";
     nshogi::core::State State = nshogi::io::sfen::StateBuilder::newState(Sfen);
 
-    TEST_ASSERT_EQ(State.getRepetitionStatus<true>(), nshogi::core::RepetitionStatus::InferiorRepetition);
+    TEST_ASSERT_EQ(State.getRepetitionStatus(true), nshogi::core::RepetitionStatus::InferiorRepetition);
 }
 
 TEST(State, RepetitionStrictHandmade11) {
@@ -686,7 +698,7 @@ TEST(State, RepetitionStrictHandmade11) {
       "2g1h+ 1g1h S*2g";
     nshogi::core::State State = nshogi::io::sfen::StateBuilder::newState(Sfen);
 
-    TEST_ASSERT_EQ(State.getRepetitionStatus<true>(), nshogi::core::RepetitionStatus::SuperiorRepetition);
+    TEST_ASSERT_EQ(State.getRepetitionStatus(true), nshogi::core::RepetitionStatus::SuperiorRepetition);
 }
 
 TEST(State, PlyOffset1) {

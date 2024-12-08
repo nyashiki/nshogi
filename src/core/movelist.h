@@ -61,7 +61,7 @@ struct MoveList {
     Move32 Moves[MoveCountMax];
     Move32* Tail;
 
-    friend class MoveGenerator;
+    friend class MoveGeneratorInternal;
 };
 
 } // namespace core

@@ -6,9 +6,24 @@
 #include "../core/state.h"
 
 namespace nshogi {
+
+namespace core {
+namespace internal {
+
+class StateImpl;
+
+} // namespace internal
+} // namespace core
+
 namespace solver {
 namespace mate1ply {
 
+namespace internal {
+
+template <core::Color C>
+core::Move32 solve(const core::internal::StateImpl& S);
+
+} // namespace internal
 
 template <core::Color C>
 core::Move32 solve(const core::State& S);

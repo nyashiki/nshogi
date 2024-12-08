@@ -1,5 +1,5 @@
 #include "initializer.h"
-#include "bitboard.h"
+#include "internal/bitboard.h"
 
 namespace nshogi {
 namespace core {
@@ -14,7 +14,7 @@ void initializeAll() {
 
     IsCalled = true;
 
-    bitboard::initializeBitboards();
+    internal::bitboard::initializeBitboards();
 }
 
 } // namespace initializer

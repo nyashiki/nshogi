@@ -1,7 +1,7 @@
 #ifndef NSHOGI_ML_FEATUREBITBOARD_H
 #define NSHOGI_ML_FEATUREBITBOARD_H
 
-#include "../core/bitboard.h"
+#include "../core/internal/bitboard.h"
 #include "../core/squareiterator.h"
 
 #include <cstring>
@@ -23,13 +23,13 @@ struct FeatureBitboard {
         return *this;
     }
 
-    FeatureBitboard(const core::bitboard::Bitboard& BB, float Value, bool Rotation): Bitboard(BB) {
+    FeatureBitboard(const core::internal::bitboard::Bitboard& BB, float Value, bool Rotation): Bitboard(BB) {
         F[3] = Value;
         C[11] = Rotation;
     }
 
-    core::bitboard::Bitboard getBitboard() const {
-        return core::bitboard::Bitboard(Bitboard & core::bitboard::Bitboard::AllBB());
+    core::internal::bitboard::Bitboard getBitboard() const {
+        return core::internal::bitboard::Bitboard(Bitboard & core::internal::bitboard::Bitboard::AllBB());
     }
 
     float getValue() const {
@@ -68,7 +68,7 @@ struct FeatureBitboard {
 
  private:
     union {
-        core::bitboard::Bitboard Bitboard;
+        core::internal::bitboard::Bitboard Bitboard;
         float F[4];     // use F[3] for the value of a neural network channel.
         uint8_t C[16];  // use C[11] for the 180 degree rotation of the board.
     };

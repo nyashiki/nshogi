@@ -1,13 +1,14 @@
-#ifndef NSHOGI_CORE_HASH_H
-#define NSHOGI_CORE_HASH_H
+#ifndef NSHOGI_CORE_INTERNAL_HASH_H
+#define NSHOGI_CORE_INTERNAL_HASH_H
 
-#include "types.h"
-#include "position.h"
+#include "../types.h"
+#include "../position.h"
 #include <cinttypes>
 
 
 namespace nshogi {
 namespace core {
+namespace internal {
 
 template<typename HashValueType>
 struct Hash {
@@ -51,8 +52,9 @@ HashValueType Hash<HashValueType>::OnBoardHash[NumColors][NumPieceType][NumSquar
 template<typename HashValueType>
 HashValueType Hash<HashValueType>::ColorHash;
 
+} // namespace internal
 } // namespace core
 } // namespace nshogi
 
 
-#endif // #ifndef NSHOGI_CORE_HASH_H
+#endif // #ifndef NSHOGI_CORE_INTERNAL_HASH_H
