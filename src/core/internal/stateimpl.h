@@ -59,6 +59,11 @@ class StateImpl {
         return Helper.ColorBB[C] & Helper.TypeBB[Type];
     }
 
+    template <Color C>
+    inline bitboard::Bitboard getBitboard(PieceTypeKind Type) const {
+        return Helper.ColorBB[C] & Helper.TypeBB[Type];
+    }
+
     inline const bitboard::Bitboard getCheckerBB() const {
         return Helper.getCurrentStepHelper().CheckerBB;
     }
@@ -170,6 +175,11 @@ class StateImpl {
     template <Color C, PieceTypeKind Type>
     uint8_t getStandCount() const {
         return getPosition().getStandCount<C, Type>();
+    }
+
+    template <Color C>
+    uint8_t getStandCount(PieceTypeKind Type) const {
+        return getPosition().getStandCount<C>(Type);
     }
 
     uint8_t getStandCount(Color C, PieceTypeKind Type) const {

@@ -2,7 +2,6 @@
 
 #include "../core/positionbuilder.h"
 #include "../core/statebuilder.h"
-#include "../io/bitboard.h"
 #include "../io/sfen.h"
 #include "../solver/mate1ply.h"
 #include "../solver/dfs.h"

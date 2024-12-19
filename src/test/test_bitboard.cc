@@ -2,7 +2,7 @@
 #include "utils.h"
 #include "../core/internal/bitboard.h"
 #include "../core/types.h"
-#include "../io/bitboard.h"
+#include "../io/internal/bitboard.h"
 
 #include <unistd.h>
 
@@ -71,7 +71,7 @@ TEST(Bitboard, Print) {
             " 0  0  0  0  0  0  0  0  0 \n"
             " 0  0  0  0  0  0  0  0  0 \n"
             " 0  0  0  0  0  0  0  0  0 \n",
-            nshogi::io::bitboard::print, Bitboard::ZeroBB());
+            nshogi::io::internal::bitboard::print, Bitboard::ZeroBB());
 
     nshogi::test::testStdOut(
             " 1  1  1  1  1  1  1  1  1 \n"
@@ -83,7 +83,7 @@ TEST(Bitboard, Print) {
             " 1  1  1  1  1  1  1  1  1 \n"
             " 1  1  1  1  1  1  1  1  1 \n"
             " 1  1  1  1  1  1  1  1  1 \n",
-            nshogi::io::bitboard::print, Bitboard::AllBB());
+            nshogi::io::internal::bitboard::print, Bitboard::AllBB());
 
     nshogi::test::testStdOut(
             " 0  0  0  0  0  0  0  0  1 \n"
@@ -95,7 +95,7 @@ TEST(Bitboard, Print) {
             " 0  0  0  0  0  0  0  0  0 \n"
             " 0  0  0  0  0  0  0  0  0 \n"
             " 0  0  0  0  0  0  0  0  0 \n",
-            nshogi::io::bitboard::print, SquareBB[Sq1A]);
+            nshogi::io::internal::bitboard::print, SquareBB[Sq1A]);
 
     nshogi::test::testStdOut(
             " 0  0  0  0  0  0  0  0  0 \n"
@@ -107,7 +107,7 @@ TEST(Bitboard, Print) {
             " 0  0  0  0  0  0  0  0  0 \n"
             " 0  0  0  0  0  0  0  0  0 \n"
             " 0  0  0  0  0  0  0  0  1 \n",
-            nshogi::io::bitboard::print, SquareBB[Sq1I]);
+            nshogi::io::internal::bitboard::print, SquareBB[Sq1I]);
 
     nshogi::test::testStdOut(
             " 0  0  0  0  0  0  0  0  0 \n"
@@ -119,7 +119,7 @@ TEST(Bitboard, Print) {
             " 0  0  0  0  0  0  0  0  0 \n"
             " 0  0  0  0  0  0  0  0  0 \n"
             " 1  0  0  0  0  0  0  0  0 \n",
-            nshogi::io::bitboard::print, SquareBB[Sq9I]);
+            nshogi::io::internal::bitboard::print, SquareBB[Sq9I]);
 
     nshogi::test::testStdOut(
             " 1  0  0  0  0  0  0  0  0 \n"
@@ -131,7 +131,7 @@ TEST(Bitboard, Print) {
             " 0  0  0  0  0  0  0  0  0 \n"
             " 0  0  0  0  0  0  0  0  0 \n"
             " 0  0  0  0  0  0  0  0  0 \n",
-            nshogi::io::bitboard::print, SquareBB[Sq9A]);
+            nshogi::io::internal::bitboard::print, SquareBB[Sq9A]);
 
     nshogi::test::testStdOut(
             " 0  0  0  0  0  0  0  0  0 \n"
@@ -143,7 +143,7 @@ TEST(Bitboard, Print) {
             " 0  0  0  0  0  0  0  0  0 \n"
             " 0  0  0  0  0  0  0  0  0 \n"
             " 0  0  0  0  0  0  0  0  0 \n",
-            nshogi::io::bitboard::print, SquareBB[Sq5E]);
+            nshogi::io::internal::bitboard::print, SquareBB[Sq5E]);
 
     nshogi::test::testStdOut(
             " 0  0  0  0  0  0  0  0  0 \n"
@@ -155,7 +155,7 @@ TEST(Bitboard, Print) {
             " 0  0  0  0  0  0  0  0  0 \n"
             " 0  0  0  0  0  0  0  0  0 \n"
             " 0  0  0  0  0  0  0  0  0 \n",
-            nshogi::io::bitboard::print,
+            nshogi::io::internal::bitboard::print,
             SquareBB[Sq4D] | SquareBB[Sq4F] | SquareBB[Sq6D] | SquareBB[Sq6F]);
 
     // clang-format on

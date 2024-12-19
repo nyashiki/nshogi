@@ -1,5 +1,6 @@
 #include "huffman.h"
 #include <cstdio>
+#include <cstring>
 #include <cinttypes>
 
 namespace nshogi {

@@ -8,6 +8,12 @@
 namespace nshogi {
 namespace core {
 
+namespace internal {
+
+class MoveGeneratorInternal;
+
+} // namespace internal
+
 struct MoveList {
  public:
     MoveList(MoveList&&) noexcept = default;
@@ -61,7 +67,7 @@ struct MoveList {
     Move32 Moves[MoveCountMax];
     Move32* Tail;
 
-    friend class MoveGeneratorInternal;
+    friend class nshogi::core::internal::MoveGeneratorInternal;
 };
 
 } // namespace core

@@ -39,6 +39,7 @@ class State {
     uint16_t getPly(bool IncludeOffset = true) const;
     Move32 getHistoryMove(uint16_t Ply) const;
     Move32 getLastMove() const;
+    uint64_t getHash() const;
 
     void doMove(Move32 Move);
     Move32 undoMove();
@@ -49,7 +50,7 @@ class State {
     void refresh();
 
     // Helper functions.
-    RepetitionStatus getRepetitionStatus(bool Strict) const;
+    RepetitionStatus getRepetitionStatus(bool Strict = false) const;
     uint8_t getStandCount(Color C, PieceTypeKind Type) const;
     Square getKingSquare(Color C) const;
     Move32 getMove32FromMove16(Move16 M16) const;

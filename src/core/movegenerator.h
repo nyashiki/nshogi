@@ -7,29 +7,6 @@
 namespace nshogi {
 namespace core {
 
-namespace internal {
-
-class StateImpl;
-
-} // namespace internal
-
-class MoveGeneratorInternal {
- public:
-    MoveGeneratorInternal() = delete;
-
-    template <Color C, bool WilyPromote = true>
-    static MoveList generateLegalMoves(const internal::StateImpl& S);
-
-    template <Color C, bool WilyPromote = true>
-    static MoveList generateLegalCheckMoves(const internal::StateImpl& S);
-
-    template <bool WilyPromote = true>
-    static MoveList generateLegalMoves(const internal::StateImpl& S);
-
-    template <bool WilyPromote = true>
-    static MoveList generateLegalCheckMoves(const internal::StateImpl& S);
-};
-
 class MoveGenerator {
  public:
     MoveGenerator() = delete;

@@ -64,6 +64,10 @@ Move32 State::getLastMove() const {
     return Impl->getLastMove();
 }
 
+uint64_t State::getHash() const {
+    return Impl->getHash();
+}
+
 void State::doMove(Move32 Move) {
     Impl->doMove(Move);
 }

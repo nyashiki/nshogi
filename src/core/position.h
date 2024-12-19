@@ -29,7 +29,8 @@ struct Position {
         return OnBoard[Sq];
     }
 
-    template <Color C> constexpr Stands getStand() const {
+    template <Color C>
+    constexpr Stands getStand() const {
         return EachStands[C];
     }
 

@@ -34,36 +34,40 @@ else
 	CXX_FLAGS = -std=c++20 -Wall -Wextra -Wconversion -Wpedantic -Wshadow -fomit-frame-pointer -fno-stack-protector -fno-rtti -flto -DNDEBUG -pipe
 	# CXX_FLAGS = -std=c++20 -Wall -Wextra -Wconversion -Wpedantic -Wshadow -fno-omit-frame-pointer -flto -pipe
 	PYTHON_CXX_FLAGS = -std=c++20 -Wall -Wextra -Wconversion -Wpedantic -Wshadow -fomit-frame-pointer -fno-stack-protector -flto -DNDEBUG -pipe
-	OPTIM = -Ofast -g3
+	OPTIM = -Ofast
 endif
 
-SOURCES :=                          \
-	src/buildinfo/capability.cc \
-	src/book/book.cc            \
-	src/book/bookmove.cc        \
-	src/book/bookmovemeta.cc    \
-	src/book/entry.cc           \
-	src/core/initializer.cc     \
-	src/core/bitboard.cc        \
-	src/core/position.cc        \
-	src/core/positionbuilder.cc \
-	src/core/state.cc           \
-	src/core/statebuilder.cc    \
-	src/core/statehelper.cc     \
-	src/core/movegenerator.cc   \
-	src/core/hash.cc            \
-	src/core/huffman.cc         \
-	src/solver/mate1ply.cc      \
-	src/solver/dfs.cc           \
-	src/ml/azteacher.cc         \
-	src/ml/featurestack.cc      \
-	src/ml/simpleteacher.cc     \
-	src/ml/teacherloader.cc     \
-	src/ml/teacherwriter.cc     \
-	src/io/bitboard.cc          \
-	src/io/huffman.cc           \
-	src/io/sfen.cc              \
-	src/io/csa.cc               \
+SOURCES :=                                 \
+	src/buildinfo/capability.cc        \
+	src/book/book.cc                   \
+	src/book/bookmove.cc               \
+	src/book/bookmovemeta.cc           \
+	src/book/entry.cc                  \
+	src/core/initializer.cc            \
+	src/core/position.cc               \
+	src/core/positionbuilder.cc        \
+	src/core/state.cc                  \
+	src/core/statebuilder.cc           \
+	src/core/movegenerator.cc          \
+	src/core/huffman.cc                \
+	src/core/internal/bitboard.cc      \
+	src/core/internal/huffmanimpl.cc   \
+	src/core/internal/hash.cc          \
+	src/core/internal/movegenerator.cc \
+	src/core/internal/statehelper.cc   \
+	src/core/internal/stateimpl.cc     \
+	src/solver/mate1ply.cc             \
+	src/solver/internal/mate1ply.cc    \
+	src/solver/dfs.cc                  \
+	src/ml/azteacher.cc                \
+	src/ml/featurebitboard.cc          \
+	src/ml/featurestack.cc             \
+	src/ml/simpleteacher.cc            \
+	src/ml/teacherloader.cc            \
+	src/ml/teacherwriter.cc            \
+	src/io/huffman.cc                  \
+	src/io/sfen.cc                     \
+	src/io/csa.cc                      \
 	src/io/file.cc
 
 TEST_SOURCES :=                         \

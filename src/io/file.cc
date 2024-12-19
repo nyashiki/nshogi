@@ -1,5 +1,7 @@
 #include "file.h"
 
+#include <cstring>
+
 namespace nshogi {
 namespace io {
 namespace file {

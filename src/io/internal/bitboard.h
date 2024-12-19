@@ -1,10 +1,12 @@
-#include "bitboard.h"
-#include "../core/squareiterator.h"
+#ifndef NSHOGI_IO_INTERNAL_BITBOARD_H
+#define NSHOGI_IO_INTERNAL_BITBOARD_H
 
-#include <iostream>
+#include "../../core/squareiterator.h"
+#include "../../core/internal/bitboard.h"
 
 namespace nshogi {
 namespace io {
+namespace internal {
 namespace bitboard {
 
 void print(const core::internal::bitboard::Bitboard& BB) {
@@ -20,5 +22,8 @@ void print(const core::internal::bitboard::Bitboard& BB) {
 }
 
 } // namespace bitboard
+} // namespace internal
 } // namespace io
 } // namespace nshogi
+
+#endif // #ifndef NSHOGI_IO_INTERNAL_BITBOARD_H
