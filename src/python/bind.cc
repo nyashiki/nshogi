@@ -7,6 +7,8 @@
 #include "../core/state.h"
 #include "../core/movegenerator.h"
 #include "../core/stateconfig.h"
+#include "../core/internal/bitboard.h"
+#include "../core/internal/stateadapter.h"
 
 #include "../io/sfen.h"
 #include "../io/csa.h"
@@ -17,6 +19,7 @@
 #include "../ml/azteacher.h"
 #include "../ml/teacherloader.h"
 #include "../ml/teacherwriter.h"
+#include "../ml/internal/featurebitboardutil.h"
 
 #include "../book/book.h"
 
@@ -144,11 +147,7 @@ PYBIND11_MODULE(nshogi, Module) {
             return S.getPosition().pieceOn(nshogi::core::Square(Square));
         })
         .def("get_repetition", [](const nshogi::core::State& S, bool Strict) {
-            if (Strict) {
-                return S.getRepetitionStatus<true>();
-            } else {
-                return S.getRepetitionStatus<false>();
-            }
+            return S.getRepetitionStatus(Strict);
         })
         .def_property_readonly("legal_moves", [](const nshogi::core::State& S) {
             auto Moves = nshogi::core::MoveGenerator::generateLegalMoves(S);
@@ -156,9 +155,12 @@ PYBIND11_MODULE(nshogi, Module) {
             return std::vector<nshogi::core::Move32>(Moves.begin(), Moves.end());
         })
         .def_property_readonly("is_in_check", [](const nshogi::core::State& S) {
-            return !S.getCheckerBB().isZero();
+            nshogi::core::internal::ImmutableStateAdapter Adapter(S);
+            return !Adapter->getCheckerBB().isZero();
         })
-        .def_property_readonly("ply", &nshogi::core::State::getPly)
+        .def_property_readonly("ply", [](const nshogi::core::State& S) {
+            return S.getPly(true);
+        })
         .def_property_readonly("last_move", &nshogi::core::State::getLastMove)
         .def_property_readonly("hash", &nshogi::core::State::getHash)
         .def_property_readonly("side_to_move", &nshogi::core::State::getSideToMove)
@@ -387,22 +389,23 @@ PYBIND11_MODULE(nshogi, Module) {
             std::memset(reinterpret_cast<char*>(Data), 0, 2 * 81 * sizeof(float));
 
             const auto State = nshogi::io::sfen::StateBuilder::newState(std::string(T.Sfen));
+            nshogi::core::internal::ImmutableStateAdapter Adapter(State);
 
             if (State.getSideToMove() == nshogi::core::Black) {
-                const nshogi::core::bitboard::Bitboard MyAttackBB = State.getAttackBB<nshogi::core::Black>();
-                const nshogi::core::bitboard::Bitboard OpAttackBB = State.getAttackBB<nshogi::core::White>();
+                const nshogi::core::internal::bitboard::Bitboard MyAttackBB = Adapter->getAttackBB<nshogi::core::Black>();
+                const nshogi::core::internal::bitboard::Bitboard OpAttackBB = Adapter->getAttackBB<nshogi::core::White>();
 
-                const nshogi::ml::FeatureBitboard MyAttackFB(MyAttackBB, 1.0, false);
-                const nshogi::ml::FeatureBitboard OpAttackFB(OpAttackBB, 1.0, false);
+                const nshogi::ml::FeatureBitboard MyAttackFB = nshogi::ml::internal::FeatureBitboardUtil::makeFeatureBitboard(MyAttackBB, 1.0, false);
+                const nshogi::ml::FeatureBitboard OpAttackFB = nshogi::ml::internal::FeatureBitboardUtil::makeFeatureBitboard(OpAttackBB, 1.0, false);
 
                 MyAttackFB.extract<nshogi::core::IterateOrder::ESWN>(Data);
                 OpAttackFB.extract<nshogi::core::IterateOrder::ESWN>(Data + 81);
             } else {
-                const nshogi::core::bitboard::Bitboard MyAttackBB = State.getAttackBB<nshogi::core::White>();
-                const nshogi::core::bitboard::Bitboard OpAttackBB = State.getAttackBB<nshogi::core::Black>();
+                const nshogi::core::internal::bitboard::Bitboard MyAttackBB = Adapter->getAttackBB<nshogi::core::White>();
+                const nshogi::core::internal::bitboard::Bitboard OpAttackBB = Adapter->getAttackBB<nshogi::core::Black>();
 
-                const nshogi::ml::FeatureBitboard MyAttackFB(MyAttackBB, 1.0, true);
-                const nshogi::ml::FeatureBitboard OpAttackFB(OpAttackBB, 1.0, true);
+                const nshogi::ml::FeatureBitboard MyAttackFB = nshogi::ml::internal::FeatureBitboardUtil::makeFeatureBitboard(MyAttackBB, 1.0, true);
+                const nshogi::ml::FeatureBitboard OpAttackFB = nshogi::ml::internal::FeatureBitboardUtil::makeFeatureBitboard(OpAttackBB, 1.0, true);
 
                 MyAttackFB.extract<nshogi::core::IterateOrder::ESWN>(Data);
                 OpAttackFB.extract<nshogi::core::IterateOrder::ESWN>(Data + 81);
@@ -441,6 +444,11 @@ PYBIND11_MODULE(nshogi, Module) {
             Data[Index] = 1.0f;
             return NpArray;
         })
+        .def("policy_index", [](const nshogi::ml::SimpleTeacher& T) {
+            const std::size_t Index =
+                nshogi::ml::getMoveIndex(T.getState().getSideToMove(), T.getNextMove());
+            return Index;
+        })
         .def("legal_moves", [](const nshogi::ml::SimpleTeacher& T) {
             auto NpArray = pybind11::array_t<float>((pybind11::ssize_t)nshogi::ml::MoveIndexMax);
             auto Data = reinterpret_cast<float*>(NpArray.request().ptr);
@@ -461,19 +469,20 @@ PYBIND11_MODULE(nshogi, Module) {
             std::memset(reinterpret_cast<char*>(Data), 0, 2 * 81 * sizeof(float));
 
             const auto State = T.getState();
+            nshogi::core::internal::ImmutableStateAdapter Adapter(State);
 
             if (State.getSideToMove() == nshogi::core::Black) {
-                const nshogi::core::bitboard::Bitboard MyAttackBB = State.getAttackBB<nshogi::core::Black>();
-                const nshogi::core::bitboard::Bitboard OpAttackBB = State.getAttackBB<nshogi::core::White>();
-                const nshogi::ml::FeatureBitboard MyAttackFB(MyAttackBB, 1.0f, false);
-                const nshogi::ml::FeatureBitboard OpAttackFB(OpAttackBB, 1.0f, false);
+                const nshogi::core::internal::bitboard::Bitboard MyAttackBB = Adapter->getAttackBB<nshogi::core::Black>();
+                const nshogi::core::internal::bitboard::Bitboard OpAttackBB = Adapter->getAttackBB<nshogi::core::White>();
+                const nshogi::ml::FeatureBitboard MyAttackFB = nshogi::ml::internal::FeatureBitboardUtil::makeFeatureBitboard(MyAttackBB, 1.0f, false);
+                const nshogi::ml::FeatureBitboard OpAttackFB = nshogi::ml::internal::FeatureBitboardUtil::makeFeatureBitboard(OpAttackBB, 1.0f, false);
                 MyAttackFB.extract<nshogi::core::IterateOrder::ESWN>(Data);
                 OpAttackFB.extract<nshogi::core::IterateOrder::ESWN>(Data + 81);
             } else {
-                const nshogi::core::bitboard::Bitboard MyAttackBB = State.getAttackBB<nshogi::core::White>();
-                const nshogi::core::bitboard::Bitboard OpAttackBB = State.getAttackBB<nshogi::core::Black>();
-                const nshogi::ml::FeatureBitboard MyAttackFB(MyAttackBB, 1.0f, true);
-                const nshogi::ml::FeatureBitboard OpAttackFB(OpAttackBB, 1.0f, true);
+                const nshogi::core::internal::bitboard::Bitboard MyAttackBB = Adapter->getAttackBB<nshogi::core::White>();
+                const nshogi::core::internal::bitboard::Bitboard OpAttackBB = Adapter->getAttackBB<nshogi::core::Black>();
+                const nshogi::ml::FeatureBitboard MyAttackFB = nshogi::ml::internal::FeatureBitboardUtil::makeFeatureBitboard(MyAttackBB, 1.0f, true);
+                const nshogi::ml::FeatureBitboard OpAttackFB = nshogi::ml::internal::FeatureBitboardUtil::makeFeatureBitboard(OpAttackBB, 1.0f, true);
                 MyAttackFB.extract<nshogi::core::IterateOrder::ESWN>(Data);
                 OpAttackFB.extract<nshogi::core::IterateOrder::ESWN>(Data + 81);
             }
