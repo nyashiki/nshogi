@@ -19,6 +19,12 @@ jobs:
     - name: Set environment variable
       if: ${{ matrix.os == 'ubuntu-22.04' }}
       run: echo 'SIMD=AVX2' >> $GITHUB_ENV
+    - name: install pybind11
+      if: runner.os == 'Linux'
+      run: pip3 install pybind11
+    - name: install pybind11
+      if: runner.os == 'macOS'
+      run: brew install pybind11
     - name: make library
       working-directory: ${{ env.working-directory }}
       run: make $SIMD=1 libnshogi
