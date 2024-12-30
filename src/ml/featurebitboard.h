@@ -1,7 +1,6 @@
 #ifndef NSHOGI_ML_FEATUREBITBOARD_H
 #define NSHOGI_ML_FEATUREBITBOARD_H
 
-#include "../core/bitboard.h"
 #include "../core/squareiterator.h"
 
 #include <cstring>
@@ -9,9 +8,15 @@
 namespace nshogi {
 namespace ml {
 
+namespace internal {
+
+class FeatureBitboardUtil;
+
+} // namespace internal
+
 struct FeatureBitboard {
  public:
-    constexpr FeatureBitboard(): Bitboard(0, 0) {
+    FeatureBitboard() {
     }
 
     FeatureBitboard(const FeatureBitboard& FB) {
@@ -23,15 +28,6 @@ struct FeatureBitboard {
         return *this;
     }
 
-    FeatureBitboard(const core::bitboard::Bitboard& BB, float Value, bool Rotation): Bitboard(BB) {
-        F[3] = Value;
-        C[11] = Rotation;
-    }
-
-    core::bitboard::Bitboard getBitboard() const {
-        return core::bitboard::Bitboard(Bitboard & core::bitboard::Bitboard::AllBB());
-    }
-
     float getValue() const {
         return F[3];
     }
@@ -40,38 +36,20 @@ struct FeatureBitboard {
         return C[11];
     }
 
-    const uint64_t* data() const {
-        return reinterpret_cast<const uint64_t*>(&Bitboard);
+    const char* data() const {
+        return reinterpret_cast<const char*>(C);
     }
 
     template<core::IterateOrder Order>
-    [[maybe_unused]]
-    void extract(float* Dest) const {
-        if (C[11] == 0) {  // no rotation.
-            core::SquareIterator<Order> SquareIt;
-
-            int Counter = 0;
-            for (auto It = SquareIt.begin(); It != SquareIt.end(); ++It) {
-                Dest[Counter] = (Bitboard.isSet(*It))? F[3] : 0;
-                ++Counter;
-            }
-        } else {
-            core::SquareIterator<core::reverseOrder<Order>()> SquareIt;
-
-            int Counter = 0;
-            for (auto It = SquareIt.begin(); It != SquareIt.end(); ++It) {
-                Dest[Counter] = (Bitboard.isSet(*It))? F[3] : 0;
-                ++Counter;
-            }
-        }
-    }
+    void extract(float* Dest) const;
 
  private:
     union {
-        core::bitboard::Bitboard Bitboard;
         float F[4];     // use F[3] for the value of a neural network channel.
         uint8_t C[16];  // use C[11] for the 180 degree rotation of the board.
     };
+
+    friend class nshogi::ml::internal::FeatureBitboardUtil;
 };
 
 
@@ -79,5 +57,4 @@ struct FeatureBitboard {
 } // namespace nshogi
 
 
-#endif // #ifndef NSHOGI
-       // _ML_FEATUREBITBOARD_H
+#endif // #ifndef NSHOGI_ML_FEATUREBITBOARD_H

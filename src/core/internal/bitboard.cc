@@ -1,5 +1,4 @@
 #include "bitboard.h"
-#include "types.h"
 #include <cstring>
 #include <iostream>
 #include <random>
@@ -7,6 +6,7 @@
 
 namespace nshogi {
 namespace core {
+namespace internal {
 namespace bitboard {
 
 using BB = Bitboard;
@@ -1278,5 +1278,6 @@ void initializeBitboards() {
 }
 
 } // namespace bitboard
+} // namespace internal
 } // namespace core
 } // namespace nshogi

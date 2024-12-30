@@ -11,6 +11,7 @@
 #include <random>
 
 #include "../core/movegenerator.h"
+#include "../core/internal/bitboard.h"
 #include "../io/sfen.h"
 
 namespace {
@@ -134,8 +135,8 @@ TEST(MoveGeneration, CheckPositions) {
             // No-promote pawn moves.
             if (!Move.drop() && Move.pieceType() == nshogi::core::PTK_Pawn && !Move.promote()) {
                 auto PromotableBB = (State.getPosition().sideToMove() == nshogi::core::Black)
-                                        ? nshogi::core::bitboard::PromotableBB[nshogi::core::Black]
-                                        : nshogi::core::bitboard::PromotableBB[nshogi::core::White];
+                                        ? nshogi::core::internal::bitboard::PromotableBB[nshogi::core::Black]
+                                        : nshogi::core::internal::bitboard::PromotableBB[nshogi::core::White];
 
                 if (PromotableBB.isSet(Move.to())) {
                     continue;
@@ -145,8 +146,8 @@ TEST(MoveGeneration, CheckPositions) {
             // No-promote lance moves.
             if (!Move.drop() && Move.pieceType() == nshogi::core::PTK_Lance && !Move.promote()) {
                 auto FirstAndSecondFurthestBB = (State.getPosition().sideToMove() == nshogi::core::Black)
-                                        ? nshogi::core::bitboard::FirstAndSecondFurthestBB[nshogi::core::Black]
-                                        : nshogi::core::bitboard::FirstAndSecondFurthestBB[nshogi::core::White];
+                                        ? nshogi::core::internal::bitboard::FirstAndSecondFurthestBB[nshogi::core::Black]
+                                        : nshogi::core::internal::bitboard::FirstAndSecondFurthestBB[nshogi::core::White];
 
                 if (FirstAndSecondFurthestBB.isSet(Move.to())) {
                     continue;

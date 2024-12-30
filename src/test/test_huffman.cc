@@ -5,6 +5,7 @@
 #include "../core/movegenerator.h"
 
 #include <random>
+#include <cstring>
 
 namespace {
 

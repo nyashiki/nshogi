@@ -5,6 +5,7 @@
 
 namespace nshogi {
 namespace core {
+namespace internal {
 
 template<>
 Hash<uint64_t>::Hash() {
@@ -61,6 +62,6 @@ void Hash<uint64_t>::refresh(const Position& Pos) {
 
 template struct Hash<uint64_t>;
 
-
+} // namespace internal
 } // namespace core
 } // namespace nshogi

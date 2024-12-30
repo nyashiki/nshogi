@@ -5,13 +5,13 @@
 #include "../core/stateconfig.h"
 #include "../core/statebuilder.h"
 #include "../core/movegenerator.h"
-#include "../io/sfen.h"
-#include "../io/bitboard.h"
-#include "../io/huffman.h"
+#include "../core/internal/stateadapter.h"
 #include "../io/file.h"
+#include "../io/sfen.h"
 #include "../ml/featurestack.h"
 #include "../ml/azteacher.h"
 #include "../ml/simpleteacher.h"
+#include "../ml/internal/featurebitboardutil.h"
 
 #include <fstream>
 #include <iostream>
@@ -19,6 +19,8 @@
 #include <filesystem>
 
 namespace {
+
+using FeatureBitboardUtil = nshogi::ml::internal::FeatureBitboardUtil;
 
 void checkFeatureTypeColor(const nshogi::core::State& State, const nshogi::core::StateConfig& Config) {
     const nshogi::ml::FeatureStackComptime<
@@ -28,14 +30,14 @@ void checkFeatureTypeColor(const nshogi::core::State& State, const nshogi::core:
 
     if (State.getPosition().sideToMove() == nshogi::core::Black) {
         TEST_ASSERT_EQ(Features.get(0).getValue(), 1.0f);
-        TEST_ASSERT_EQ(Features.get(0).getBitboard(), nshogi::core::bitboard::Bitboard::AllBB());
+        TEST_ASSERT_EQ(FeatureBitboardUtil::getBitboard(Features.get(0)), nshogi::core::internal::bitboard::Bitboard::AllBB());
         TEST_ASSERT_EQ(Features.get(1).getValue(), 0.0f);
-        TEST_ASSERT_EQ(Features.get(1).getBitboard(), nshogi::core::bitboard::Bitboard::ZeroBB());
+        TEST_ASSERT_EQ(FeatureBitboardUtil::getBitboard(Features.get(1)), nshogi::core::internal::bitboard::Bitboard::ZeroBB());
     } else {
         TEST_ASSERT_EQ(Features.get(0).getValue(), 0.0f);
-        TEST_ASSERT_EQ(Features.get(0).getBitboard(), nshogi::core::bitboard::Bitboard::ZeroBB());
+        TEST_ASSERT_EQ(FeatureBitboardUtil::getBitboard(Features.get(0)), nshogi::core::internal::bitboard::Bitboard::ZeroBB());
         TEST_ASSERT_EQ(Features.get(1).getValue(), 1.0f);
-        TEST_ASSERT_EQ(Features.get(1).getBitboard(), nshogi::core::bitboard::Bitboard::AllBB());
+        TEST_ASSERT_EQ(FeatureBitboardUtil::getBitboard(Features.get(1)), nshogi::core::internal::bitboard::Bitboard::AllBB());
     }
 }
 
@@ -47,14 +49,14 @@ void checkFeatureTypeColorRuntime(const nshogi::core::State& State, const nshogi
 
     if (State.getPosition().sideToMove() == nshogi::core::Black) {
         TEST_ASSERT_EQ(Features.get(0).getValue(), 1.0f);
-        TEST_ASSERT_EQ(Features.get(0).getBitboard(), nshogi::core::bitboard::Bitboard::AllBB());
+        TEST_ASSERT_EQ(FeatureBitboardUtil::getBitboard(Features.get(0)), nshogi::core::internal::bitboard::Bitboard::AllBB());
         TEST_ASSERT_EQ(Features.get(1).getValue(), 0.0f);
-        TEST_ASSERT_EQ(Features.get(1).getBitboard(), nshogi::core::bitboard::Bitboard::ZeroBB());
+        TEST_ASSERT_EQ(FeatureBitboardUtil::getBitboard(Features.get(1)), nshogi::core::internal::bitboard::Bitboard::ZeroBB());
     } else {
         TEST_ASSERT_EQ(Features.get(0).getValue(), 0.0f);
-        TEST_ASSERT_EQ(Features.get(0).getBitboard(), nshogi::core::bitboard::Bitboard::ZeroBB());
+        TEST_ASSERT_EQ(FeatureBitboardUtil::getBitboard(Features.get(0)), nshogi::core::internal::bitboard::Bitboard::ZeroBB());
         TEST_ASSERT_EQ(Features.get(1).getValue(), 1.0f);
-        TEST_ASSERT_EQ(Features.get(1).getBitboard(), nshogi::core::bitboard::Bitboard::AllBB());
+        TEST_ASSERT_EQ(FeatureBitboardUtil::getBitboard(Features.get(1)), nshogi::core::internal::bitboard::Bitboard::AllBB());
     }
 }
 
@@ -90,11 +92,13 @@ void checkFeatureTypeOnBoard(const nshogi::core::State& State, const nshogi::cor
         nshogi::ml::FeatureType::FT_OpProRook
     > Features(State, Config);
 
+    nshogi::core::internal::ImmutableStateAdapter Adapter(State);
+
     std::size_t I = 0;
     for (nshogi::core::Color C : { State.getPosition().sideToMove(), ~State.getPosition().sideToMove() }) {
         for (nshogi::core::PieceTypeKind Type : nshogi::core::PieceTypes) {
             TEST_ASSERT_EQ(Features.get(I).getValue(), 1.0f);
-            TEST_ASSERT_EQ(Features.get(I).getBitboard(), State.getBitboard(C, Type));
+            TEST_ASSERT_EQ(FeatureBitboardUtil::getBitboard(Features.get(I)), Adapter->getBitboard(C, Type));
 
             if (State.getPosition().sideToMove() == nshogi::core::Black) {
                 TEST_ASSERT_FALSE(Features.get(I).isRotated());
@@ -139,11 +143,13 @@ void checkFeatureTypeOnBoardRuntime(const nshogi::core::State& State, const nsho
         nshogi::ml::FeatureType::FT_OpProRook
     }, State, Config);
 
+    nshogi::core::internal::ImmutableStateAdapter Adapter(State);
+
     std::size_t I = 0;
     for (nshogi::core::Color C : { State.getPosition().sideToMove(), ~State.getPosition().sideToMove() }) {
         for (nshogi::core::PieceTypeKind Type : nshogi::core::PieceTypes) {
             TEST_ASSERT_EQ(Features.get(I).getValue(), 1.0f);
-            TEST_ASSERT_EQ(Features.get(I).getBitboard(), State.getBitboard(C, Type));
+            TEST_ASSERT_EQ(FeatureBitboardUtil::getBitboard(Features.get(I)), Adapter->getBitboard(C, Type));
 
             if (State.getPosition().sideToMove() == nshogi::core::Black) {
                 TEST_ASSERT_FALSE(Features.get(I).isRotated());
@@ -206,10 +212,10 @@ void checkFeatureTypeSmallStand(const nshogi::core::State& State, const nshogi::
             for (uint8_t Count = 1; Count <= 4; ++Count) {
                 if (State.getPosition().getStandCount(C, Type) >= Count) {
                     TEST_ASSERT_EQ(Features.get(I).getValue(), 1.0f);
-                    TEST_ASSERT_EQ(Features.get(I).getBitboard(), nshogi::core::bitboard::Bitboard::AllBB());
+                    TEST_ASSERT_EQ(FeatureBitboardUtil::getBitboard(Features.get(I)), nshogi::core::internal::bitboard::Bitboard::AllBB());
                 } else {
                     TEST_ASSERT_EQ(Features.get(I).getValue(), 0.0f);
-                    TEST_ASSERT_EQ(Features.get(I).getBitboard(), nshogi::core::bitboard::Bitboard::AllBB());
+                    TEST_ASSERT_EQ(FeatureBitboardUtil::getBitboard(Features.get(I)), nshogi::core::internal::bitboard::Bitboard::AllBB());
                 }
 
                 ++I;
@@ -268,10 +274,10 @@ void checkFeatureTypeSmallStandRuntime(const nshogi::core::State& State, const n
             for (uint8_t Count = 1; Count <= 4; ++Count) {
                 if (State.getPosition().getStandCount(C, Type) >= Count) {
                     TEST_ASSERT_EQ(Features.get(I).getValue(), 1.0f);
-                    TEST_ASSERT_EQ(Features.get(I).getBitboard(), nshogi::core::bitboard::Bitboard::AllBB());
+                    TEST_ASSERT_EQ(FeatureBitboardUtil::getBitboard(Features.get(I)), nshogi::core::internal::bitboard::Bitboard::AllBB());
                 } else {
                     TEST_ASSERT_EQ(Features.get(I).getValue(), 0.0f);
-                    TEST_ASSERT_EQ(Features.get(I).getBitboard(), nshogi::core::bitboard::Bitboard::AllBB());
+                    TEST_ASSERT_EQ(FeatureBitboardUtil::getBitboard(Features.get(I)), nshogi::core::internal::bitboard::Bitboard::AllBB());
                 }
 
                 ++I;
@@ -298,10 +304,10 @@ void checkFeatureTypeLargeStand(const nshogi::core::State& State, const nshogi::
             for (uint8_t Count = 1; Count <= 2; ++Count) {
                 if (State.getPosition().getStandCount(C, Type) >= Count) {
                     TEST_ASSERT_EQ(Features.get(I).getValue(), 1.0f);
-                    TEST_ASSERT_EQ(Features.get(I).getBitboard(), nshogi::core::bitboard::Bitboard::AllBB());
+                    TEST_ASSERT_EQ(FeatureBitboardUtil::getBitboard(Features.get(I)), nshogi::core::internal::bitboard::Bitboard::AllBB());
                 } else {
                     TEST_ASSERT_EQ(Features.get(I).getValue(), 0.0f);
-                    TEST_ASSERT_EQ(Features.get(I).getBitboard(), nshogi::core::bitboard::Bitboard::AllBB());
+                    TEST_ASSERT_EQ(FeatureBitboardUtil::getBitboard(Features.get(I)), nshogi::core::internal::bitboard::Bitboard::AllBB());
                 }
 
                 ++I;
@@ -328,10 +334,10 @@ void checkFeatureTypeLargeStandRuntime(const nshogi::core::State& State, const n
             for (uint8_t Count = 1; Count <= 2; ++Count) {
                 if (State.getPosition().getStandCount(C, Type) >= Count) {
                     TEST_ASSERT_EQ(Features.get(I).getValue(), 1.0f);
-                    TEST_ASSERT_EQ(Features.get(I).getBitboard(), nshogi::core::bitboard::Bitboard::AllBB());
+                    TEST_ASSERT_EQ(FeatureBitboardUtil::getBitboard(Features.get(I)), nshogi::core::internal::bitboard::Bitboard::AllBB());
                 } else {
                     TEST_ASSERT_EQ(Features.get(I).getValue(), 0.0f);
-                    TEST_ASSERT_EQ(Features.get(I).getBitboard(), nshogi::core::bitboard::Bitboard::AllBB());
+                    TEST_ASSERT_EQ(FeatureBitboardUtil::getBitboard(Features.get(I)), nshogi::core::internal::bitboard::Bitboard::AllBB());
                 }
 
                 ++I;
@@ -345,12 +351,14 @@ void checkFeatureTypeCheck(const nshogi::core::State& State, const nshogi::core:
         nshogi::ml::FeatureType::FT_Check
     > Features(State, Config);
 
-    if (State.getCheckerBB().isZero()) {
+    nshogi::core::internal::ImmutableStateAdapter Adapter(State);
+
+    if (Adapter->getCheckerBB().isZero()) {
         TEST_ASSERT_EQ(Features.get(0).getValue(), 0.0f);
-        TEST_ASSERT_EQ(Features.get(0).getBitboard(), nshogi::core::bitboard::Bitboard::ZeroBB());
+        TEST_ASSERT_EQ(FeatureBitboardUtil::getBitboard(Features.get(0)), nshogi::core::internal::bitboard::Bitboard::ZeroBB());
     } else {
         TEST_ASSERT_EQ(Features.get(0).getValue(), 1.0f);
-        TEST_ASSERT_EQ(Features.get(0).getBitboard(), nshogi::core::bitboard::Bitboard::AllBB());
+        TEST_ASSERT_EQ(FeatureBitboardUtil::getBitboard(Features.get(0)), nshogi::core::internal::bitboard::Bitboard::AllBB());
     }
 }
 
@@ -359,12 +367,14 @@ void checkFeatureTypeCheckRuntime(const nshogi::core::State& State, const nshogi
         nshogi::ml::FeatureType::FT_Check
     }, State, Config);
 
-    if (State.getCheckerBB().isZero()) {
+    nshogi::core::internal::ImmutableStateAdapter Adapter(State);
+
+    if (Adapter->getCheckerBB().isZero()) {
         TEST_ASSERT_EQ(Features.get(0).getValue(), 0.0f);
-        TEST_ASSERT_EQ(Features.get(0).getBitboard(), nshogi::core::bitboard::Bitboard::ZeroBB());
+        TEST_ASSERT_EQ(FeatureBitboardUtil::getBitboard(Features.get(0)), nshogi::core::internal::bitboard::Bitboard::ZeroBB());
     } else {
         TEST_ASSERT_EQ(Features.get(0).getValue(), 1.0f);
-        TEST_ASSERT_EQ(Features.get(0).getBitboard(), nshogi::core::bitboard::Bitboard::AllBB());
+        TEST_ASSERT_EQ(FeatureBitboardUtil::getBitboard(Features.get(0)), nshogi::core::internal::bitboard::Bitboard::AllBB());
     }
 }
 
@@ -374,26 +384,22 @@ void checkFeatureTypeNoPawnFile(const nshogi::core::State& State, const nshogi::
         nshogi::ml::FeatureType::FT_NoOpPawnFile
     > Features(State, Config);
 
+    nshogi::core::internal::ImmutableStateAdapter Adapter(State);
+
     std::size_t I = 0;
     for (nshogi::core::Color C : {State.getPosition().sideToMove(), ~State.getPosition().sideToMove()}) {
-        nshogi::core::bitboard::Bitboard PawnFileBB = nshogi::core::bitboard::Bitboard::ZeroBB();
+        nshogi::core::internal::bitboard::Bitboard PawnFileBB = nshogi::core::internal::bitboard::Bitboard::ZeroBB();
 
-        const auto PawnBB = State.getBitboard(C, nshogi::core::PTK_Pawn);
+        const auto PawnBB = Adapter->getBitboard(C, nshogi::core::PTK_Pawn);
 
         for (nshogi::core::File F : nshogi::core::Files) {
-            if (!(PawnBB & nshogi::core::bitboard::FileBB[F]).isZero()) {
-                PawnFileBB |= nshogi::core::bitboard::FileBB[F];
+            if (!(PawnBB & nshogi::core::internal::bitboard::FileBB[F]).isZero()) {
+                PawnFileBB |= nshogi::core::internal::bitboard::FileBB[F];
             }
         }
 
         TEST_ASSERT_EQ(Features.get(I).getValue(), 1.0f);
-        TEST_ASSERT_EQ(Features.get(I).getBitboard(), ~PawnFileBB);
-
-        if (Features.get(I).getBitboard() != ~PawnFileBB) {
-            nshogi::core::bitboard::Bitboard BB = Features.get(I).getBitboard();
-            nshogi::io::bitboard::print(BB);
-            nshogi::io::bitboard::print(~PawnFileBB);
-        }
+        TEST_ASSERT_EQ(FeatureBitboardUtil::getBitboard(Features.get(I)), ~PawnFileBB);
 
         if (State.getPosition().sideToMove() == nshogi::core::Black) {
             TEST_ASSERT_FALSE(Features.get(I).isRotated());
@@ -411,20 +417,22 @@ void checkFeatureTypeNoPawnFileRuntime(const nshogi::core::State& State, const n
         nshogi::ml::FeatureType::FT_NoOpPawnFile
     }, State, Config);
 
+    nshogi::core::internal::ImmutableStateAdapter Adapter(State);
+
     std::size_t I = 0;
     for (nshogi::core::Color C : {State.getPosition().sideToMove(), ~State.getPosition().sideToMove()}) {
-        nshogi::core::bitboard::Bitboard PawnFileBB = nshogi::core::bitboard::Bitboard::ZeroBB();
+        nshogi::core::internal::bitboard::Bitboard PawnFileBB = nshogi::core::internal::bitboard::Bitboard::ZeroBB();
 
-        const auto PawnBB = State.getBitboard(C, nshogi::core::PTK_Pawn);
+        const auto PawnBB = Adapter->getBitboard(C, nshogi::core::PTK_Pawn);
 
         for (nshogi::core::File F :  nshogi::core::Files) {
-            if (!(PawnBB & nshogi::core::bitboard::FileBB[F]).isZero()) {
-                PawnFileBB |= nshogi::core::bitboard::FileBB[F];
+            if (!(PawnBB & nshogi::core::internal::bitboard::FileBB[F]).isZero()) {
+                PawnFileBB |= nshogi::core::internal::bitboard::FileBB[F];
             }
         }
 
         TEST_ASSERT_EQ(Features.get(I).getValue(), 1.0f);
-        TEST_ASSERT_EQ(Features.get(I).getBitboard(), ~PawnFileBB);
+        TEST_ASSERT_EQ(FeatureBitboardUtil::getBitboard(Features.get(I)), ~PawnFileBB);
 
         if (State.getPosition().sideToMove() == nshogi::core::Black) {
             TEST_ASSERT_FALSE(Features.get(I).isRotated());
@@ -443,7 +451,7 @@ void checkFeatureTypeProgress(const nshogi::core::State& State, const nshogi::co
 
     TEST_ASSERT_FLOAT_EQ(Features.get(0).getValue(),
             (double)State.getPly() / Config.MaxPly, 1e-6);
-    TEST_ASSERT_EQ(Features.get(0).getBitboard(), nshogi::core::bitboard::Bitboard::AllBB());
+    TEST_ASSERT_EQ(FeatureBitboardUtil::getBitboard(Features.get(0)), nshogi::core::internal::bitboard::Bitboard::AllBB());
 }
 
 void checkFeatureTypeProgressRuntime(const nshogi::core::State& State, const nshogi::core::StateConfig& Config) {
@@ -453,7 +461,7 @@ void checkFeatureTypeProgressRuntime(const nshogi::core::State& State, const nsh
 
     TEST_ASSERT_FLOAT_EQ(Features.get(0).getValue(),
             (double)State.getPly() / Config.MaxPly, 1e-6);
-    TEST_ASSERT_EQ(Features.get(0).getBitboard(), nshogi::core::bitboard::Bitboard::AllBB());
+    TEST_ASSERT_EQ(FeatureBitboardUtil::getBitboard(Features.get(0)), nshogi::core::internal::bitboard::Bitboard::AllBB());
 }
 
 void checkFeatureTypeProgressUnit(const nshogi::core::State& State, const nshogi::core::StateConfig& Config) {
@@ -462,7 +470,7 @@ void checkFeatureTypeProgressUnit(const nshogi::core::State& State, const nshogi
     > Features(State, Config);
 
     TEST_ASSERT_FLOAT_EQ(Features.get(0).getValue(), 1.0f / Config.MaxPly, 1e-6);
-    TEST_ASSERT_EQ(Features.get(0).getBitboard(), nshogi::core::bitboard::Bitboard::AllBB());
+    TEST_ASSERT_EQ(FeatureBitboardUtil::getBitboard(Features.get(0)), nshogi::core::internal::bitboard::Bitboard::AllBB());
 }
 
 void checkFeatureTypeProgressUnitRuntime(const nshogi::core::State& State, const nshogi::core::StateConfig& Config) {
@@ -471,7 +479,7 @@ void checkFeatureTypeProgressUnitRuntime(const nshogi::core::State& State, const
     }, State, Config);
 
     TEST_ASSERT_FLOAT_EQ(Features.get(0).getValue(), 1.0f / Config.MaxPly, 1e-6);
-    TEST_ASSERT_EQ(Features.get(0).getBitboard(), nshogi::core::bitboard::Bitboard::AllBB());
+    TEST_ASSERT_EQ(FeatureBitboardUtil::getBitboard(Features.get(0)), nshogi::core::internal::bitboard::Bitboard::AllBB());
 }
 
 void checkFeatureTypeRule(const nshogi::core::State& State, const nshogi::core::StateConfig& Config) {
@@ -481,9 +489,9 @@ void checkFeatureTypeRule(const nshogi::core::State& State, const nshogi::core::
         nshogi::ml::FeatureType::FT_RuleTrying
     > Features(State, Config);
 
-    TEST_ASSERT_EQ(Features.get(0).getBitboard(), nshogi::core::bitboard::Bitboard::AllBB());
-    TEST_ASSERT_EQ(Features.get(1).getBitboard(), nshogi::core::bitboard::Bitboard::AllBB());
-    TEST_ASSERT_EQ(Features.get(2).getBitboard(), nshogi::core::bitboard::Bitboard::AllBB());
+    TEST_ASSERT_EQ(FeatureBitboardUtil::getBitboard(Features.get(0)), nshogi::core::internal::bitboard::Bitboard::AllBB());
+    TEST_ASSERT_EQ(FeatureBitboardUtil::getBitboard(Features.get(1)), nshogi::core::internal::bitboard::Bitboard::AllBB());
+    TEST_ASSERT_EQ(FeatureBitboardUtil::getBitboard(Features.get(2)), nshogi::core::internal::bitboard::Bitboard::AllBB());
 
     if (Config.Rule == nshogi::core::EndingRule::ER_Declare27) {
         TEST_ASSERT_EQ(Features.get(0).getValue(), 1.0f);
@@ -507,9 +515,9 @@ void checkFeatureTypeRuleRuntime(const nshogi::core::State& State, const nshogi:
         nshogi::ml::FeatureType::FT_RuleTrying
     }, State, Config);
 
-    TEST_ASSERT_EQ(Features.get(0).getBitboard(), nshogi::core::bitboard::Bitboard::AllBB());
-    TEST_ASSERT_EQ(Features.get(1).getBitboard(), nshogi::core::bitboard::Bitboard::AllBB());
-    TEST_ASSERT_EQ(Features.get(2).getBitboard(), nshogi::core::bitboard::Bitboard::AllBB());
+    TEST_ASSERT_EQ(FeatureBitboardUtil::getBitboard(Features.get(0)), nshogi::core::internal::bitboard::Bitboard::AllBB());
+    TEST_ASSERT_EQ(FeatureBitboardUtil::getBitboard(Features.get(1)), nshogi::core::internal::bitboard::Bitboard::AllBB());
+    TEST_ASSERT_EQ(FeatureBitboardUtil::getBitboard(Features.get(2)), nshogi::core::internal::bitboard::Bitboard::AllBB());
 
     if (Config.Rule == nshogi::core::EndingRule::ER_Declare27) {
         TEST_ASSERT_EQ(Features.get(0).getValue(), 1.0f);
@@ -731,7 +739,7 @@ void checkEqualComptimeAndRuntime(const nshogi::core::State& State, const nshogi
 
     for (std::size_t I = 0; I < 86; ++I) {
         TEST_ASSERT_EQ(FeaturesComptime.get(I).getValue(), FeaturesRuntime.get(I).getValue());
-        TEST_ASSERT_EQ(FeaturesComptime.get(I).getBitboard(), FeaturesRuntime.get(I).getBitboard());
+        TEST_ASSERT_EQ(FeatureBitboardUtil::getBitboard(FeaturesComptime.get(I)), FeatureBitboardUtil::getBitboard(FeaturesRuntime.get(I)));
         TEST_ASSERT_EQ(FeaturesComptime.get(I).isRotated(), FeaturesRuntime.get(I).isRotated());
     }
 

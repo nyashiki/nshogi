@@ -409,7 +409,7 @@ core::Position PositionBuilder::newPosition(const std::string& Sfen) {
         }
 
         if (Sfen[Cursor] < '0' || Sfen[Cursor] > '9') {
-            throw std::runtime_error("invalid sfen string (ply cursor range error).\n" +
+            throw std::runtime_error("invalid sfen string (ply not a number error).\n" +
                      ("    Sfen: " + Sfen));
         }
 

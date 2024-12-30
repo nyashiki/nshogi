@@ -1,14 +1,12 @@
 #include "statehelper.h"
-#include "bitboard.h"
-#include "hash.h"
-#include "state.h"
-#include "types.h"
-#include <cstddef>
+#include "../types.h"
+
 #include <cstdlib>
 #include <cstring>
 
 namespace nshogi {
 namespace core {
+namespace internal {
 
 StateHelper::StateHelper(const Position& Pos)
     : InitialPosition(Pos)
@@ -71,5 +69,6 @@ Move32 StateHelper::goBackOneStep() {
     return PrevMove;
 }
 
+} // namepsace internal
 } // namespace core
 } // namespace nshogi

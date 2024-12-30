@@ -7,6 +7,12 @@
 namespace nshogi {
 namespace core {
 
+namespace internal {
+
+class StateImpl;
+
+} // namespace internal
+
 struct Position {
  public:
     Position();
@@ -23,7 +29,8 @@ struct Position {
         return OnBoard[Sq];
     }
 
-    template <Color C> constexpr Stands getStand() const {
+    template <Color C>
+    constexpr Stands getStand() const {
         return EachStands[C];
     }
 
@@ -81,7 +88,7 @@ struct Position {
     PieceKind OnBoard[NumSquares];
     Stands EachStands[NumColors];
 
-    friend class State;
+    friend class internal::StateImpl;
     friend class PositionBuilder;
 };
 

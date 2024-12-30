@@ -3,8 +3,9 @@
 
 #include "bitboard.h"
 #include "hash.h"
-#include "position.h"
-#include "types.h"
+#include "../position.h"
+#include "../types.h"
+
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
@@ -12,6 +13,7 @@
 
 namespace nshogi {
 namespace core {
+namespace internal {
 
 struct StepHelper {
     StepHelper() : Move(Move32::MoveNone()) {
@@ -77,10 +79,10 @@ struct StateHelper {
     // Store them since they are computationally heavy.
     std::vector<StepHelper> SHelper;
 
-    friend class State;
-    friend class StateBuilder;
+    friend class StateImpl;
 };
 
+} // namespace internal
 } // namespace core
 } // namespace nshogi
 

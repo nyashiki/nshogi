@@ -2,13 +2,14 @@
 #define NSHOGI_CORE_UTILS_H
 
 #include "bitboard.h"
-#include "types.h"
+#include "../types.h"
 
 #include <vector>
 #include <sstream>
 
 namespace nshogi {
 namespace core {
+namespace internal {
 namespace utils {
 
 inline bool isSameLine(Square Sq1, Square Sq2) {
@@ -33,6 +34,7 @@ inline std::vector<std::string> split(const std::string& Src, char Delim) {
 }
 
 } // namespace utils
+} // namespace internal
 } // namespace core
 } // namespace nshogi
 

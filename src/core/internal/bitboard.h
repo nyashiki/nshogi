@@ -1,7 +1,7 @@
-#ifndef NSHOGI_CORE_BITBOARD_H
-#define NSHOGI_CORE_BITBOARD_H
+#ifndef NSHOGI_CORE_INTERNAL_BITBOARD_H
+#define NSHOGI_CORE_INTERNAL_BITBOARD_H
 
-#include "types.h"
+#include "../types.h"
 
 #include <bit>
 #include <functional>
@@ -38,6 +38,7 @@
 
 namespace nshogi {
 namespace core {
+namespace internal {
 namespace bitboard {
 
 struct Bitboard;
@@ -778,7 +779,8 @@ inline Bitboard getForwardBB(Square Sq) {
 void initializeBitboards();
 
 } // namespace bitboard
+} // namespace internal
 } // namespace core
 } // namespace nshogi
 
-#endif // #ifndef NSHOGI_CORE_BITBOARD_H
+#endif // #ifndef NSHOGI_CORE_INTERNAL_BITBOARD_H

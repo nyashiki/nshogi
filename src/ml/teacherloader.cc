@@ -5,6 +5,7 @@
 
 #include <cstdint>
 #include <fstream>
+#include <iostream>
 
 
 namespace nshogi {

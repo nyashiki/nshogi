@@ -1,6 +1,6 @@
 #include "csa.h"
 #include "../core/squareiterator.h"
-#include "../core/utils.h"
+#include "../core/internal/utils.h"
 
 #include <cstddef>
 #include <cstdint>
@@ -253,7 +253,7 @@ core::Position PositionBuilder::newPosition(const std::string& CSA) {
 
     PositionBuilder Builder;
 
-    std::vector<std::string> CSASplitted = utils::split(CSA, '\n');
+    std::vector<std::string> CSASplitted = internal::utils::split(CSA, '\n');
 
     int InputRowCount = 0;
 
@@ -365,10 +365,10 @@ StateBuilder::StateBuilder(const std::string& CSA)
     : core::StateBuilder(PositionBuilder::newPosition(CSA)) {
     using namespace core;
 
-    std::vector<std::string> CSASplitted = utils::split(CSA, '\n');
+    std::vector<std::string> CSASplitted = internal::utils::split(CSA, '\n');
 
     for (const auto& CSALine : CSASplitted) {
-        auto CSAMove = utils::split(CSALine, ',')[0];
+        auto CSAMove = internal::utils::split(CSALine, ',')[0];
         if (CSAMove.size() == 7) {
             if (CSALine[0] == '+' || CSALine[0] == '-') {
                 core::Move32 Move = CSAToMove32(Instance.getPosition(), CSALine);
