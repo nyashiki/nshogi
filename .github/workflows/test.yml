@@ -25,6 +25,8 @@ jobs:
     - name: install pybind11
       if: runner.os == 'macOS'
       run: brew install pybind11
+    - name: install numpy
+      run: pip3 install numpy
     - name: make library
       working-directory: ${{ env.working-directory }}
       run: make $SIMD=1 libnshogi
