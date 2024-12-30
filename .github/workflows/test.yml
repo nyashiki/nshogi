@@ -31,3 +31,6 @@ jobs:
     - name: test the shared library
       working-directory: ${{ env.working-directory }}
       run: make $SIMD=1 runtest-shared
+    - name: test Python library
+      working-directory: ${{ env.working-directory }}
+      run: make runtest-python
