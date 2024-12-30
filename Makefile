@@ -241,6 +241,10 @@ python: $(PYTHON_TARGET)
 install-python: python
 	cp $(PYTHON_TARGET) $(shell python3 -c "import site; print(site.getsitepackages()[0])")
 
+.PHONY: runtest-python
+runtest-python: python
+	PYTHONPATH=$(OBJDIR)/lib/ python3 src/test/python/test.py
+
 .PHONY: runbench
 runbench: bench
 	perf record -a --call-graph dwarf -F 49 -- ./$(BENCH_TARGET)
