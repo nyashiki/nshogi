@@ -1,3 +1,12 @@
+//
+// Copyright (c) 2025 @nyashiki
+//
+// This software is licensed under the MIT license.
+// For details, see the LICENSE file in the root of this repository.
+//
+// SPDX-License-Identifier: MIT
+//
+
 #include "teacherloader.h"
 #include "azteacher.h"
 #include "simpleteacher.h"
@@ -6,7 +15,6 @@
 #include <cstdint>
 #include <fstream>
 #include <iostream>
-
 
 namespace nshogi {
 namespace ml {

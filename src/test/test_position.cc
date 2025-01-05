@@ -1,7 +1,15 @@
+//
+// Copyright (c) 2025 @nyashiki
+//
+// This software is licensed under the MIT license.
+// For details, see the LICENSE file in the root of this repository.
+//
+// SPDX-License-Identifier: MIT
+//
+
 #include "common.h"
 #include "../core/position.h"
 #include "../core/positionbuilder.h"
-
 
 TEST(Position, Constructor1) {
     nshogi::core::Position Pos =
