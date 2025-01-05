@@ -4,7 +4,7 @@ This directory contains data files, some of which are **not** covered under the 
 Please refer to the following details:
 
 ### Files not covered by the MIT License
-The following files are sourced from [https://yaneuraou.yaneu.com/2020/12/25/christmas-present/]
+The following files are sourced from [https://yaneuraou.yaneu.com/2020/12/25/christmas-present/](やねうら王公式からクリスマスプレゼントに詰将棋500万問を謹呈)
 and are provided under the terms specified by their original source:
 
 - `test/mate-3-ply.txt`
