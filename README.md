@@ -37,6 +37,6 @@ Type `make [CXX=<CXX>] [<SSE INSTRUCTION>=1] [PREFIX=<PREFIX>] runtest-{static|s
 Under construction.
 
 ## License
-This repository includes some resources in the `res/` directory that are sourced from [https://yaneuraou.yaneu.com/2020/12/25/christmas-present/](やねうら王公式からクリスマスプレゼントに詰将棋500万問を謹呈).
+This repository includes some resources in the `res/` directory that are sourced from [やねうら王公式からクリスマスプレゼントに詰将棋500万問を謹呈](https://yaneuraou.yaneu.com/2020/12/25/christmas-present/)
 These data files are proveded under their own terms and are **not** subject to the MIT License.
 For more details, please refer to `res/README.md`.
