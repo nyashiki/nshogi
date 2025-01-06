@@ -26,7 +26,6 @@ void save(std::ofstream&, const ml::AZTeacher&);
 
 } // namespace az_teacher
 
-
 namespace simple_teacher {
 
 ml::SimpleTeacher load(std::ifstream&);

@@ -31,7 +31,7 @@ Position::Position(const Position& Pos, uint16_t Offset) {
     PlyOffset = Offset;
 }
 
-bool Position::equals(const Position &Pos, bool IgnorePlyOffset) const {
+bool Position::equals(const Position& Pos, bool IgnorePlyOffset) const {
     if (SideToMove != Pos.SideToMove) {
         return false;
     }

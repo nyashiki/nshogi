@@ -35,153 +35,147 @@ TEST(Types, FlipColors) {
 
 TEST(Types, PieceToPieceType) {
     TEST_ASSERT_EQ(getPieceType(nshogi::core::PK_BlackPawn),
-                    nshogi::core::PTK_Pawn);
+                   nshogi::core::PTK_Pawn);
     TEST_ASSERT_EQ(getPieceType(nshogi::core::PK_BlackLance),
-                    nshogi::core::PTK_Lance);
+                   nshogi::core::PTK_Lance);
     TEST_ASSERT_EQ(getPieceType(nshogi::core::PK_BlackKnight),
-                    nshogi::core::PTK_Knight);
+                   nshogi::core::PTK_Knight);
     TEST_ASSERT_EQ(getPieceType(nshogi::core::PK_BlackSilver),
-                    nshogi::core::PTK_Silver);
+                   nshogi::core::PTK_Silver);
     TEST_ASSERT_EQ(getPieceType(nshogi::core::PK_BlackGold),
-                    nshogi::core::PTK_Gold);
+                   nshogi::core::PTK_Gold);
     TEST_ASSERT_EQ(getPieceType(nshogi::core::PK_BlackKing),
-                    nshogi::core::PTK_King);
+                   nshogi::core::PTK_King);
     TEST_ASSERT_EQ(getPieceType(nshogi::core::PK_BlackBishop),
-                    nshogi::core::PTK_Bishop);
+                   nshogi::core::PTK_Bishop);
     TEST_ASSERT_EQ(getPieceType(nshogi::core::PK_BlackRook),
-                    nshogi::core::PTK_Rook);
+                   nshogi::core::PTK_Rook);
     TEST_ASSERT_EQ(getPieceType(nshogi::core::PK_BlackProPawn),
-                    nshogi::core::PTK_ProPawn);
+                   nshogi::core::PTK_ProPawn);
     TEST_ASSERT_EQ(getPieceType(nshogi::core::PK_BlackProLance),
-                    nshogi::core::PTK_ProLance);
+                   nshogi::core::PTK_ProLance);
     TEST_ASSERT_EQ(getPieceType(nshogi::core::PK_BlackProKnight),
-                    nshogi::core::PTK_ProKnight);
+                   nshogi::core::PTK_ProKnight);
     TEST_ASSERT_EQ(getPieceType(nshogi::core::PK_BlackProSilver),
-                    nshogi::core::PTK_ProSilver);
+                   nshogi::core::PTK_ProSilver);
     TEST_ASSERT_EQ(getPieceType(nshogi::core::PK_BlackProBishop),
-                    nshogi::core::PTK_ProBishop);
+                   nshogi::core::PTK_ProBishop);
     TEST_ASSERT_EQ(getPieceType(nshogi::core::PK_BlackProRook),
-                    nshogi::core::PTK_ProRook);
+                   nshogi::core::PTK_ProRook);
 
     TEST_ASSERT_EQ(getPieceType(nshogi::core::PK_WhitePawn),
-                    nshogi::core::PTK_Pawn);
+                   nshogi::core::PTK_Pawn);
     TEST_ASSERT_EQ(getPieceType(nshogi::core::PK_WhiteLance),
-                    nshogi::core::PTK_Lance);
+                   nshogi::core::PTK_Lance);
     TEST_ASSERT_EQ(getPieceType(nshogi::core::PK_WhiteKnight),
-                    nshogi::core::PTK_Knight);
+                   nshogi::core::PTK_Knight);
     TEST_ASSERT_EQ(getPieceType(nshogi::core::PK_WhiteSilver),
-                    nshogi::core::PTK_Silver);
+                   nshogi::core::PTK_Silver);
     TEST_ASSERT_EQ(getPieceType(nshogi::core::PK_WhiteGold),
-                    nshogi::core::PTK_Gold);
+                   nshogi::core::PTK_Gold);
     TEST_ASSERT_EQ(getPieceType(nshogi::core::PK_WhiteKing),
-                    nshogi::core::PTK_King);
+                   nshogi::core::PTK_King);
     TEST_ASSERT_EQ(getPieceType(nshogi::core::PK_WhiteBishop),
-                    nshogi::core::PTK_Bishop);
+                   nshogi::core::PTK_Bishop);
     TEST_ASSERT_EQ(getPieceType(nshogi::core::PK_WhiteRook),
-                    nshogi::core::PTK_Rook);
+                   nshogi::core::PTK_Rook);
     TEST_ASSERT_EQ(getPieceType(nshogi::core::PK_WhiteProPawn),
-                    nshogi::core::PTK_ProPawn);
+                   nshogi::core::PTK_ProPawn);
     TEST_ASSERT_EQ(getPieceType(nshogi::core::PK_WhiteProLance),
-                    nshogi::core::PTK_ProLance);
+                   nshogi::core::PTK_ProLance);
     TEST_ASSERT_EQ(getPieceType(nshogi::core::PK_WhiteProKnight),
-                    nshogi::core::PTK_ProKnight);
+                   nshogi::core::PTK_ProKnight);
     TEST_ASSERT_EQ(getPieceType(nshogi::core::PK_WhiteProSilver),
-                    nshogi::core::PTK_ProSilver);
+                   nshogi::core::PTK_ProSilver);
     TEST_ASSERT_EQ(getPieceType(nshogi::core::PK_WhiteProBishop),
-                    nshogi::core::PTK_ProBishop);
+                   nshogi::core::PTK_ProBishop);
     TEST_ASSERT_EQ(getPieceType(nshogi::core::PK_WhiteProRook),
-                    nshogi::core::PTK_ProRook);
+                   nshogi::core::PTK_ProRook);
 }
 
 TEST(Types, PieceTypePromote) {
     TEST_ASSERT_EQ(promotePieceType(nshogi::core::PTK_Pawn),
-                    nshogi::core::PTK_ProPawn);
+                   nshogi::core::PTK_ProPawn);
     TEST_ASSERT_EQ(promotePieceType(nshogi::core::PTK_Lance),
-                    nshogi::core::PTK_ProLance);
+                   nshogi::core::PTK_ProLance);
     TEST_ASSERT_EQ(promotePieceType(nshogi::core::PTK_Knight),
-                    nshogi::core::PTK_ProKnight);
+                   nshogi::core::PTK_ProKnight);
     TEST_ASSERT_EQ(promotePieceType(nshogi::core::PTK_Silver),
-                    nshogi::core::PTK_ProSilver);
+                   nshogi::core::PTK_ProSilver);
     TEST_ASSERT_EQ(promotePieceType(nshogi::core::PTK_Bishop),
-                    nshogi::core::PTK_ProBishop);
+                   nshogi::core::PTK_ProBishop);
     TEST_ASSERT_EQ(promotePieceType(nshogi::core::PTK_Rook),
-                    nshogi::core::PTK_ProRook);
+                   nshogi::core::PTK_ProRook);
 }
 
 TEST(Types, PieceGetColor) {
     TEST_ASSERT_EQ(getColor(nshogi::core::PK_BlackPawn), nshogi::core::Black);
     TEST_ASSERT_EQ(getColor(nshogi::core::PK_BlackLance), nshogi::core::Black);
-    TEST_ASSERT_EQ(getColor(nshogi::core::PK_BlackKnight),
-                    nshogi::core::Black);
-    TEST_ASSERT_EQ(getColor(nshogi::core::PK_BlackSilver),
-                    nshogi::core::Black);
+    TEST_ASSERT_EQ(getColor(nshogi::core::PK_BlackKnight), nshogi::core::Black);
+    TEST_ASSERT_EQ(getColor(nshogi::core::PK_BlackSilver), nshogi::core::Black);
     TEST_ASSERT_EQ(getColor(nshogi::core::PK_BlackGold), nshogi::core::Black);
     TEST_ASSERT_EQ(getColor(nshogi::core::PK_BlackKing), nshogi::core::Black);
-    TEST_ASSERT_EQ(getColor(nshogi::core::PK_BlackBishop),
-                    nshogi::core::Black);
+    TEST_ASSERT_EQ(getColor(nshogi::core::PK_BlackBishop), nshogi::core::Black);
     TEST_ASSERT_EQ(getColor(nshogi::core::PK_BlackRook), nshogi::core::Black);
     TEST_ASSERT_EQ(getColor(nshogi::core::PK_BlackProPawn),
-                    nshogi::core::Black);
+                   nshogi::core::Black);
     TEST_ASSERT_EQ(getColor(nshogi::core::PK_BlackProLance),
-                    nshogi::core::Black);
+                   nshogi::core::Black);
     TEST_ASSERT_EQ(getColor(nshogi::core::PK_BlackProKnight),
-                    nshogi::core::Black);
+                   nshogi::core::Black);
     TEST_ASSERT_EQ(getColor(nshogi::core::PK_BlackProSilver),
-                    nshogi::core::Black);
+                   nshogi::core::Black);
     TEST_ASSERT_EQ(getColor(nshogi::core::PK_BlackProBishop),
-                    nshogi::core::Black);
+                   nshogi::core::Black);
     TEST_ASSERT_EQ(getColor(nshogi::core::PK_BlackProRook),
-                    nshogi::core::Black);
+                   nshogi::core::Black);
     TEST_ASSERT_EQ(getColor(nshogi::core::PK_WhitePawn), nshogi::core::White);
     TEST_ASSERT_EQ(getColor(nshogi::core::PK_WhiteLance), nshogi::core::White);
-    TEST_ASSERT_EQ(getColor(nshogi::core::PK_WhiteKnight),
-                    nshogi::core::White);
-    TEST_ASSERT_EQ(getColor(nshogi::core::PK_WhiteSilver),
-                    nshogi::core::White);
+    TEST_ASSERT_EQ(getColor(nshogi::core::PK_WhiteKnight), nshogi::core::White);
+    TEST_ASSERT_EQ(getColor(nshogi::core::PK_WhiteSilver), nshogi::core::White);
     TEST_ASSERT_EQ(getColor(nshogi::core::PK_WhiteGold), nshogi::core::White);
     TEST_ASSERT_EQ(getColor(nshogi::core::PK_WhiteKing), nshogi::core::White);
-    TEST_ASSERT_EQ(getColor(nshogi::core::PK_WhiteBishop),
-                    nshogi::core::White);
+    TEST_ASSERT_EQ(getColor(nshogi::core::PK_WhiteBishop), nshogi::core::White);
     TEST_ASSERT_EQ(getColor(nshogi::core::PK_WhiteRook), nshogi::core::White);
     TEST_ASSERT_EQ(getColor(nshogi::core::PK_WhiteProPawn),
-                    nshogi::core::White);
+                   nshogi::core::White);
     TEST_ASSERT_EQ(getColor(nshogi::core::PK_WhiteProLance),
-                    nshogi::core::White);
+                   nshogi::core::White);
     TEST_ASSERT_EQ(getColor(nshogi::core::PK_WhiteProKnight),
-                    nshogi::core::White);
+                   nshogi::core::White);
     TEST_ASSERT_EQ(getColor(nshogi::core::PK_WhiteProSilver),
-                    nshogi::core::White);
+                   nshogi::core::White);
     TEST_ASSERT_EQ(getColor(nshogi::core::PK_WhiteProBishop),
-                    nshogi::core::White);
+                   nshogi::core::White);
     TEST_ASSERT_EQ(getColor(nshogi::core::PK_WhiteProRook),
-                    nshogi::core::White);
+                   nshogi::core::White);
 }
 
 TEST(Types, PiecePromote) {
     TEST_ASSERT_EQ(promotePiece(nshogi::core::PK_BlackPawn),
-                    nshogi::core::PieceKind::PK_BlackProPawn);
+                   nshogi::core::PieceKind::PK_BlackProPawn);
     TEST_ASSERT_EQ(promotePiece(nshogi::core::PK_BlackLance),
-                    nshogi::core::PieceKind::PK_BlackProLance);
+                   nshogi::core::PieceKind::PK_BlackProLance);
     TEST_ASSERT_EQ(promotePiece(nshogi::core::PK_BlackKnight),
-                    nshogi::core::PieceKind::PK_BlackProKnight);
+                   nshogi::core::PieceKind::PK_BlackProKnight);
     TEST_ASSERT_EQ(promotePiece(nshogi::core::PK_BlackSilver),
-                    nshogi::core::PieceKind::PK_BlackProSilver);
+                   nshogi::core::PieceKind::PK_BlackProSilver);
     TEST_ASSERT_EQ(promotePiece(nshogi::core::PK_BlackBishop),
-                    nshogi::core::PieceKind::PK_BlackProBishop);
+                   nshogi::core::PieceKind::PK_BlackProBishop);
     TEST_ASSERT_EQ(promotePiece(nshogi::core::PK_BlackRook),
-                    nshogi::core::PieceKind::PK_BlackProRook);
+                   nshogi::core::PieceKind::PK_BlackProRook);
     TEST_ASSERT_EQ(promotePiece(nshogi::core::PK_WhitePawn),
-                    nshogi::core::PieceKind::PK_WhiteProPawn);
+                   nshogi::core::PieceKind::PK_WhiteProPawn);
     TEST_ASSERT_EQ(promotePiece(nshogi::core::PK_WhiteLance),
-                    nshogi::core::PieceKind::PK_WhiteProLance);
+                   nshogi::core::PieceKind::PK_WhiteProLance);
     TEST_ASSERT_EQ(promotePiece(nshogi::core::PK_WhiteKnight),
-                    nshogi::core::PieceKind::PK_WhiteProKnight);
+                   nshogi::core::PieceKind::PK_WhiteProKnight);
     TEST_ASSERT_EQ(promotePiece(nshogi::core::PK_WhiteSilver),
-                    nshogi::core::PieceKind::PK_WhiteProSilver);
+                   nshogi::core::PieceKind::PK_WhiteProSilver);
     TEST_ASSERT_EQ(promotePiece(nshogi::core::PK_WhiteBishop),
-                    nshogi::core::PieceKind::PK_WhiteProBishop);
+                   nshogi::core::PieceKind::PK_WhiteProBishop);
     TEST_ASSERT_EQ(promotePiece(nshogi::core::PK_WhiteRook),
-                    nshogi::core::PieceKind::PK_WhiteProRook);
+                   nshogi::core::PieceKind::PK_WhiteProRook);
 }
 
 TEST(Types, IsPromoted) {
@@ -205,90 +199,90 @@ TEST(Types, IsPromoted) {
 
 TEST(Types, PieceTypeDemote) {
     TEST_ASSERT_EQ(demotePieceType(nshogi::core::PTK_Pawn),
-                    nshogi::core::PTK_Pawn);
+                   nshogi::core::PTK_Pawn);
     TEST_ASSERT_EQ(demotePieceType(nshogi::core::PTK_Lance),
-                    nshogi::core::PTK_Lance);
+                   nshogi::core::PTK_Lance);
     TEST_ASSERT_EQ(demotePieceType(nshogi::core::PTK_Knight),
-                    nshogi::core::PTK_Knight);
+                   nshogi::core::PTK_Knight);
     TEST_ASSERT_EQ(demotePieceType(nshogi::core::PTK_Silver),
-                    nshogi::core::PTK_Silver);
+                   nshogi::core::PTK_Silver);
     TEST_ASSERT_EQ(demotePieceType(nshogi::core::PTK_Bishop),
-                    nshogi::core::PTK_Bishop);
+                   nshogi::core::PTK_Bishop);
     TEST_ASSERT_EQ(demotePieceType(nshogi::core::PTK_Rook),
-                    nshogi::core::PTK_Rook);
+                   nshogi::core::PTK_Rook);
     TEST_ASSERT_EQ(demotePieceType(nshogi::core::PTK_Gold),
-                    nshogi::core::PTK_Gold);
+                   nshogi::core::PTK_Gold);
     TEST_ASSERT_EQ(demotePieceType(nshogi::core::PTK_ProPawn),
-                    nshogi::core::PTK_Pawn);
+                   nshogi::core::PTK_Pawn);
     TEST_ASSERT_EQ(demotePieceType(nshogi::core::PTK_ProLance),
-                    nshogi::core::PTK_Lance);
+                   nshogi::core::PTK_Lance);
     TEST_ASSERT_EQ(demotePieceType(nshogi::core::PTK_ProKnight),
-                    nshogi::core::PTK_Knight);
+                   nshogi::core::PTK_Knight);
     TEST_ASSERT_EQ(demotePieceType(nshogi::core::PTK_ProSilver),
-                    nshogi::core::PTK_Silver);
+                   nshogi::core::PTK_Silver);
     TEST_ASSERT_EQ(demotePieceType(nshogi::core::PTK_ProBishop),
-                    nshogi::core::PTK_Bishop);
+                   nshogi::core::PTK_Bishop);
     TEST_ASSERT_EQ(demotePieceType(nshogi::core::PTK_ProRook),
-                    nshogi::core::PTK_Rook);
+                   nshogi::core::PTK_Rook);
 }
 
 TEST(Types, MakePiece) {
     TEST_ASSERT_EQ(makePiece<nshogi::core::Black>(nshogi::core::PTK_Pawn),
-                    nshogi::core::PK_BlackPawn);
+                   nshogi::core::PK_BlackPawn);
     TEST_ASSERT_EQ(makePiece<nshogi::core::Black>(nshogi::core::PTK_Lance),
-                    nshogi::core::PK_BlackLance);
+                   nshogi::core::PK_BlackLance);
     TEST_ASSERT_EQ(makePiece<nshogi::core::Black>(nshogi::core::PTK_Knight),
-                    nshogi::core::PK_BlackKnight);
+                   nshogi::core::PK_BlackKnight);
     TEST_ASSERT_EQ(makePiece<nshogi::core::Black>(nshogi::core::PTK_Silver),
-                    nshogi::core::PK_BlackSilver);
+                   nshogi::core::PK_BlackSilver);
     TEST_ASSERT_EQ(makePiece<nshogi::core::Black>(nshogi::core::PTK_Gold),
-                    nshogi::core::PK_BlackGold);
+                   nshogi::core::PK_BlackGold);
     TEST_ASSERT_EQ(makePiece<nshogi::core::Black>(nshogi::core::PTK_King),
-                    nshogi::core::PK_BlackKing);
+                   nshogi::core::PK_BlackKing);
     TEST_ASSERT_EQ(makePiece<nshogi::core::Black>(nshogi::core::PTK_Bishop),
-                    nshogi::core::PK_BlackBishop);
+                   nshogi::core::PK_BlackBishop);
     TEST_ASSERT_EQ(makePiece<nshogi::core::Black>(nshogi::core::PTK_Rook),
-                    nshogi::core::PK_BlackRook);
+                   nshogi::core::PK_BlackRook);
     TEST_ASSERT_EQ(makePiece<nshogi::core::Black>(nshogi::core::PTK_ProPawn),
-                    nshogi::core::PK_BlackProPawn);
+                   nshogi::core::PK_BlackProPawn);
     TEST_ASSERT_EQ(makePiece<nshogi::core::Black>(nshogi::core::PTK_ProLance),
-                    nshogi::core::PK_BlackProLance);
+                   nshogi::core::PK_BlackProLance);
     TEST_ASSERT_EQ(makePiece<nshogi::core::Black>(nshogi::core::PTK_ProKnight),
-                    nshogi::core::PK_BlackProKnight);
+                   nshogi::core::PK_BlackProKnight);
     TEST_ASSERT_EQ(makePiece<nshogi::core::Black>(nshogi::core::PTK_ProSilver),
-                    nshogi::core::PK_BlackProSilver);
+                   nshogi::core::PK_BlackProSilver);
     TEST_ASSERT_EQ(makePiece<nshogi::core::Black>(nshogi::core::PTK_ProBishop),
-                    nshogi::core::PK_BlackProBishop);
+                   nshogi::core::PK_BlackProBishop);
     TEST_ASSERT_EQ(makePiece<nshogi::core::Black>(nshogi::core::PTK_ProRook),
-                    nshogi::core::PK_BlackProRook);
+                   nshogi::core::PK_BlackProRook);
     TEST_ASSERT_EQ(makePiece<nshogi::core::White>(nshogi::core::PTK_Pawn),
-                    nshogi::core::PK_WhitePawn);
+                   nshogi::core::PK_WhitePawn);
     TEST_ASSERT_EQ(makePiece<nshogi::core::White>(nshogi::core::PTK_Lance),
-                    nshogi::core::PK_WhiteLance);
+                   nshogi::core::PK_WhiteLance);
     TEST_ASSERT_EQ(makePiece<nshogi::core::White>(nshogi::core::PTK_Knight),
-                    nshogi::core::PK_WhiteKnight);
+                   nshogi::core::PK_WhiteKnight);
     TEST_ASSERT_EQ(makePiece<nshogi::core::White>(nshogi::core::PTK_Silver),
-                    nshogi::core::PK_WhiteSilver);
+                   nshogi::core::PK_WhiteSilver);
     TEST_ASSERT_EQ(makePiece<nshogi::core::White>(nshogi::core::PTK_Gold),
-                    nshogi::core::PK_WhiteGold);
+                   nshogi::core::PK_WhiteGold);
     TEST_ASSERT_EQ(makePiece<nshogi::core::White>(nshogi::core::PTK_King),
-                    nshogi::core::PK_WhiteKing);
+                   nshogi::core::PK_WhiteKing);
     TEST_ASSERT_EQ(makePiece<nshogi::core::White>(nshogi::core::PTK_Bishop),
-                    nshogi::core::PK_WhiteBishop);
+                   nshogi::core::PK_WhiteBishop);
     TEST_ASSERT_EQ(makePiece<nshogi::core::White>(nshogi::core::PTK_Rook),
-                    nshogi::core::PK_WhiteRook);
+                   nshogi::core::PK_WhiteRook);
     TEST_ASSERT_EQ(makePiece<nshogi::core::White>(nshogi::core::PTK_ProPawn),
-                    nshogi::core::PK_WhiteProPawn);
+                   nshogi::core::PK_WhiteProPawn);
     TEST_ASSERT_EQ(makePiece<nshogi::core::White>(nshogi::core::PTK_ProLance),
-                    nshogi::core::PK_WhiteProLance);
+                   nshogi::core::PK_WhiteProLance);
     TEST_ASSERT_EQ(makePiece<nshogi::core::White>(nshogi::core::PTK_ProKnight),
-                    nshogi::core::PK_WhiteProKnight);
+                   nshogi::core::PK_WhiteProKnight);
     TEST_ASSERT_EQ(makePiece<nshogi::core::White>(nshogi::core::PTK_ProSilver),
-                    nshogi::core::PK_WhiteProSilver);
+                   nshogi::core::PK_WhiteProSilver);
     TEST_ASSERT_EQ(makePiece<nshogi::core::White>(nshogi::core::PTK_ProBishop),
-                    nshogi::core::PK_WhiteProBishop);
+                   nshogi::core::PK_WhiteProBishop);
     TEST_ASSERT_EQ(makePiece<nshogi::core::White>(nshogi::core::PTK_ProRook),
-                    nshogi::core::PK_WhiteProRook);
+                   nshogi::core::PK_WhiteProRook);
 }
 
 TEST(Types, FileRange) {
@@ -493,7 +487,8 @@ TEST(Types, BoardMove) {
                     TEST_ASSERT_FALSE(Move16(MoveC).promote());
                     TEST_ASSERT_FALSE(Move16(MoveC).drop());
 
-                    Move32 MovePC = Move32::boardPromotingMove(FromSq, ToSq, Type, Type2);
+                    Move32 MovePC =
+                        Move32::boardPromotingMove(FromSq, ToSq, Type, Type2);
                     TEST_ASSERT_EQ(MovePC.from(), FromSq);
                     TEST_ASSERT_EQ(MovePC.to(), ToSq);
                     TEST_ASSERT_EQ(MovePC.pieceType(), Type);

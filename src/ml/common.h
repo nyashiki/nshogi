@@ -13,7 +13,6 @@
 #include "../core/types.h"
 #include <cstddef>
 
-
 namespace nshogi {
 namespace ml {
 
@@ -23,17 +22,24 @@ namespace {
 
 template <core::Color C>
 inline std::size_t getMoveIndex(core::Move16 M16) {
-    const core::Square To = (C == core::Black)? M16.to() : core::getInversed(M16.to());
+    const core::Square To =
+        (C == core::Black) ? M16.to() : core::getInversed(M16.to());
 
     if (M16.drop()) {
-        const auto Type = (core::PieceTypeKind)(M16.from() - core::NumSquares + 1);
-        return (std::size_t)(20 + (int)Type - 1) * (std::size_t)core::NumSquares + (std::size_t)To;
+        const auto Type =
+            (core::PieceTypeKind)(M16.from() - core::NumSquares + 1);
+        return (std::size_t)(20 + (int)Type - 1) *
+                   (std::size_t)core::NumSquares +
+               (std::size_t)To;
     }
 
-    const core::Square From = (C == core::Black)? M16.from() : core::getInversed(M16.from());
-    const uint8_t SerializedDirection = core::SquareSerializedDirection[(std::size_t)From][(std::size_t)To];
+    const core::Square From =
+        (C == core::Black) ? M16.from() : core::getInversed(M16.from());
+    const uint8_t SerializedDirection =
+        core::SquareSerializedDirection[(std::size_t)From][(std::size_t)To];
 
-    const std::size_t Channel = (M16.promote())? (10 + SerializedDirection) : SerializedDirection;
+    const std::size_t Channel =
+        (M16.promote()) ? (10 + SerializedDirection) : SerializedDirection;
 
     return Channel * (std::size_t)core::NumSquares + (std::size_t)To;
 }
@@ -60,7 +66,6 @@ inline std::size_t getMoveIndex(core::Color C, const core::Move16 Move) {
         return getMoveIndex<core::White>(Move);
     }
 }
-
 
 } // namespace ml
 } // namespace nshogi

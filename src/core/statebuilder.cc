@@ -8,8 +8,8 @@
 //
 
 #include "statebuilder.h"
-#include "positionbuilder.h"
 #include "internal/stateadapter.h"
+#include "positionbuilder.h"
 
 namespace nshogi {
 namespace core {

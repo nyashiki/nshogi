@@ -397,7 +397,8 @@ void initializeCrossStepAttacks() {
     }
 }
 
-template <Direction Dir> constexpr bool isBorder(Square Sq) {
+template <Direction Dir>
+constexpr bool isBorder(Square Sq) {
     const Rank R = squareToRank(Sq);
     const File F = squareToFile(Sq);
     return ((Dir == North || Dir == NorthEast || Dir == NorthWest) &&
@@ -480,43 +481,49 @@ std::pair<Bitboard, Bitboard> crossPatternBB(Square Sq,
 
 #endif
 
-std::pair<Bitboard, Bitboard> diagSWNEPatternBB(Square Sq, const uint16_t Pattern) {
-    const auto& [A1, E1, B1] = getPatternBB<NorthEast, true>(Sq, Pattern, false, 0);
-    const auto& [A2, E2, B2] = getPatternBB<SouthWest, true>(Sq, Pattern, false, B1);
+std::pair<Bitboard, Bitboard> diagSWNEPatternBB(Square Sq,
+                                                const uint16_t Pattern) {
+    const auto& [A1, E1, B1] =
+        getPatternBB<NorthEast, true>(Sq, Pattern, false, 0);
+    const auto& [A2, E2, B2] =
+        getPatternBB<SouthWest, true>(Sq, Pattern, false, B1);
 
     assert(B2 <= 7);
     const Bitboard AttackBB = (A1 | A2) & ~SquareBB[Sq];
-    const Bitboard ExistBB = (E1 | E2) & ~FileBB[File9] &
-                             ~FileBB[File1] & ~RankBB[RankI] & ~RankBB[RankA] &
-                             ~SquareBB[Sq];
+    const Bitboard ExistBB = (E1 | E2) & ~FileBB[File9] & ~FileBB[File1] &
+                             ~RankBB[RankI] & ~RankBB[RankA] & ~SquareBB[Sq];
     return {AttackBB, ExistBB};
 }
 
-std::pair<Bitboard, Bitboard> diagNWSEPatternBB(Square Sq, const uint16_t Pattern) {
-    const auto& [A1, E1, B1] = getPatternBB<SouthEast, true>(Sq, Pattern, false, 0);
-    const auto& [A2, E2, B2] = getPatternBB<NorthWest, true>(Sq, Pattern, false, B1);
+std::pair<Bitboard, Bitboard> diagNWSEPatternBB(Square Sq,
+                                                const uint16_t Pattern) {
+    const auto& [A1, E1, B1] =
+        getPatternBB<SouthEast, true>(Sq, Pattern, false, 0);
+    const auto& [A2, E2, B2] =
+        getPatternBB<NorthWest, true>(Sq, Pattern, false, B1);
 
     assert(B2 <= 7);
     const Bitboard AttackBB = (A1 | A2) & ~SquareBB[Sq];
-    const Bitboard ExistBB = (E1 | E2) & ~FileBB[File9] &
-                             ~FileBB[File1] & ~RankBB[RankI] & ~RankBB[RankA] &
-                             ~SquareBB[Sq];
+    const Bitboard ExistBB = (E1 | E2) & ~FileBB[File9] & ~FileBB[File1] &
+                             ~RankBB[RankI] & ~RankBB[RankA] & ~SquareBB[Sq];
     return {AttackBB, ExistBB};
 }
 
 std::pair<Bitboard, Bitboard> verticalPatternBB(Square Sq,
-                                             const uint16_t Pattern) {
+                                                const uint16_t Pattern) {
     const auto& [A1, E1, B1] = getPatternBB<North, true>(Sq, Pattern, false, 0);
-    const auto& [A2, E2, B2] = getPatternBB<South, true>(Sq, Pattern, false, B1);
+    const auto& [A2, E2, B2] =
+        getPatternBB<South, true>(Sq, Pattern, false, B1);
 
     assert(B2 <= 7);
     const Bitboard AttackBB = (A1 | A2) & ~SquareBB[Sq];
-    const Bitboard ExistBB = (E1 | E2) & ~SquareBB[Sq] & ~RankBB[RankA] & ~RankBB[RankI];
+    const Bitboard ExistBB =
+        (E1 | E2) & ~SquareBB[Sq] & ~RankBB[RankA] & ~RankBB[RankI];
     return {AttackBB, ExistBB};
 }
 
 std::pair<Bitboard, Bitboard> horizontalPatternBB(Square Sq,
-                                             const uint16_t Pattern) {
+                                                  const uint16_t Pattern) {
     const auto& [A1, E1, B1] = getPatternBB<East, true>(Sq, Pattern, false, 0);
     const auto& [A2, E2, B2] = getPatternBB<West, true>(Sq, Pattern, false, B1);
 
@@ -569,7 +576,8 @@ void setBishopMagicMasks() {
 #if !defined(USE_BMI2) || !defined(USE_PEXT)
 
 std::tuple<bool, std::vector<Bitboard*>, std::vector<Bitboard*>>
-isBishopMagicNumberOK(Square Sq, uint64_t MagicNumber, uint16_t *BishopMasterCount) {
+isBishopMagicNumberOK(Square Sq, uint64_t MagicNumber,
+                      uint16_t* BishopMasterCount) {
     std::vector<Bitboard*> Target1(1 << DiagMagicBits, nullptr);
     std::vector<Bitboard*> Target2(1 << DiagMagicBits, nullptr);
     std::vector<bool> IsUsed1(1 << DiagMagicBits, false);
@@ -619,7 +627,8 @@ isBishopMagicNumberOK(Square Sq, uint64_t MagicNumber, uint16_t *BishopMasterCou
             }
             if (!TargetFound) {
                 if (*BishopMasterCount == BishopMagicMasterCountMax - 1) {
-                    throw std::runtime_error("No room to store BishopMagicMaster.");
+                    throw std::runtime_error(
+                        "No room to store BishopMagicMaster.");
                 }
 
                 BishopMagicMaster[*BishopMasterCount] = AttackBB;
@@ -653,7 +662,8 @@ isBishopMagicNumberOK(Square Sq, uint64_t MagicNumber, uint16_t *BishopMasterCou
             }
             if (!TargetFound) {
                 if (*BishopMasterCount == BishopMagicMasterCountMax - 1) {
-                    throw std::runtime_error("No room to store BishopMagicMaster.");
+                    throw std::runtime_error(
+                        "No room to store BishopMagicMaster.");
                 }
 
                 BishopMagicMaster[*BishopMasterCount] = AttackBB;
@@ -749,16 +759,18 @@ void computeBishopMagicBitboard() {
 
     for (Square Sq : Squares) {
         if (!IsPrecomputed) {
-            std::printf("Searching for a bishop magic number for square %2d ... ", Sq);
+            std::printf(
+                "Searching for a bishop magic number for square %2d ... ", Sq);
             std::cout << std::flush;
         }
 
-        for (uint64_t Trial = 0; ; ++Trial) {
+        for (uint64_t Trial = 0;; ++Trial) {
             const uint64_t MagicNumberCandidate =
                 (IsPrecomputed) ? BishopMagicBB[Sq].MagicNumber
                                 : generateMagicNumberCandidate();
 
-            const auto& [Result, Target1, Target2] = isBishopMagicNumberOK(Sq, MagicNumberCandidate, &BishopMasterCount);
+            const auto& [Result, Target1, Target2] = isBishopMagicNumberOK(
+                Sq, MagicNumberCandidate, &BishopMasterCount);
             if (Result) {
                 BishopMagicBB[Sq].MagicNumber = MagicNumberCandidate;
                 std::memcpy(static_cast<void*>(BishopMagicBB[Sq].AttackBB[0]),
@@ -769,8 +781,9 @@ void computeBishopMagicBitboard() {
                             (1 << DiagMagicBits) * sizeof(Bitboard*));
 
                 if (!IsPrecomputed) {
-                    std::printf("OK (found 0x%016" PRIx64 " with %7" PRIu64 " trials).",
-                           MagicNumberCandidate, Trial);
+                    std::printf("OK (found 0x%016" PRIx64 " with %7" PRIu64
+                                " trials).",
+                                MagicNumberCandidate, Trial);
                     std::cout << std::endl;
                 }
                 break;
@@ -812,19 +825,24 @@ void setBishopPextTable() {
 
     uint16_t BishopMasterCount = 0;
     for (Square Sq : Squares) {
-        BishopMagicBB[Sq].MagicNumber[0] = diagSWNEPatternMask(Sq).horizontalOr();
-        BishopMagicBB[Sq].MagicNumber[1] = diagNWSEPatternMask(Sq).horizontalOr();
+        BishopMagicBB[Sq].MagicNumber[0] =
+            diagSWNEPatternMask(Sq).horizontalOr();
+        BishopMagicBB[Sq].MagicNumber[1] =
+            diagNWSEPatternMask(Sq).horizontalOr();
 
         {
             const uint16_t NumBit = NumBits[Sq];
             for (uint16_t Pattern = 0; Pattern < (1 << NumBit); ++Pattern) {
                 const auto& [AttackBB, BB] = diagPatternBB(Sq, Pattern);
 
-                const uint64_t Base = (BB & BishopMagicBB[Sq].Mask).horizontalOr();
+                const uint64_t Base =
+                    (BB & BishopMagicBB[Sq].Mask).horizontalOr();
 
                 const Bitboard AttackBBs[2] = {
-                    AttackBB & (DirectionBB[11 + NorthEast][Sq] | DirectionBB[11 + SouthWest][Sq]),
-                    AttackBB & (DirectionBB[11 + SouthEast][Sq] | DirectionBB[11 + NorthWest][Sq]),
+                    AttackBB & (DirectionBB[11 + NorthEast][Sq] |
+                                DirectionBB[11 + SouthWest][Sq]),
+                    AttackBB & (DirectionBB[11 + SouthEast][Sq] |
+                                DirectionBB[11 + NorthWest][Sq]),
                 };
 
                 for (int I = 0; I < 2; ++I) {
@@ -838,8 +856,10 @@ void setBishopPextTable() {
                         }
                     }
                     if (!TargetFound) {
-                        if (BishopMasterCount == BishopMagicMasterCountMax - 1) {
-                            throw std::runtime_error("No room to store BishopMagicMaster.");
+                        if (BishopMasterCount ==
+                            BishopMagicMasterCountMax - 1) {
+                            throw std::runtime_error(
+                                "No room to store BishopMagicMaster.");
                         }
 
                         BishopMagicMaster[BishopMasterCount] = AttackBBs[I];
@@ -847,11 +867,13 @@ void setBishopPextTable() {
                         ++BishopMasterCount;
                     }
 
-                    uint64_t Index = (I == 0)
-                        ? _pext_u64(Base, BishopMagicBB[Sq].MagicNumber[0])
-                        : _pext_u64(Base, BishopMagicBB[Sq].MagicNumber[1]);
+                    uint64_t Index =
+                        (I == 0)
+                            ? _pext_u64(Base, BishopMagicBB[Sq].MagicNumber[0])
+                            : _pext_u64(Base, BishopMagicBB[Sq].MagicNumber[1]);
 
-                    BishopMagicBB[Sq].AttackBB[I][Index] = &BishopMagicMaster[TargetIndex];
+                    BishopMagicBB[Sq].AttackBB[I][Index] =
+                        &BishopMagicMaster[TargetIndex];
                 }
             }
         }
@@ -873,7 +895,8 @@ void setRookMagicMasks() {
 #if !defined(USE_BMI2) || !defined(USE_PEXT)
 
 std::tuple<bool, std::vector<Bitboard*>, std::vector<Bitboard*>>
-isRookMagicNumberOK(Square Sq, uint64_t MagicNumber, uint16_t *RookMasterCount) {
+isRookMagicNumberOK(Square Sq, uint64_t MagicNumber,
+                    uint16_t* RookMasterCount) {
     std::vector<Bitboard*> Target1(1 << CrossMagicBits, nullptr);
     std::vector<Bitboard*> Target2(1 << CrossMagicBits, nullptr);
     std::vector<bool> IsUsed1(1 << DiagMagicBits, false);
@@ -923,7 +946,8 @@ isRookMagicNumberOK(Square Sq, uint64_t MagicNumber, uint16_t *RookMasterCount) 
             }
             if (!TargetFound) {
                 if (*RookMasterCount == RookMagicMasterCountMax - 1) {
-                    throw std::runtime_error("No room to store RookMagicMaster.");
+                    throw std::runtime_error(
+                        "No room to store RookMagicMaster.");
                 }
 
                 RookMagicMaster[*RookMasterCount] = AttackBB;
@@ -957,7 +981,8 @@ isRookMagicNumberOK(Square Sq, uint64_t MagicNumber, uint16_t *RookMasterCount) 
             }
             if (!TargetFound) {
                 if (*RookMasterCount == RookMagicMasterCountMax - 1) {
-                    throw std::runtime_error("No room to store RookMagicMaster.");
+                    throw std::runtime_error(
+                        "No room to store RookMagicMaster.");
                 }
 
                 RookMagicMaster[*RookMasterCount] = AttackBB;
@@ -987,7 +1012,8 @@ void computeRookMagicBitboard() {
 
     for (Square Sq : Squares) {
         if (!IsPrecomputed) {
-            std::printf("Searching for a rook magic number for square %2d ... ", Sq);
+            std::printf("Searching for a rook magic number for square %2d ... ",
+                        Sq);
             std::cout << std::flush;
         }
 
@@ -996,7 +1022,8 @@ void computeRookMagicBitboard() {
                 (IsPrecomputed) ? RookMagicBB[Sq].MagicNumber
                                 : generateMagicNumberCandidate();
 
-            const auto& [Result, Target1, Target2] = isRookMagicNumberOK(Sq, MagicNumberCandidate, &RookMasterCount);
+            const auto& [Result, Target1, Target2] =
+                isRookMagicNumberOK(Sq, MagicNumberCandidate, &RookMasterCount);
             if (Result) {
                 RookMagicBB[Sq].MagicNumber = MagicNumberCandidate;
                 std::memcpy(static_cast<void*>(RookMagicBB[Sq].AttackBB[0]),
@@ -1007,8 +1034,9 @@ void computeRookMagicBitboard() {
                             (1 << CrossMagicBits) * sizeof(Bitboard*));
 
                 if (!IsPrecomputed) {
-                    std::printf("OK (found 0x%016" PRIx64 " with %7" PRIu64 " trials).",
-                           MagicNumberCandidate, Trial);
+                    std::printf("OK (found 0x%016" PRIx64 " with %7" PRIu64
+                                " trials).",
+                                MagicNumberCandidate, Trial);
                     std::cout << std::endl;
                 }
                 break;
@@ -1051,18 +1079,22 @@ void setRookPextTable() {
     uint16_t RookMasterCount = 0;
     for (Square Sq : Squares) {
         RookMagicBB[Sq].MagicNumber[0] = verticalPatternMask(Sq).horizontalOr();
-        RookMagicBB[Sq].MagicNumber[1] = horizontalPatternMask(Sq).horizontalOr();
+        RookMagicBB[Sq].MagicNumber[1] =
+            horizontalPatternMask(Sq).horizontalOr();
 
         {
             const uint16_t NumBit = NumBits[Sq];
             for (uint16_t Pattern = 0; Pattern < (1 << NumBit); ++Pattern) {
                 const auto& [AttackBB, BB] = crossPatternBB(Sq, Pattern);
 
-                const uint64_t Base = (BB & RookMagicBB[Sq].Mask).horizontalOr();
+                const uint64_t Base =
+                    (BB & RookMagicBB[Sq].Mask).horizontalOr();
 
                 const Bitboard AttackBBs[2] = {
-                    AttackBB & (DirectionBB[11 + North][Sq] | DirectionBB[11 + South][Sq]),
-                    AttackBB & (DirectionBB[11 + East][Sq] | DirectionBB[11 + West][Sq]),
+                    AttackBB & (DirectionBB[11 + North][Sq] |
+                                DirectionBB[11 + South][Sq]),
+                    AttackBB & (DirectionBB[11 + East][Sq] |
+                                DirectionBB[11 + West][Sq]),
                 };
 
                 for (int I = 0; I < 2; ++I) {
@@ -1077,7 +1109,8 @@ void setRookPextTable() {
                     }
                     if (!TargetFound) {
                         if (RookMasterCount == RookMagicMasterCountMax - 1) {
-                            throw std::runtime_error("No room to store RookMagicMaster.");
+                            throw std::runtime_error(
+                                "No room to store RookMagicMaster.");
                         }
 
                         RookMagicMaster[RookMasterCount] = AttackBBs[I];
@@ -1085,11 +1118,13 @@ void setRookPextTable() {
                         ++RookMasterCount;
                     }
 
-                    uint64_t Index = (I == 0)
-                        ? _pext_u64(Base, RookMagicBB[Sq].MagicNumber[0])
-                        : _pext_u64(Base, RookMagicBB[Sq].MagicNumber[1]);
+                    uint64_t Index =
+                        (I == 0)
+                            ? _pext_u64(Base, RookMagicBB[Sq].MagicNumber[0])
+                            : _pext_u64(Base, RookMagicBB[Sq].MagicNumber[1]);
 
-                    RookMagicBB[Sq].AttackBB[I][Index] = &RookMagicMaster[TargetIndex];
+                    RookMagicBB[Sq].AttackBB[I][Index] =
+                        &RookMagicMaster[TargetIndex];
                 }
             }
         }
@@ -1110,11 +1145,15 @@ void initializeLineBB() {
                 std::abs(squareToRank(Sq1) - squareToRank(Sq2))) {
                 LineBB[Sq1][Sq2] = Bitboard::ZeroBB();
                 LineBB[Sq1][Sq2] |=
-                    (SquareBB[Sq1] | DirectionBB[11 + NorthEast][Sq1] | DirectionBB[11 + SouthWest][Sq1]) &
-                    (SquareBB[Sq2] | DirectionBB[11 + NorthEast][Sq2] | DirectionBB[11 + SouthWest][Sq2]);
+                    (SquareBB[Sq1] | DirectionBB[11 + NorthEast][Sq1] |
+                     DirectionBB[11 + SouthWest][Sq1]) &
+                    (SquareBB[Sq2] | DirectionBB[11 + NorthEast][Sq2] |
+                     DirectionBB[11 + SouthWest][Sq2]);
                 LineBB[Sq1][Sq2] |=
-                    (SquareBB[Sq1] | DirectionBB[11 + SouthEast][Sq1] | DirectionBB[11 + NorthWest][Sq1]) &
-                    (SquareBB[Sq2] | DirectionBB[11 + SouthEast][Sq2] | DirectionBB[11 + NorthWest][Sq2]);
+                    (SquareBB[Sq1] | DirectionBB[11 + SouthEast][Sq1] |
+                     DirectionBB[11 + NorthWest][Sq1]) &
+                    (SquareBB[Sq2] | DirectionBB[11 + SouthEast][Sq2] |
+                     DirectionBB[11 + NorthWest][Sq2]);
             } else if (squareToFile(Sq1) == squareToFile(Sq2)) {
                 LineBB[Sq1][Sq2].copyFrom(FileBB[squareToFile(Sq1)]);
             } else if (squareToRank(Sq1) == squareToRank(Sq2)) {
@@ -1146,30 +1185,30 @@ void initializeBetweenBB() {
                 continue;
             }
 
-            BetweenBB[Sq1][Sq2] |=
-                DirectionBB[11 + North][Sq1] & DirectionBB[11 + South][Sq2] &
-                ~SquareBB[Sq1] & ~SquareBB[Sq2];
-            BetweenBB[Sq1][Sq2] |=
-                DirectionBB[11 + NorthEast][Sq1] & DirectionBB[11 + SouthWest][Sq2] &
-                ~SquareBB[Sq1] & ~SquareBB[Sq2];
-            BetweenBB[Sq1][Sq2] |=
-                DirectionBB[11 + East][Sq1] & DirectionBB[11 + West][Sq2] &
-                ~SquareBB[Sq1] & ~SquareBB[Sq2];
-            BetweenBB[Sq1][Sq2] |=
-                DirectionBB[11 + SouthEast][Sq1] & DirectionBB[11 + NorthWest][Sq2] &
-                ~SquareBB[Sq1] & ~SquareBB[Sq2];
-            BetweenBB[Sq1][Sq2] |=
-                DirectionBB[11 + South][Sq1] & DirectionBB[11 + North][Sq2] &
-                ~SquareBB[Sq1] & ~SquareBB[Sq2];
-            BetweenBB[Sq1][Sq2] |=
-                DirectionBB[11 + SouthWest][Sq1] & DirectionBB[11 + NorthEast][Sq2] &
-                ~SquareBB[Sq1] & ~SquareBB[Sq2];
-            BetweenBB[Sq1][Sq2] |=
-                DirectionBB[11 + West][Sq1] & DirectionBB[11 + East][Sq2] &
-                ~SquareBB[Sq1] & ~SquareBB[Sq2];
-            BetweenBB[Sq1][Sq2] |=
-                DirectionBB[11 + NorthWest][Sq1] & DirectionBB[11 + SouthEast][Sq2] &
-                ~SquareBB[Sq1] & ~SquareBB[Sq2];
+            BetweenBB[Sq1][Sq2] |= DirectionBB[11 + North][Sq1] &
+                                   DirectionBB[11 + South][Sq2] &
+                                   ~SquareBB[Sq1] & ~SquareBB[Sq2];
+            BetweenBB[Sq1][Sq2] |= DirectionBB[11 + NorthEast][Sq1] &
+                                   DirectionBB[11 + SouthWest][Sq2] &
+                                   ~SquareBB[Sq1] & ~SquareBB[Sq2];
+            BetweenBB[Sq1][Sq2] |= DirectionBB[11 + East][Sq1] &
+                                   DirectionBB[11 + West][Sq2] &
+                                   ~SquareBB[Sq1] & ~SquareBB[Sq2];
+            BetweenBB[Sq1][Sq2] |= DirectionBB[11 + SouthEast][Sq1] &
+                                   DirectionBB[11 + NorthWest][Sq2] &
+                                   ~SquareBB[Sq1] & ~SquareBB[Sq2];
+            BetweenBB[Sq1][Sq2] |= DirectionBB[11 + South][Sq1] &
+                                   DirectionBB[11 + North][Sq2] &
+                                   ~SquareBB[Sq1] & ~SquareBB[Sq2];
+            BetweenBB[Sq1][Sq2] |= DirectionBB[11 + SouthWest][Sq1] &
+                                   DirectionBB[11 + NorthEast][Sq2] &
+                                   ~SquareBB[Sq1] & ~SquareBB[Sq2];
+            BetweenBB[Sq1][Sq2] |= DirectionBB[11 + West][Sq1] &
+                                   DirectionBB[11 + East][Sq2] &
+                                   ~SquareBB[Sq1] & ~SquareBB[Sq2];
+            BetweenBB[Sq1][Sq2] |= DirectionBB[11 + NorthWest][Sq1] &
+                                   DirectionBB[11 + SouthEast][Sq2] &
+                                   ~SquareBB[Sq1] & ~SquareBB[Sq2];
         }
     }
 }
@@ -1183,10 +1222,11 @@ void initializeDiagBB() {
                 continue;
             }
 
-            const auto Direction = SquareDirection[(std::size_t)Sq1][(std::size_t)Sq2];
+            const auto Direction =
+                SquareDirection[(std::size_t)Sq1][(std::size_t)Sq2];
 
-            if (Direction == NorthWest || Direction == NorthEast
-                || Direction == SouthWest || Direction == SouthEast) {
+            if (Direction == NorthWest || Direction == NorthEast ||
+                Direction == SouthWest || Direction == SouthEast) {
                 DiagBB[Sq1].toggleBit(Sq2);
             }
         }
@@ -1202,10 +1242,11 @@ void initializeCrossBB() {
                 continue;
             }
 
-            const auto Direction = SquareDirection[(std::size_t)Sq1][(std::size_t)Sq2];
+            const auto Direction =
+                SquareDirection[(std::size_t)Sq1][(std::size_t)Sq2];
 
-            if (Direction == North || Direction == East
-                || Direction == South || Direction == West) {
+            if (Direction == North || Direction == East || Direction == South ||
+                Direction == West) {
                 CrossBB[Sq1].toggleBit(Sq2);
             }
         }
@@ -1221,7 +1262,8 @@ void initializeForwardBB() {
                 continue;
             }
 
-            const auto Direction = SquareDirection[(std::size_t)Sq1][(std::size_t)Sq2];
+            const auto Direction =
+                SquareDirection[(std::size_t)Sq1][(std::size_t)Sq2];
 
             if (Direction == North) {
                 ForwardBB[Sq1].toggleBit(Sq2);
@@ -1239,7 +1281,8 @@ void initializeBackwardBB() {
                 continue;
             }
 
-            const auto Direction = SquareDirection[(std::size_t)Sq1][(std::size_t)Sq2];
+            const auto Direction =
+                SquareDirection[(std::size_t)Sq1][(std::size_t)Sq2];
 
             if (Direction == South) {
                 BackwardBB[Sq1].toggleBit(Sq2);
@@ -1247,7 +1290,6 @@ void initializeBackwardBB() {
         }
     }
 }
-
 
 } // namespace
 

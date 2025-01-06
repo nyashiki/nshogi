@@ -108,7 +108,8 @@ struct Position {
     ///
     /// @brief Check if two positions are equal.
     /// @param Pos The position to compare with.
-    /// @param IgnorePlyOffset Whether to ignore the ply offset at the initial position.
+    /// @param IgnorePlyOffset Whether to ignore the ply offset at the initial
+    /// position.
     ///
     bool equals(const Position& Pos, bool IgnorePlyOffset = false) const;
 

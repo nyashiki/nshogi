@@ -19,7 +19,6 @@
 namespace nshogi {
 namespace book {
 
-
 struct Entry {
  public:
     Entry(const char* Sfen);

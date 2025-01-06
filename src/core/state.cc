@@ -105,16 +105,16 @@ Move32 State::getMove32FromMove16(Move16 M16) const {
     return Impl->getMove32FromMove16(M16);
 }
 
-uint8_t State::computePieceScore(
-    Color C,
-    uint8_t SliderScoreUnit,
-    uint8_t StepScoreUnit,
-    bool OnlyInPromotableZone) const {
+uint8_t State::computePieceScore(Color C, uint8_t SliderScoreUnit,
+                                 uint8_t StepScoreUnit,
+                                 bool OnlyInPromotableZone) const {
 
     if (C == Black) {
-        return Impl->computePieceScore<Black>(SliderScoreUnit, StepScoreUnit, OnlyInPromotableZone);
+        return Impl->computePieceScore<Black>(SliderScoreUnit, StepScoreUnit,
+                                              OnlyInPromotableZone);
     } else {
-        return Impl->computePieceScore<White>(SliderScoreUnit, StepScoreUnit, OnlyInPromotableZone);
+        return Impl->computePieceScore<White>(SliderScoreUnit, StepScoreUnit,
+                                              OnlyInPromotableZone);
     }
 }
 

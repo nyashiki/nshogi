@@ -9,16 +9,16 @@
 
 #include "book.h"
 
-#include <memory>
 #include "../core/statebuilder.h"
 #include "../io/sfen.h"
-
-#include <fstream>
 #include <memory>
+
+#include <cmath>
+#include <fstream>
 #include <iostream>
+#include <memory>
 #include <sstream>
 #include <string>
-#include <cmath>
 
 namespace nshogi {
 namespace book {
@@ -30,7 +30,8 @@ Book::Book(Book&& B) noexcept {
     Entries = std::move(B.Entries);
 };
 
-Book Book::loadYaneuraOuFormat(const char* Path, double PonanzaConstant, const char* Desc) {
+Book Book::loadYaneuraOuFormat(const char* Path, double PonanzaConstant,
+                               const char* Desc) {
     Book B;
 
     std::ifstream Ifs(Path);
@@ -48,7 +49,8 @@ Book Book::loadYaneuraOuFormat(const char* Path, double PonanzaConstant, const c
 
         if (Line.size() > 4 && Line.starts_with("sfen")) {
             // Set a target position.
-            State = std::make_unique<core::State>(io::sfen::StateBuilder::newState(Line.substr(5)));
+            State = std::make_unique<core::State>(
+                io::sfen::StateBuilder::newState(Line.substr(5)));
             continue;
         }
 
@@ -65,16 +67,19 @@ Book Book::loadYaneuraOuFormat(const char* Path, double PonanzaConstant, const c
 
         auto Move = io::sfen::sfenToMove32(State->getPosition(), SMove);
 
-        Entry* E = B.addEntry(io::sfen::positionToSfen(State->getPosition()).c_str());
+        Entry* E =
+            B.addEntry(io::sfen::positionToSfen(State->getPosition()).c_str());
         BookMove* BM = E->addBookMove(Move);
 
         State->doMove(Move);
-        auto CounterMove = (SCounterMove == "none")
-            ? core::Move32::MoveNone()
-            : io::sfen::sfenToMove32(State->getPosition(), SCounterMove);
+        auto CounterMove =
+            (SCounterMove == "none")
+                ? core::Move32::MoveNone()
+                : io::sfen::sfenToMove32(State->getPosition(), SCounterMove);
         State->undoMove();
 
-        const double WinRate = 1.0 / (1.0 + std::exp(-Evaluation / PonanzaConstant));
+        const double WinRate =
+            1.0 / (1.0 + std::exp(-Evaluation / PonanzaConstant));
 
         BM->getMeta().setCount(1);
         BM->getMeta().setWinRate(WinRate);
@@ -90,7 +95,8 @@ Book Book::loadYaneuraOuFormat(const char* Path, double PonanzaConstant, const c
     return B;
 }
 
-Book Book::makeBookFromSfens(const char* Path, uint16_t PlyLimit, uint16_t PlyCutoff, const char* Desc) {
+Book Book::makeBookFromSfens(const char* Path, uint16_t PlyLimit,
+                             uint16_t PlyCutoff, const char* Desc) {
     Book B;
 
     B.makeBookFromSfensInternal(Path, PlyLimit, PlyCutoff, Desc);
@@ -98,7 +104,8 @@ Book Book::makeBookFromSfens(const char* Path, uint16_t PlyLimit, uint16_t PlyCu
     return B;
 }
 
-void Book::patchFromSfens(const char* Path, uint16_t PlyLimit, uint16_t PlyCutoff, const char* Desc) {
+void Book::patchFromSfens(const char* Path, uint16_t PlyLimit,
+                          uint16_t PlyCutoff, const char* Desc) {
     removePositionsInSfens(Path);
     makeBookFromSfensInternal(Path, PlyLimit, PlyCutoff, Desc);
 }
@@ -134,7 +141,7 @@ std::size_t Book::size() const {
 void Book::dump(const char* Path) const {
     std::ofstream Ofs(Path, std::ios::out | std::ios::binary);
 
-    for (const auto& E: Entries) {
+    for (const auto& E : Entries) {
         E.second->dump(Ofs);
     }
 }
@@ -158,8 +165,9 @@ Book Book::load(const char* Path) {
             std::cout << "FileSize: " << FileSize << std::endl;
             std::cout << "EntrySize: " << EntrySize << std::endl;
 
-            throw std::runtime_error("FileSize must be divided by the entry size.\n"
-                    "Unfortunately, the file is possibly broken.");
+            throw std::runtime_error(
+                "FileSize must be divided by the entry size.\n"
+                "Unfortunately, the file is possibly broken.");
         }
 
         Ifs.seekg(0, std::ios_base::beg);
@@ -167,7 +175,8 @@ Book Book::load(const char* Path) {
     }
 
     for (std::size_t I = 0; I < NumEntries; ++I) {
-        std::unique_ptr<Entry> NewEntry = std::make_unique<Entry>(Entry::load(Ifs));
+        std::unique_ptr<Entry> NewEntry =
+            std::make_unique<Entry>(Entry::load(Ifs));
         std::string Key = std::string(NewEntry->getSfen());
         B.Entries.emplace(std::move(Key), std::move(NewEntry));
     }
@@ -175,7 +184,8 @@ Book Book::load(const char* Path) {
     return B;
 }
 
-void Book::makeBookFromSfensInternal(const char* Path, uint16_t PlyLimit, uint16_t PlyCutoff, const char* Desc) {
+void Book::makeBookFromSfensInternal(const char* Path, uint16_t PlyLimit,
+                                     uint16_t PlyCutoff, const char* Desc) {
     std::ifstream Ifs(Path);
     std::string Line;
 
@@ -195,14 +205,16 @@ void Book::makeBookFromSfensInternal(const char* Path, uint16_t PlyLimit, uint16
                 break;
             }
 
-            if (PlyCutoff > 0 && State.getPly() >= PlyCutoff && Ply >= State.getPly() - PlyCutoff) {
+            if (PlyCutoff > 0 && State.getPly() >= PlyCutoff &&
+                Ply >= State.getPly() - PlyCutoff) {
                 break;
             }
 
             const auto& Move = State.getHistoryMove(Ply);
 
             if (Winner == Replay.getSideToMove()) {
-                Entry* E = addEntry(io::sfen::positionToSfen(Replay.getPosition()).c_str());
+                Entry* E = addEntry(
+                    io::sfen::positionToSfen(Replay.getPosition()).c_str());
 
                 BookMove* BM = E->addBookMove(Move);
 
@@ -245,7 +257,8 @@ void Book::removePositionsInSfens(const char* Path) {
             const auto& Move = State.getHistoryMove(Ply);
 
             if (Winner == Replay.getSideToMove()) {
-                Entry* E = findEntry(io::sfen::positionToSfen(Replay.getPosition()).c_str());
+                Entry* E = findEntry(
+                    io::sfen::positionToSfen(Replay.getPosition()).c_str());
 
                 if (E != nullptr) {
                     E->clear();

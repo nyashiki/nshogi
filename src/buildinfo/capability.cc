@@ -48,6 +48,6 @@ bool neonAvailable() {
     return false;
 }
 
-} // namespace build_info
 } // namespace capability
+} // namespace build_info
 } // namespace nshogi

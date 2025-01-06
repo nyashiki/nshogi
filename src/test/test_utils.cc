@@ -7,9 +7,9 @@
 // SPDX-License-Identifier: MIT
 //
 
-#include "common.h"
-#include "../core/types.h"
 #include "../core/internal/utils.h"
+#include "../core/types.h"
+#include "common.h"
 
 TEST(Utils, IsSameLine) {
     using namespace nshogi::core;

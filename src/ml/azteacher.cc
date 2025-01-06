@@ -8,15 +8,14 @@
 //
 
 #include "azteacher.h"
-#include "../io/sfen.h"
 #include "../core/movegenerator.h"
+#include "../io/sfen.h"
 
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
-#include <string>
 #include <random>
-
+#include <string>
 
 namespace nshogi {
 namespace ml {
@@ -65,18 +64,21 @@ void AZTeacher::corruptMyself() {
         std::memcpy(Moves[I].data(), &Buffer[I], 6 * sizeof(char));
     }
 
-    std::memcpy(reinterpret_cast<char*>(Visits.data()), Buffer, NumSavedPlayouts * sizeof(uint16_t));
+    std::memcpy(reinterpret_cast<char*>(Visits.data()), Buffer,
+                NumSavedPlayouts * sizeof(uint16_t));
 
     EndingRule = (core::EndingRule)mt();
     MaxPly = (uint16_t)mt();
 
-    std::memcpy(reinterpret_cast<char*>(&BlackDrawValue), &Buffer[512], sizeof(float));
-    std::memcpy(reinterpret_cast<char*>(&WhiteDrawValue), &Buffer[544], sizeof(float));
+    std::memcpy(reinterpret_cast<char*>(&BlackDrawValue), &Buffer[512],
+                sizeof(float));
+    std::memcpy(reinterpret_cast<char*>(&WhiteDrawValue), &Buffer[544],
+                sizeof(float));
 
     Declared = (bool)mt();
 }
 
-bool AZTeacher::equals(const AZTeacher &T) const {
+bool AZTeacher::equals(const AZTeacher& T) const {
     if (std::memcmp(Sfen, T.Sfen, SfenCStrLength) != 0) {
         return false;
     }
@@ -111,13 +113,13 @@ bool AZTeacher::equals(const AZTeacher &T) const {
 
     if (std::memcmp(reinterpret_cast<const char*>(&BlackDrawValue),
                     reinterpret_cast<const char*>(&T.BlackDrawValue),
-                sizeof(float)) != 0) {
+                    sizeof(float)) != 0) {
         return false;
     }
 
     if (std::memcmp(reinterpret_cast<const char*>(&WhiteDrawValue),
                     reinterpret_cast<const char*>(&T.WhiteDrawValue),
-                sizeof(float)) != 0) {
+                    sizeof(float)) != 0) {
         return false;
     }
 
@@ -135,7 +137,8 @@ bool AZTeacher::checkSanity(int Level) const {
             return false;
         }
 
-        if ((Winner != core::Black) && (Winner != core::White) && (Winner != core::NoColor)) {
+        if ((Winner != core::Black) && (Winner != core::White) &&
+            (Winner != core::NoColor)) {
             return false;
         }
 
@@ -168,17 +171,20 @@ bool AZTeacher::checkSanity(int Level) const {
     }
 
     if (Level >= 2) {
-        const auto State = nshogi::io::sfen::StateBuilder::newState(std::string(Sfen));
+        const auto State =
+            nshogi::io::sfen::StateBuilder::newState(std::string(Sfen));
         // Check if SideToMove is identical to that of Sfen.
         if (State.getSideToMove() != SideToMove) {
             return false;
         }
 
         // Check if all moves is legal.
-        const auto LegalMoves = nshogi::core::MoveGenerator::generateLegalMoves(State);
+        const auto LegalMoves =
+            nshogi::core::MoveGenerator::generateLegalMoves(State);
 
         for (uint8_t I = 0; I < NumMoves; ++I) {
-            const auto Move = nshogi::io::sfen::sfenToMove32(State.getPosition(), std::string(Moves[I].data()));
+            const auto Move = nshogi::io::sfen::sfenToMove32(
+                State.getPosition(), std::string(Moves[I].data()));
 
             if (LegalMoves.find(Move) == LegalMoves.end()) {
                 return false;
@@ -188,7 +194,6 @@ bool AZTeacher::checkSanity(int Level) const {
 
     return true;
 }
-
 
 } // namespace ml
 } // namespace nshogi

@@ -11,9 +11,9 @@
 #define NSHOGI_BOOK_BOOK_H
 
 #include "entry.h"
-#include <vector>
 #include <memory>
 #include <unordered_map>
+#include <vector>
 
 namespace nshogi {
 namespace book {
@@ -26,9 +26,14 @@ class Book {
     Book& operator=(const Book&) = delete;
     Book& operator=(Book&&) = delete;
 
-    static Book loadYaneuraOuFormat(const char* Path, double PonanzaConstant = 600, const char* Description = nullptr);
-    static Book makeBookFromSfens(const char* Path, uint16_t PlyLimit, uint16_t PlyCutoff, const char* Description = nullptr);
-    void patchFromSfens(const char* Path, uint16_t PlyLimit, uint16_t PlyCutoff, const char* Description = nullptr);
+    static Book loadYaneuraOuFormat(const char* Path,
+                                    double PonanzaConstant = 600,
+                                    const char* Description = nullptr);
+    static Book makeBookFromSfens(const char* Path, uint16_t PlyLimit,
+                                  uint16_t PlyCutoff,
+                                  const char* Description = nullptr);
+    void patchFromSfens(const char* Path, uint16_t PlyLimit, uint16_t PlyCutoff,
+                        const char* Description = nullptr);
 
     Entry* addEntry(const char* Sfen);
     Entry* findEntry(const char* Sfen);
@@ -39,7 +44,9 @@ class Book {
     static Book load(const char* Path);
 
  private:
-    void makeBookFromSfensInternal(const char* Path, uint16_t PlyLimit, uint16_t PlyCutOff, const char* Description = nullptr);
+    void makeBookFromSfensInternal(const char* Path, uint16_t PlyLimit,
+                                   uint16_t PlyCutOff,
+                                   const char* Description = nullptr);
     void removePositionsInSfens(const char* Path);
 
     std::unordered_map<std::string, std::unique_ptr<Entry>> Entries;

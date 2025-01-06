@@ -13,11 +13,11 @@
 #include "../types.h"
 
 #include <bit>
-#include <functional>
-#include <iostream>
 #include <cassert>
 #include <cinttypes>
 #include <cstdint>
+#include <functional>
+#include <iostream>
 
 #if defined(USE_SSE2)
 
@@ -103,32 +103,35 @@ struct alignas(16) Bitboard {
         }
 #elif defined(USE_NEON)
         if (!std::is_constant_evaluated()) {
-            return vcombine_u64(
-                    vcreate_u64(0x7fffffffffffffff),
-                    vcreate_u64(0x3ffff));
+            return vcombine_u64(vcreate_u64(0x7fffffffffffffff),
+                                vcreate_u64(0x3ffff));
         }
 #endif
 
         return Bitboard(0x3ffff, 0x7fffffffffffffff);
     }
 
-    constexpr Bitboard(uint64_t High, uint64_t Low) : Primitive{Low, High} {
+    constexpr Bitboard(uint64_t High, uint64_t Low)
+        : Primitive{Low, High} {
     }
 
 #if defined(USE_SSE2)
-    constexpr Bitboard(const __m128i& BB) : Bitboard_(BB) {
+    constexpr Bitboard(const __m128i& BB)
+        : Bitboard_(BB) {
     }
 #elif defined(USE_NEON)
-    constexpr Bitboard(const uint64x2_t& BB) : Bitboard_(BB) {
+    constexpr Bitboard(const uint64x2_t& BB)
+        : Bitboard_(BB) {
     }
 #endif
 
-
 #if defined(USE_SSE2) || defined(USE_NEON)
-    Bitboard(const Bitboard& BB) : Bitboard_(BB.Bitboard_) {
+    Bitboard(const Bitboard& BB)
+        : Bitboard_(BB.Bitboard_) {
     }
 #else
-    constexpr Bitboard(const Bitboard& BB) : Primitive { BB.getPrimitive<false>(), BB.getPrimitive<true>() } {
+    constexpr Bitboard(const Bitboard& BB)
+        : Primitive{BB.getPrimitive<false>(), BB.getPrimitive<true>()} {
     }
 #endif
 
@@ -170,7 +173,8 @@ struct alignas(16) Bitboard {
 #elif defined(USE_NEON)
         if (!std::is_constant_evaluated()) {
             uint64x2_t Temp = vandq_u64(Bitboard_, Bitboard_);
-            return (vgetq_lane_u64(Temp, 0) == 0) && (vgetq_lane_u64(Temp, 1) == 0);
+            return (vgetq_lane_u64(Temp, 0) == 0) &&
+                   (vgetq_lane_u64(Temp, 1) == 0);
         }
 #endif
         return Primitive[0] == 0 && Primitive[1] == 0;
@@ -184,7 +188,8 @@ struct alignas(16) Bitboard {
 #elif defined(USE_NEON)
         if (!std::is_constant_evaluated()) {
             uint64x2_t Temp = vandq_u64(Bitboard_, SquareBB[Sq].Bitboard_);
-            return (vgetq_lane_u64(Temp, 0) != 0) || (vgetq_lane_u64(Temp, 1) != 0);
+            return (vgetq_lane_u64(Temp, 0) != 0) ||
+                   (vgetq_lane_u64(Temp, 1) != 0);
         }
 #endif
         return !(*this & SquareBB[Sq]).isZero();
@@ -232,7 +237,7 @@ struct alignas(16) Bitboard {
         if (std::is_constant_evaluated()) {
             Bitboard Res(Primitive[1], Primitive[0]);
             Res |= BB;
-            return { Res.Primitive[1], Res.Primitive[0] };
+            return {Res.Primitive[1], Res.Primitive[0]};
         } else {
             Bitboard Res = *this;
             Res |= BB;
@@ -261,7 +266,7 @@ struct alignas(16) Bitboard {
         if (std::is_constant_evaluated()) {
             Bitboard Res(Primitive[1], Primitive[0]);
             Res &= BB;
-            return { Res.Primitive[1], Res.Primitive[0] };
+            return {Res.Primitive[1], Res.Primitive[0]};
         } else {
             Bitboard Res = *this;
             Res &= BB;
@@ -290,7 +295,7 @@ struct alignas(16) Bitboard {
         if (std::is_constant_evaluated()) {
             Bitboard Res(Primitive[1], Primitive[0]);
             Res ^= BB;
-            return { Res.Primitive[1], Res.Primitive[0] };
+            return {Res.Primitive[1], Res.Primitive[0]};
         } else {
             Bitboard Res = *this;
             Res ^= BB;
@@ -308,7 +313,8 @@ struct alignas(16) Bitboard {
             return vbicq_u64(BB.Bitboard_, Bitboard_);
         }
 #endif
-        return { ~Primitive[1] & BB.Primitive[1], ~Primitive[0] & BB.Primitive[0] };
+        return {~Primitive[1] & BB.Primitive[1],
+                ~Primitive[0] & BB.Primitive[0]};
     }
 
     constexpr Bitboard operator~() const {
@@ -347,10 +353,11 @@ struct alignas(16) Bitboard {
     constexpr Bitboard getRightShiftSi128() const {
         // We can't use _mm_slli_si128 here when Shift % 8 == 0 holds because
         // the bitboard is composed of two 64-bit variables.
-        // One of them uses 63 bits to represent the first 7 files (7 files * 9 squares = 63),
-        // and the other one uses 18 bits for the remaining 2 files (2 files * 9 squares = 18).
-        // Therefore, we must pay attention to the 1 bit of the former one.
-        // Using _mm_slli_si128 collapses this configuration.
+        // One of them uses 63 bits to represent the first 7 files (7 files * 9
+        // squares = 63), and the other one uses 18 bits for the remaining 2
+        // files (2 files * 9 squares = 18). Therefore, we must pay attention to
+        // the 1 bit of the former one. Using _mm_slli_si128 collapses this
+        // configuration.
 #if defined(USE_SSE2)
         if (!std::is_constant_evaluated()) {
             const uint64_t Carry = Primitive[1] << (63 - Shift);
@@ -360,7 +367,8 @@ struct alignas(16) Bitboard {
         }
 #endif
         return Bitboard(Primitive[1] >> Shift,
-                        (Primitive[0] >> Shift) | (Primitive[1] << (63 - Shift)));
+                        (Primitive[0] >> Shift) |
+                            (Primitive[1] << (63 - Shift)));
     }
 
     template <int Shift>
@@ -402,7 +410,8 @@ struct alignas(16) Bitboard {
             return BB;
         }
 #endif
-        return Bitboard((Primitive[1] << Shift) | (Primitive[0] >> (63 - Shift)),
+        return Bitboard((Primitive[1] << Shift) |
+                            (Primitive[0] >> (63 - Shift)),
                         Primitive[0] << Shift);
     }
 
@@ -416,7 +425,8 @@ struct alignas(16) Bitboard {
         uint8x16_t Compare = vceqq_u8(Bitboard_, BB.Bitboard_);
         return vminvq_u8(Compare) == 0xFF;
 #endif
-        return Primitive[0] == BB.Primitive[0] && Primitive[1] == BB.Primitive[1];
+        return Primitive[0] == BB.Primitive[0] &&
+               Primitive[1] == BB.Primitive[1];
     }
 
     constexpr bool operator!=(const Bitboard& BB) const {
@@ -429,10 +439,12 @@ struct alignas(16) Bitboard {
         uint8x16_t Compare = vceqq_u8(Bitboard_, BB.Bitboard_);
         return vminvq_u8(Compare) != 0xFF;
 #endif
-        return (Primitive[0] != BB.Primitive[0]) || (Primitive[1] != BB.Primitive[1]);
+        return (Primitive[0] != BB.Primitive[0]) ||
+               (Primitive[1] != BB.Primitive[1]);
     }
 
-    [[maybe_unused]] [[nodiscard]] constexpr Bitboard subtract(const Bitboard& BB) const {
+    [[maybe_unused]] [[nodiscard]] constexpr Bitboard
+    subtract(const Bitboard& BB) const {
 #if defined(USE_SSE2)
         if (!std::is_constant_evaluated()) {
             return _mm_sub_epi64(Bitboard_, BB.Bitboard_);
@@ -442,7 +454,8 @@ struct alignas(16) Bitboard {
             return vsubq_u64(Bitboard_, BB.Bitboard_);
         }
 #endif
-        return Bitboard(Primitive[1] - BB.Primitive[1], Primitive[0] - BB.Primitive[0]);
+        return Bitboard(Primitive[1] - BB.Primitive[1],
+                        Primitive[0] - BB.Primitive[0]);
     }
 
     template <bool High>
@@ -460,7 +473,7 @@ struct alignas(16) Bitboard {
                         : vgetq_lane_u64(Bitboard_, 0);
         }
 #endif
-        return High? Primitive[1] : Primitive[0];
+        return High ? Primitive[1] : Primitive[0];
     }
 
     inline int countTrailingZero(uint64_t Value) const {
@@ -503,8 +516,9 @@ struct alignas(16) Bitboard {
             Bitboard_ = _mm_and_si128(
                 Bitboard_, _mm_sub_epi64(Bitboard_, _mm_set_epi64x(0, 1)));
 #elif defined(USE_NEON)
-            Bitboard_ = vandq_u64(Bitboard_,
-                    vsubq_u64(Bitboard_, vcombine_u64(vdup_n_u64(1), vdup_n_u64(0))));
+            Bitboard_ = vandq_u64(
+                Bitboard_, vsubq_u64(Bitboard_, vcombine_u64(vdup_n_u64(1),
+                                                             vdup_n_u64(0))));
 #else
             Primitive[0] &= (Primitive[0] - 1);
 #endif
@@ -518,8 +532,9 @@ struct alignas(16) Bitboard {
         Bitboard_ = _mm_and_si128(
             Bitboard_, _mm_sub_epi64(Bitboard_, _mm_set_epi64x(1, 0)));
 #elif defined(USE_NEON)
-            Bitboard_ = vandq_u64(Bitboard_,
-                    vsubq_u64(Bitboard_, vcombine_u64(vdup_n_u64(0), vdup_n_u64(1))));
+        Bitboard_ = vandq_u64(
+            Bitboard_,
+            vsubq_u64(Bitboard_, vcombine_u64(vdup_n_u64(0), vdup_n_u64(1))));
 #else
         Primitive[1] &= (Primitive[1] - 1);
 #endif
@@ -530,7 +545,7 @@ struct alignas(16) Bitboard {
     // Use template of a function since using
     // std::function<void(Square)> can have overhead.
     template <typename FuncType>
-    requires std::is_invocable_v<FuncType, Square>
+        requires std::is_invocable_v<FuncType, Square>
     void forEach(FuncType Func) const {
         uint64_t B = getPrimitive<false>();
 
@@ -549,7 +564,7 @@ struct alignas(16) Bitboard {
     }
 
     template <typename FuncType>
-    requires std::is_invocable_r_v<bool, FuncType, Square>
+        requires std::is_invocable_r_v<bool, FuncType, Square>
     bool any(FuncType Func) const {
         uint64_t B = getPrimitive<false>();
 
@@ -626,8 +641,9 @@ struct alignas(16) Bitboard {
 };
 
 // Magic bitboard.
-template <uint64_t NumBits> struct MagicBitboard {
-    MagicBitboard(){};
+template <uint64_t NumBits>
+struct MagicBitboard {
+    MagicBitboard() {};
 
 #if defined(USE_BMI2) && defined(USE_PEXT)
     uint64_t MagicNumber[2];
@@ -637,7 +653,7 @@ template <uint64_t NumBits> struct MagicBitboard {
     Bitboard Masks[2];
 #endif
 
-    Bitboard *AttackBB[2][1 << NumBits];
+    Bitboard* AttackBB[2][1 << NumBits];
 };
 
 static constexpr uint16_t BishopMagicMasterCountMax = 880;
@@ -695,7 +711,8 @@ inline Bitboard getLanceAttackBB(Square Sq, const Bitboard& OccupiedBB) {
         auto Temp = OccupiedBB ^ (OccupiedBB.subtract(SquareBB[Sq + North]));
         return Temp & ForwardBB[Sq];
     } else {
-        auto Temp = (BackwardBB[Sq] & (OccupiedBB | RankBB[RankI])).pickUpMostSignificantBB();
+        auto Temp = (BackwardBB[Sq] & (OccupiedBB | RankBB[RankI]))
+                        .pickUpMostSignificantBB();
         return SquareBB[Sq].subtract(Temp);
     }
 }
@@ -715,13 +732,16 @@ inline Bitboard getBishopAttackBB(Square Sq, const Bitboard& OccupiedBB) {
 #else
     const uint16_t Pattern1 =
         (uint16_t)(((OccupiedBB & Magic.Masks[0]).horizontalOr() *
-                    Magic.MagicNumber) >> (64 - DiagMagicBits));
+                    Magic.MagicNumber) >>
+                   (64 - DiagMagicBits));
     const uint16_t Pattern2 =
         (uint16_t)(((OccupiedBB & Magic.Masks[1]).horizontalOr() *
-                    Magic.MagicNumber) >> (64 - DiagMagicBits));
+                    Magic.MagicNumber) >>
+                   (64 - DiagMagicBits));
 #endif
 
-    const auto AttackBB = *Magic.AttackBB[0][Pattern1] | *Magic.AttackBB[1][Pattern2];
+    const auto AttackBB =
+        *Magic.AttackBB[0][Pattern1] | *Magic.AttackBB[1][Pattern2];
 
     if constexpr (Type == PTK_ProBishop) {
         return AttackBB | KingAttackBB[Sq];
@@ -745,13 +765,16 @@ inline Bitboard getRookAttackBB(Square Sq, const Bitboard& OccupiedBB) {
 #else
     const uint16_t Pattern1 =
         (uint16_t)(((OccupiedBB & Magic.Masks[0]).horizontalOr() *
-                    Magic.MagicNumber) >> (64 - CrossMagicBits));
+                    Magic.MagicNumber) >>
+                   (64 - CrossMagicBits));
     const uint16_t Pattern2 =
         (uint16_t)(((OccupiedBB & Magic.Masks[1]).horizontalOr() *
-                    Magic.MagicNumber) >> (64 - CrossMagicBits));
+                    Magic.MagicNumber) >>
+                   (64 - CrossMagicBits));
 #endif
 
-    const auto AttackBB = *Magic.AttackBB[0][Pattern1] | *Magic.AttackBB[1][Pattern2];
+    const auto AttackBB =
+        *Magic.AttackBB[0][Pattern1] | *Magic.AttackBB[1][Pattern2];
 
     if constexpr (Type == PTK_ProRook) {
         return AttackBB | KingAttackBB[Sq];

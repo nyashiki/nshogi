@@ -19,7 +19,8 @@ HuffmanCode::HuffmanCode(const HuffmanCode& HC)
     : Impl(new internal::HuffmanCodeImpl(*HC.Impl)) {
 }
 
-HuffmanCode::HuffmanCode(uint64_t Code3, uint64_t Code2, uint64_t Code1, uint64_t Code0)
+HuffmanCode::HuffmanCode(uint64_t Code3, uint64_t Code2, uint64_t Code1,
+                         uint64_t Code0)
     : Impl(new internal::HuffmanCodeImpl(Code3, Code2, Code1, Code0)) {
 }
 
@@ -51,20 +52,20 @@ const char* HuffmanCode::data() const {
 }
 
 HuffmanCode HuffmanCode::zero() {
-    return HuffmanCode(new internal::HuffmanCodeImpl(internal::HuffmanCodeImpl::zero()));
+    return HuffmanCode(
+        new internal::HuffmanCodeImpl(internal::HuffmanCodeImpl::zero()));
 }
 
 HuffmanCode HuffmanCode::encode(const Position& Pos) {
-    return HuffmanCode(new internal::HuffmanCodeImpl(internal::HuffmanCodeImpl::encode(Pos)));
+    return HuffmanCode(
+        new internal::HuffmanCodeImpl(internal::HuffmanCodeImpl::encode(Pos)));
 }
 
-HuffmanCode HuffmanCode::encode(const Position& Pos, Square BlackKingSquare, Square WhiteKingSquare) {
+HuffmanCode HuffmanCode::encode(const Position& Pos, Square BlackKingSquare,
+                                Square WhiteKingSquare) {
     return HuffmanCode(
-            new internal::HuffmanCodeImpl(
-                internal::HuffmanCodeImpl::encode(
-                    Pos,
-                    BlackKingSquare,
-                    WhiteKingSquare)));
+        new internal::HuffmanCodeImpl(internal::HuffmanCodeImpl::encode(
+            Pos, BlackKingSquare, WhiteKingSquare)));
 }
 
 Position HuffmanCode::decode(const HuffmanCode& HC) {

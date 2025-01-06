@@ -10,8 +10,8 @@
 #ifndef NSHOGI_IO_INTERNAL_BITBOARD_H
 #define NSHOGI_IO_INTERNAL_BITBOARD_H
 
-#include "../../core/squareiterator.h"
 #include "../../core/internal/bitboard.h"
+#include "../../core/squareiterator.h"
 
 namespace nshogi {
 namespace io {

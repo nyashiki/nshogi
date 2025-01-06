@@ -20,8 +20,8 @@ namespace core {
 /// @class MoveGenerator
 /// @brief Generates all legal moves for a given state.
 ///
-/// This class is responsible for enumerating all possible moves in a game state,
-/// ensuring that each move complies with the rules of Shogi.
+/// This class is responsible for enumerating all possible moves in a game
+/// state, ensuring that each move complies with the rules of Shogi.
 ///
 
 class MoveGenerator {

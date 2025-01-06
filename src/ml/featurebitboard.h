@@ -49,21 +49,19 @@ struct FeatureBitboard {
         return reinterpret_cast<const char*>(C);
     }
 
-    template<core::IterateOrder Order>
+    template <core::IterateOrder Order>
     void extract(float* Dest) const;
 
  private:
     union {
-        float F[4];     // use F[3] for the value of a neural network channel.
-        uint8_t C[16];  // use C[11] for the 180 degree rotation of the board.
+        float F[4];    // use F[3] for the value of a neural network channel.
+        uint8_t C[16]; // use C[11] for the 180 degree rotation of the board.
     };
 
     friend class nshogi::ml::internal::FeatureBitboardUtil;
 };
 
-
 } // namespace ml
 } // namespace nshogi
-
 
 #endif // #ifndef NSHOGI_ML_FEATUREBITBOARD_H

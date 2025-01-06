@@ -10,10 +10,10 @@
 #ifndef NSHOGI_ML_SIMPLETEACHER_H
 #define NSHOGI_ML_SIMPLETEACHER_H
 
+#include "../core/huffman.h"
 #include "../core/position.h"
 #include "../core/state.h"
 #include "../core/stateconfig.h"
-#include "../core/huffman.h"
 #include "../core/types.h"
 
 namespace nshogi {

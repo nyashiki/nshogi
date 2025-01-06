@@ -28,7 +28,7 @@ enum struct IterateOrder {
 };
 // clang-format on
 
-template<IterateOrder Order>
+template <IterateOrder Order>
 constexpr IterateOrder reverseOrder() {
     if constexpr (Order == IterateOrder::ESWN) {
         return IterateOrder::WNES;

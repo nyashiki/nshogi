@@ -8,9 +8,9 @@
 //
 
 #include "teacherloader.h"
+#include "../io/file.h"
 #include "azteacher.h"
 #include "simpleteacher.h"
-#include "../io/file.h"
 
 #include <cstdint>
 #include <fstream>
@@ -19,8 +19,10 @@
 namespace nshogi {
 namespace ml {
 
-template<typename TeacherType>
-TeacherLoaderForFixedSizeTeacher<TeacherType>::TeacherLoaderForFixedSizeTeacher(const std::string& TeacherPath): Path(TeacherPath) {
+template <typename TeacherType>
+TeacherLoaderForFixedSizeTeacher<TeacherType>::TeacherLoaderForFixedSizeTeacher(
+    const std::string& TeacherPath)
+    : Path(TeacherPath) {
     std::ifstream Ifs(Path, std::ios::in | std::ios::binary);
 
     if (!Ifs) {
@@ -45,21 +47,21 @@ TeacherLoaderForFixedSizeTeacher<TeacherType>::TeacherLoaderForFixedSizeTeacher(
         std::cout << "FileSize: " << FileSize << std::endl;
         std::cout << "TeacherSizeUnit: " << TeacherSizeUnit << std::endl;
 
-        throw std::runtime_error(
-            "FileSize must be divided by the unit.\n"
-            "Unfortunately, the file is possibly broken.");
+        throw std::runtime_error("FileSize must be divided by the unit.\n"
+                                 "Unfortunately, the file is possibly broken.");
     }
 
     NumTeachers = FileSize / TeacherSizeUnit;
 }
 
-template<typename TeacherType>
+template <typename TeacherType>
 std::size_t TeacherLoaderForFixedSizeTeacher<TeacherType>::size() const {
     return NumTeachers;
 }
 
-template<typename TeacherType>
-TeacherType TeacherLoaderForFixedSizeTeacher<TeacherType>::operator[](std::size_t Index) const {
+template <typename TeacherType>
+TeacherType TeacherLoaderForFixedSizeTeacher<TeacherType>::operator[](
+    std::size_t Index) const {
     assert(Index < NumTeachers);
 
     std::ifstream Ifs(Path, std::ios::in | std::ios::binary);
@@ -71,11 +73,9 @@ TeacherType TeacherLoaderForFixedSizeTeacher<TeacherType>::operator[](std::size_
     return T;
 }
 
-template
-class TeacherLoaderForFixedSizeTeacher<AZTeacher>;
+template class TeacherLoaderForFixedSizeTeacher<AZTeacher>;
 
-template
-class TeacherLoaderForFixedSizeTeacher<SimpleTeacher>;
+template class TeacherLoaderForFixedSizeTeacher<SimpleTeacher>;
 
 } // namespace ml
 } // namespace nshogi

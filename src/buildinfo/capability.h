@@ -20,8 +20,8 @@ bool avxAvailable();
 bool avx2Available();
 bool neonAvailable();
 
-} // namespace build_info
 } // namespace capability
-} // namespace
+} // namespace build_info
+} // namespace nshogi
 
 #endif // #ifndef NSHOGI_CAPABILITY_H

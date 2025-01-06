@@ -10,11 +10,11 @@
 #ifndef NSHOGI_IO_SFEN_H
 #define NSHOGI_IO_SFEN_H
 
-#include "../core/types.h"
 #include "../core/position.h"
 #include "../core/positionbuilder.h"
 #include "../core/state.h"
 #include "../core/statebuilder.h"
+#include "../core/types.h"
 
 #include <string>
 

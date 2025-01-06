@@ -10,14 +10,13 @@
 #ifndef NSHOGI_BOOK_BOOKMOVE_H
 #define NSHOGI_BOOK_BOOKMOVE_H
 
-#include "bookmovemeta.h"
 #include "../core/types.h"
+#include "bookmovemeta.h"
 
 #include <fstream>
 
 namespace nshogi {
 namespace book {
-
 
 struct BookMove {
  public:
@@ -37,7 +36,6 @@ struct BookMove {
     core::Move32 Move;
     BookMoveMeta Meta;
 };
-
 
 } // namespace book
 } // namespace nshogi

@@ -22,17 +22,19 @@ SimpleTeacher::SimpleTeacher(const SimpleTeacher& ST)
     : HuffmanCode(ST.HuffmanCode)
     , Ply(ST.Ply)
     , MaxPly(ST.MaxPly)
-    , DrawValues { ST.DrawValues[0], ST.DrawValues[1] }
+    , DrawValues{ST.DrawValues[0], ST.DrawValues[1]}
     , NextMove(ST.NextMove)
     , Winner(ST.Winner) {
 }
 
 core::Position SimpleTeacher::getPosition() const {
-    return core::PositionBuilder::newPosition(core::HuffmanCode::decode(HuffmanCode), Ply);
+    return core::PositionBuilder::newPosition(
+        core::HuffmanCode::decode(HuffmanCode), Ply);
 }
 
 core::State SimpleTeacher::getState() const {
-    return core::StateBuilder::newState(core::HuffmanCode::decode(HuffmanCode), Ply);
+    return core::StateBuilder::newState(core::HuffmanCode::decode(HuffmanCode),
+                                        Ply);
 }
 
 core::StateConfig SimpleTeacher::getConfig() const {
@@ -77,13 +79,10 @@ SimpleTeacher& SimpleTeacher::setWinner(core::Color C) {
 }
 
 bool SimpleTeacher::equals(const SimpleTeacher& ST) const {
-    return HuffmanCode == ST.HuffmanCode
-        && Ply == ST.Ply
-        && MaxPly == ST.MaxPly
-        && DrawValues[0] == ST.DrawValues[0]
-        && DrawValues[1] == ST.DrawValues[1]
-        && NextMove == ST.NextMove
-        && Winner == ST.Winner;
+    return HuffmanCode == ST.HuffmanCode && Ply == ST.Ply &&
+           MaxPly == ST.MaxPly && DrawValues[0] == ST.DrawValues[0] &&
+           DrawValues[1] == ST.DrawValues[1] && NextMove == ST.NextMove &&
+           Winner == ST.Winner;
 }
 
 } // namespace ml

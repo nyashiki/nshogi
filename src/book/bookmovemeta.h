@@ -12,8 +12,8 @@
 
 #include "../core/types.h"
 
-#include <fstream>
 #include <cinttypes>
+#include <fstream>
 
 namespace nshogi {
 namespace book {

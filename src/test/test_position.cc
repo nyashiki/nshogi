@@ -7,9 +7,9 @@
 // SPDX-License-Identifier: MIT
 //
 
-#include "common.h"
 #include "../core/position.h"
 #include "../core/positionbuilder.h"
+#include "common.h"
 
 TEST(Position, Constructor1) {
     nshogi::core::Position Pos =

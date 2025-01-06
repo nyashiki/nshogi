@@ -19,7 +19,6 @@
 #include <string>
 #include <vector>
 
-
 TEST(CSA, InitialPosition) {
     auto Position = nshogi::core::PositionBuilder::getInitialPosition();
 
@@ -56,7 +55,8 @@ TEST(CSA, Example1) {
 }
 
 TEST(CSA, Handmade1) {
-    const std::string Sfen = "lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL b - 1 moves 7g7f 3c3d 8h2b+ 3a2b";
+    const std::string Sfen = "lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/"
+                             "LNSGKGSNL b - 1 moves 7g7f 3c3d 8h2b+ 3a2b";
     nshogi::core::State State = nshogi::io::sfen::StateBuilder::newState(Sfen);
 
     const std::string& CSA = nshogi::io::csa::stateToCSA(State);

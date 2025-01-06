@@ -9,8 +9,8 @@
 
 #include "bookmovemeta.h"
 
-#include <stdexcept>
 #include <cstring>
+#include <stdexcept>
 
 namespace nshogi {
 namespace book {
@@ -107,8 +107,8 @@ BookMoveMeta BookMoveMeta::load(std::ifstream& Ifs) {
     Ifs.read(reinterpret_cast<char*>(&BMM.Count), sizeof(Count));
     Ifs.read(reinterpret_cast<char*>(&BMM.WinRate), sizeof(WinRate));
     Ifs.read(reinterpret_cast<char*>(&BMM.DrawRate), sizeof(DrawRate));
-    Ifs.read(reinterpret_cast<char*>(BMM.PV), 32  * sizeof(core::Move32));
-    Ifs.read(reinterpret_cast<char*>(BMM.Description), 64  * sizeof(char));
+    Ifs.read(reinterpret_cast<char*>(BMM.PV), 32 * sizeof(core::Move32));
+    Ifs.read(reinterpret_cast<char*>(BMM.Description), 64 * sizeof(char));
 
     return BMM;
 }

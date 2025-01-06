@@ -18,7 +18,6 @@ namespace huffman {
 
 void print(const core::HuffmanCode&);
 
-
 } // namespace huffman
 } // namespace io
 } // namespace nshogi

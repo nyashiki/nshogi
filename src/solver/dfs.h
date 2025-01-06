@@ -10,8 +10,8 @@
 #ifndef NSHOGI_SOLVER_DFS_H
 #define NSHOGI_SOLVER_DFS_H
 
-#include "../core/types.h"
 #include "../core/state.h"
+#include "../core/types.h"
 
 namespace nshogi {
 namespace solver {

@@ -10,11 +10,11 @@
 #ifndef NSHOGI_CORE_UTILS_H
 #define NSHOGI_CORE_UTILS_H
 
-#include "bitboard.h"
 #include "../types.h"
+#include "bitboard.h"
 
-#include <vector>
 #include <sstream>
+#include <vector>
 
 namespace nshogi {
 namespace core {

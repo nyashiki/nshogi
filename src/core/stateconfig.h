@@ -26,5 +26,4 @@ struct StateConfig {
 } // namespace core
 } // namespace nshogi
 
-
 #endif // #ifndef NSHOGI_CORE_STATECONFIG_H

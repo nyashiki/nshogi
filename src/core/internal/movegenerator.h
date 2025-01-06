@@ -10,8 +10,8 @@
 #ifndef NSHOGI_CORE_INTERNAL_MOVEGENERATOR_H
 #define NSHOGI_CORE_INTERNAL_MOVEGENERATOR_H
 
-#include "stateimpl.h"
 #include "../movelist.h"
+#include "stateimpl.h"
 
 namespace nshogi {
 namespace core {

@@ -34,7 +34,7 @@ struct MoveList {
     MoveList(std::initializer_list<Move32> Ms) {
         Move32* Head = Moves;
 
-        for(const auto& M : Ms) {
+        for (const auto& M : Ms) {
             *Head++ = M;
         }
 
@@ -68,7 +68,8 @@ struct MoveList {
     }
 
  private:
-    MoveList() : Tail(Moves) {
+    MoveList()
+        : Tail(Moves) {
     }
 
     static constexpr std::size_t MoveCountMax = 600;

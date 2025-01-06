@@ -10,8 +10,8 @@
 #ifndef NSHOGI_SOLVER_MATE1PLY_H
 #define NSHOGI_SOLVER_MATE1PLY_H
 
-#include "../core/types.h"
 #include "../core/state.h"
+#include "../core/types.h"
 
 namespace nshogi {
 namespace solver {
@@ -27,6 +27,5 @@ core::Move32 solve(const core::State& S);
 } // namespace mate1ply
 } // namespace solver
 } // namespace nshogi
-
 
 #endif // #ifndef NSHOGI_SOLVER_MATE1PLY_H

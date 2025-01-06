@@ -10,10 +10,10 @@
 #ifndef NSHOGI_CORE_STATEHELPER_H
 #define NSHOGI_CORE_STATEHELPER_H
 
-#include "bitboard.h"
-#include "hash.h"
 #include "../position.h"
 #include "../types.h"
+#include "bitboard.h"
+#include "hash.h"
 
 #include <cstddef>
 #include <cstdint>
@@ -25,7 +25,8 @@ namespace core {
 namespace internal {
 
 struct StepHelper {
-    StepHelper() : Move(Move32::MoveNone()) {
+    StepHelper()
+        : Move(Move32::MoveNone()) {
     }
 
     Move32 Move;
@@ -51,7 +52,8 @@ struct StateHelper {
 
     ~StateHelper();
 
-    void proceedOneStep(Move32 Move, uint64_t BoardHash, Stands BlackStand, Stands WhiteStand);
+    void proceedOneStep(Move32 Move, uint64_t BoardHash, Stands BlackStand,
+                        Stands WhiteStand);
     Move32 goBackOneStep();
 
     inline const StepHelper& getCurrentStepHelper() const {

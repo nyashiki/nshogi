@@ -265,6 +265,10 @@ llvm-cov: clean-cov-prof runtest-static
 	llvm-profdata merge -sparse default.profraw -o default.profdata
 	llvm-cov show -format=html -output-dir=cov_html -instr-profile default.profdata $(TEST_STATIC_TARGET)
 
+.PHONY: fmt
+fmt:
+	find src/ \( -name "*.cc" -o -name "*.h" \) -exec clang-format -i {} \;
+
 .PHONY: clean
 clean: clean-perf clean-cov-prof
 	-rm -rf build

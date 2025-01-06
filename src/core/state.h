@@ -135,9 +135,12 @@ class State {
     /// @param C The color of the player.
     /// @param SliderScoreUnit The score assigned to each slider piece.
     /// @param StepScoreUnit The score assigned to each step piece.
-    /// @param OnlyInPromotableZone If true, only pieces within the promotable zone are considered.
+    /// @param OnlyInPromotableZone If true, only pieces within the promotable
+    /// zone are considered.
     ///
-    uint8_t computePieceScore(Color C, uint8_t SliderScoreUnit, uint8_t StepScoreUnit, bool OnlyInPromotableZone) const;
+    uint8_t computePieceScore(Color C, uint8_t SliderScoreUnit,
+                              uint8_t StepScoreUnit,
+                              bool OnlyInPromotableZone) const;
 
     ///
     /// @brief Check if the current player can win by declaration.

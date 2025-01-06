@@ -36,9 +36,11 @@ class AZTeacherIO : public ml::AZTeacher {
         for (std::size_t I = 0; I < NumSavedPlayouts; ++I) {
             Ifs.read(Moves[I].data(), 6 * sizeof(char));
         }
-        Ifs.read(reinterpret_cast<char*>(Visits.data()), NumSavedPlayouts * sizeof(uint16_t));
+        Ifs.read(reinterpret_cast<char*>(Visits.data()),
+                 NumSavedPlayouts * sizeof(uint16_t));
 
-        Ifs.read(reinterpret_cast<char*>(&EndingRule), sizeof(core::EndingRule));
+        Ifs.read(reinterpret_cast<char*>(&EndingRule),
+                 sizeof(core::EndingRule));
         Ifs.read(reinterpret_cast<char*>(&MaxPly), sizeof(uint16_t));
         Ifs.read(reinterpret_cast<char*>(&BlackDrawValue), sizeof(float));
         Ifs.read(reinterpret_cast<char*>(&WhiteDrawValue), sizeof(float));
@@ -63,7 +65,8 @@ class AZTeacherIO : public ml::AZTeacher {
             return load_0_1_0(Ifs);
         }
 
-        const std::string ErrorMessage = "Unknown version (" + std::string(Version) + ").";
+        const std::string ErrorMessage =
+            "Unknown version (" + std::string(Version) + ").";
         throw std::runtime_error(ErrorMessage.c_str());
     }
 
@@ -73,18 +76,23 @@ class AZTeacherIO : public ml::AZTeacher {
         Ofs.write(Version, 8 * sizeof(char));
         Ofs.write(Sfen, SfenCStrLength * sizeof(char));
 
-        Ofs.write(reinterpret_cast<const char*>(&SideToMove), sizeof(core::Color));
+        Ofs.write(reinterpret_cast<const char*>(&SideToMove),
+                  sizeof(core::Color));
         Ofs.write(reinterpret_cast<const char*>(&Winner), sizeof(core::Color));
         Ofs.write(reinterpret_cast<const char*>(&NumMoves), sizeof(uint8_t));
         for (std::size_t I = 0; I < NumSavedPlayouts; ++I) {
             Ofs.write(Moves[I].data(), 6 * sizeof(char));
         }
-        Ofs.write(reinterpret_cast<const char*>(Visits.data()), NumSavedPlayouts * sizeof(uint16_t));
+        Ofs.write(reinterpret_cast<const char*>(Visits.data()),
+                  NumSavedPlayouts * sizeof(uint16_t));
 
-        Ofs.write(reinterpret_cast<const char*>(&EndingRule), sizeof(core::EndingRule));
+        Ofs.write(reinterpret_cast<const char*>(&EndingRule),
+                  sizeof(core::EndingRule));
         Ofs.write(reinterpret_cast<const char*>(&MaxPly), sizeof(uint16_t));
-        Ofs.write(reinterpret_cast<const char*>(&BlackDrawValue), sizeof(float));
-        Ofs.write(reinterpret_cast<const char*>(&WhiteDrawValue), sizeof(float));
+        Ofs.write(reinterpret_cast<const char*>(&BlackDrawValue),
+                  sizeof(float));
+        Ofs.write(reinterpret_cast<const char*>(&WhiteDrawValue),
+                  sizeof(float));
 
         Ofs.write(reinterpret_cast<const char*>(&Declared), sizeof(bool));
 
@@ -170,19 +178,23 @@ void save(std::ofstream& Ofs, const ml::SimpleTeacher& SimpleTeacher) {
 
 } // namespace simple_teacher
 
-template<> ml::AZTeacher load<ml::AZTeacher>(std::ifstream& Ifs) {
+template <>
+ml::AZTeacher load<ml::AZTeacher>(std::ifstream& Ifs) {
     return az_teacher::load(Ifs);
 }
 
-template<> void save<ml::AZTeacher>(std::ofstream& Ofs, const ml::AZTeacher& AT) {
+template <>
+void save<ml::AZTeacher>(std::ofstream& Ofs, const ml::AZTeacher& AT) {
     az_teacher::save(Ofs, AT);
 }
 
-template<> ml::SimpleTeacher load<ml::SimpleTeacher>(std::ifstream& Ifs) {
+template <>
+ml::SimpleTeacher load<ml::SimpleTeacher>(std::ifstream& Ifs) {
     return simple_teacher::load(Ifs);
 }
 
-template<> void save<ml::SimpleTeacher>(std::ofstream& Ofs, const ml::SimpleTeacher& ST) {
+template <>
+void save<ml::SimpleTeacher>(std::ofstream& Ofs, const ml::SimpleTeacher& ST) {
     simple_teacher::save(Ofs, ST);
 }
 

@@ -66,7 +66,8 @@ BookMove* Entry::addBookMove(const core::Move32& Move) {
         return nullptr;
     }
 
-    BookMoves[(std::size_t)NumBookMoves] = std::make_unique<BookMove>(BookMove(Move));
+    BookMoves[(std::size_t)NumBookMoves] =
+        std::make_unique<BookMove>(BookMove(Move));
     if (NumBookMoves != 0) {
         std::swap(BookMoves[0], BookMoves[(std::size_t)NumBookMoves]);
     }
@@ -81,7 +82,8 @@ void Entry::clear() {
 
 void Entry::dump(std::ofstream& Ofs) const {
     Ofs.write(Sfen, 140 * sizeof(char));
-    Ofs.write(reinterpret_cast<const char*>(&NumBookMoves), sizeof(NumBookMoves));
+    Ofs.write(reinterpret_cast<const char*>(&NumBookMoves),
+              sizeof(NumBookMoves));
 
     for (std::size_t I = 0; I < MaxNumBookMoves; ++I) {
         if (I < NumBookMoves) {
