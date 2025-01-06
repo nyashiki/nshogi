@@ -5,9 +5,13 @@ on: [push]
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
     steps:
-      - uses: DenverCoder1/doxygen-github-pages-action@v2.0.0
+      - uses: actions/checkout@v4
+      - uses: mattnotmitt/doxygen-action@v1.9.5
+        with:
+            doxyfile-path: 'Doxyfile'
+      - name: deploy
+        uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./doc/html/
