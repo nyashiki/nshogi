@@ -7,6 +7,8 @@ jobs:
     runs-on: ubuntu-latest
     env:
       working-directory: ./
+    permissions:
+      contents: write
 
     steps:
     - uses: actions/checkout@v4
