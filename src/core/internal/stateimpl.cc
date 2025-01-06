@@ -193,7 +193,7 @@ void StateImpl::doMove(Move32 Move) {
 }
 
 template <Color C>
-inline Move32 StateImpl::undoMove() {
+inline void StateImpl::undoMove() {
     const Move32 PrevMove = Helper.goBackOneStep();
     Pos.changeSideToMove();
 
@@ -251,14 +251,13 @@ inline Move32 StateImpl::undoMove() {
     HashValue.updateColor();
 
     assert((getBitboard<Black>() & getBitboard<White>()).isZero());
-    return PrevMove;
 }
 
-Move32 StateImpl::undoMove() {
+void StateImpl::undoMove() {
     if (getPosition().sideToMove() == Black) {
-        return undoMove<Black>();
+        undoMove<Black>();
     } else {
-        return undoMove<White>();
+        undoMove<White>();
     }
 }
 

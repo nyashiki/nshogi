@@ -81,12 +81,8 @@ void State::doMove(Move32 Move) {
     Impl->doMove(Move);
 }
 
-Move32 State::undoMove() {
-    return Impl->undoMove();
-}
-
-void State::refresh() {
-    Impl->refresh();
+void State::undoMove() {
+    Impl->undoMove();
 }
 
 RepetitionStatus State::getRepetitionStatus(bool Strict) const {

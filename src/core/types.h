@@ -96,11 +96,13 @@ inline constexpr bool isPromoted(PieceTypeKind Type) {
 template<Color C>
 inline constexpr PieceKind makePiece(PieceTypeKind Pt);
 
-template<> inline constexpr PieceKind makePiece<Black>(PieceTypeKind Pt) {
+template<>
+inline constexpr PieceKind makePiece<Black>(PieceTypeKind Pt) {
     return (PieceKind)(Pt);
 }
 
-template<> inline constexpr PieceKind makePiece<White>(PieceTypeKind Pt) {
+template<>
+inline constexpr PieceKind makePiece<White>(PieceTypeKind Pt) {
     return (PieceKind)(0b10000 | Pt);
 }
 
@@ -391,6 +393,14 @@ inline constexpr bool isSuperiorOrEqual(Stands St1, Stands St2) {
 
 struct Move16;
 
+///
+/// @struct Move32
+/// @brief Represents any legal move in Shogi with 32 bits.
+///
+/// This structure encodes all necessary information for a Shogi move,
+/// including source and destination, piece type, dropping or not,
+/// and promotion, within a compact 32-bit format.
+///
 struct Move32 {
  public:
     constexpr Move32(const Move32& M): C_(M.C_) {
@@ -446,10 +456,9 @@ struct Move32 {
         return Move32(Value);
     }
 
-    /// This move is used for the declaration win.
-    /// Note: since the from square and the to square is the same,
-    /// this constant is not used as a standard move so this move
-    /// will never cause conflicts.
+    ///
+    /// @brief This move is used for the declaration win.
+    ///
     static constexpr Move32 MoveWin() {
         return Move32((1 << FromShift) | (1 << ToShift));
     }
@@ -489,28 +498,47 @@ struct Move32 {
                      ((uint32_t)To));
     }
 
+    ///
+    /// @brief Get the destination square.
+    ///
     constexpr Square to() const {
         return (Square)(C_ & ToBits);
     }
 
+    ///
+    /// @brief Get the source square.
+    ///
     constexpr Square from() const {
         return (Square)((C_ & FromBits) >> FromShift);
     }
 
+    ///
+    /// @brief Get whether it is a dropping move.
+    ///
+    constexpr bool drop() const {
+        return from() >= NumSquares;
+    }
+
+    ///
+    /// @brief Get whether it is a promoting move.
+    ///
     constexpr bool promote() const {
         return (bool)((C_ & PromoteBit) >> PromoteShift);
     }
 
+    ///
+    /// @brief Get the piece type of the move.
+    ///
     constexpr PieceTypeKind pieceType() const {
         return (PieceTypeKind)((C_ & PieceTypeBits) >> PieceTypeShift);
     }
 
+    ///
+    /// @brief Get the piece type of the opponent's piece if capturing.
+    /// If it is not a capturing move, this method returns PTK_Empty.
+    ///
     constexpr PieceTypeKind capturePieceType() const {
         return (PieceTypeKind)((C_ & CaptureTypeBits) >> CaptureTypeShift);
-    }
-
-    constexpr bool drop() const {
-        return from() >= NumSquares;
     }
 
  private:
@@ -535,6 +563,17 @@ struct Move32 {
  friend struct MoveList;
 };
 
+///
+/// @struct Move16
+/// @brief Represents any legal move in Shogi with 16 bits.
+///
+/// This structure encodes essential information for a Shogi move,
+/// such as source and destination, whether it is a dropping move, and promotion,
+/// in a compact 16-bit format.
+/// However, piece type information is omitted to reduce the number of used bits.
+/// This information must be retrieved from the game state when needed
+/// by nshogi::core::State::getMove32FromMove16().
+///
 struct Move16 {
  public:
     constexpr Move16(Move32 M): C_(M.C_ & 0xffff) {
@@ -583,18 +622,30 @@ struct Move16 {
         return Move16(Move32::MoveWin());
     }
 
-    constexpr Square from() const {
-        return (Square)((C_ & (uint16_t)Move32::FromBits) >> (uint16_t)Move32::FromShift);
-    }
-
+    ///
+    /// @brief Get the destination square.
+    ///
     constexpr Square to() const {
         return (Square)(C_ & (uint16_t)Move32::ToBits);
     }
 
+    ///
+    /// @brief Get the source square.
+    ///
+    constexpr Square from() const {
+        return (Square)((C_ & (uint16_t)Move32::FromBits) >> (uint16_t)Move32::FromShift);
+    }
+
+    ///
+    /// @brief Get whether it is a dropping move.
+    ///
     constexpr bool drop() const {
         return from() >= NumSquares;
     }
 
+    ///
+    /// @brief Get whether it is a promoting move.
+    ///
     constexpr bool promote() const {
         return (bool)((C_ & (uint16_t)Move32::PromoteBit) >> (uint16_t)Move32::PromoteShift);
     }

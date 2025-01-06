@@ -105,8 +105,8 @@ class StateImpl {
     void doMove(Move32 Move);
 
     template <Color C>
-    Move32 undoMove();
-    Move32 undoMove();
+    void undoMove();
+    void undoMove();
 
     // Re-compute "second" variables, where "second" means
     // any variables that can be computed by "first" variables
@@ -634,6 +634,11 @@ class StateImpl {
 
             return bitboard::isAttacked(
                     bitboard::KingAttackBB[Sq], getBitboard<~C, PTK_ProRook>());
+        } else {
+            // Should not be reached.
+            []<bool Flag = false>()
+                { static_assert(Flag, "Unhandled PieceTypeKind."); }();
+            return false;
         }
     }
 

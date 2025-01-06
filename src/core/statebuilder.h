@@ -22,9 +22,7 @@ class StateBuilder {
  public:
     static State getInitialState();
 
-    State build() {
-        return std::move(Instance);
-    }
+    State build();
 
     static core::State newState(const Position&);
     static core::State newState(const Position&, uint16_t Ply);

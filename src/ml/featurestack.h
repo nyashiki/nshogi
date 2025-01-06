@@ -83,6 +83,7 @@ struct FeatureStackComptime : FeatureStack {
         if (this != &FSC) {
             Features = std::move(FSC.Features);
         }
+        return *this;
     }
 
     static void constructAt(FeatureBitboard* FB, const core::State& State, const core::StateConfig& Config) {
@@ -339,7 +340,7 @@ struct FeatureStackComptime : FeatureStack {
             // constexpr-if blocks above.
             // https://stackoverflow.com/a/64354296
             []<bool Flag = false>()
-                {static_assert(Flag, "Unhandled FeatureType");}();
+                { static_assert(Flag, "Unhandled FeatureType"); }();
         }
 
         process<C, TailType...>(State, Config, FB + 1);

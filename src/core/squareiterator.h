@@ -47,7 +47,15 @@ constexpr IterateOrder reverseOrder() {
     }
 }
 
-template <IterateOrder Order> struct SquareIterator {
+///
+/// @class SquareIterator
+/// @brief Iterator for all squares along the specified order.
+/// This iterator allows traversal over all squares in a specific order.
+///
+/// @tparam Order The order in which the squares are traversed.
+///
+template <IterateOrder Order>
+struct SquareIterator {
  public:
     SquareIterator() {
         if constexpr (Order == IterateOrder::Fastest ||
