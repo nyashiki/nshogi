@@ -643,7 +643,7 @@ struct alignas(16) Bitboard {
 // Magic bitboard.
 template <uint64_t NumBits>
 struct MagicBitboard {
-    MagicBitboard() {};
+    MagicBitboard(){};
 
 #if defined(USE_BMI2) && defined(USE_PEXT)
     uint64_t MagicNumber[2];
