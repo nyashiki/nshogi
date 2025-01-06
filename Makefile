@@ -47,10 +47,6 @@ endif
 
 SOURCES :=                                 \
 	src/buildinfo/capability.cc        \
-	src/book/book.cc                   \
-	src/book/bookmove.cc               \
-	src/book/bookmovemeta.cc           \
-	src/book/entry.cc                  \
 	src/core/initializer.cc            \
 	src/core/position.cc               \
 	src/core/positionbuilder.cc        \

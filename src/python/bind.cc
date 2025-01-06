@@ -30,8 +30,6 @@
 #include "../ml/teacherloader.h"
 #include "../ml/teacherwriter.h"
 
-#include "../book/book.h"
-
 #include <string>
 #include <vector>
 
