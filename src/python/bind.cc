@@ -154,9 +154,8 @@ PYBIND11_MODULE(nshogi, Module) {
         .def("do_move",
              static_cast<void (nshogi::core::State::*)(nshogi::core::Move32)>(
                  &nshogi::core::State::doMove))
-        .def("undo_move",
-             static_cast<nshogi::core::Move32 (nshogi::core::State::*)()>(
-                 &nshogi::core::State::undoMove))
+        .def("undo_move", static_cast<void (nshogi::core::State::*)()>(
+                              &nshogi::core::State::undoMove))
         .def("to_sfen",
              [](const nshogi::core::State& S) {
                  return nshogi::io::sfen::stateToSfen(S);
