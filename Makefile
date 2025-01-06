@@ -209,12 +209,10 @@ install: $(SHARED_TARGET) $(STATIC_TARGET)
 	install -m 644 $(SHARED_TARGET) $(PREFIX)/lib
 	install -m 644 $(STATIC_TARGET) $(PREFIX)/lib
 	ln -s $(PREFIX)/lib/$(SHARED_TARGET_NAME) $(PREFIX)/lib/libnshogi.so
-	install -d $(PREFIX)/include/nshogi/book
 	install -d $(PREFIX)/include/nshogi/core
 	install -d $(PREFIX)/include/nshogi/io
 	install -d $(PREFIX)/include/nshogi/ml
 	install -d $(PREFIX)/include/nshogi/solver
-	install -m 644 src/book/*.h $(PREFIX)/include/nshogi/book
 	install -m 644 src/core/*.h $(PREFIX)/include/nshogi/core
 	install -m 644 src/io/*.h $(PREFIX)/include/nshogi/io
 	install -m 644 src/ml/*.h $(PREFIX)/include/nshogi/ml
