@@ -1,0 +1,27 @@
+var classnshogi_1_1core_1_1State =
+[
+    [ "State", "classnshogi_1_1core_1_1State.html#afc80a641d6987eaa898190a29d9b5f50", null ],
+    [ "State", "classnshogi_1_1core_1_1State.html#a00a60dd547195744f883b64c995f9d8e", null ],
+    [ "~State", "classnshogi_1_1core_1_1State.html#a68f199ead5787f52f3e898e4027736e1", null ],
+    [ "canDeclare", "classnshogi_1_1core_1_1State.html#aab1719f44e8a3a54429d176cf816f2f8", null ],
+    [ "clone", "classnshogi_1_1core_1_1State.html#a1b1849c4b962b7b4c2e99c67f0c13490", null ],
+    [ "computePieceScore", "classnshogi_1_1core_1_1State.html#a2761a69152a8fdcfcef69b40f0192f76", null ],
+    [ "doMove", "classnshogi_1_1core_1_1State.html#a44bd540a87f1c5835118deb7815ca81a", null ],
+    [ "getHash", "classnshogi_1_1core_1_1State.html#a1dd818e4ebefcbf72d36b7de6baf3062", null ],
+    [ "getHistoryMove", "classnshogi_1_1core_1_1State.html#adf692b104e55b583b42f402395942131", null ],
+    [ "getInitialPosition", "classnshogi_1_1core_1_1State.html#ac8213e054ac059e85fb02d9fb2d033d9", null ],
+    [ "getKingSquare", "classnshogi_1_1core_1_1State.html#ade5a4479c42ccdfa57e1802c0cdb8a63", null ],
+    [ "getLastMove", "classnshogi_1_1core_1_1State.html#a01b3ccadb5842a47fde1e86d0ae28076", null ],
+    [ "getMove32FromMove16", "classnshogi_1_1core_1_1State.html#a08a60a1962852a9e7c2526f0a77369f7", null ],
+    [ "getPly", "classnshogi_1_1core_1_1State.html#a418131dbe642f20f8e177018034f92c6", null ],
+    [ "getPosition", "classnshogi_1_1core_1_1State.html#a91db230075847f44cdd91745cedc9c6d", null ],
+    [ "getRepetitionStatus", "classnshogi_1_1core_1_1State.html#a81dfe540d99e6fdc0a5e6869b0420546", null ],
+    [ "getSideToMove", "classnshogi_1_1core_1_1State.html#ad2e27550c419567fa92c8b3ddaa4bf76", null ],
+    [ "getStandCount", "classnshogi_1_1core_1_1State.html#a69cef7ea4ddfdd0853ea1fef403cbb6f", null ],
+    [ "operator=", "classnshogi_1_1core_1_1State.html#accddff21bcc408724e0ab7cecee1a9a7", null ],
+    [ "operator=", "classnshogi_1_1core_1_1State.html#a8bb4bae069498b01769e4132cd82b08b", null ],
+    [ "undoMove", "classnshogi_1_1core_1_1State.html#a8c19fb89d3f8f2337ace2be35be1b53a", null ],
+    [ "internal::ImmutableStateAdapter", "classnshogi_1_1core_1_1State.html#a3f9dce124b0a5ee0b5344c6c4853ed44", null ],
+    [ "internal::MutableStateAdapter", "classnshogi_1_1core_1_1State.html#aaf3b674303632679e3e9fcc868b49ee3", null ],
+    [ "StateBuilder", "classnshogi_1_1core_1_1State.html#a351fbb0ba2579b6a81c1653b460b7658", null ]
+];

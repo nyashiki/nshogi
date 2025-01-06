@@ -1,0 +1,21 @@
+var searchData=
+[
+  ['az_5fteacher_0',['az_teacher',['../namespacenshogi_1_1io_1_1file_1_1az__teacher.html',1,'nshogi::io::file']]],
+  ['build_5finfo_1',['build_info',['../namespacenshogi_1_1build__info.html',1,'nshogi']]],
+  ['capability_2',['capability',['../namespacenshogi_1_1build__info_1_1capability.html',1,'nshogi::build_info']]],
+  ['core_3',['core',['../namespacenshogi_1_1core.html',1,'nshogi']]],
+  ['csa_4',['csa',['../namespacenshogi_1_1io_1_1csa.html',1,'nshogi::io']]],
+  ['dfs_5',['dfs',['../namespacenshogi_1_1solver_1_1dfs.html',1,'nshogi::solver']]],
+  ['file_6',['file',['../namespacenshogi_1_1io_1_1file.html',1,'nshogi::io']]],
+  ['huffman_7',['huffman',['../namespacenshogi_1_1io_1_1huffman.html',1,'nshogi::io']]],
+  ['initializer_8',['initializer',['../namespacenshogi_1_1core_1_1initializer.html',1,'nshogi::core']]],
+  ['internal_9',['internal',['../namespacenshogi_1_1core_1_1internal.html',1,'nshogi::core::internal'],['../namespacenshogi_1_1ml_1_1internal.html',1,'nshogi::ml::internal']]],
+  ['io_10',['io',['../namespacenshogi_1_1io.html',1,'nshogi']]],
+  ['mate1ply_11',['mate1ply',['../namespacenshogi_1_1solver_1_1mate1ply.html',1,'nshogi::solver']]],
+  ['math_12',['math',['../namespacenshogi_1_1ml_1_1math.html',1,'nshogi::ml']]],
+  ['ml_13',['ml',['../namespacenshogi_1_1ml.html',1,'nshogi']]],
+  ['nshogi_14',['nshogi',['../namespacenshogi.html',1,'']]],
+  ['sfen_15',['sfen',['../namespacenshogi_1_1io_1_1sfen.html',1,'nshogi::io']]],
+  ['simple_5fteacher_16',['simple_teacher',['../namespacenshogi_1_1io_1_1file_1_1simple__teacher.html',1,'nshogi::io::file']]],
+  ['solver_17',['solver',['../namespacenshogi_1_1solver.html',1,'nshogi']]]
+];
