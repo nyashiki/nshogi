@@ -1,3 +1,12 @@
+//
+// Copyright (c) 2025 @nyashiki
+//
+// This software is licensed under the MIT license.
+// For details, see the LICENSE file in the root of this repository.
+//
+// SPDX-License-Identifier: MIT
+//
+
 #include "capability.h"
 
 namespace nshogi {
@@ -39,6 +48,6 @@ bool neonAvailable() {
     return false;
 }
 
-} // namespace build_info
 } // namespace capability
+} // namespace build_info
 } // namespace nshogi

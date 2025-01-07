@@ -1,19 +1,26 @@
+//
+// Copyright (c) 2025 @nyashiki
+//
+// This software is licensed under the MIT license.
+// For details, see the LICENSE file in the root of this repository.
+//
+// SPDX-License-Identifier: MIT
+//
+
 #ifndef NSHOGI_IO_CSA_H
 #define NSHOGI_IO_CSA_H
 
-#include "../core/types.h"
 #include "../core/position.h"
-#include "../core/state.h"
 #include "../core/positionbuilder.h"
+#include "../core/state.h"
 #include "../core/statebuilder.h"
+#include "../core/types.h"
 
 #include <string>
-
 
 namespace nshogi {
 namespace io {
 namespace csa {
-
 
 char fileToChar(core::File File);
 char rankToChar(core::File File);
@@ -42,9 +49,7 @@ class StateBuilder : public core::StateBuilder {
 
  private:
     StateBuilder(const std::string& CSA);
-
 };
-
 
 } // namespace csa
 } // namespace io

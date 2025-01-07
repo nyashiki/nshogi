@@ -1,5 +1,13 @@
+#
+# Copyright (c) 2025 @nyashiki
+#
+# This software is licensed under the MIT license.
+# For details, see the LICENSE file in the root of this repository.
+#
+# SPDX-License-Identifier: MIT
+#
+
 CXX := clang++
-# CXX := g++
 
 PREFIX ?= /usr/local
 
@@ -39,10 +47,6 @@ endif
 
 SOURCES :=                                 \
 	src/buildinfo/capability.cc        \
-	src/book/book.cc                   \
-	src/book/bookmove.cc               \
-	src/book/bookmovemeta.cc           \
-	src/book/entry.cc                  \
 	src/core/initializer.cc            \
 	src/core/position.cc               \
 	src/core/positionbuilder.cc        \
@@ -205,12 +209,10 @@ install: $(SHARED_TARGET) $(STATIC_TARGET)
 	install -m 644 $(SHARED_TARGET) $(PREFIX)/lib
 	install -m 644 $(STATIC_TARGET) $(PREFIX)/lib
 	ln -s $(PREFIX)/lib/$(SHARED_TARGET_NAME) $(PREFIX)/lib/libnshogi.so
-	install -d $(PREFIX)/include/nshogi/book
 	install -d $(PREFIX)/include/nshogi/core
 	install -d $(PREFIX)/include/nshogi/io
 	install -d $(PREFIX)/include/nshogi/ml
 	install -d $(PREFIX)/include/nshogi/solver
-	install -m 644 src/book/*.h $(PREFIX)/include/nshogi/book
 	install -m 644 src/core/*.h $(PREFIX)/include/nshogi/core
 	install -m 644 src/io/*.h $(PREFIX)/include/nshogi/io
 	install -m 644 src/ml/*.h $(PREFIX)/include/nshogi/ml
@@ -256,6 +258,10 @@ llvm-cov: CXX_FLAGS += -fprofile-instr-generate -fcoverage-mapping
 llvm-cov: clean-cov-prof runtest-static
 	llvm-profdata merge -sparse default.profraw -o default.profdata
 	llvm-cov show -format=html -output-dir=cov_html -instr-profile default.profdata $(TEST_STATIC_TARGET)
+
+.PHONY: fmt
+fmt:
+	find src/ \( -name "*.cc" -o -name "*.h" \) -exec clang-format -i {} \;
 
 .PHONY: clean
 clean: clean-perf clean-cov-prof

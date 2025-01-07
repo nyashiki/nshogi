@@ -1,13 +1,21 @@
+//
+// Copyright (c) 2025 @nyashiki
+//
+// This software is licensed under the MIT license.
+// For details, see the LICENSE file in the root of this repository.
+//
+// SPDX-License-Identifier: MIT
+//
+
 #include "hash.h"
 #include <cstdint>
 #include <random>
-
 
 namespace nshogi {
 namespace core {
 namespace internal {
 
-template<>
+template <>
 Hash<uint64_t>::Hash() {
     static std::ranlux48 Rng(20230622);
 
@@ -26,17 +34,17 @@ Hash<uint64_t>::Hash() {
     }
 }
 
-template<>
-Hash<uint64_t>::Hash(const Hash<uint64_t>& H): Value(H.Value) {
+template <>
+Hash<uint64_t>::Hash(const Hash<uint64_t>& H)
+    : Value(H.Value) {
 }
 
-
-template<>
+template <>
 void Hash<uint64_t>::clear() {
     Value = 0;
 }
 
-template<>
+template <>
 void Hash<uint64_t>::refresh(const Position& Pos) {
     clear();
 

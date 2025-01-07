@@ -1,3 +1,12 @@
+//
+// Copyright (c) 2025 @nyashiki
+//
+// This software is licensed under the MIT license.
+// For details, see the LICENSE file in the root of this repository.
+//
+// SPDX-License-Identifier: MIT
+//
+
 #ifndef NSHOGI_CORE_HUFFMAN_H
 #define NSHOGI_CORE_HUFFMAN_H
 
@@ -10,7 +19,7 @@ namespace internal {
 
 struct HuffmanCodeImpl;
 
-} // namespace
+} // namespace internal
 
 struct alignas(32) HuffmanCode {
  public:
@@ -31,7 +40,8 @@ struct alignas(32) HuffmanCode {
     static HuffmanCode zero();
 
     static HuffmanCode encode(const Position&);
-    static HuffmanCode encode(const Position&, Square BlackKingSquare, Square WhiteKingSquare);
+    static HuffmanCode encode(const Position&, Square BlackKingSquare,
+                              Square WhiteKingSquare);
     static Position decode(const HuffmanCode&);
 
  private:

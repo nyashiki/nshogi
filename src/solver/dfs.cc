@@ -1,8 +1,17 @@
+//
+// Copyright (c) 2025 @nyashiki
+//
+// This software is licensed under the MIT license.
+// For details, see the LICENSE file in the root of this repository.
+//
+// SPDX-License-Identifier: MIT
+//
+
 #include "dfs.h"
-#include "internal/mate1ply.h"
 #include "../core/internal/movegenerator.h"
-#include "../core/internal/stateimpl.h"
 #include "../core/internal/stateadapter.h"
+#include "../core/internal/stateimpl.h"
+#include "internal/mate1ply.h"
 
 namespace nshogi {
 namespace solver {
@@ -10,10 +19,10 @@ namespace dfs {
 
 namespace {
 
-template<core::Color C>
+template <core::Color C>
 core::Move32 defence(core::internal::StateImpl* S, int Limit);
 
-template<core::Color C>
+template <core::Color C>
 core::Move32 attack(core::internal::StateImpl* S, int Limit) {
     if (Limit < 1) {
         return core::Move32::MoveNone();
@@ -28,9 +37,11 @@ core::Move32 attack(core::internal::StateImpl* S, int Limit) {
     const auto CheckMoves = [&]() {
         if (Limit > 3 && S->getStandCount<C, core::PTK_Pawn>() > 0) {
             // Generate non-promoting moves to avoid utifu-dume rule.
-            return core::internal::MoveGeneratorInternal::generateLegalCheckMoves<C, false>(*S);
+            return core::internal::MoveGeneratorInternal::
+                generateLegalCheckMoves<C, false>(*S);
         } else {
-            return core::internal::MoveGeneratorInternal::generateLegalCheckMoves<C, true>(*S);
+            return core::internal::MoveGeneratorInternal::
+                generateLegalCheckMoves<C, true>(*S);
         }
     }();
 
@@ -49,9 +60,10 @@ core::Move32 attack(core::internal::StateImpl* S, int Limit) {
     return core::Move32::MoveNone();
 }
 
-template<core::Color C>
+template <core::Color C>
 core::Move32 defence(core::internal::StateImpl* S, int Limit) {
-    const auto DefenceMoves = core::internal::MoveGeneratorInternal::generateLegalMoves<C, true>(*S);
+    const auto DefenceMoves =
+        core::internal::MoveGeneratorInternal::generateLegalMoves<C, true>(*S);
 
     bool IsCheckmatedBy1Ply = true;
     for (const auto& Move : DefenceMoves) {
@@ -68,7 +80,8 @@ core::Move32 defence(core::internal::StateImpl* S, int Limit) {
     }
 
     const core::Move32 LastMove = S->getLastMove();
-    if (IsCheckmatedBy1Ply && LastMove.drop() && LastMove.pieceType() == core::PTK_Pawn) {
+    if (IsCheckmatedBy1Ply && LastMove.drop() &&
+        LastMove.pieceType() == core::PTK_Pawn) {
         // Rule: utchifu-dume.
         return core::Move32::MoveWin();
     }

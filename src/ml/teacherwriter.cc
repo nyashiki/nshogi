@@ -1,22 +1,32 @@
+//
+// Copyright (c) 2025 @nyashiki
+//
+// This software is licensed under the MIT license.
+// For details, see the LICENSE file in the root of this repository.
+//
+// SPDX-License-Identifier: MIT
+//
+
 #include "teacherwriter.h"
-#include "azteacher.h"
 #include "../io/file.h"
+#include "azteacher.h"
 
 #include <cstddef>
 #include <fstream>
-#include <vector>
 #include <numeric>
 #include <random>
+#include <vector>
 
 namespace nshogi {
 namespace ml {
 
-template<typename TeacherType>
-ThreadsafeTeacherWriter<TeacherType>::ThreadsafeTeacherWriter(const std::string& TeacherPath): Path(TeacherPath) {
-
+template <typename TeacherType>
+ThreadsafeTeacherWriter<TeacherType>::ThreadsafeTeacherWriter(
+    const std::string& TeacherPath)
+    : Path(TeacherPath) {
 }
 
-template<typename TeacherType>
+template <typename TeacherType>
 void ThreadsafeTeacherWriter<TeacherType>::write(const TeacherType& Teacher) {
     std::lock_guard<std::mutex> lk(Mutex);
 
@@ -26,8 +36,10 @@ void ThreadsafeTeacherWriter<TeacherType>::write(const TeacherType& Teacher) {
     Ofs.flush();
 }
 
-template<typename TeacherType>
-void ThreadsafeTeacherWriter<TeacherType>::shuffle(const TeacherLoaderForFixedSizeTeacher<TeacherType> &Loader, const std::string& OutputPath, uint64_t Seed) {
+template <typename TeacherType>
+void ThreadsafeTeacherWriter<TeacherType>::shuffle(
+    const TeacherLoaderForFixedSizeTeacher<TeacherType>& Loader,
+    const std::string& OutputPath, uint64_t Seed) {
     std::ofstream Ofs(OutputPath, std::ios::out | std::ios::app);
 
     std::vector<std::size_t> Indices(Loader.size());
@@ -47,11 +59,9 @@ void ThreadsafeTeacherWriter<TeacherType>::shuffle(const TeacherLoaderForFixedSi
     }
 }
 
-template
-class ThreadsafeTeacherWriter<AZTeacher>;
+template class ThreadsafeTeacherWriter<AZTeacher>;
 
-template
-class ThreadsafeTeacherWriter<SimpleTeacher>;
+template class ThreadsafeTeacherWriter<SimpleTeacher>;
 
 } // namespace ml
 } // namespace nshogi

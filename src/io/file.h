@@ -1,3 +1,12 @@
+//
+// Copyright (c) 2025 @nyashiki
+//
+// This software is licensed under the MIT license.
+// For details, see the LICENSE file in the root of this repository.
+//
+// SPDX-License-Identifier: MIT
+//
+
 #ifndef NSHOGI_IO_FILE_H
 #define NSHOGI_IO_FILE_H
 
@@ -16,7 +25,6 @@ ml::AZTeacher load(std::ifstream&);
 void save(std::ofstream&, const ml::AZTeacher&);
 
 } // namespace az_teacher
-
 
 namespace simple_teacher {
 

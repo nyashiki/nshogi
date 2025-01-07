@@ -1,3 +1,12 @@
+//
+// Copyright (c) 2025 @nyashiki
+//
+// This software is licensed under the MIT license.
+// For details, see the LICENSE file in the root of this repository.
+//
+// SPDX-License-Identifier: MIT
+//
+
 #include "sfen.h"
 #include "../core/squareiterator.h"
 #include "../core/types.h"
@@ -63,7 +72,9 @@ std::string move16ToSfen(core::Move16 Move) {
     const core::Square To = Move.to();
 
     if (Move.drop()) {
-        const core::PieceTypeKind Type = (core::PieceTypeKind)(Move.from() - core::NumSquares + 1);;
+        const core::PieceTypeKind Type =
+            (core::PieceTypeKind)(Move.from() - core::NumSquares + 1);
+        ;
 
         SStream << pieceToSfen(core::makePiece(core::Black, Type)) << '*';
         SStream << squareToSfen(To);
@@ -98,18 +109,24 @@ core::Move32 sfenToMove32(const core::Position& Pos, const std::string& Sfen) {
 
     if (Sfen[1] == '*') {
         if (Sfen.size() != 4) {
-            throw std::runtime_error("invalid sfen string (dropping check error).\n" +
-                    ("    Position:" + positionToSfen(Pos) + "\n"
-                     "    Sfen: " + Sfen));
+            throw std::runtime_error(
+                "invalid sfen string (dropping check error).\n" +
+                ("    Position:" + positionToSfen(Pos) +
+                 "\n"
+                 "    Sfen: " +
+                 Sfen));
         }
 
         const core::PieceKind Piece = charToPiece(Sfen[0], false);
         const core::PieceTypeKind Type = core::getPieceType(Piece);
 
         if (pieceToSfen(Piece)[0] != Sfen[0]) {
-            throw std::runtime_error("invalid sfen string (piece check error).\n" +
-                    ("    Position:" + positionToSfen(Pos) + "\n"
-                     "    Sfen: " + Sfen));
+            throw std::runtime_error(
+                "invalid sfen string (piece check error).\n" +
+                ("    Position:" + positionToSfen(Pos) +
+                 "\n"
+                 "    Sfen: " +
+                 Sfen));
         }
 
         return core::Move32::droppingMove(ToSq, Type);
@@ -117,14 +134,19 @@ core::Move32 sfenToMove32(const core::Position& Pos, const std::string& Sfen) {
 
     if (Sfen.size() != 4 && Sfen.size() != 5) {
         throw std::runtime_error("invalid sfen string (size check error).\n" +
-                ("    Position:" + positionToSfen(Pos) + "\n"
-                 "    Sfen: " + Sfen));
+                                 ("    Position:" + positionToSfen(Pos) +
+                                  "\n"
+                                  "    Sfen: " +
+                                  Sfen));
     }
 
     if (Sfen.size() == 5 && Sfen[4] != '+') {
-        throw std::runtime_error("invalid sfen string (promotion check error).\n" +
-                ("    Position:" + positionToSfen(Pos) + "\n"
-                 "    Sfen: " + Sfen));
+        throw std::runtime_error(
+            "invalid sfen string (promotion check error).\n" +
+            ("    Position:" + positionToSfen(Pos) +
+             "\n"
+             "    Sfen: " +
+             Sfen));
     }
 
     core::File FromFile = charToFile(Sfen[0]);
@@ -136,8 +158,10 @@ core::Move32 sfenToMove32(const core::Position& Pos, const std::string& Sfen) {
 
     if (Type == core::PTK_Empty) {
         throw std::runtime_error("invalid sfen string (type check error).\n" +
-                ("    Position:" + positionToSfen(Pos) + "\n"
-                 "    Sfen: " + Sfen));
+                                 ("    Position:" + positionToSfen(Pos) +
+                                  "\n"
+                                  "    Sfen: " +
+                                  Sfen));
     }
 
     bool IsPromoting = Sfen.size() == 5 && Sfen[4] == '+';
@@ -270,7 +294,8 @@ std::string stateToSfen(const core::State& State) {
     if (State.getPly() > State.getPosition().getPlyOffset()) {
         SStream << " moves";
 
-        for (uint16_t Ply = State.getPosition().getPlyOffset(); Ply < State.getPly(); ++Ply) {
+        for (uint16_t Ply = State.getPosition().getPlyOffset();
+             Ply < State.getPly(); ++Ply) {
             SStream << " " << move32ToSfen(State.getHistoryMove(Ply));
         }
     }
@@ -293,7 +318,7 @@ core::Position PositionBuilder::newPosition(const std::string& Sfen) {
     for (; Sfen[Cursor] != ' '; ++Cursor) {
         if (Cursor >= Sfen.size()) {
             throw std::runtime_error("invalid sfen string (cursor error).\n" +
-                     ("    Sfen: " + Sfen));
+                                     ("    Sfen: " + Sfen));
         }
 
         if (Sfen[Cursor] == '/') {
@@ -307,8 +332,9 @@ core::Position PositionBuilder::newPosition(const std::string& Sfen) {
 
         if (Sfen[Cursor] >= '1' && Sfen[Cursor] <= '9') {
             if (Promote) {
-                throw std::runtime_error("invalid sfen string (empty count error).\n" +
-                     ("    Sfen: " + Sfen));
+                throw std::runtime_error(
+                    "invalid sfen string (empty count error).\n" +
+                    ("    Sfen: " + Sfen));
             }
 
             SquareIt += Sfen[Cursor] - '0';
@@ -318,8 +344,9 @@ core::Position PositionBuilder::newPosition(const std::string& Sfen) {
         PieceKind Piece = charToPiece(Sfen[Cursor], Promote);
 
         if (Piece == PK_Empty) {
-            throw std::runtime_error("invalid sfen string (piece empty error).\n" +
-                     ("    Sfen: " + Sfen));
+            throw std::runtime_error(
+                "invalid sfen string (piece empty error).\n" +
+                ("    Sfen: " + Sfen));
         }
 
         Builder.setPiece(*SquareIt, Piece);
@@ -329,7 +356,7 @@ core::Position PositionBuilder::newPosition(const std::string& Sfen) {
 
     if (*SquareIt != NumSquares) {
         throw std::runtime_error("invalid sfen string (square error).\n" +
-                     ("    Sfen: " + Sfen));
+                                 ("    Sfen: " + Sfen));
     }
 
     ++Cursor;
@@ -340,14 +367,15 @@ core::Position PositionBuilder::newPosition(const std::string& Sfen) {
         Builder.setColor(White);
     } else {
         throw std::runtime_error("invalid sfen string (color error).\n" +
-                     ("    Sfen: " + Sfen));
+                                 ("    Sfen: " + Sfen));
     }
 
     ++Cursor;
 
     if (Sfen[Cursor] != ' ') {
-        throw std::runtime_error("invalid sfen string (empty charactor check error).\n" +
-                     ("    Sfen: " + Sfen));
+        throw std::runtime_error(
+            "invalid sfen string (empty charactor check error).\n" +
+            ("    Sfen: " + Sfen));
     }
 
     ++Cursor;
@@ -355,8 +383,9 @@ core::Position PositionBuilder::newPosition(const std::string& Sfen) {
     uint8_t StandCount = 0;
     for (; Sfen[Cursor] != ' '; ++Cursor) {
         if (Cursor >= Sfen.size()) {
-            throw std::runtime_error("invalid sfen string (stand cursor error).\n" +
-                     ("    Sfen: " + Sfen));
+            throw std::runtime_error(
+                "invalid sfen string (stand cursor error).\n" +
+                ("    Sfen: " + Sfen));
         }
 
         if (Sfen[Cursor] == '-') {
@@ -372,8 +401,9 @@ core::Position PositionBuilder::newPosition(const std::string& Sfen) {
         PieceTypeKind Type = getPieceType(Piece);
 
         if (Type == PTK_Empty || Type == PTK_King) {
-            throw std::runtime_error("invalid sfen string (empty or king check error).\n" +
-                     ("    Sfen: " + Sfen));
+            throw std::runtime_error(
+                "invalid sfen string (empty or king check error).\n" +
+                ("    Sfen: " + Sfen));
         }
 
         if (StandCount == 0) {
@@ -391,14 +421,14 @@ core::Position PositionBuilder::newPosition(const std::string& Sfen) {
 
     if (StandCount > 0) {
         throw std::runtime_error("invalid sfen string (stand count error).\n" +
-                     ("    Sfen: " + Sfen));
+                                 ("    Sfen: " + Sfen));
     }
 
     ++Cursor;
 
     if (Cursor >= Sfen.size()) {
         throw std::runtime_error("invalid sfen string (ply cursor error).\n" +
-                     ("    Sfen: " + Sfen));
+                                 ("    Sfen: " + Sfen));
     }
 
     uint16_t Ply = 0;
@@ -409,8 +439,9 @@ core::Position PositionBuilder::newPosition(const std::string& Sfen) {
         }
 
         if (Sfen[Cursor] < '0' || Sfen[Cursor] > '9') {
-            throw std::runtime_error("invalid sfen string (ply not a number error).\n" +
-                     ("    Sfen: " + Sfen));
+            throw std::runtime_error(
+                "invalid sfen string (ply not a number error).\n" +
+                ("    Sfen: " + Sfen));
         }
 
         Ply = (uint16_t)(Ply * 10) + (uint16_t)(Sfen[Cursor] - '0');
@@ -418,7 +449,7 @@ core::Position PositionBuilder::newPosition(const std::string& Sfen) {
 
     if (Ply == 0) {
         throw std::runtime_error("invalid sfen string (ply zero error).\n" +
-                     ("    Sfen: " + Sfen));
+                                 ("    Sfen: " + Sfen));
     }
 
     Builder.setPlyOffset(Ply - 1);
@@ -455,7 +486,7 @@ StateBuilder::StateBuilder(const std::string& Sfen)
 
         if (ExpectMovesStr != "moves") {
             throw std::runtime_error("invalid sfen string (moves error)\n" +
-                     ("    Sfen: " + Sfen));
+                                     ("    Sfen: " + Sfen));
         }
     }
 

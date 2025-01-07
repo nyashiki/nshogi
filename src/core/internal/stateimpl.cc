@@ -1,11 +1,19 @@
+//
+// Copyright (c) 2025 @nyashiki
+//
+// This software is licensed under the MIT license.
+// For details, see the LICENSE file in the root of this repository.
+//
+// SPDX-License-Identifier: MIT
+//
+
 #include "stateimpl.h"
+#include "../types.h"
 #include "bitboard.h"
 #include "statehelper.h"
-#include "../types.h"
 
 #include <cassert>
 #include <cstring>
-
 
 namespace nshogi {
 namespace core {
@@ -20,7 +28,8 @@ bool canDeclareImpl(const StateImpl& S) {
     }
 
     const bitboard::Bitboard EnteringPiecesBB =
-        (S.getBitboard<C>() ^ S.getBitboard<C, PTK_King>()) & bitboard::PromotableBB[C];
+        (S.getBitboard<C>() ^ S.getBitboard<C, PTK_King>()) &
+        bitboard::PromotableBB[C];
 
     if (EnteringPiecesBB.popCount() < 10) {
         return false;
@@ -30,7 +39,7 @@ bool canDeclareImpl(const StateImpl& S) {
         return false;
     }
 
-    constexpr uint8_t Criteria = (C == Black)? 28 : 27;
+    constexpr uint8_t Criteria = (C == Black) ? 28 : 27;
 
     if (S.computeDeclarationScore<C>() >= Criteria) {
         return true;
@@ -71,24 +80,30 @@ StateImpl StateImpl::clone() const {
     S.Helper.Ply = Helper.Ply;
 
     std::memcpy(reinterpret_cast<char*>(S.Helper.ColorBB),
-                reinterpret_cast<const char*>(Helper.ColorBB), NumColors * sizeof(bitboard::Bitboard));
+                reinterpret_cast<const char*>(Helper.ColorBB),
+                NumColors * sizeof(bitboard::Bitboard));
 
     std::memcpy(reinterpret_cast<char*>(S.Helper.TypeBB),
-                reinterpret_cast<const char*>(Helper.TypeBB), NumPieceType * sizeof(bitboard::Bitboard));
+                reinterpret_cast<const char*>(Helper.TypeBB),
+                NumPieceType * sizeof(bitboard::Bitboard));
 
     std::memcpy(reinterpret_cast<char*>(S.Helper.KingSquare),
-                reinterpret_cast<const char*>(Helper.KingSquare), NumColors * sizeof(Square));
+                reinterpret_cast<const char*>(Helper.KingSquare),
+                NumColors * sizeof(Square));
 
     S.Helper.SHelper.resize(Helper.SHelper.size());
     std::memcpy(reinterpret_cast<char*>(S.Helper.SHelper.data()),
-                reinterpret_cast<const char*>(Helper.SHelper.data()), Helper.SHelper.size() * sizeof(StepHelper));
+                reinterpret_cast<const char*>(Helper.SHelper.data()),
+                Helper.SHelper.size() * sizeof(StepHelper));
 
     return S;
 }
 
 template <Color C>
 inline void StateImpl::doMove(Move32 Move) {
-    Helper.proceedOneStep(Move, HashValue.getValue(), getPosition().getStand<Black>(), getPosition().getStand<White>());
+    Helper.proceedOneStep(Move, HashValue.getValue(),
+                          getPosition().getStand<Black>(),
+                          getPosition().getStand<White>());
     StepHelper* CurrentStepHelper = &Helper.SHelper[Helper.Ply];
 
     const Square To = Move.to();
@@ -165,11 +180,13 @@ inline void StateImpl::doMove(Move32 Move) {
 
     const StepHelper& PrevStepHelper = Helper.getStepHelper(Helper.Ply - 1);
     if (!CurrentStepHelper->CheckerBB.isZero()) {
-        CurrentStepHelper->ContinuousCheckCounts[C] = PrevStepHelper.ContinuousCheckCounts[C] + 1;
+        CurrentStepHelper->ContinuousCheckCounts[C] =
+            PrevStepHelper.ContinuousCheckCounts[C] + 1;
     } else {
         CurrentStepHelper->ContinuousCheckCounts[C] = 0;
     }
-    CurrentStepHelper->ContinuousCheckCounts[~C] = PrevStepHelper.ContinuousCheckCounts[~C];
+    CurrentStepHelper->ContinuousCheckCounts[~C] =
+        PrevStepHelper.ContinuousCheckCounts[~C];
 
     // And now it is opponent's turn.
     Pos.changeSideToMove();
@@ -184,7 +201,7 @@ void StateImpl::doMove(Move32 Move) {
 }
 
 template <Color C>
-inline Move32 StateImpl::undoMove() {
+inline void StateImpl::undoMove() {
     const Move32 PrevMove = Helper.goBackOneStep();
     Pos.changeSideToMove();
 
@@ -242,14 +259,13 @@ inline Move32 StateImpl::undoMove() {
     HashValue.updateColor();
 
     assert((getBitboard<Black>() & getBitboard<White>()).isZero());
-    return PrevMove;
 }
 
-Move32 StateImpl::undoMove() {
+void StateImpl::undoMove() {
     if (getPosition().sideToMove() == Black) {
-        return undoMove<Black>();
+        undoMove<Black>();
     } else {
-        return undoMove<White>();
+        undoMove<White>();
     }
 }
 
@@ -290,12 +306,16 @@ void StateImpl::refresh() {
 
     if (getPosition().sideToMove() == Black) {
         setCheckerBB<Black>(CurrentStepHelper);
-        setDefendingOpponentSliderBB<Black, true>(CurrentStepHelper, OccupiedBB);
-        setDefendingOpponentSliderBB<White, false>(CurrentStepHelper, OccupiedBB);
+        setDefendingOpponentSliderBB<Black, true>(CurrentStepHelper,
+                                                  OccupiedBB);
+        setDefendingOpponentSliderBB<White, false>(CurrentStepHelper,
+                                                   OccupiedBB);
     } else {
         setCheckerBB<White>(CurrentStepHelper);
-        setDefendingOpponentSliderBB<Black, false>(CurrentStepHelper, OccupiedBB);
-        setDefendingOpponentSliderBB<White, true>(CurrentStepHelper, OccupiedBB);
+        setDefendingOpponentSliderBB<Black, false>(CurrentStepHelper,
+                                                   OccupiedBB);
+        setDefendingOpponentSliderBB<White, true>(CurrentStepHelper,
+                                                  OccupiedBB);
     }
 
     HashValue.refresh(getPosition());
@@ -306,20 +326,25 @@ void StateImpl::refresh() {
     CurrentStepHelper->EachStand[White] = getPosition().getStand<White>();
 
     if (!CurrentStepHelper->CheckerBB.isZero()) {
-        CurrentStepHelper->ContinuousCheckCounts[getPosition().sideToMove()] = 1;
+        CurrentStepHelper->ContinuousCheckCounts[getPosition().sideToMove()] =
+            1;
     }
 }
 
 template <Color C, bool UpdateCheckerBySliders>
-inline void StateImpl::setDefendingOpponentSliderBB(
-        StepHelper* SHelper, const bitboard::Bitboard& OccupiedBB) {
+inline void
+StateImpl::setDefendingOpponentSliderBB(StepHelper* SHelper,
+                                        const bitboard::Bitboard& OccupiedBB) {
     SHelper->DefendingOpponentSliderBB[C].clear();
 
     const bitboard::Bitboard Candidates =
-        ((getBitboard<PTK_Lance>() & bitboard::getForwardBB<C>(getKingSquare<C>()))
-         | ((getBitboard<PTK_Bishop>() | getBitboard<PTK_ProBishop>()) & bitboard::getDiagBB(getKingSquare<C>()))
-         | ((getBitboard<PTK_Rook>() | getBitboard<PTK_ProRook>()) & bitboard::getCrossBB(getKingSquare<C>())))
-        & getBitboard<~C>();
+        ((getBitboard<PTK_Lance>() &
+          bitboard::getForwardBB<C>(getKingSquare<C>())) |
+         ((getBitboard<PTK_Bishop>() | getBitboard<PTK_ProBishop>()) &
+          bitboard::getDiagBB(getKingSquare<C>())) |
+         ((getBitboard<PTK_Rook>() | getBitboard<PTK_ProRook>()) &
+          bitboard::getCrossBB(getKingSquare<C>()))) &
+        getBitboard<~C>();
 
     Candidates.forEach([&](Square Sq) {
         const bitboard::Bitboard BetweenOccupiedBB =
@@ -342,18 +367,20 @@ inline void StateImpl::setCheckerBB(StepHelper* SHelper) {
 
     SHelper->CheckerBB.clear();
 
-    SHelper->CheckerBB |= bitboard::getAttackBB<C, PTK_Pawn>(KingSq) &
-                          getBitboard<PTK_Pawn>();
+    SHelper->CheckerBB |=
+        bitboard::getAttackBB<C, PTK_Pawn>(KingSq) & getBitboard<PTK_Pawn>();
     SHelper->CheckerBB |= bitboard::getAttackBB<C, PTK_Knight>(KingSq) &
                           getBitboard<PTK_Knight>();
     SHelper->CheckerBB |= bitboard::getAttackBB<C, PTK_Silver>(KingSq) &
                           getBitboard<PTK_Silver>();
-    SHelper->CheckerBB |= bitboard::getAttackBB<C, PTK_Gold>(KingSq) &
-                          (getBitboard<PTK_Gold>() | getBitboard<PTK_ProPawn>()
-                           | getBitboard<PTK_ProLance>() | getBitboard<PTK_ProKnight>()
-                           | getBitboard<PTK_ProSilver>());
-    SHelper->CheckerBB |= bitboard::getAttackBB<C, PTK_King>(KingSq) &
-                          (getBitboard<PTK_ProBishop>() | getBitboard<PTK_ProRook>());
+    SHelper->CheckerBB |=
+        bitboard::getAttackBB<C, PTK_Gold>(KingSq) &
+        (getBitboard<PTK_Gold>() | getBitboard<PTK_ProPawn>() |
+         getBitboard<PTK_ProLance>() | getBitboard<PTK_ProKnight>() |
+         getBitboard<PTK_ProSilver>());
+    SHelper->CheckerBB |=
+        bitboard::getAttackBB<C, PTK_King>(KingSq) &
+        (getBitboard<PTK_ProBishop>() | getBitboard<PTK_ProRook>());
 
     SHelper->CheckerBB &= getBitboard<~C>();
 }

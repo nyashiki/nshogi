@@ -1,14 +1,23 @@
+//
+// Copyright (c) 2025 @nyashiki
+//
+// This software is licensed under the MIT license.
+// For details, see the LICENSE file in the root of this repository.
+//
+// SPDX-License-Identifier: MIT
+//
+
 #ifndef NSHOGI_ML_AZTEACHER_H
 #define NSHOGI_ML_AZTEACHER_H
 
-#include "../core/types.h"
 #include "../core/state.h"
 #include "../core/stateconfig.h"
+#include "../core/types.h"
 
+#include <array>
 #include <cstddef>
 #include <cstdint>
 #include <fstream>
-#include <array>
 #include <vector>
 
 namespace nshogi {
@@ -56,6 +65,5 @@ struct AZTeacher {
 
 } // namespace ml
 } // namespace nshogi
-
 
 #endif // #ifndef NSHOGI_ML_AZTEACHER_H

@@ -1,3 +1,12 @@
+//
+// Copyright (c) 2025 @nyashiki
+//
+// This software is licensed under the MIT license.
+// For details, see the LICENSE file in the root of this repository.
+//
+// SPDX-License-Identifier: MIT
+//
+
 #ifndef NSHOGI_CORE_SQUAREITERATOR_H
 #define NSHOGI_CORE_SQUAREITERATOR_H
 
@@ -19,7 +28,7 @@ enum struct IterateOrder {
 };
 // clang-format on
 
-template<IterateOrder Order>
+template <IterateOrder Order>
 constexpr IterateOrder reverseOrder() {
     if constexpr (Order == IterateOrder::ESWN) {
         return IterateOrder::WNES;
@@ -38,7 +47,15 @@ constexpr IterateOrder reverseOrder() {
     }
 }
 
-template <IterateOrder Order> struct SquareIterator {
+///
+/// @class SquareIterator
+/// @brief Iterator for all squares along the specified order.
+/// This iterator allows traversal over all squares in a specific order.
+///
+/// @tparam Order The order in which the squares are traversed.
+///
+template <IterateOrder Order>
+struct SquareIterator {
  public:
     SquareIterator() {
         if constexpr (Order == IterateOrder::Fastest ||

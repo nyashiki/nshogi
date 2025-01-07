@@ -1,33 +1,46 @@
-#include "common.h"
-#include "utils.h"
+//
+// Copyright (c) 2025 @nyashiki
+//
+// This software is licensed under the MIT license.
+// For details, see the LICENSE file in the root of this repository.
+//
+// SPDX-License-Identifier: MIT
+//
+
 #include "../core/internal/bitboard.h"
 #include "../core/types.h"
 #include "../io/internal/bitboard.h"
+#include "common.h"
+#include "utils.h"
 
 #include <unistd.h>
 
 TEST(Bitboard, ZeroBB) {
     for (nshogi::core::Square Sq : nshogi::core::Squares) {
-        TEST_ASSERT_FALSE(nshogi::core::internal::bitboard::Bitboard::ZeroBB().isSet(Sq));
+        TEST_ASSERT_FALSE(
+            nshogi::core::internal::bitboard::Bitboard::ZeroBB().isSet(Sq));
     }
 }
 
 TEST(Bitboard, AllBB) {
     for (nshogi::core::Square Sq : nshogi::core::Squares) {
-        TEST_ASSERT_TRUE(nshogi::core::internal::bitboard::Bitboard::AllBB().isSet(Sq));
+        TEST_ASSERT_TRUE(
+            nshogi::core::internal::bitboard::Bitboard::AllBB().isSet(Sq));
     }
 }
 
 TEST(Bitboard, SquareBB) {
     for (nshogi::core::Square Sq : nshogi::core::Squares) {
-        TEST_ASSERT_EQ(nshogi::core::internal::bitboard::SquareBB[Sq].getOne(), Sq);
+        TEST_ASSERT_EQ(nshogi::core::internal::bitboard::SquareBB[Sq].getOne(),
+                       Sq);
     }
 }
 
 TEST(Bitboard, DoubleFlip) {
     for (nshogi::core::Square Sq : nshogi::core::Squares) {
-        TEST_ASSERT_EQ(nshogi::core::internal::bitboard::SquareBB[Sq] ^ nshogi::core::internal::bitboard::SquareBB[Sq],
-                nshogi::core::internal::bitboard::Bitboard::ZeroBB());
+        TEST_ASSERT_EQ(nshogi::core::internal::bitboard::SquareBB[Sq] ^
+                           nshogi::core::internal::bitboard::SquareBB[Sq],
+                       nshogi::core::internal::bitboard::Bitboard::ZeroBB());
     }
 }
 
@@ -36,9 +49,10 @@ TEST(Bitboard, NotEqual) {
         for (nshogi::core::Square Sq2 : nshogi::core::Squares) {
             if (Sq1 == Sq2) {
                 TEST_ASSERT_EQ(nshogi::core::internal::bitboard::SquareBB[Sq1],
-                    nshogi::core::internal::bitboard::SquareBB[Sq2]);
+                               nshogi::core::internal::bitboard::SquareBB[Sq2]);
             } else {
-                TEST_ASSERT_NEQ(nshogi::core::internal::bitboard::SquareBB[Sq1],
+                TEST_ASSERT_NEQ(
+                    nshogi::core::internal::bitboard::SquareBB[Sq1],
                     nshogi::core::internal::bitboard::SquareBB[Sq2]);
             }
         }

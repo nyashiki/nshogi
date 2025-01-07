@@ -1,8 +1,17 @@
+//
+// Copyright (c) 2025 @nyashiki
+//
+// This software is licensed under the MIT license.
+// For details, see the LICENSE file in the root of this repository.
+//
+// SPDX-License-Identifier: MIT
+//
+
 #include "mate1ply.h"
-#include "internal/mate1ply.h"
 #include "../core/internal/bitboard.h"
-#include "../core/internal/stateimpl.h"
 #include "../core/internal/stateadapter.h"
+#include "../core/internal/stateimpl.h"
+#include "internal/mate1ply.h"
 
 namespace nshogi {
 
@@ -22,9 +31,9 @@ core::Move32 solver::mate1ply::solve(const core::State& S) {
     }
 }
 
-template
-core::Move32 solver::mate1ply::solve<core::Color::Black>(const core::State&);
-template
-core::Move32 solver::mate1ply::solve<core::Color::White>(const core::State&);
+template core::Move32
+solver::mate1ply::solve<core::Color::Black>(const core::State&);
+template core::Move32
+solver::mate1ply::solve<core::Color::White>(const core::State&);
 
-}  // namespace nshogi
+} // namespace nshogi

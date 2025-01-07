@@ -1,0 +1,20 @@
+name: fmt
+
+on: [pull_request]
+
+jobs:
+  fmt:
+    runs-on: ubuntu-latest
+    env:
+      working-directory: ./
+    permissions:
+      contents: write
+
+    steps:
+    - uses: actions/checkout@v4
+    - run: sudo apt-get install clang-format -y
+    - run: make fmt
+    - uses: stefanzweifel/git-auto-commit-action@v5
+      with:
+        branch: ${{ github.head_ref }}
+        commit_message: '[Bot] clang-format'

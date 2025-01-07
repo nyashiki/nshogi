@@ -1,6 +1,15 @@
-#include "common.h"
-#include "../core/types.h"
+//
+// Copyright (c) 2025 @nyashiki
+//
+// This software is licensed under the MIT license.
+// For details, see the LICENSE file in the root of this repository.
+//
+// SPDX-License-Identifier: MIT
+//
+
 #include "../core/internal/utils.h"
+#include "../core/types.h"
+#include "common.h"
 
 TEST(Utils, IsSameLine) {
     using namespace nshogi::core;

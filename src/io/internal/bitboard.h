@@ -1,8 +1,17 @@
+//
+// Copyright (c) 2025 @nyashiki
+//
+// This software is licensed under the MIT license.
+// For details, see the LICENSE file in the root of this repository.
+//
+// SPDX-License-Identifier: MIT
+//
+
 #ifndef NSHOGI_IO_INTERNAL_BITBOARD_H
 #define NSHOGI_IO_INTERNAL_BITBOARD_H
 
-#include "../../core/squareiterator.h"
 #include "../../core/internal/bitboard.h"
+#include "../../core/squareiterator.h"
 
 namespace nshogi {
 namespace io {

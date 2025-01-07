@@ -1,3 +1,12 @@
+//
+// Copyright (c) 2025 @nyashiki
+//
+// This software is licensed under the MIT license.
+// For details, see the LICENSE file in the root of this repository.
+//
+// SPDX-License-Identifier: MIT
+//
+
 #ifndef NSHOGI_CORE_INTERNAL_HUFFMANIMPL_H
 #define NSHOGI_CORE_INTERNAL_HUFFMANIMPL_H
 
@@ -25,7 +34,8 @@ struct alignas(32) HuffmanCodeImpl {
 #endif // #ifdef USE_AVX2
     }
 
-    HuffmanCodeImpl(uint64_t Code3, uint64_t Code2, uint64_t Code1, uint64_t Code0) {
+    HuffmanCodeImpl(uint64_t Code3, uint64_t Code2, uint64_t Code1,
+                    uint64_t Code0) {
         Data[0] = Code0;
         Data[1] = Code1;
         Data[2] = Code2;
@@ -48,7 +58,8 @@ struct alignas(32) HuffmanCodeImpl {
     }
 
     static HuffmanCodeImpl encode(const Position&);
-    static HuffmanCodeImpl encode(const Position&, Square BlackKingSquare, Square WhiteKingSquare);
+    static HuffmanCodeImpl encode(const Position&, Square BlackKingSquare,
+                                  Square WhiteKingSquare);
     static Position decode(const HuffmanCodeImpl&);
 
     bool operator==(const HuffmanCodeImpl& HC) const {
@@ -105,7 +116,6 @@ struct alignas(32) HuffmanCodeImpl {
         uint64_t Data[4];
     };
 };
-
 
 } // namespace internal
 } // namespace core

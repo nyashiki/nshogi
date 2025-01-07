@@ -1,62 +1,58 @@
-#include "featurestack.h"
-#include "featuretype.h"
+//
+// Copyright (c) 2025 @nyashiki
+//
+// This software is licensed under the MIT license.
+// For details, see the LICENSE file in the root of this repository.
+//
+// SPDX-License-Identifier: MIT
+//
 
-#include "internal/featurebitboardutil.h"
+#include "featurestack.h"
 #include "../core/internal/stateadapter.h"
+#include "featuretype.h"
+#include "internal/featurebitboardutil.h"
 
 #include <cassert>
 
 namespace nshogi {
 namespace ml {
 
-template<>
+template <>
 FeatureBitboard processIsBlackTurn<core::Black>() {
     return internal::FeatureBitboardUtil::makeFeatureBitboard(
-            core::internal::bitboard::Bitboard::AllBB(),
-            1,
-            false);
+        core::internal::bitboard::Bitboard::AllBB(), 1, false);
 }
 
-template<>
+template <>
 FeatureBitboard processIsBlackTurn<core::White>() {
     return internal::FeatureBitboardUtil::makeFeatureBitboard(
-            core::internal::bitboard::Bitboard::ZeroBB(),
-            0,
-            false);
+        core::internal::bitboard::Bitboard::ZeroBB(), 0, false);
 }
 
-template<>
+template <>
 FeatureBitboard processIsWhiteTurn<core::Black>() {
     return internal::FeatureBitboardUtil::makeFeatureBitboard(
-            core::internal::bitboard::Bitboard::ZeroBB(),
-            0,
-            false);
+        core::internal::bitboard::Bitboard::ZeroBB(), 0, false);
 }
 
-template<>
+template <>
 FeatureBitboard processIsWhiteTurn<core::White>() {
     return internal::FeatureBitboardUtil::makeFeatureBitboard(
-            core::internal::bitboard::Bitboard::AllBB(),
-            1,
-            false);
+        core::internal::bitboard::Bitboard::AllBB(), 1, false);
 }
 
 FeatureBitboard processCheck(const core::State& State) {
     core::internal::ImmutableStateAdapter Adapter(State);
     if (!Adapter->getCheckerBB().isZero()) {
         return internal::FeatureBitboardUtil::makeFeatureBitboard(
-                core::internal::bitboard::Bitboard::AllBB(),
-                1,
-                false);
+            core::internal::bitboard::Bitboard::AllBB(), 1, false);
     }
 
     return internal::FeatureBitboardUtil::makeFeatureBitboard(
-            core::internal::bitboard::Bitboard::ZeroBB(),
-            0,
-            false);
+        core::internal::bitboard::Bitboard::ZeroBB(), 0, false);
 }
 
-template<core::Color MyColor, core::Color TargetColor>
+template <core::Color MyColor, core::Color TargetColor>
 FeatureBitboard processNoPawnFile(const core::State& State) {
     core::internal::ImmutableStateAdapter Adapter(State);
     const core::internal::bitboard::Bitboard PawnBB =
@@ -92,130 +88,131 @@ FeatureBitboard processNoPawnFile(const core::State& State) {
         PawnExistFilesBB |= core::internal::bitboard::FileBB[core::File9];
     }
 
-    return internal::FeatureBitboardUtil::makeFeatureBitboard(~PawnExistFilesBB, 1, MyColor == core::White);
+    return internal::FeatureBitboardUtil::makeFeatureBitboard(
+        ~PawnExistFilesBB, 1, MyColor == core::White);
 }
 
-template
-FeatureBitboard processNoPawnFile<core::Black, core::Black>(const core::State& State);
-template
-FeatureBitboard processNoPawnFile<core::Black, core::White>(const core::State& State);
-template
-FeatureBitboard processNoPawnFile<core::White, core::Black>(const core::State& State);
-template
-FeatureBitboard processNoPawnFile<core::White, core::White>(const core::State& State);
+template FeatureBitboard
+processNoPawnFile<core::Black, core::Black>(const core::State& State);
+template FeatureBitboard
+processNoPawnFile<core::Black, core::White>(const core::State& State);
+template FeatureBitboard
+processNoPawnFile<core::White, core::Black>(const core::State& State);
+template FeatureBitboard
+processNoPawnFile<core::White, core::White>(const core::State& State);
 
-FeatureBitboard processProgress(const core::State& State, const core::StateConfig& Config) {
+FeatureBitboard processProgress(const core::State& State,
+                                const core::StateConfig& Config) {
     return internal::FeatureBitboardUtil::makeFeatureBitboard(
-            core::internal::bitboard::Bitboard::AllBB(),
-            (float)State.getPly() / Config.MaxPly,
-            false);
+        core::internal::bitboard::Bitboard::AllBB(),
+        (float)State.getPly() / Config.MaxPly, false);
 }
 
 FeatureBitboard processProgressUnit(const core::StateConfig& Config) {
     return internal::FeatureBitboardUtil::makeFeatureBitboard(
-            core::internal::bitboard::Bitboard::AllBB(),
-            1.0f / Config.MaxPly,
-            false);
+        core::internal::bitboard::Bitboard::AllBB(), 1.0f / Config.MaxPly,
+        false);
 }
 
-template<core::Color MyColor, core::Color PieceColor>
-FeatureBitboard processPiece(const core::State& State, core::PieceTypeKind Type) {
+template <core::Color MyColor, core::Color PieceColor>
+FeatureBitboard processPiece(const core::State& State,
+                             core::PieceTypeKind Type) {
     core::internal::ImmutableStateAdapter Adapter(State);
     return internal::FeatureBitboardUtil::makeFeatureBitboard(
-            Adapter->getBitboard<PieceColor>(Type),
-            1,
-            MyColor == core::White);
+        Adapter->getBitboard<PieceColor>(Type), 1, MyColor == core::White);
 }
 
-template
-FeatureBitboard processPiece<core::Black, core::Black>(const core::State& State, core::PieceTypeKind Type);
-template
-FeatureBitboard processPiece<core::Black, core::White>(const core::State& State, core::PieceTypeKind Type);
-template
-FeatureBitboard processPiece<core::White, core::Black>(const core::State& State, core::PieceTypeKind Type);
-template
-FeatureBitboard processPiece<core::White, core::White>(const core::State& State, core::PieceTypeKind Type);
+template FeatureBitboard
+processPiece<core::Black, core::Black>(const core::State& State,
+                                       core::PieceTypeKind Type);
+template FeatureBitboard
+processPiece<core::Black, core::White>(const core::State& State,
+                                       core::PieceTypeKind Type);
+template FeatureBitboard
+processPiece<core::White, core::Black>(const core::State& State,
+                                       core::PieceTypeKind Type);
+template FeatureBitboard
+processPiece<core::White, core::White>(const core::State& State,
+                                       core::PieceTypeKind Type);
 
-template<core::Color MyColor>
-FeatureBitboard processStand(const core::State& State, core::PieceTypeKind Type, uint8_t Count) {
+template <core::Color MyColor>
+FeatureBitboard processStand(const core::State& State, core::PieceTypeKind Type,
+                             uint8_t Count) {
     uint8_t TypeStandCount = State.getPosition().getStandCount<MyColor>(Type);
     return internal::FeatureBitboardUtil::makeFeatureBitboard(
-            core::internal::bitboard::Bitboard::AllBB(),
-            TypeStandCount >= Count,
-            false);
+        core::internal::bitboard::Bitboard::AllBB(), TypeStandCount >= Count,
+        false);
 }
 
-template
-FeatureBitboard processStand<core::Black>(const core::State& State, core::PieceTypeKind Type, uint8_t Count);
-template
-FeatureBitboard processStand<core::White>(const core::State& State, core::PieceTypeKind Type, uint8_t Count);
+template FeatureBitboard processStand<core::Black>(const core::State& State,
+                                                   core::PieceTypeKind Type,
+                                                   uint8_t Count);
+template FeatureBitboard processStand<core::White>(const core::State& State,
+                                                   core::PieceTypeKind Type,
+                                                   uint8_t Count);
 
-template<core::EndingRule Rule>
+template <core::EndingRule Rule>
 FeatureBitboard processRule(const core::StateConfig& Config) {
     return internal::FeatureBitboardUtil::makeFeatureBitboard(
-            core::internal::bitboard::Bitboard::AllBB(),
-            Config.Rule == Rule,
-            false);
+        core::internal::bitboard::Bitboard::AllBB(), Config.Rule == Rule,
+        false);
 }
 
-template
-FeatureBitboard processRule<core::EndingRule::ER_NoRule>(const core::StateConfig& Config);
-template
-FeatureBitboard processRule<core::EndingRule::ER_Draw24>(const core::StateConfig& Config);
-template
-FeatureBitboard processRule<core::EndingRule::ER_Trying>(const core::StateConfig& Config);
-template
-FeatureBitboard processRule<core::EndingRule::ER_Declare27>(const core::StateConfig& Config);
+template FeatureBitboard
+processRule<core::EndingRule::ER_NoRule>(const core::StateConfig& Config);
+template FeatureBitboard
+processRule<core::EndingRule::ER_Draw24>(const core::StateConfig& Config);
+template FeatureBitboard
+processRule<core::EndingRule::ER_Trying>(const core::StateConfig& Config);
+template FeatureBitboard
+processRule<core::EndingRule::ER_Declare27>(const core::StateConfig& Config);
 
-template<>
+template <>
 FeatureBitboard processDrawValue<core::Black>(const core::StateConfig& Config) {
     return internal::FeatureBitboardUtil::makeFeatureBitboard(
-            core::internal::bitboard::Bitboard::AllBB(),
-            Config.BlackDrawValue,
-            false);
+        core::internal::bitboard::Bitboard::AllBB(), Config.BlackDrawValue,
+        false);
 }
 
-template<>
+template <>
 FeatureBitboard processDrawValue<core::White>(const core::StateConfig& Config) {
     return internal::FeatureBitboardUtil::makeFeatureBitboard(
-            core::internal::bitboard::Bitboard::AllBB(),
-            Config.WhiteDrawValue,
-            false);
+        core::internal::bitboard::Bitboard::AllBB(), Config.WhiteDrawValue,
+        false);
 }
 
 template <>
 FeatureBitboard processDeclarationScore<core::Black>(const core::State& State) {
     core::internal::ImmutableStateAdapter Adapter(State);
     return internal::FeatureBitboardUtil::makeFeatureBitboard(
-            core::internal::bitboard::Bitboard::AllBB(),
-            (float)Adapter->computeDeclarationScore<core::Black>() / 28.0f,
-            false);
+        core::internal::bitboard::Bitboard::AllBB(),
+        (float)Adapter->computeDeclarationScore<core::Black>() / 28.0f, false);
 }
 
 template <>
 FeatureBitboard processDeclarationScore<core::White>(const core::State& State) {
     core::internal::ImmutableStateAdapter Adapter(State);
     return internal::FeatureBitboardUtil::makeFeatureBitboard(
-            core::internal::bitboard::Bitboard::AllBB(),
-            (float)Adapter->computeDeclarationScore<core::White>() / 27.0f,
-            false);
+        core::internal::bitboard::Bitboard::AllBB(),
+        (float)Adapter->computeDeclarationScore<core::White>() / 27.0f, false);
 }
 
 template <core::Color C>
 FeatureBitboard processPieceScore(const core::State& State) {
     core::internal::ImmutableStateAdapter Adapter(State);
     return internal::FeatureBitboardUtil::makeFeatureBitboard(
-            core::internal::bitboard::Bitboard::AllBB(),
-            (float)Adapter->computePieceScore<C>(5, 1, false) / 54.0f,
-            false);
+        core::internal::bitboard::Bitboard::AllBB(),
+        (float)Adapter->computePieceScore<C>(5, 1, false) / 54.0f, false);
 }
 
-template
-FeatureBitboard processPieceScore<core::Black>(const core::State& State);
-template
-FeatureBitboard processPieceScore<core::White>(const core::State& State);
+template FeatureBitboard
+processPieceScore<core::Black>(const core::State& State);
+template FeatureBitboard
+processPieceScore<core::White>(const core::State& State);
 
-FeatureStackRuntime::FeatureStackRuntime(const std::vector<FeatureType>& Types, const core::State& State, const core::StateConfig& Config) {
+FeatureStackRuntime::FeatureStackRuntime(const std::vector<FeatureType>& Types,
+                                         const core::State& State,
+                                         const core::StateConfig& Config) {
     if (State.getPosition().sideToMove() == core::Black) {
         process<core::Black>(Types, State, Config);
     } else {
@@ -227,8 +224,10 @@ const FeatureBitboard& FeatureStackRuntime::get(std::size_t Index) const {
     return Features[Index];
 }
 
-template<core::Color C>
-void FeatureStackRuntime::process(const std::vector<FeatureType>& Types, const core::State& State, const core::StateConfig& Config) {
+template <core::Color C>
+void FeatureStackRuntime::process(const std::vector<FeatureType>& Types,
+                                  const core::State& State,
+                                  const core::StateConfig& Config) {
     Features.resize(Types.size());
 
     for (size_t I = 0; I < Types.size(); ++I) {
@@ -304,121 +303,121 @@ void FeatureStackRuntime::process(const std::vector<FeatureType>& Types, const c
             Features[I] = processPiece<C, ~C>(State, core::PTK_ProBishop);
         } else if (Type == FeatureType::FT_OpProRook) {
             Features[I] = processPiece<C, ~C>(State, core::PTK_ProRook);
-        } else if  (Type == FeatureType::FT_MyStandPawn1) {
+        } else if (Type == FeatureType::FT_MyStandPawn1) {
             Features[I] = processStand<C>(State, core::PTK_Pawn, 1);
-        } else if  (Type == FeatureType::FT_MyStandPawn2) {
+        } else if (Type == FeatureType::FT_MyStandPawn2) {
             Features[I] = processStand<C>(State, core::PTK_Pawn, 2);
-        } else if  (Type == FeatureType::FT_MyStandPawn3) {
+        } else if (Type == FeatureType::FT_MyStandPawn3) {
             Features[I] = processStand<C>(State, core::PTK_Pawn, 3);
-        } else if  (Type == FeatureType::FT_MyStandPawn4) {
+        } else if (Type == FeatureType::FT_MyStandPawn4) {
             Features[I] = processStand<C>(State, core::PTK_Pawn, 4);
-        } else if  (Type == FeatureType::FT_MyStandPawn5) {
+        } else if (Type == FeatureType::FT_MyStandPawn5) {
             Features[I] = processStand<C>(State, core::PTK_Pawn, 5);
-        } else if  (Type == FeatureType::FT_MyStandPawn6) {
+        } else if (Type == FeatureType::FT_MyStandPawn6) {
             Features[I] = processStand<C>(State, core::PTK_Pawn, 6);
-        } else if  (Type == FeatureType::FT_MyStandPawn7) {
+        } else if (Type == FeatureType::FT_MyStandPawn7) {
             Features[I] = processStand<C>(State, core::PTK_Pawn, 7);
-        } else if  (Type == FeatureType::FT_MyStandPawn8) {
+        } else if (Type == FeatureType::FT_MyStandPawn8) {
             Features[I] = processStand<C>(State, core::PTK_Pawn, 8);
-        } else if  (Type == FeatureType::FT_MyStandPawn9) {
+        } else if (Type == FeatureType::FT_MyStandPawn9) {
             Features[I] = processStand<C>(State, core::PTK_Pawn, 9);
-        } else if  (Type == FeatureType::FT_MyStandLance1) {
+        } else if (Type == FeatureType::FT_MyStandLance1) {
             Features[I] = processStand<C>(State, core::PTK_Lance, 1);
-        } else if  (Type == FeatureType::FT_MyStandLance2) {
+        } else if (Type == FeatureType::FT_MyStandLance2) {
             Features[I] = processStand<C>(State, core::PTK_Lance, 2);
-        } else if  (Type == FeatureType::FT_MyStandLance3) {
+        } else if (Type == FeatureType::FT_MyStandLance3) {
             Features[I] = processStand<C>(State, core::PTK_Lance, 3);
-        } else if  (Type == FeatureType::FT_MyStandLance4) {
+        } else if (Type == FeatureType::FT_MyStandLance4) {
             Features[I] = processStand<C>(State, core::PTK_Lance, 4);
-        } else if  (Type == FeatureType::FT_MyStandKnight1) {
+        } else if (Type == FeatureType::FT_MyStandKnight1) {
             Features[I] = processStand<C>(State, core::PTK_Knight, 1);
-        } else if  (Type == FeatureType::FT_MyStandKnight2) {
+        } else if (Type == FeatureType::FT_MyStandKnight2) {
             Features[I] = processStand<C>(State, core::PTK_Knight, 2);
-        } else if  (Type == FeatureType::FT_MyStandKnight3) {
+        } else if (Type == FeatureType::FT_MyStandKnight3) {
             Features[I] = processStand<C>(State, core::PTK_Knight, 3);
-        } else if  (Type == FeatureType::FT_MyStandKnight4) {
+        } else if (Type == FeatureType::FT_MyStandKnight4) {
             Features[I] = processStand<C>(State, core::PTK_Knight, 4);
-        } else if  (Type == FeatureType::FT_MyStandSilver1) {
+        } else if (Type == FeatureType::FT_MyStandSilver1) {
             Features[I] = processStand<C>(State, core::PTK_Silver, 1);
-        } else if  (Type == FeatureType::FT_MyStandSilver2) {
+        } else if (Type == FeatureType::FT_MyStandSilver2) {
             Features[I] = processStand<C>(State, core::PTK_Silver, 2);
-        } else if  (Type == FeatureType::FT_MyStandSilver3) {
+        } else if (Type == FeatureType::FT_MyStandSilver3) {
             Features[I] = processStand<C>(State, core::PTK_Silver, 3);
-        } else if  (Type == FeatureType::FT_MyStandSilver4) {
+        } else if (Type == FeatureType::FT_MyStandSilver4) {
             Features[I] = processStand<C>(State, core::PTK_Silver, 4);
-        } else if  (Type == FeatureType::FT_MyStandGold1) {
+        } else if (Type == FeatureType::FT_MyStandGold1) {
             Features[I] = processStand<C>(State, core::PTK_Gold, 1);
-        } else if  (Type == FeatureType::FT_MyStandGold2) {
+        } else if (Type == FeatureType::FT_MyStandGold2) {
             Features[I] = processStand<C>(State, core::PTK_Gold, 2);
-        } else if  (Type == FeatureType::FT_MyStandGold3) {
+        } else if (Type == FeatureType::FT_MyStandGold3) {
             Features[I] = processStand<C>(State, core::PTK_Gold, 3);
-        } else if  (Type == FeatureType::FT_MyStandGold4) {
+        } else if (Type == FeatureType::FT_MyStandGold4) {
             Features[I] = processStand<C>(State, core::PTK_Gold, 4);
-        } else if  (Type == FeatureType::FT_MyStandBishop1) {
+        } else if (Type == FeatureType::FT_MyStandBishop1) {
             Features[I] = processStand<C>(State, core::PTK_Bishop, 1);
-        } else if  (Type == FeatureType::FT_MyStandBishop2) {
+        } else if (Type == FeatureType::FT_MyStandBishop2) {
             Features[I] = processStand<C>(State, core::PTK_Bishop, 2);
-        } else if  (Type == FeatureType::FT_MyStandRook1) {
+        } else if (Type == FeatureType::FT_MyStandRook1) {
             Features[I] = processStand<C>(State, core::PTK_Rook, 1);
-        } else if  (Type == FeatureType::FT_MyStandRook2) {
+        } else if (Type == FeatureType::FT_MyStandRook2) {
             Features[I] = processStand<C>(State, core::PTK_Rook, 2);
-        } else if  (Type == FeatureType::FT_OpStandPawn1) {
+        } else if (Type == FeatureType::FT_OpStandPawn1) {
             Features[I] = processStand<~C>(State, core::PTK_Pawn, 1);
-        } else if  (Type == FeatureType::FT_OpStandPawn2) {
+        } else if (Type == FeatureType::FT_OpStandPawn2) {
             Features[I] = processStand<~C>(State, core::PTK_Pawn, 2);
-        } else if  (Type == FeatureType::FT_OpStandPawn3) {
+        } else if (Type == FeatureType::FT_OpStandPawn3) {
             Features[I] = processStand<~C>(State, core::PTK_Pawn, 3);
-        } else if  (Type == FeatureType::FT_OpStandPawn4) {
+        } else if (Type == FeatureType::FT_OpStandPawn4) {
             Features[I] = processStand<~C>(State, core::PTK_Pawn, 4);
-        } else if  (Type == FeatureType::FT_OpStandPawn5) {
+        } else if (Type == FeatureType::FT_OpStandPawn5) {
             Features[I] = processStand<~C>(State, core::PTK_Pawn, 5);
-        } else if  (Type == FeatureType::FT_OpStandPawn6) {
+        } else if (Type == FeatureType::FT_OpStandPawn6) {
             Features[I] = processStand<~C>(State, core::PTK_Pawn, 6);
-        } else if  (Type == FeatureType::FT_OpStandPawn7) {
+        } else if (Type == FeatureType::FT_OpStandPawn7) {
             Features[I] = processStand<~C>(State, core::PTK_Pawn, 7);
-        } else if  (Type == FeatureType::FT_OpStandPawn8) {
+        } else if (Type == FeatureType::FT_OpStandPawn8) {
             Features[I] = processStand<~C>(State, core::PTK_Pawn, 8);
-        } else if  (Type == FeatureType::FT_OpStandPawn9) {
+        } else if (Type == FeatureType::FT_OpStandPawn9) {
             Features[I] = processStand<~C>(State, core::PTK_Pawn, 9);
-        } else if  (Type == FeatureType::FT_OpStandLance1) {
+        } else if (Type == FeatureType::FT_OpStandLance1) {
             Features[I] = processStand<~C>(State, core::PTK_Lance, 1);
-        } else if  (Type == FeatureType::FT_OpStandLance2) {
+        } else if (Type == FeatureType::FT_OpStandLance2) {
             Features[I] = processStand<~C>(State, core::PTK_Lance, 2);
-        } else if  (Type == FeatureType::FT_OpStandLance3) {
+        } else if (Type == FeatureType::FT_OpStandLance3) {
             Features[I] = processStand<~C>(State, core::PTK_Lance, 3);
-        } else if  (Type == FeatureType::FT_OpStandLance4) {
+        } else if (Type == FeatureType::FT_OpStandLance4) {
             Features[I] = processStand<~C>(State, core::PTK_Lance, 4);
-        } else if  (Type == FeatureType::FT_OpStandKnight1) {
+        } else if (Type == FeatureType::FT_OpStandKnight1) {
             Features[I] = processStand<~C>(State, core::PTK_Knight, 1);
-        } else if  (Type == FeatureType::FT_OpStandKnight2) {
+        } else if (Type == FeatureType::FT_OpStandKnight2) {
             Features[I] = processStand<~C>(State, core::PTK_Knight, 2);
-        } else if  (Type == FeatureType::FT_OpStandKnight3) {
+        } else if (Type == FeatureType::FT_OpStandKnight3) {
             Features[I] = processStand<~C>(State, core::PTK_Knight, 3);
-        } else if  (Type == FeatureType::FT_OpStandKnight4) {
+        } else if (Type == FeatureType::FT_OpStandKnight4) {
             Features[I] = processStand<~C>(State, core::PTK_Knight, 4);
-        } else if  (Type == FeatureType::FT_OpStandSilver1) {
+        } else if (Type == FeatureType::FT_OpStandSilver1) {
             Features[I] = processStand<~C>(State, core::PTK_Silver, 1);
-        } else if  (Type == FeatureType::FT_OpStandSilver2) {
+        } else if (Type == FeatureType::FT_OpStandSilver2) {
             Features[I] = processStand<~C>(State, core::PTK_Silver, 2);
-        } else if  (Type == FeatureType::FT_OpStandSilver3) {
+        } else if (Type == FeatureType::FT_OpStandSilver3) {
             Features[I] = processStand<~C>(State, core::PTK_Silver, 3);
-        } else if  (Type == FeatureType::FT_OpStandSilver4) {
+        } else if (Type == FeatureType::FT_OpStandSilver4) {
             Features[I] = processStand<~C>(State, core::PTK_Silver, 4);
-        } else if  (Type == FeatureType::FT_OpStandGold1) {
+        } else if (Type == FeatureType::FT_OpStandGold1) {
             Features[I] = processStand<~C>(State, core::PTK_Gold, 1);
-        } else if  (Type == FeatureType::FT_OpStandGold2) {
+        } else if (Type == FeatureType::FT_OpStandGold2) {
             Features[I] = processStand<~C>(State, core::PTK_Gold, 2);
-        } else if  (Type == FeatureType::FT_OpStandGold3) {
+        } else if (Type == FeatureType::FT_OpStandGold3) {
             Features[I] = processStand<~C>(State, core::PTK_Gold, 3);
-        } else if  (Type == FeatureType::FT_OpStandGold4) {
+        } else if (Type == FeatureType::FT_OpStandGold4) {
             Features[I] = processStand<~C>(State, core::PTK_Gold, 4);
-        } else if  (Type == FeatureType::FT_OpStandBishop1) {
+        } else if (Type == FeatureType::FT_OpStandBishop1) {
             Features[I] = processStand<~C>(State, core::PTK_Bishop, 1);
-        } else if  (Type == FeatureType::FT_OpStandBishop2) {
+        } else if (Type == FeatureType::FT_OpStandBishop2) {
             Features[I] = processStand<~C>(State, core::PTK_Bishop, 2);
-        } else if  (Type == FeatureType::FT_OpStandRook1) {
+        } else if (Type == FeatureType::FT_OpStandRook1) {
             Features[I] = processStand<~C>(State, core::PTK_Rook, 1);
-        } else if  (Type == FeatureType::FT_OpStandRook2) {
+        } else if (Type == FeatureType::FT_OpStandRook2) {
             Features[I] = processStand<~C>(State, core::PTK_Rook, 2);
         } else if (Type == FeatureType::FT_RuleDeclare27) {
             Features[I] = processRule<core::EndingRule::ER_Declare27>(Config);
@@ -443,7 +442,6 @@ void FeatureStackRuntime::process(const std::vector<FeatureType>& Types, const c
         }
     }
 }
-
 
 } // namespace ml
 } // namespace nshogi

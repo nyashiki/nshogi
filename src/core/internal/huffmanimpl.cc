@@ -1,5 +1,13 @@
-#include "huffmanimpl.h"
+//
+// Copyright (c) 2025 @nyashiki
+//
+// This software is licensed under the MIT license.
+// For details, see the LICENSE file in the root of this repository.
+//
+// SPDX-License-Identifier: MIT
+//
 
+#include "huffmanimpl.h"
 #include "../positionbuilder.h"
 
 namespace nshogi {
@@ -68,7 +76,8 @@ static constexpr HuffmanCodeElem HuffmanStandTable[8] = {
 
 // clang-format on
 
-static constexpr auto HuffmanLUT = []() -> std::array<std::array<uint16_t, 1 << 9>, 9> {
+static constexpr auto HuffmanLUT =
+    []() -> std::array<std::array<uint16_t, 1 << 9>, 9> {
     std::array<std::array<uint16_t, 1 << 9>, 9> LUT;
 
     for (std::size_t I = 0; I < 9; ++I) {
@@ -94,7 +103,8 @@ static constexpr auto HuffmanLUT = []() -> std::array<std::array<uint16_t, 1 << 
     return LUT;
 }();
 
-static constexpr auto HuffmanStandLUT = []() -> std::array<std::array<uint16_t, 1 << 8>, 8> {
+static constexpr auto HuffmanStandLUT =
+    []() -> std::array<std::array<uint16_t, 1 << 8>, 8> {
     std::array<std::array<uint16_t, 1 << 8>, 8> LUT;
 
     for (std::size_t I = 0; I < 8; ++I) {
@@ -156,7 +166,8 @@ class HuffmanCodeStream : public HuffmanCodeImpl {
     uint8_t Cursor;
 };
 
-void writeStand(HuffmanCodeStream* HCS, Color C, PieceTypeKind Kind, uint8_t Count) {
+void writeStand(HuffmanCodeStream* HCS, Color C, PieceTypeKind Kind,
+                uint8_t Count) {
     while (Count > 0) {
         const auto& Elem = HuffmanStandTable[(std::size_t)Kind];
         HCS->write(Elem.Pattern, Elem.Size);
@@ -227,7 +238,8 @@ class HuffmanPositionBuilder : public PositionBuilder {
                 Color C = (Color)HCS.read();
                 ++LoadBits;
 
-                incrementStand(C, (PieceTypeKind)(HuffmanStandLUT[Size][Pattern] - 1));
+                incrementStand(
+                    C, (PieceTypeKind)(HuffmanStandLUT[Size][Pattern] - 1));
 
                 Pattern = 0;
                 Size = 0;
@@ -239,7 +251,6 @@ class HuffmanPositionBuilder : public PositionBuilder {
 };
 
 } // namespace
-
 
 HuffmanCodeImpl HuffmanCodeImpl::encode(const Position& Pos) {
     Square BlackKingSquare = (Square)0;
@@ -256,7 +267,9 @@ HuffmanCodeImpl HuffmanCodeImpl::encode(const Position& Pos) {
     return encode(Pos, BlackKingSquare, WhiteKingSquare);
 }
 
-HuffmanCodeImpl HuffmanCodeImpl::encode(const Position& Pos, Square BlackKingSquare, Square WhiteKingSquare) {
+HuffmanCodeImpl HuffmanCodeImpl::encode(const Position& Pos,
+                                        Square BlackKingSquare,
+                                        Square WhiteKingSquare) {
     HuffmanCodeStream HCS;
 
     HCS.write(BlackKingSquare, 7);
@@ -276,21 +289,21 @@ HuffmanCodeImpl HuffmanCodeImpl::encode(const Position& Pos, Square BlackKingSqu
 
     HCS.write(Pos.sideToMove(), 1);
 
-    writeStand(&HCS, Black, PTK_Pawn,   Pos.getStandCount<Black, PTK_Pawn>());
-    writeStand(&HCS, Black, PTK_Lance,  Pos.getStandCount<Black, PTK_Lance>());
+    writeStand(&HCS, Black, PTK_Pawn, Pos.getStandCount<Black, PTK_Pawn>());
+    writeStand(&HCS, Black, PTK_Lance, Pos.getStandCount<Black, PTK_Lance>());
     writeStand(&HCS, Black, PTK_Knight, Pos.getStandCount<Black, PTK_Knight>());
     writeStand(&HCS, Black, PTK_Silver, Pos.getStandCount<Black, PTK_Silver>());
     writeStand(&HCS, Black, PTK_Bishop, Pos.getStandCount<Black, PTK_Bishop>());
-    writeStand(&HCS, Black, PTK_Rook,   Pos.getStandCount<Black, PTK_Rook>());
-    writeStand(&HCS, Black, PTK_Gold,   Pos.getStandCount<Black, PTK_Gold>());
+    writeStand(&HCS, Black, PTK_Rook, Pos.getStandCount<Black, PTK_Rook>());
+    writeStand(&HCS, Black, PTK_Gold, Pos.getStandCount<Black, PTK_Gold>());
 
-    writeStand(&HCS, White, PTK_Pawn,   Pos.getStandCount<White, PTK_Pawn>());
-    writeStand(&HCS, White, PTK_Lance,  Pos.getStandCount<White, PTK_Lance>());
+    writeStand(&HCS, White, PTK_Pawn, Pos.getStandCount<White, PTK_Pawn>());
+    writeStand(&HCS, White, PTK_Lance, Pos.getStandCount<White, PTK_Lance>());
     writeStand(&HCS, White, PTK_Knight, Pos.getStandCount<White, PTK_Knight>());
     writeStand(&HCS, White, PTK_Silver, Pos.getStandCount<White, PTK_Silver>());
     writeStand(&HCS, White, PTK_Bishop, Pos.getStandCount<White, PTK_Bishop>());
-    writeStand(&HCS, White, PTK_Rook,   Pos.getStandCount<White, PTK_Rook>());
-    writeStand(&HCS, White, PTK_Gold,   Pos.getStandCount<White, PTK_Gold>());
+    writeStand(&HCS, White, PTK_Rook, Pos.getStandCount<White, PTK_Rook>());
+    writeStand(&HCS, White, PTK_Gold, Pos.getStandCount<White, PTK_Gold>());
 
     return HCS;
 }

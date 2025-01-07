@@ -1,19 +1,27 @@
+//
+// Copyright (c) 2025 @nyashiki
+//
+// This software is licensed under the MIT license.
+// For details, see the LICENSE file in the root of this repository.
+//
+// SPDX-License-Identifier: MIT
+//
+
 #include "csa.h"
-#include "../core/squareiterator.h"
 #include "../core/internal/utils.h"
+#include "../core/squareiterator.h"
 
 #include <cstddef>
 #include <cstdint>
 #include <cstdio>
 #include <map>
+#include <sstream>
 #include <stdexcept>
 #include <string>
-#include <sstream>
 
 namespace nshogi {
 namespace io {
 namespace csa {
-
 
 char fileToChar(core::File File) {
     return '1' + (char)File;
@@ -34,7 +42,6 @@ core::Rank charToRank(char C) {
 core::File charToFile(char C) {
     if (C < '1' || C > '9') {
         throw std::runtime_error(std::string("invalid CSA file ") + C + ".");
-
     }
 
     return (core::File)(C - '1');
@@ -42,12 +49,13 @@ core::File charToFile(char C) {
 
 std::string pieceTypeToCSA(core::PieceTypeKind Type) {
     static const char* Table[15] = {
-        " * ",  "FU",  "KY",  "KE",  "GI",  "KA",  "HI",  "KI",  "OU",  "TO", "NY",
-        "NK", "NG", "UM", "RY",
+        " * ", "FU", "KY", "KE", "GI", "KA", "HI", "KI",
+        "OU",  "TO", "NY", "NK", "NG", "UM", "RY",
     };
 
     if ((uint8_t)Type >= 15) {
-        throw std::runtime_error(std::string("invalid piece type ") + std::to_string(Type) + ".");
+        throw std::runtime_error(std::string("invalid piece type ") +
+                                 std::to_string(Type) + ".");
     }
 
     return std::string(Table[Type]);
@@ -130,7 +138,7 @@ std::string move32ToCSA(core::Move32 Move, core::Color Color) {
 
     std::stringstream SStream;
 
-    SStream << ((Color == core::Black)? "+" : "-");
+    SStream << ((Color == core::Black) ? "+" : "-");
 
     if (Move.drop()) {
         SStream << "00" << squareToCSA(Move.to());
@@ -152,7 +160,7 @@ std::string move32ToCSA(core::Move32 Move, core::Color Color) {
 core::Move32 CSAToMove32(const core::Position& Pos, const std::string& CSA) {
     if (CSA.size() < 7) {
         throw std::runtime_error("invalid CSA string (size check error).\n" +
-                ("    CSA: " + CSA));
+                                 ("    CSA: " + CSA));
     }
 
     core::File ToFile = charToFile(CSA[3]);
@@ -163,7 +171,7 @@ core::Move32 CSAToMove32(const core::Position& Pos, const std::string& CSA) {
 
     if (pieceTypeToCSA(Type) != CSA.substr(5)) {
         throw std::runtime_error("invalid CSA string (type check error).\n" +
-                ("    CSA: " + CSA));
+                                 ("    CSA: " + CSA));
     }
 
     if (CSA[1] == '0' && CSA[2] == '0') {
@@ -177,13 +185,14 @@ core::Move32 CSAToMove32(const core::Position& Pos, const std::string& CSA) {
     core::PieceTypeKind CaptureType = core::getPieceType(Pos.pieceOn(ToSq));
 
     if (FromType != Type) {
-        return core::Move32::boardPromotingMove(FromSq, ToSq, FromType, CaptureType);
+        return core::Move32::boardPromotingMove(FromSq, ToSq, FromType,
+                                                CaptureType);
     } else {
         return core::Move32::boardMove(FromSq, ToSq, FromType, CaptureType);
     }
 }
 
-std::string positionToCSA(const core::Position &Pos) {
+std::string positionToCSA(const core::Position& Pos) {
     using namespace core;
 
     std::stringstream SStream;
@@ -227,7 +236,7 @@ std::string positionToCSA(const core::Position &Pos) {
         SStream << "\n";
     }
 
-    SStream << ((Pos.sideToMove() == Black)? "+" : "-") << "\n";
+    SStream << ((Pos.sideToMove() == Black) ? "+" : "-") << "\n";
 
     return SStream.str();
 }
@@ -300,10 +309,11 @@ core::Position PositionBuilder::newPosition(const std::string& CSA) {
             ++InputRowCount;
         } else if (Token == "P+") {
             std::size_t Cursor = 2;
-            uint32_t StandCounts[16] = { };
+            uint32_t StandCounts[16] = {};
 
             while (Cursor + 4 <= CSALine.size()) {
-                core::PieceTypeKind Type = CSAToPieceType(CSALine.substr(Cursor + 2, 2));
+                core::PieceTypeKind Type =
+                    CSAToPieceType(CSALine.substr(Cursor + 2, 2));
                 if (CSALine.substr(Cursor, 2) == "00") {
                     StandCounts[Type]++;
                 } else {
@@ -319,10 +329,11 @@ core::Position PositionBuilder::newPosition(const std::string& CSA) {
             }
         } else if (Token == "P-") {
             std::size_t Cursor = 2;
-            uint32_t StandCounts[16] = { };
+            uint32_t StandCounts[16] = {};
 
             while (Cursor + 4 <= CSALine.size()) {
-                core::PieceTypeKind Type = CSAToPieceType(CSALine.substr(Cursor + 2, 2));
+                core::PieceTypeKind Type =
+                    CSAToPieceType(CSALine.substr(Cursor + 2, 2));
                 if (CSALine.substr(Cursor, 2) == "00") {
                     StandCounts[Type]++;
                 } else {
@@ -371,7 +382,8 @@ StateBuilder::StateBuilder(const std::string& CSA)
         auto CSAMove = internal::utils::split(CSALine, ',')[0];
         if (CSAMove.size() == 7) {
             if (CSALine[0] == '+' || CSALine[0] == '-') {
-                core::Move32 Move = CSAToMove32(Instance.getPosition(), CSALine);
+                core::Move32 Move =
+                    CSAToMove32(Instance.getPosition(), CSALine);
                 Instance.doMove(Move);
             }
         } else {

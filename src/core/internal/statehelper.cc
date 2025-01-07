@@ -1,3 +1,12 @@
+//
+// Copyright (c) 2025 @nyashiki
+//
+// This software is licensed under the MIT license.
+// For details, see the LICENSE file in the root of this repository.
+//
+// SPDX-License-Identifier: MIT
+//
+
 #include "statehelper.h"
 #include "../types.h"
 
@@ -25,8 +34,9 @@ StateHelper::StateHelper(const Position& Pos, uint16_t PlyOffset)
 }
 
 StateHelper::StateHelper(StateHelper&& Helper) noexcept
-    : InitialPosition(Helper.InitialPosition), Ply(Helper.Ply),
-      SHelper(Helper.SHelper) {
+    : InitialPosition(Helper.InitialPosition)
+    , Ply(Helper.Ply)
+    , SHelper(Helper.SHelper) {
 
     std::memcpy(static_cast<void*>(ColorBB),
                 static_cast<const void*>(Helper.ColorBB),
@@ -44,7 +54,8 @@ StateHelper::StateHelper(StateHelper&& Helper) noexcept
 StateHelper::~StateHelper() {
 }
 
-void StateHelper::proceedOneStep(Move32 Move, uint64_t BoardHash, Stands BlackStand, Stands WhiteStand) {
+void StateHelper::proceedOneStep(Move32 Move, uint64_t BoardHash,
+                                 Stands BlackStand, Stands WhiteStand) {
     SHelper.emplace_back();
 
     assert(Ply < SHelper.size());
@@ -69,6 +80,6 @@ Move32 StateHelper::goBackOneStep() {
     return PrevMove;
 }
 
-} // namepsace internal
+} // namespace internal
 } // namespace core
 } // namespace nshogi

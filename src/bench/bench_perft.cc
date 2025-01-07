@@ -1,5 +1,5 @@
-#include "../core/state.h"
 #include "../core/movegenerator.h"
+#include "../core/state.h"
 #include "../core/statebuilder.h"
 #include <cstdio>
 
@@ -10,7 +10,8 @@ uint64_t perftImpl(nshogi::core::State& State, int Limit) {
         return 1;
     }
 
-    const auto Moves = nshogi::core::MoveGenerator::generateLegalMoves<false>(State);
+    const auto Moves =
+        nshogi::core::MoveGenerator::generateLegalMoves<false>(State);
 
     uint64_t Sum = 0;
     for (const auto& Move : Moves) {
@@ -22,7 +23,7 @@ uint64_t perftImpl(nshogi::core::State& State, int Limit) {
     return Sum;
 }
 
-}  // namespace
+} // namespace
 
 void benchPerft(int Ply) {
     nshogi::core::State State = nshogi::core::StateBuilder::getInitialState();

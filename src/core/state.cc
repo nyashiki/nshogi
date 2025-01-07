@@ -1,3 +1,12 @@
+//
+// Copyright (c) 2025 @nyashiki
+//
+// This software is licensed under the MIT license.
+// For details, see the LICENSE file in the root of this repository.
+//
+// SPDX-License-Identifier: MIT
+//
+
 #include "state.h"
 #include "internal/stateimpl.h"
 #include "position.h"
@@ -72,12 +81,8 @@ void State::doMove(Move32 Move) {
     Impl->doMove(Move);
 }
 
-Move32 State::undoMove() {
-    return Impl->undoMove();
-}
-
-void State::refresh() {
-    Impl->refresh();
+void State::undoMove() {
+    Impl->undoMove();
 }
 
 RepetitionStatus State::getRepetitionStatus(bool Strict) const {
@@ -100,16 +105,16 @@ Move32 State::getMove32FromMove16(Move16 M16) const {
     return Impl->getMove32FromMove16(M16);
 }
 
-uint8_t State::computePieceScore(
-    Color C,
-    uint8_t SliderScoreUnit,
-    uint8_t StepScoreUnit,
-    bool OnlyInPromotableZone) const {
+uint8_t State::computePieceScore(Color C, uint8_t SliderScoreUnit,
+                                 uint8_t StepScoreUnit,
+                                 bool OnlyInPromotableZone) const {
 
     if (C == Black) {
-        return Impl->computePieceScore<Black>(SliderScoreUnit, StepScoreUnit, OnlyInPromotableZone);
+        return Impl->computePieceScore<Black>(SliderScoreUnit, StepScoreUnit,
+                                              OnlyInPromotableZone);
     } else {
-        return Impl->computePieceScore<White>(SliderScoreUnit, StepScoreUnit, OnlyInPromotableZone);
+        return Impl->computePieceScore<White>(SliderScoreUnit, StepScoreUnit,
+                                              OnlyInPromotableZone);
     }
 }
 
