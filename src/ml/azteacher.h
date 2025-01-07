@@ -1,14 +1,23 @@
+//
+// Copyright (c) 2025 @nyashiki
+//
+// This software is licensed under the MIT license.
+// For details, see the LICENSE file in the root of this repository.
+//
+// SPDX-License-Identifier: MIT
+//
+
 #ifndef NSHOGI_ML_AZTEACHER_H
 #define NSHOGI_ML_AZTEACHER_H
 
-#include "../core/types.h"
 #include "../core/state.h"
 #include "../core/stateconfig.h"
+#include "../core/types.h"
 
+#include <array>
 #include <cstddef>
 #include <cstdint>
 #include <fstream>
-#include <array>
 #include <vector>
 
 namespace nshogi {
@@ -24,16 +33,7 @@ struct AZTeacher {
 
     AZTeacher(const AZTeacher& T);
 
-    void dump(std::ofstream& Ofs) const {
-        dump_0_1_0(Ofs);
-    }
-
-    void dump_0_1_0(std::ofstream& Ofs) const;
-
     bool checkSanity(int Level) const;
-
-    [[nodiscard]]
-    static AZTeacher load(std::ifstream& Ifs);
 
     // State.
     char Sfen[SfenCStrLength];
@@ -61,14 +61,9 @@ struct AZTeacher {
 
     [[maybe_unused]]
     bool equals(const AZTeacher& T) const;
-
- private:
-    [[nodiscard]]
-    static AZTeacher load_0_1_0(std::ifstream& Ifs);
 };
 
 } // namespace ml
 } // namespace nshogi
-
 
 #endif // #ifndef NSHOGI_ML_AZTEACHER_H

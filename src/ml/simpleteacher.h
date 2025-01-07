@@ -1,13 +1,20 @@
+//
+// Copyright (c) 2025 @nyashiki
+//
+// This software is licensed under the MIT license.
+// For details, see the LICENSE file in the root of this repository.
+//
+// SPDX-License-Identifier: MIT
+//
+
 #ifndef NSHOGI_ML_SIMPLETEACHER_H
 #define NSHOGI_ML_SIMPLETEACHER_H
 
+#include "../core/huffman.h"
 #include "../core/position.h"
 #include "../core/state.h"
 #include "../core/stateconfig.h"
-#include "../core/huffman.h"
 #include "../core/types.h"
-
-
 
 namespace nshogi {
 namespace ml {

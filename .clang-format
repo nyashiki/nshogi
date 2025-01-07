@@ -1,4 +1,6 @@
 BasedOnStyle: LLVM
+Language: Cpp
+Standard: c++20
 AccessModifierOffset: -3
 IndentWidth: 4
 TabWidth: 4
@@ -7,5 +9,7 @@ BraceWrapping:
     AfterFunction: false
 AllowShortFunctionsOnASingleLine: false
 PointerAlignment: Left
-Language: Cpp
-Standard: c++20
+AlwaysBreakTemplateDeclarations: Yes
+ConstructorInitializerAllOnOneLineOrOnePerLine: false
+ConstructorInitializerIndentWidth: 4
+BreakConstructorInitializers: BeforeComma

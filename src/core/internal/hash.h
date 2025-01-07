@@ -1,15 +1,24 @@
-#ifndef NSHOGI_CORE_HASH_H
-#define NSHOGI_CORE_HASH_H
+//
+// Copyright (c) 2025 @nyashiki
+//
+// This software is licensed under the MIT license.
+// For details, see the LICENSE file in the root of this repository.
+//
+// SPDX-License-Identifier: MIT
+//
 
-#include "types.h"
-#include "position.h"
+#ifndef NSHOGI_CORE_INTERNAL_HASH_H
+#define NSHOGI_CORE_INTERNAL_HASH_H
+
+#include "../position.h"
+#include "../types.h"
 #include <cinttypes>
-
 
 namespace nshogi {
 namespace core {
+namespace internal {
 
-template<typename HashValueType>
+template <typename HashValueType>
 struct Hash {
  public:
     Hash();
@@ -23,7 +32,7 @@ struct Hash {
     void clear();
     void refresh(const Position& Pos);
 
-    template<Color C>
+    template <Color C>
     void update(PieceTypeKind Type, Square Sq) {
         Value ^= OnBoardHash[C][Type][Sq];
     }
@@ -44,15 +53,16 @@ struct Hash {
     static HashValueType ColorHash;
 };
 
-template<typename HashValueType>
+template <typename HashValueType>
 bool Hash<HashValueType>::IsTableGenerated = false;
-template<typename HashValueType>
-HashValueType Hash<HashValueType>::OnBoardHash[NumColors][NumPieceType][NumSquares];
-template<typename HashValueType>
+template <typename HashValueType>
+HashValueType Hash<HashValueType>::OnBoardHash[NumColors][NumPieceType]
+                                              [NumSquares];
+template <typename HashValueType>
 HashValueType Hash<HashValueType>::ColorHash;
 
+} // namespace internal
 } // namespace core
 } // namespace nshogi
 
-
-#endif // #ifndef NSHOGI_CORE_HASH_H
+#endif // #ifndef NSHOGI_CORE_INTERNAL_HASH_H

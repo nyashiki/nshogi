@@ -1,5 +1,14 @@
+//
+// Copyright (c) 2025 @nyashiki
+//
+// This software is licensed under the MIT license.
+// For details, see the LICENSE file in the root of this repository.
+//
+// SPDX-License-Identifier: MIT
+//
+
 #include "initializer.h"
-#include "bitboard.h"
+#include "internal/bitboard.h"
 
 namespace nshogi {
 namespace core {
@@ -14,7 +23,7 @@ void initializeAll() {
 
     IsCalled = true;
 
-    bitboard::initializeBitboards();
+    internal::bitboard::initializeBitboards();
 }
 
 } // namespace initializer

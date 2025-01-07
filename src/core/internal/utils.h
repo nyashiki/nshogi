@@ -1,14 +1,24 @@
+//
+// Copyright (c) 2025 @nyashiki
+//
+// This software is licensed under the MIT license.
+// For details, see the LICENSE file in the root of this repository.
+//
+// SPDX-License-Identifier: MIT
+//
+
 #ifndef NSHOGI_CORE_UTILS_H
 #define NSHOGI_CORE_UTILS_H
 
+#include "../types.h"
 #include "bitboard.h"
-#include "types.h"
 
-#include <vector>
 #include <sstream>
+#include <vector>
 
 namespace nshogi {
 namespace core {
+namespace internal {
 namespace utils {
 
 inline bool isSameLine(Square Sq1, Square Sq2) {
@@ -33,6 +43,7 @@ inline std::vector<std::string> split(const std::string& Src, char Delim) {
 }
 
 } // namespace utils
+} // namespace internal
 } // namespace core
 } // namespace nshogi
 

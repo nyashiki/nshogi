@@ -1,3 +1,12 @@
+//
+// Copyright (c) 2025 @nyashiki
+//
+// This software is licensed under the MIT license.
+// For details, see the LICENSE file in the root of this repository.
+//
+// SPDX-License-Identifier: MIT
+//
+
 #ifndef NSHOGI_CORE_MOVELIST_H
 #define NSHOGI_CORE_MOVELIST_H
 
@@ -7,6 +16,12 @@
 
 namespace nshogi {
 namespace core {
+
+namespace internal {
+
+class MoveGeneratorInternal;
+
+} // namespace internal
 
 struct MoveList {
  public:
@@ -19,7 +34,7 @@ struct MoveList {
     MoveList(std::initializer_list<Move32> Ms) {
         Move32* Head = Moves;
 
-        for(const auto& M : Ms) {
+        for (const auto& M : Ms) {
             *Head++ = M;
         }
 
@@ -34,11 +49,11 @@ struct MoveList {
         return Tail;
     }
 
-    inline const Move32& operator[](std::size_t Index) const {
+    inline Move32 operator[](std::size_t Index) const {
         return Moves[Index];
     }
 
-    [[maybe_unused]] inline const Move32* find(const Move32& Move) const {
+    [[maybe_unused]] inline const Move32* find(Move32 Move) const {
         for (const auto& EachMove : *this) {
             if (EachMove == Move) {
                 return &EachMove;
@@ -53,7 +68,8 @@ struct MoveList {
     }
 
  private:
-    MoveList() : Tail(Moves) {
+    MoveList()
+        : Tail(Moves) {
     }
 
     static constexpr std::size_t MoveCountMax = 600;
@@ -61,7 +77,7 @@ struct MoveList {
     Move32 Moves[MoveCountMax];
     Move32* Tail;
 
-    friend class MoveGenerator;
+    friend class nshogi::core::internal::MoveGeneratorInternal;
 };
 
 } // namespace core

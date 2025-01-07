@@ -1,3 +1,12 @@
+//
+// Copyright (c) 2025 @nyashiki
+//
+// This software is licensed under the MIT license.
+// For details, see the LICENSE file in the root of this repository.
+//
+// SPDX-License-Identifier: MIT
+//
+
 #include "position.h"
 #include "types.h"
 #include <algorithm>
@@ -16,7 +25,13 @@ Position::Position(const Position& Pos) {
                 sizeof(*this));
 }
 
-bool Position::equals(const Position &Pos, bool IgnorePlyOffset) const {
+Position::Position(const Position& Pos, uint16_t Offset) {
+    std::memcpy(static_cast<void*>(this), static_cast<const void*>(&Pos),
+                sizeof(*this));
+    PlyOffset = Offset;
+}
+
+bool Position::equals(const Position& Pos, bool IgnorePlyOffset) const {
     if (SideToMove != Pos.SideToMove) {
         return false;
     }

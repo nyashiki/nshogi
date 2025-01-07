@@ -1,5 +1,13 @@
-#include "simpleteacher.h"
+//
+// Copyright (c) 2025 @nyashiki
+//
+// This software is licensed under the MIT license.
+// For details, see the LICENSE file in the root of this repository.
+//
+// SPDX-License-Identifier: MIT
+//
 
+#include "simpleteacher.h"
 #include "../core/positionbuilder.h"
 #include "../core/statebuilder.h"
 
@@ -14,22 +22,24 @@ SimpleTeacher::SimpleTeacher(const SimpleTeacher& ST)
     : HuffmanCode(ST.HuffmanCode)
     , Ply(ST.Ply)
     , MaxPly(ST.MaxPly)
-    , DrawValues { ST.DrawValues[0], ST.DrawValues[1] }
+    , DrawValues{ST.DrawValues[0], ST.DrawValues[1]}
     , NextMove(ST.NextMove)
     , Winner(ST.Winner) {
 }
 
 core::Position SimpleTeacher::getPosition() const {
-    return core::PositionBuilder::newPosition(core::HuffmanCode::decode(HuffmanCode), Ply);
+    return core::PositionBuilder::newPosition(
+        core::HuffmanCode::decode(HuffmanCode), Ply);
 }
 
 core::State SimpleTeacher::getState() const {
-    return core::StateBuilder::newState(core::HuffmanCode::decode(HuffmanCode), Ply);
+    return core::StateBuilder::newState(core::HuffmanCode::decode(HuffmanCode),
+                                        Ply);
 }
 
 core::StateConfig SimpleTeacher::getConfig() const {
     core::StateConfig Config;
-    Config.Rule = core::EndingRule::Declare27_ER;
+    Config.Rule = core::EndingRule::ER_Declare27;
     Config.MaxPly = MaxPly;
     Config.BlackDrawValue = DrawValues[0];
     Config.WhiteDrawValue = DrawValues[1];
@@ -69,13 +79,10 @@ SimpleTeacher& SimpleTeacher::setWinner(core::Color C) {
 }
 
 bool SimpleTeacher::equals(const SimpleTeacher& ST) const {
-    return HuffmanCode == ST.HuffmanCode
-        && Ply == ST.Ply
-        && MaxPly == ST.MaxPly
-        && DrawValues[0] == ST.DrawValues[0]
-        && DrawValues[1] == ST.DrawValues[1]
-        && NextMove == ST.NextMove
-        && Winner == ST.Winner;
+    return HuffmanCode == ST.HuffmanCode && Ply == ST.Ply &&
+           MaxPly == ST.MaxPly && DrawValues[0] == ST.DrawValues[0] &&
+           DrawValues[1] == ST.DrawValues[1] && NextMove == ST.NextMove &&
+           Winner == ST.Winner;
 }
 
 } // namespace ml

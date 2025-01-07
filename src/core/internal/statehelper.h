@@ -1,10 +1,20 @@
+//
+// Copyright (c) 2025 @nyashiki
+//
+// This software is licensed under the MIT license.
+// For details, see the LICENSE file in the root of this repository.
+//
+// SPDX-License-Identifier: MIT
+//
+
 #ifndef NSHOGI_CORE_STATEHELPER_H
 #define NSHOGI_CORE_STATEHELPER_H
 
+#include "../position.h"
+#include "../types.h"
 #include "bitboard.h"
 #include "hash.h"
-#include "position.h"
-#include "types.h"
+
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
@@ -12,9 +22,11 @@
 
 namespace nshogi {
 namespace core {
+namespace internal {
 
 struct StepHelper {
-    StepHelper() : Move(Move32::MoveNone()) {
+    StepHelper()
+        : Move(Move32::MoveNone()) {
     }
 
     Move32 Move;
@@ -30,6 +42,7 @@ struct StepHelper {
 struct StateHelper {
  public:
     StateHelper(const Position& Pos);
+    StateHelper(const Position& Pos, uint16_t PlyOffset);
 
     StateHelper(const StateHelper&) = delete;
     StateHelper& operator=(const StateHelper&) = delete;
@@ -39,7 +52,8 @@ struct StateHelper {
 
     ~StateHelper();
 
-    void proceedOneStep(const Move32& Move, uint64_t BoardHash, Stands BlackStand, Stands WhiteStand);
+    void proceedOneStep(Move32 Move, uint64_t BoardHash, Stands BlackStand,
+                        Stands WhiteStand);
     Move32 goBackOneStep();
 
     inline const StepHelper& getCurrentStepHelper() const {
@@ -54,11 +68,17 @@ struct StateHelper {
         return InitialPosition;
     }
 
-    inline uint16_t getPly() const {
+    inline uint16_t getPly(bool IncludeOffset = true) const {
+        if (IncludeOffset) {
+            return InitialPosition.getPlyOffset() + Ply;
+        }
+
         return Ply;
     }
 
  private:
+    constexpr static std::size_t DefaultReserveSize = 1024;
+
     const Position InitialPosition;
     uint16_t Ply;
 
@@ -70,10 +90,10 @@ struct StateHelper {
     // Store them since they are computationally heavy.
     std::vector<StepHelper> SHelper;
 
-    friend class State;
-    friend class StateBuilder;
+    friend class StateImpl;
 };
 
+} // namespace internal
 } // namespace core
 } // namespace nshogi
 

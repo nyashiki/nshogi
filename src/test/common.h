@@ -1,17 +1,25 @@
+//
+// Copyright (c) 2025 @nyashiki
+//
+// This software is licensed under the MIT license.
+// For details, see the LICENSE file in the root of this repository.
+//
+// SPDX-License-Identifier: MIT
+//
+
 #ifndef NSHOGI_TEST_COMMON_H
 #define NSHOGI_TEST_COMMON_H
 
-
 #include <chrono>
 #include <concepts>
+#include <cstdint>
 #include <functional>
 #include <iostream>
 #include <sstream>
-#include <string>
 #include <stdexcept>
+#include <string>
 #include <type_traits>
 #include <vector>
-#include <cstdint>
 
 namespace nshogi {
 namespace test {
@@ -47,18 +55,22 @@ class TestCase {
 
     TestStatistics run() const {
         const auto StartTime = std::chrono::steady_clock::now();
-        std::cout << "[ RUN      ] " << SuiteName << "." << CaseName << std::endl;
+        std::cout << "[ RUN      ] " << SuiteName << "." << CaseName
+                  << std::endl;
         try {
             TestFunc();
             const auto EndTime = std::chrono::steady_clock::now();
             const auto Duration =
-                std::chrono::duration_cast<std::chrono::milliseconds>(EndTime - StartTime).count();
-            std::cout << "[       OK ] " << SuiteName << "." << CaseName
-                << " (" << Duration << " milliseconds)" << std::endl;
+                std::chrono::duration_cast<std::chrono::milliseconds>(EndTime -
+                                                                      StartTime)
+                    .count();
+            std::cout << "[       OK ] " << SuiteName << "." << CaseName << " ("
+                      << Duration << " milliseconds)" << std::endl;
             return TestStatistics(1, 0);
         } catch (const std::exception& Exception) {
             std::cout << Exception.what() << std::endl;
-            std::cout << "[   FAILED ] " << SuiteName << "." << CaseName << std::endl;
+            std::cout << "[   FAILED ] " << SuiteName << "." << CaseName
+                      << std::endl;
             return TestStatistics(0, 1);
         } catch (...) {
             std::cout << "Unknown error." << std::endl;
@@ -74,7 +86,9 @@ class TestCase {
 
 class TestSuite {
  public:
-    explicit TestSuite(const char* Name) : SuiteName(Name) {}
+    explicit TestSuite(const char* Name)
+        : SuiteName(Name) {
+    }
 
     TestStatistics run() const {
         TestStatistics Statistics;
@@ -112,7 +126,8 @@ class TestBody {
         return Statistics;
     }
 
-    void addTest(const char* SuiteName, const char* CaseName, std::function<void()> TestFunc) {
+    void addTest(const char* SuiteName, const char* CaseName,
+                 std::function<void()> TestFunc) {
         for (auto& Suite : TestSuites) {
             if (Suite.name() == std::string(SuiteName)) {
                 Suite.addTest(TestCase(TestFunc, SuiteName, CaseName));
@@ -137,70 +152,71 @@ class TestBody {
 } // namespace test
 } // namespace nshogi
 
-#define TEST_ASSERT_EQ(Actual, Expected)                              \
-    do {                                                              \
-        auto&& _Actual = (Actual);                                    \
-        auto&& _Expected = (Expected);                                \
-        if (_Actual != _Expected) {                                   \
-            std::ostringstream Oss;                                   \
-            Oss << "Test failed: " << #Actual << " == " << #Expected; \
-            throw std::runtime_error(Oss.str());                      \
-        }                                                             \
+#define TEST_ASSERT_EQ(Actual, Expected)                                       \
+    do {                                                                       \
+        auto&& _Actual = (Actual);                                             \
+        auto&& _Expected = (Expected);                                         \
+        if (_Actual != _Expected) {                                            \
+            std::ostringstream Oss;                                            \
+            Oss << "Test failed: " << #Actual << " == " << #Expected;          \
+            throw std::runtime_error(Oss.str());                               \
+        }                                                                      \
     } while (false)
 
-#define TEST_ASSERT_NEQ(Actual, Expected)                             \
-    do {                                                              \
-        auto&& _Actual = (Actual);                                    \
-        auto&& _Expected = (Expected);                                \
-        if (_Actual == _Expected) {                                   \
-            std::ostringstream Oss;                                   \
-            Oss << "Test failed: " << #Actual << " != " << #Expected; \
-            throw std::runtime_error(Oss.str());                      \
-        }                                                             \
+#define TEST_ASSERT_NEQ(Actual, Expected)                                      \
+    do {                                                                       \
+        auto&& _Actual = (Actual);                                             \
+        auto&& _Expected = (Expected);                                         \
+        if (_Actual == _Expected) {                                            \
+            std::ostringstream Oss;                                            \
+            Oss << "Test failed: " << #Actual << " != " << #Expected;          \
+            throw std::runtime_error(Oss.str());                               \
+        }                                                                      \
     } while (false)
 
-#define TEST_ASSERT_STREQ(Actual, Expected) \
-    if (std::string(Actual) != std::string(Expected)) { \
-        std::ostringstream Oss; \
-        Oss << "Test failed: " << #Actual << " == " << #Expected << "\n" \
-            << "    Expected: " << (Expected) << "\n" \
-            << "    Actual: " << (Actual); \
-        throw std::runtime_error(Oss.str()); \
+#define TEST_ASSERT_STREQ(Actual, Expected)                                    \
+    if (std::string(Actual) != std::string(Expected)) {                        \
+        std::ostringstream Oss;                                                \
+        Oss << "Test failed: " << #Actual << " == " << #Expected << "\n"       \
+            << "    Expected: " << (Expected) << "\n"                          \
+            << "    Actual: " << (Actual);                                     \
+        throw std::runtime_error(Oss.str());                                   \
     }
 
-#define TEST_ASSERT_TRUE(Condition) \
-    if (!(Condition)) { \
-        std::ostringstream Oss; \
-        Oss << "Test failed:\n    Expected " << #Condition << " is true."; \
-        throw std::runtime_error(Oss.str()); \
+#define TEST_ASSERT_TRUE(Condition)                                            \
+    if (!(Condition)) {                                                        \
+        std::ostringstream Oss;                                                \
+        Oss << "Test failed:\n    Expected " << #Condition << " is true.";     \
+        throw std::runtime_error(Oss.str());                                   \
     }
 
-#define TEST_ASSERT_FALSE(Condition) \
-    if (Condition) { \
-        std::ostringstream Oss; \
-        Oss << "Test failed:\n    Expected " << #Condition << " is false."; \
-        throw std::runtime_error(Oss.str()); \
+#define TEST_ASSERT_FALSE(Condition)                                           \
+    if (Condition) {                                                           \
+        std::ostringstream Oss;                                                \
+        Oss << "Test failed:\n    Expected " << #Condition << " is false.";    \
+        throw std::runtime_error(Oss.str());                                   \
     }
 
-#define TEST_ASSERT_FLOAT_EQ(Actual, Expected, Tolerance) \
-    if (std::fabs((Actual) - (Expected)) > (Tolerance)) { \
-        std::ostringstream Oss; \
-        Oss << "Test failed: " << "\n" \
-            << "    Expected: " << (Expected) << "\n" \
-            << "    Actual: " << (Actual) << "\n" \
-            << "    Tolerance: " << (Tolerance); \
-        throw std::runtime_error(Oss.str()); \
+#define TEST_ASSERT_FLOAT_EQ(Actual, Expected, Tolerance)                      \
+    if (std::fabs((Actual) - (Expected)) > (Tolerance)) {                      \
+        std::ostringstream Oss;                                                \
+        Oss << "Test failed: " << "\n"                                         \
+            << "    Expected: " << (Expected) << "\n"                          \
+            << "    Actual: " << (Actual) << "\n"                              \
+            << "    Tolerance: " << (Tolerance);                               \
+        throw std::runtime_error(Oss.str());                                   \
     }
 
-#define TEST(SuiteName, CaseName) \
-    static void SuiteName##_##CaseName(); \
-    namespace { \
-        struct SuiteName##_##CaseName##_Adder { \
-            SuiteName##_##CaseName##_Adder() { \
-                nshogi::test::common::TestBody::getInstance().addTest(#SuiteName, #CaseName, SuiteName##_##CaseName); \
-            } \
-        } SuiteName##_##CaseName##_Adder_instance; \
-    } \
+#define TEST(SuiteName, CaseName)                                              \
+    static void SuiteName##_##CaseName();                                      \
+    namespace {                                                                \
+    struct SuiteName##_##CaseName##_Adder {                                    \
+        SuiteName##_##CaseName##_Adder() {                                     \
+            nshogi::test::common::TestBody::getInstance().addTest(             \
+                #SuiteName, #CaseName, SuiteName##_##CaseName);                \
+        }                                                                      \
+    } SuiteName##_##CaseName##_Adder_instance;                                 \
+    }                                                                          \
     static void SuiteName##_##CaseName()
 
 #endif // #ifndef NSHOGI_TEST_COMMON_H

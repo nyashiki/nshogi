@@ -1,7 +1,16 @@
-#include "common.h"
+//
+// Copyright (c) 2025 @nyashiki
+//
+// This software is licensed under the MIT license.
+// For details, see the LICENSE file in the root of this repository.
+//
+// SPDX-License-Identifier: MIT
+//
+
 #include "../core/positionbuilder.h"
 #include "../core/statebuilder.h"
 #include "../io/sfen.h"
+#include "common.h"
 #include <stdexcept>
 #include <vector>
 
@@ -163,15 +172,15 @@ TEST(Sfen, SetGetSfenPosition) {
     for (const auto& Sfen : Sfens) {
         nshogi::core::Position Position =
             nshogi::io::sfen::PositionBuilder::newPosition(Sfen);
-        TEST_ASSERT_STREQ(
-            nshogi::io::sfen::positionToSfen(Position).c_str(), Sfen.c_str());
+        TEST_ASSERT_STREQ(nshogi::io::sfen::positionToSfen(Position).c_str(),
+                          Sfen.c_str());
 
         nshogi::core::State State =
             nshogi::io::sfen::StateBuilder::newState(Sfen);
-        TEST_ASSERT_STREQ(nshogi::io::sfen::positionToSfen(
-                                   State.getInitialPosition())
-                                   .c_str(),
-                               Sfen.c_str());
+        TEST_ASSERT_STREQ(
+            nshogi::io::sfen::positionToSfen(State.getInitialPosition())
+                .c_str(),
+            Sfen.c_str());
     }
 }
 
@@ -223,5 +232,25 @@ TEST(State, SfenWithMoves) {
         "lnsgkg1nl/1r5s1/pppppp1pp/6p2/9/2P6/PP1PPPPPP/7R1/LNSGKGSNL b Bb 1");
 
     TEST_ASSERT_STREQ(nshogi::io::sfen::stateToSfen(State).c_str(),
-                           Sfen.c_str());
+                      Sfen.c_str());
+}
+
+TEST(State, SfenStartpos) {
+    const std::string Sfen = "startpos";
+
+    nshogi::core::State State = nshogi::io::sfen::StateBuilder::newState(Sfen);
+
+    TEST_ASSERT_STREQ(
+        nshogi::io::sfen::positionToSfen(State.getPosition()).c_str(),
+        "lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL b - 1");
+}
+
+TEST(State, SfenStartposWithMoves) {
+    const std::string Sfen = "startpos moves 2g2f 8c8d 7g7f 8d8e 8h7g";
+
+    nshogi::core::State State = nshogi::io::sfen::StateBuilder::newState(Sfen);
+
+    TEST_ASSERT_STREQ(
+        nshogi::io::sfen::positionToSfen(State.getPosition()).c_str(),
+        "lnsgkgsnl/1r5b1/p1ppppppp/9/1p7/2P4P1/PPBPPPP1P/7R1/LNSGKGSNL w - 1");
 }

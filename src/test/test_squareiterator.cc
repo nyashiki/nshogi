@@ -1,11 +1,19 @@
-#include "common.h"
-#include "../core/types.h"
-#include "../core/squareiterator.h"
+//
+// Copyright (c) 2025 @nyashiki
+//
+// This software is licensed under the MIT license.
+// For details, see the LICENSE file in the root of this repository.
+//
+// SPDX-License-Identifier: MIT
+//
 
+#include "../core/squareiterator.h"
+#include "../core/types.h"
+#include "common.h"
 
 namespace {
 
-template<nshogi::core::IterateOrder Order>
+template <nshogi::core::IterateOrder Order>
 void testReverseOrder() {
     nshogi::core::SquareIterator<Order> SqIt;
     nshogi::core::SquareIterator<nshogi::core::reverseOrder<Order>()> RvSqIt;
