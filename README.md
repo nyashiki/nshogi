@@ -1,4 +1,5 @@
 # nshogi: a shogi library.
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/c82fbf71ad27453395499d1a677326fe)](https://app.codacy.com/gh/nyashiki/nshogi/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![build](https://github.com/Nyashiki/nshogi/actions/workflows/build.yml/badge.svg?branch=master)](https://github.com/Nyashiki/nshogi/actions/workflows/build.yml)
 [![test](https://github.com/nyashiki/nshogi/actions/workflows/test.yml/badge.svg?branch=master)](https://github.com/nyashiki/nshogi/actions/workflows/test.yml)
