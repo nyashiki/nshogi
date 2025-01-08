@@ -82,7 +82,6 @@ class TestML(unittest.TestCase):
                 legal_moves = set(f.readline().rstrip().split(" ")[1:])
 
                 sfen = line.rstrip()
-                state = nshogi.io.sfen.make_state_from_sfen(sfen)
 
                 self.sfens.append(sfen)
                 self.legal_moves.append(legal_moves)
