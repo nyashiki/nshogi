@@ -1,5 +1,5 @@
 # nshogi: a shogi library.
-
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![build](https://github.com/Nyashiki/nshogi/actions/workflows/build.yml/badge.svg?branch=master)](https://github.com/Nyashiki/nshogi/actions/workflows/build.yml)
 [![test](https://github.com/nyashiki/nshogi/actions/workflows/test.yml/badge.svg?branch=master)](https://github.com/nyashiki/nshogi/actions/workflows/test.yml)
 
