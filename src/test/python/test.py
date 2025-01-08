@@ -27,7 +27,6 @@ class TestState(unittest.TestCase):
                 legal_moves = set(f.readline().rstrip().split(" ")[1:])
 
                 sfen = line.rstrip()
-                state = nshogi.io.sfen.make_state_from_sfen(sfen)
 
                 self.sfens.append(sfen)
                 self.legal_moves.append(legal_moves)
@@ -50,7 +49,7 @@ class TestState(unittest.TestCase):
             self.assertEqual(state.to_sfen(), state_cloned.to_sfen())
 
     def test_do_move_undo_move(self):
-        for i in range(10):
+        for _ in range(10):
             state = nshogi.io.sfen.make_state_from_sfen("startpos")
 
             for ply in range(256):
