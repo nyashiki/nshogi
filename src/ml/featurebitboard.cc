@@ -17,7 +17,9 @@ namespace ml {
 namespace {
 
 template <typename IterateType>
-inline void extractImpl(float* Dest, const core::internal::bitboard::Bitboard& Bitboard, float Value) {
+inline void extractImpl(float* Dest,
+                        const core::internal::bitboard::Bitboard& Bitboard,
+                        float Value) {
     IterateType SquareIt;
 
     int Counter = 0;
@@ -37,7 +39,8 @@ void FeatureBitboard::extract(float* Dest) const {
     if (C[11] == 0) { // no rotation.
         extractImpl<core::SquareIterator<Order>>(Dest, Bitboard, F[3]);
     } else {
-        extractImpl<core::SquareIterator<core::reverseOrder<Order>()>>(Dest, Bitboard, F[3]);
+        extractImpl<core::SquareIterator<core::reverseOrder<Order>()>>(
+            Dest, Bitboard, F[3]);
     }
 }
 
