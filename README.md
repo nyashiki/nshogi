@@ -23,6 +23,7 @@ Additionally, nshogi provides essential functionalities for machine learning, su
 #### C++ Library
 
 Type `make [CXX=<CXX>] [<SSE INSTRUCTION>=1] [PREFIX=<PREFIX>] install` in your terminal, where:
+
 - `<CXX>` is a C++ compiler.
 - `<SSE INSTRUCTION>` is one of the {SSE, SSE41, SSE42, AVX, AVX2}, depends on the instructions your CPU supports.
 - `<PREFIX>` is in which directory the library will be installed. The default value is `/usr/local`.
@@ -30,12 +31,14 @@ Type `make [CXX=<CXX>] [<SSE INSTRUCTION>=1] [PREFIX=<PREFIX>] install` in your 
 #### Python module
 
 Type `make [CXX=<CXX>] [<SSE INSTRUCTION>=1] install-python` in your terminal, where:
+
 - `<CXX>` is a C++ compiler.
 - `<SSE INSTRUCTION>` is one of the {SSE, SSE41, SSE42, AVX, AVX2}, depends on the instructions your CPU supports.
 
 ### Run tests for the library
 
 Type `make [CXX=<CXX>] [<SSE INSTRUCTION>=1] [PREFIX=<PREFIX>] runtest-{static|shared}` in your terminal, where:
+
 - `<CXX>` is a C++ compiler.
 - `<SSE INSTRUCTION>` is one of the {SSE, SSE41, SSE42, AVX, AVX2}, depends on the instructions your CPU supports.
 - `<PREFIX>` is in which directory the library will be installed. The default value is `/usr/local`.
