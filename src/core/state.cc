@@ -97,6 +97,10 @@ uint8_t State::getStandCount(Color C, PieceTypeKind Type) const {
     return Impl->getStandCount(C, Type);
 }
 
+bool State::isInCheck() const {
+    return !Impl->getCheckerBB().isZero();
+}
+
 Square State::getKingSquare(Color C) const {
     return Impl->getKingSquare(C);
 }

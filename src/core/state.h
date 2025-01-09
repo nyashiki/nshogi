@@ -117,6 +117,11 @@ class State {
     uint8_t getStandCount(Color C, PieceTypeKind Type) const;
 
     ///
+    /// @brief Return true if the king of the current turn is in check.
+    ///
+    bool isInCheck() const;
+
+    ///
     /// @brief Get the square location of the king piece.
     /// @param C The color of the king.
     ///
