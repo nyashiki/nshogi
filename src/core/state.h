@@ -101,8 +101,6 @@ class State {
     ///
     void undoMove();
 
-    // Helper functions.
-
     ///
     /// @brief Get the repetition status of the state.
     /// @param Strict If true, performs a deep check of the game state;
