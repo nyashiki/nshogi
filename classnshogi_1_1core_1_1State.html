@@ -156,6 +156,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a69cef7ea4ddfdd0853ea1fef403cbb6f"><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classnshogi_1_1core_1_1State.html#a69cef7ea4ddfdd0853ea1fef403cbb6f">getStandCount</a> (<a class="el" href="namespacenshogi_1_1core.html#a31bbefbdbc08642dd7fffa28c0533659">Color</a> C, <a class="el" href="namespacenshogi_1_1core.html#a48e95a20c4b8db53f6c955ddac0b0e12">PieceTypeKind</a> Type) const</td></tr>
 <tr class="memdesc:a69cef7ea4ddfdd0853ea1fef403cbb6f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the number of pieces on the stand (i.e., mochigoma in Japanese).  <a href="classnshogi_1_1core_1_1State.html#a69cef7ea4ddfdd0853ea1fef403cbb6f">More...</a><br /></td></tr>
 <tr class="separator:a69cef7ea4ddfdd0853ea1fef403cbb6f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab664d492c13ace6588be633e5c1898c7"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classnshogi_1_1core_1_1State.html#ab664d492c13ace6588be633e5c1898c7">isInCheck</a> () const</td></tr>
+<tr class="memdesc:ab664d492c13ace6588be633e5c1898c7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return true if the king of the current turn is in check.  <a href="classnshogi_1_1core_1_1State.html#ab664d492c13ace6588be633e5c1898c7">More...</a><br /></td></tr>
+<tr class="separator:ab664d492c13ace6588be633e5c1898c7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ade5a4479c42ccdfa57e1802c0cdb8a63"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacenshogi_1_1core.html#a4fc4e1258dfdd1f019167d58c1d7a6c1">Square</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classnshogi_1_1core_1_1State.html#ade5a4479c42ccdfa57e1802c0cdb8a63">getKingSquare</a> (<a class="el" href="namespacenshogi_1_1core.html#a31bbefbdbc08642dd7fffa28c0533659">Color</a> C) const</td></tr>
 <tr class="memdesc:ade5a4479c42ccdfa57e1802c0cdb8a63"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the square location of the king piece.  <a href="classnshogi_1_1core_1_1State.html#ade5a4479c42ccdfa57e1802c0cdb8a63">More...</a><br /></td></tr>
 <tr class="separator:ade5a4479c42ccdfa57e1802c0cdb8a63"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -614,6 +617,25 @@ Friends</h2></td></tr>
   </table>
   </dd>
 </dl>
+
+</div>
+</div>
+<a id="ab664d492c13ace6588be633e5c1898c7" name="ab664d492c13ace6588be633e5c1898c7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab664d492c13ace6588be633e5c1898c7">&#9670;&#160;</a></span>isInCheck()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool nshogi::core::State::isInCheck </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Return true if the king of the current turn is in check. </p>
 
 </div>
 </div>
