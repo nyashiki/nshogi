@@ -101,8 +101,6 @@ class State {
     ///
     void undoMove();
 
-    // Helper functions.
-
     ///
     /// @brief Get the repetition status of the state.
     /// @param Strict If true, performs a deep check of the game state;
@@ -117,6 +115,11 @@ class State {
     /// @param Type The type of the piece.
     ///
     uint8_t getStandCount(Color C, PieceTypeKind Type) const;
+
+    ///
+    /// @brief Return true if the king of the current turn is in check.
+    ///
+    bool isInCheck() const;
 
     ///
     /// @brief Get the square location of the king piece.

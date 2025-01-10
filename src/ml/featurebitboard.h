@@ -23,7 +23,7 @@ class FeatureBitboardUtil;
 
 } // namespace internal
 
-struct FeatureBitboard {
+struct alignas(16) FeatureBitboard {
  public:
     FeatureBitboard() {
     }
