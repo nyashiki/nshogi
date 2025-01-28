@@ -171,6 +171,7 @@ PYBIND11_MODULE(nshogi, Module) {
              [](const nshogi::core::State& S, bool Strict) {
                  return S.getRepetitionStatus(Strict);
              })
+        .def("can_declare", &nshogi::core::State::canDeclare)
         .def_property_readonly(
             "legal_moves",
             [](const nshogi::core::State& S) {

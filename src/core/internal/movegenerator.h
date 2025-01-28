@@ -27,6 +27,9 @@ class MoveGeneratorInternal {
     template <Color C, bool WilyPromote = true>
     static MoveList generateLegalCheckMoves(const internal::StateImpl& S);
 
+    template <Color C, bool WilyPromote = true>
+    static MoveList generateLegalEvasionMoves(const internal::StateImpl& S);
+
     template <bool WilyPromote = true>
     static MoveList generateLegalMoves(const internal::StateImpl& S);
 

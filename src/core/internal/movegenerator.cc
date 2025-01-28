@@ -18,8 +18,6 @@ namespace {
 
 using namespace internal::bitboard;
 
-enum struct GenerateType { Normal, Check, Evasion };
-
 template <Color C, bool Capture, bool WilyPromote = true>
 inline Move32*
 generateOnBoardOneStepPawnMovesImpl(const StateImpl& S, Move32* Moves,
@@ -2596,24 +2594,12 @@ inline Move32* generateLegalCheckMovesImpl(const StateImpl& S, Move32* Moves) {
     return Moves;
 }
 
-template <GenerateType GenType, Color C, bool WilyPromote>
-inline Move32* generateLegalMovesImpl(const StateImpl& S, Move32* Moves) {
-    if constexpr (GenType == GenerateType::Normal) {
-        Moves = generateLegalMovesImpl<C, WilyPromote>(S, Moves);
-    } else if constexpr (GenType == GenerateType::Check) {
-        Moves = generateLegalCheckMovesImpl<C, WilyPromote>(S, Moves);
-    }
-
-    return Moves;
-}
-
 } // namespace
 
 template <Color C, bool WilyPromote>
 MoveList MoveGeneratorInternal::generateLegalMoves(const StateImpl& S) {
     MoveList List;
-    List.Tail = generateLegalMovesImpl<GenerateType::Normal, C, WilyPromote>(
-        S, List.Tail);
+    List.Tail = generateLegalMovesImpl<C, WilyPromote>(S, List.Tail);
     return List;
 }
 
@@ -2627,8 +2613,23 @@ MoveList MoveGeneratorInternal::generateLegalMoves(const StateImpl& S) {
 template <Color C, bool WilyPromote>
 MoveList MoveGeneratorInternal::generateLegalCheckMoves(const StateImpl& S) {
     MoveList List;
-    List.Tail = generateLegalMovesImpl<GenerateType::Check, C, WilyPromote>(
-        S, List.Tail);
+    List.Tail = generateLegalCheckMovesImpl<C, WilyPromote>(S, List.Tail);
+    return List;
+}
+
+template <Color C, bool WilyPromote>
+MoveList MoveGeneratorInternal::generateLegalEvasionMoves(const StateImpl& S) {
+    const Bitboard CheckerBB = S.getCheckerBB();
+    const Bitboard MyBB = S.getBitboard<C>();
+    const Bitboard OpBB = S.getBitboard<~C>();
+    const Bitboard OccupiedBB = MyBB | OpBB;
+
+    assert(!CheckerBB.isZero());
+
+    MoveList List;
+    List.Tail = generateLegalEvasionMovesImpl<C, WilyPromote>(
+        S, List.Tail, CheckerBB, OpBB, OccupiedBB);
+
     return List;
 }
 
@@ -2656,6 +2657,17 @@ template MoveList MoveGeneratorInternal::generateLegalCheckMoves<White, false>(
     const StateImpl& S);
 template MoveList
 MoveGeneratorInternal::generateLegalCheckMoves<White, true>(const StateImpl& S);
+
+template MoveList
+MoveGeneratorInternal::generateLegalEvasionMoves<Black, false>(
+    const StateImpl& S);
+template MoveList MoveGeneratorInternal::generateLegalEvasionMoves<Black, true>(
+    const StateImpl& S);
+template MoveList
+MoveGeneratorInternal::generateLegalEvasionMoves<White, false>(
+    const StateImpl& S);
+template MoveList MoveGeneratorInternal::generateLegalEvasionMoves<White, true>(
+    const StateImpl& S);
 
 template MoveList
 MoveGeneratorInternal::generateLegalMoves<false>(const StateImpl& S);

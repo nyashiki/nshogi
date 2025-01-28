@@ -52,6 +52,8 @@ Under construction.
 
 This repository is released under the MIT License.
 
+For details about licenses of third-party dependencies, please see [LICENSE-THIRD-PARTY.md](./LICENSE-THIRD-PARTY.md).
+
 ### Important note on included data
 
 This repository includes some resources in the `res/` directory that are sourced from [やねうら王公式からクリスマスプレゼントに詰将棋500万問を謹呈](https://yaneuraou.yaneu.com/2020/12/25/christmas-present/).
