@@ -17,7 +17,6 @@
 #include <cinttypes>
 #include <cstdint>
 #include <functional>
-#include <iostream>
 
 #if defined(USE_SSE2)
 
