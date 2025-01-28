@@ -63,7 +63,9 @@ core::Move32 attack(core::internal::StateImpl* S, int Limit) {
 template <core::Color C>
 core::Move32 defence(core::internal::StateImpl* S, int Limit) {
     const auto DefenceMoves =
-        core::internal::MoveGeneratorInternal::generateLegalEvasionMoves<C, true>(*S);
+        core::internal::MoveGeneratorInternal::generateLegalEvasionMoves<C,
+                                                                         true>(
+            *S);
 
     bool IsCheckmatedBy1Ply = true;
     for (const auto& Move : DefenceMoves) {

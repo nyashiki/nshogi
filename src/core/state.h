@@ -104,7 +104,8 @@ class State {
     ///
     /// @brief Get the repetition status of the state.
     /// @param Strict If false, detecting one repeated position is sufficient.
-    ///               If true, the detection strictly follows the repetition rules.
+    ///               If true, the detection strictly follows the repetition
+    ///               rules.
     ///
     RepetitionStatus getRepetitionStatus(bool Strict = false) const;
 

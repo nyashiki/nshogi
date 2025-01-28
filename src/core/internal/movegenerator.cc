@@ -2649,23 +2649,25 @@ MoveGeneratorInternal::generateLegalMoves<White, false>(const StateImpl& S);
 template MoveList
 MoveGeneratorInternal::generateLegalMoves<White, true>(const StateImpl& S);
 
-template
-MoveList MoveGeneratorInternal::generateLegalCheckMoves<Black, false>(const StateImpl& S);
-template
-MoveList MoveGeneratorInternal::generateLegalCheckMoves<Black, true>(const StateImpl& S);
-template
-MoveList MoveGeneratorInternal::generateLegalCheckMoves<White, false>(const StateImpl& S);
-template
-MoveList MoveGeneratorInternal::generateLegalCheckMoves<White, true>(const StateImpl& S);
+template MoveList MoveGeneratorInternal::generateLegalCheckMoves<Black, false>(
+    const StateImpl& S);
+template MoveList
+MoveGeneratorInternal::generateLegalCheckMoves<Black, true>(const StateImpl& S);
+template MoveList MoveGeneratorInternal::generateLegalCheckMoves<White, false>(
+    const StateImpl& S);
+template MoveList
+MoveGeneratorInternal::generateLegalCheckMoves<White, true>(const StateImpl& S);
 
-template
-MoveList MoveGeneratorInternal::generateLegalEvasionMoves<Black, false>(const StateImpl& S);
-template
-MoveList MoveGeneratorInternal::generateLegalEvasionMoves<Black, true>(const StateImpl& S);
-template
-MoveList MoveGeneratorInternal::generateLegalEvasionMoves<White, false>(const StateImpl& S);
-template
-MoveList MoveGeneratorInternal::generateLegalEvasionMoves<White, true>(const StateImpl& S);
+template MoveList
+MoveGeneratorInternal::generateLegalEvasionMoves<Black, false>(
+    const StateImpl& S);
+template MoveList MoveGeneratorInternal::generateLegalEvasionMoves<Black, true>(
+    const StateImpl& S);
+template MoveList
+MoveGeneratorInternal::generateLegalEvasionMoves<White, false>(
+    const StateImpl& S);
+template MoveList MoveGeneratorInternal::generateLegalEvasionMoves<White, true>(
+    const StateImpl& S);
 
 template MoveList
 MoveGeneratorInternal::generateLegalMoves<false>(const StateImpl& S);
