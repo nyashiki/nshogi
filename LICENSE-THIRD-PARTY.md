@@ -1,6 +1,6 @@
 # Third party licenses
 
-##  [pybind11](https://github.com/pybind/pybind11) (BSD-3-Clause)
+## [pybind11](https://github.com/pybind/pybind11) (BSD-3-Clause)
 
 Used for building Python module.
 
