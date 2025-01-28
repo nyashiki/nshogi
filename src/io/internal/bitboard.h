@@ -13,6 +13,8 @@
 #include "../../core/internal/bitboard.h"
 #include "../../core/squareiterator.h"
 
+#include <iostream>
+
 namespace nshogi {
 namespace io {
 namespace internal {
