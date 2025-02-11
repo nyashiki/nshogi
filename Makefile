@@ -17,8 +17,10 @@ VERSION = $(shell cat NSHOGI_VERSION)
 OBJDIR = build/$(BUILD)_$(CXX)
 ifeq ($(shell uname), Darwin)
 	SHARED_TARGET_NAME := libnshogi.$(VERSION).dylib
+    SHARED_TARGET_NAME_NO_VERSION := libnshogi.dylib
 else
 	SHARED_TARGET_NAME := libnshogi.so.$(VERSION)
+    SHARED_TARGET_NAME_NO_VERSION := libnshogi.so
 endif
 SHARED_TARGET := $(OBJDIR)/lib/$(SHARED_TARGET_NAME)
 STATIC_TARGET := $(OBJDIR)/lib/libnshogi_static.a
@@ -208,7 +210,7 @@ install: $(SHARED_TARGET) $(STATIC_TARGET)
 	install -d $(PREFIX)/lib
 	install -m 644 $(SHARED_TARGET) $(PREFIX)/lib
 	install -m 644 $(STATIC_TARGET) $(PREFIX)/lib
-	ln -s $(PREFIX)/lib/$(SHARED_TARGET_NAME) $(PREFIX)/lib/libnshogi.so
+	ln -s $(PREFIX)/lib/$(SHARED_TARGET_NAME) $(PREFIX)/lib/$(SHARED_TARGET_NAME_NO_VERSION)
 	install -d $(PREFIX)/include/nshogi/core
 	install -d $(PREFIX)/include/nshogi/io
 	install -d $(PREFIX)/include/nshogi/ml
