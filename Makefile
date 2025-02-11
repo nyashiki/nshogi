@@ -208,7 +208,7 @@ install: $(SHARED_TARGET) $(STATIC_TARGET)
 	install -d $(PREFIX)/lib
 	install -m 644 $(SHARED_TARGET) $(PREFIX)/lib
 	install -m 644 $(STATIC_TARGET) $(PREFIX)/lib
-	ln -s $(PREFIX)/lib/$(SHARED_TARGET_NAME) $(PREFIX)/lib/libnshogi.so
+	ln -s $(PREFIX)/lib/$(SHARED_TARGET_NAME) $(PREFIX)/lib/$(SHARED_TARGET_NAME)
 	install -d $(PREFIX)/include/nshogi/core
 	install -d $(PREFIX)/include/nshogi/io
 	install -d $(PREFIX)/include/nshogi/ml
