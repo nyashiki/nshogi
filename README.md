@@ -46,7 +46,7 @@ Type `make [CXX=<CXX>] [<SSE INSTRUCTION>=1] [PREFIX=<PREFIX>] runtest-{static|s
 
 ### Examples with code
 
-Under construction.
+See [wiki](https://github.com/nyashiki/nshogi/wiki).
 
 ## License
 
