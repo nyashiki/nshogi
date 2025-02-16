@@ -32,6 +32,7 @@ struct alignas(32) HuffmanCode {
 
     bool operator==(const HuffmanCode& HC) const;
     bool operator!=(const HuffmanCode& HC) const;
+    bool operator<(const HuffmanCode& HC) const;
 
     static std::size_t size();
 
