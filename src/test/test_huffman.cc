@@ -122,6 +122,36 @@ TEST(Huffman, CopyConstructor) {
     }
 }
 
+TEST(Huffman, Less1) {
+    const auto Code1 = nshogi::core::HuffmanCode(3, 2, 1, 0);
+    const auto Code2 = nshogi::core::HuffmanCode(4, 3, 2, 1);
+    TEST_ASSERT_TRUE(Code1 < Code2);
+}
+
+TEST(Huffman, Less2) {
+    const auto Code1 = nshogi::core::HuffmanCode(0, 0, 0, 0);
+    const auto Code2 = nshogi::core::HuffmanCode(1, 0, 0, 0);
+    TEST_ASSERT_TRUE(Code1 < Code2);
+}
+
+TEST(Huffman, Less3) {
+    const auto Code1 = nshogi::core::HuffmanCode(0, 0, 0, 0);
+    const auto Code2 = nshogi::core::HuffmanCode(0, 0, 0, 0);
+    TEST_ASSERT_FALSE(Code1 < Code2);
+}
+
+TEST(Huffman, Less4) {
+    const auto Code1 = nshogi::core::HuffmanCode(1, 0, 0, 0);
+    const auto Code2 = nshogi::core::HuffmanCode(0, 0, 0, 0);
+    TEST_ASSERT_FALSE(Code1 < Code2);
+}
+
+TEST(Huffman, Less5) {
+    const auto Code1 = nshogi::core::HuffmanCode(4, 3, 2, 1);
+    const auto Code2 = nshogi::core::HuffmanCode(3, 2, 1, 0);
+    TEST_ASSERT_FALSE(Code1 < Code2);
+}
+
 TEST(Huffman, InitialPosition) {
     nshogi::core::Position Pos =
         nshogi::core::PositionBuilder::getInitialPosition();

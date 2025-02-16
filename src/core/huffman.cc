@@ -43,6 +43,10 @@ bool HuffmanCode::operator!=(const HuffmanCode& HC) const {
     return *Impl != *HC.Impl;
 }
 
+bool HuffmanCode::operator<(const HuffmanCode& HC) const {
+    return *Impl < *HC.Impl;
+}
+
 std::size_t HuffmanCode::size() {
     return internal::HuffmanCodeImpl::size();
 }

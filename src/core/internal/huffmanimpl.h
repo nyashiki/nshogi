@@ -92,6 +92,21 @@ struct alignas(32) HuffmanCodeImpl {
 #endif // #ifdef USE_AVX2
     }
 
+    bool operator<(const HuffmanCodeImpl& HC) const {
+#ifdef USE_AVX2
+        const int MaskLt = _mm256_movemask_epi8(_mm256_cmpgt_epi8(HC.C, C));
+        const int MaskGt = _mm256_movemask_epi8(_mm256_cmpgt_epi8(C, HC.C));
+        return MaskGt < MaskLt;
+#else
+        for (std::size_t I = 0; I < 4; ++I) {
+            if (Data[I] < HC.Data[I]) {
+                return true;
+            }
+        }
+        return false;
+#endif
+    }
+
     static constexpr std::size_t size() {
         return 4 * sizeof(uint64_t);
     }
