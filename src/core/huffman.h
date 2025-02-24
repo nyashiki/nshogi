@@ -25,6 +25,7 @@ struct alignas(32) HuffmanCode {
  public:
     HuffmanCode(const HuffmanCode& HC);
     HuffmanCode(uint64_t Code3, uint64_t Code2, uint64_t Code1, uint64_t Code0);
+    HuffmanCode(const char* Data);
 
     ~HuffmanCode();
 

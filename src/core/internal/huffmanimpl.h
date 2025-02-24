@@ -42,6 +42,10 @@ struct alignas(32) HuffmanCodeImpl {
         Data[3] = Code3;
     }
 
+    HuffmanCodeImpl(const char* Src) {
+        std::memcpy(Data, Src, sizeof(uint64_t) * 4);
+    }
+
     HuffmanCodeImpl operator=(const HuffmanCodeImpl& HC) {
 #ifdef USE_AVX2
         C = HC.C;

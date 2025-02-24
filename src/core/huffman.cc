@@ -24,6 +24,10 @@ HuffmanCode::HuffmanCode(uint64_t Code3, uint64_t Code2, uint64_t Code1,
     : Impl(new internal::HuffmanCodeImpl(Code3, Code2, Code1, Code0)) {
 }
 
+HuffmanCode::HuffmanCode(const char* Data)
+    : Impl(new internal::HuffmanCodeImpl(Data)) {
+}
+
 HuffmanCode::~HuffmanCode() {
     assert(Impl != nullptr);
     delete Impl;
