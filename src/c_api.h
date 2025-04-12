@@ -23,6 +23,11 @@ extern "C" {
 typedef uint32_t nshogi_move_t;
 
 typedef enum {
+    NSHOGI_BLACK,
+    NSHOGI_WHITE,
+} nshogi_color_t;
+
+typedef enum {
     NSHOGI_NO_REPETITION,
     NSHOGI_REPETITION,
     NSHOGI_WIN_REPETITION,
@@ -144,14 +149,30 @@ typedef struct nshogi_state_config nshogi_state_config_t;
 typedef struct nshogi_state_api {
     void (*destroyState)(nshogi_state_t* state);
 
-    int (*generateMoves)(nshogi_state_t* state, int wily_promote, nshogi_move_t* dest);
-    void (*doMove)(nshogi_state_t* state, nshogi_move_t move);
-    void (*undoMove)(nshogi_state_t* state);
+    // Getter.
+    nshogi_color_t (*getSideToMove)(nshogi_state_t* state);
+    int (*getPly)(nshogi_state_t* state);
     nshogi_repetition_t (*getRepetition)(nshogi_state_t* state);
     int (*canDeclare)(nshogi_state_t* state);
 
+    // Operator.
+    int (*generateMoves)(nshogi_state_t* state, int wily_promote, nshogi_move_t* dest);
+    void (*doMove)(nshogi_state_t* state, nshogi_move_t move);
+    void (*undoMove)(nshogi_state_t* state);
+
+    // StateConfig.
     nshogi_state_config_t* (*createStateConfig)(void);
     void (*destroyStateConfig)(nshogi_state_config_t* state_config);
+
+    // Getter.
+    uint16_t (*getMaxPly)(nshogi_state_config_t* state_config);
+    float (*getBlackDrawValue)(nshogi_state_config_t* state_config);
+    float (*getWhiteDrawValue)(nshogi_state_config_t* state_config);
+
+    // Setter.
+    void (*setMaxPly)(nshogi_state_config_t* state_config, uint16_t max_ply);
+    void (*setBlackDrawValue)(nshogi_state_config_t* state_config, float value);
+    void (*setWhiteDrawValue)(nshogi_state_config_t* state_config, float value);
 } nshogi_state_api_t;
 
 typedef struct nshogi_ml_api {

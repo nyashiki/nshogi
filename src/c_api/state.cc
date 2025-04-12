@@ -38,6 +38,11 @@ int stateApiGenerateMoves(nshogi_state_t* CState, int WilyPromote, nshogi_move_t
     return (int)MoveList.size();
 }
 
+nshogi_color_t stateApiGetSideToMove(nshogi_state_t* CState) {
+    core::State* State = reinterpret_cast<core::State*>(CState);
+    return static_cast<nshogi_color_t>(State->getSideToMove());
+}
+
 void stateApiDoMove(nshogi_state_t* CState, nshogi_move_t CMove) {
     core::State* State = reinterpret_cast<core::State*>(CState);
     core::Move32 Move = core::Move32::fromValue(CMove);
@@ -55,6 +60,11 @@ nshogi_repetition_t stateApiGetRepetition(nshogi_state_t* CState) {
     return static_cast<nshogi_repetition_t>(State->getRepetitionStatus());
 }
 
+int stateApiGetPly(nshogi_state_t* CState) {
+    core::State* State = reinterpret_cast<core::State*>(CState);
+    return State->getPly();
+}
+
 int stateApiCanDeclare(nshogi_state_t* CState) {
     core::State* State = reinterpret_cast<core::State*>(CState);
     return static_cast<int>(State->canDeclare());
@@ -70,6 +80,36 @@ void stateApiDestroyStateConfig(nshogi_state_config_t* CStateConfig) {
     delete StateConfig;
 }
 
+uint16_t stateApiGetMaxPly(nshogi_state_config_t* CStateConfig) {
+    core::StateConfig* StateConfig = reinterpret_cast<core::StateConfig*>(CStateConfig);
+    return StateConfig->MaxPly;
+}
+
+float stateApiGetBlackDrawValue(nshogi_state_config_t* CStateConfig) {
+    core::StateConfig* StateConfig = reinterpret_cast<core::StateConfig*>(CStateConfig);
+    return StateConfig->BlackDrawValue;
+}
+
+float stateApiGetWhiteDrawValue(nshogi_state_config_t* CStateConfig) {
+    core::StateConfig* StateConfig = reinterpret_cast<core::StateConfig*>(CStateConfig);
+    return StateConfig->WhiteDrawValue;
+}
+
+void stateApiSetMaxPly(nshogi_state_config_t* CStateConfig, uint16_t MaxPly) {
+    core::StateConfig* StateConfig = reinterpret_cast<core::StateConfig*>(CStateConfig);
+    StateConfig->MaxPly = MaxPly;
+}
+
+void stateApiSetBlackDrawValue(nshogi_state_config_t* CStateConfig, float Value) {
+    core::StateConfig* StateConfig = reinterpret_cast<core::StateConfig*>(CStateConfig);
+    StateConfig->BlackDrawValue = Value;
+}
+
+void stateApiSetWhiteDrawValue(nshogi_state_config_t* CStateConfig, float Value) {
+    core::StateConfig* StateConfig = reinterpret_cast<core::StateConfig*>(CStateConfig);
+    StateConfig->WhiteDrawValue = Value;
+}
+
 } // namespace
 
 nshogi_state_api_t* c_api::state::getApi() {
@@ -77,15 +117,26 @@ nshogi_state_api_t* c_api::state::getApi() {
     static nshogi_state_api_t Api;
 
     if (!Initialized) {
+        Api.getSideToMove = stateApiGetSideToMove;
+        Api.getPly = stateApiGetPly;
+        Api.getRepetition = stateApiGetRepetition;
+        Api.canDeclare = stateApiCanDeclare;
+
         Api.destroyState = stateApiDestroyState;
         Api.generateMoves = stateApiGenerateMoves;
         Api.doMove = stateApiDoMove;
         Api.undoMove = stateApiUndoMove;
-        Api.getRepetition = stateApiGetRepetition;
-        Api.canDeclare = stateApiCanDeclare;
 
         Api.createStateConfig = stateApiCreateStateConfig;
         Api.destroyStateConfig = stateApiDestroyStateConfig;
+
+        Api.getPly = stateApiGetPly;
+        Api.getBlackDrawValue = stateApiGetBlackDrawValue;
+        Api.getWhiteDrawValue = stateApiGetWhiteDrawValue;
+
+        Api.setMaxPly = stateApiSetMaxPly;
+        Api.setBlackDrawValue = stateApiSetBlackDrawValue;
+        Api.setWhiteDrawValue = stateApiSetWhiteDrawValue;
 
         Initialized = true;
     }
