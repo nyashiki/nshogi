@@ -8,6 +8,7 @@
 //
 
 #include "../c_api.h"
+#include "position.h"
 #include "state.h"
 #include "ml.h"
 #include "io.h"
@@ -21,6 +22,10 @@
 using namespace nshogi;
 
 namespace {
+
+nshogi_position_api_t* positionApiImpl() {
+    return c_api::position::getApi();
+}
 
 nshogi_state_api_t* stateApiImpl() {
     return c_api::state::getApi();
@@ -61,6 +66,7 @@ nshogi_api_t* nshogiApi(void) {
     if (!Initialized) {
         core::initializer::initializeAll();
 
+        Api.positionApi = positionApiImpl;
         Api.stateApi = stateApiImpl;
         Api.mlApi = mlApiImpl;
         Api.ioApi = ioApiImpl;

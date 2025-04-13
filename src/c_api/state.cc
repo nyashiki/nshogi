@@ -22,6 +22,11 @@ void stateApiDestroyState(nshogi_state_t* CState) {
     delete State;
 }
 
+nshogi_state_t* stateApiClone(nshogi_state_t* CState) {
+    core::State* State = reinterpret_cast<core::State*>(CState);
+    return reinterpret_cast<nshogi_state_t*>(new core::State(State->clone()));
+}
+
 int stateApiGenerateMoves(nshogi_state_t* CState, int WilyPromote, nshogi_move_t* Moves) {
     core::State* State = reinterpret_cast<core::State*>(CState);
 
@@ -65,9 +70,39 @@ int stateApiGetPly(nshogi_state_t* CState) {
     return State->getPly();
 }
 
+const nshogi_position_t* stateApiGetPosition(nshogi_state_t* CState) {
+    core::State* State = reinterpret_cast<core::State*>(CState);
+    return reinterpret_cast<const nshogi_position_t*>(&State->getPosition());
+}
+
+const nshogi_position_t* stateApiGetInitialPosition(nshogi_state_t* CState) {
+    core::State* State = reinterpret_cast<core::State*>(CState);
+    return reinterpret_cast<const nshogi_position_t*>(&State->getInitialPosition());
+}
+
 int stateApiCanDeclare(nshogi_state_t* CState) {
     core::State* State = reinterpret_cast<core::State*>(CState);
     return static_cast<int>(State->canDeclare());
+}
+
+nshogi_move_t stateApiGetHistoryMove(nshogi_state_t* CState, uint16_t Ply) {
+    core::State* State = reinterpret_cast<core::State*>(CState);
+    return static_cast<nshogi_move_t>(State->getHistoryMove(Ply).value());
+}
+
+nshogi_move_t stateApiGetLastMove(nshogi_state_t* CState) {
+    core::State* State = reinterpret_cast<core::State*>(CState);
+    return static_cast<nshogi_move_t>(State->getLastMove().value());
+}
+
+uint64_t stateApiGetHash(nshogi_state_t* CState) {
+    core::State* State = reinterpret_cast<core::State*>(CState);
+    return State->getHash();
+}
+
+int stateApiIsInCheck(nshogi_state_t* CState) {
+    core::State* State = reinterpret_cast<core::State*>(CState);
+    return static_cast<bool>(State->isInCheck());
 }
 
 nshogi_state_config_t* stateApiCreateStateConfig(void) {
@@ -117,12 +152,21 @@ nshogi_state_api_t* c_api::state::getApi() {
     static nshogi_state_api_t Api;
 
     if (!Initialized) {
+        Api.destroyState = stateApiDestroyState;
+
+        Api.clone = stateApiClone;
+
         Api.getSideToMove = stateApiGetSideToMove;
         Api.getPly = stateApiGetPly;
+        Api.getPosition = stateApiGetPosition;
+        Api.getInitialPosition = stateApiGetInitialPosition;
         Api.getRepetition = stateApiGetRepetition;
         Api.canDeclare = stateApiCanDeclare;
+        Api.getHistoryMove = stateApiGetHistoryMove;
+        Api.getLastMove = stateApiGetLastMove;
+        Api.getHash = stateApiGetHash;
+        Api.isInCheck = stateApiIsInCheck;
 
-        Api.destroyState = stateApiDestroyState;
         Api.generateMoves = stateApiGenerateMoves;
         Api.doMove = stateApiDoMove;
         Api.undoMove = stateApiUndoMove;
@@ -130,7 +174,7 @@ nshogi_state_api_t* c_api::state::getApi() {
         Api.createStateConfig = stateApiCreateStateConfig;
         Api.destroyStateConfig = stateApiDestroyStateConfig;
 
-        Api.getPly = stateApiGetPly;
+        Api.getMaxPly = stateApiGetMaxPly;
         Api.getBlackDrawValue = stateApiGetBlackDrawValue;
         Api.getWhiteDrawValue = stateApiGetWhiteDrawValue;
 
