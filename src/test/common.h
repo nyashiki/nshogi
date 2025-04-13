@@ -11,6 +11,7 @@
 #define NSHOGI_TEST_COMMON_H
 
 #include <chrono>
+#include <cmath>
 #include <concepts>
 #include <cstdint>
 #include <functional>
