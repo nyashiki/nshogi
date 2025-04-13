@@ -174,9 +174,9 @@ typedef struct nshogi_state_config nshogi_state_config_t;
 // Api.
 
 typedef struct nshogi_position_api {
-    nshogi_color_t (*getSideToMove)(nshogi_position_t* position);
-    nshogi_piece_t (*pieceOn)(nshogi_position_t* position, nshogi_square_t square);
-    uint8_t (*getStandCount)(nshogi_position_t* position, nshogi_color_t color, nshogi_piece_type_t piece_type);
+    nshogi_color_t (*getSideToMove)(const nshogi_position_t* position);
+    nshogi_piece_t (*pieceOn)(const nshogi_position_t* position, nshogi_square_t square);
+    uint8_t (*getStandCount)(const nshogi_position_t* position, nshogi_color_t color, nshogi_piece_type_t piece_type);
 } nshogi_position_api_t;
 
 typedef struct nshogi_state_api {
