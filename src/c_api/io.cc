@@ -32,6 +32,27 @@ char* ioApiMoveToSfen(nshogi_move_t CMove) {
     return CSfen;
 }
 
+char* ioApiStateToSfen(const nshogi_state_t* CState) {
+    const core::State* State = reinterpret_cast<const core::State*>(CState);
+
+    std::string Sfen = io::sfen::stateToSfen(*State);
+
+    char* CSfen = static_cast<char*>(malloc((Sfen.size() + 1) * sizeof(char)));
+    std::strcpy(CSfen, Sfen.c_str());
+
+    return CSfen;
+}
+
+char* ioApiPositionToSfen(const nshogi_position_t* CPosition) {
+    const core::Position* Position = reinterpret_cast<const core::Position*>(CPosition);
+
+    std::string Sfen = io::sfen::positionToSfen(*Position);
+
+    char* CSfen = static_cast<char*>(malloc((Sfen.size() + 1) * sizeof(char)));
+    std::strcpy(CSfen, Sfen.c_str());
+
+    return CSfen;
+}
 
 } // namespace
 
@@ -42,6 +63,8 @@ nshogi_io_api_t* c_api::io::getApi() {
     if (!Initialized) {
         Api.createStateFromSfen = ioApiCreateStateFromSfen;
         Api.moveToSfen = ioApiMoveToSfen;
+        Api.stateToSfen = ioApiStateToSfen;
+        Api.positionToSfen = ioApiPositionToSfen;
 
         Initialized = true;
     }

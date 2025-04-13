@@ -44,8 +44,8 @@ int apiIsDroppingPawn(nshogi_move_t CMove) {
     return Move.drop() && Move.pieceType() == core::PTK_Pawn;
 }
 
-int apiMoveToIndex(nshogi_state_t* CState, nshogi_move_t CMove) {
-    core::State* State = reinterpret_cast<core::State*>(CState);
+int apiMoveToIndex(const nshogi_state_t* CState, nshogi_move_t CMove) {
+    const core::State* State = reinterpret_cast<const core::State*>(CState);
     core::Move32 Move = core::Move32::fromValue(CMove);
     return static_cast<int>(ml::getMoveIndex(State->getSideToMove(), Move));
 }

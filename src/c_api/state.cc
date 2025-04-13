@@ -22,13 +22,13 @@ void stateApiDestroyState(nshogi_state_t* CState) {
     delete State;
 }
 
-nshogi_state_t* stateApiClone(nshogi_state_t* CState) {
-    core::State* State = reinterpret_cast<core::State*>(CState);
+nshogi_state_t* stateApiClone(const nshogi_state_t* CState) {
+    const core::State* State = reinterpret_cast<const core::State*>(CState);
     return reinterpret_cast<nshogi_state_t*>(new core::State(State->clone()));
 }
 
-int stateApiGenerateMoves(nshogi_state_t* CState, int WilyPromote, nshogi_move_t* Moves) {
-    core::State* State = reinterpret_cast<core::State*>(CState);
+int stateApiGenerateMoves(const nshogi_state_t* CState, int WilyPromote, nshogi_move_t* Moves) {
+    const core::State* State = reinterpret_cast<const core::State*>(CState);
 
     auto generateLegalMoves = (WilyPromote)
         ? core::MoveGenerator::generateLegalMoves<true>
@@ -43,8 +43,8 @@ int stateApiGenerateMoves(nshogi_state_t* CState, int WilyPromote, nshogi_move_t
     return (int)MoveList.size();
 }
 
-nshogi_color_t stateApiGetSideToMove(nshogi_state_t* CState) {
-    core::State* State = reinterpret_cast<core::State*>(CState);
+nshogi_color_t stateApiGetSideToMove(const nshogi_state_t* CState) {
+    const core::State* State = reinterpret_cast<const core::State*>(CState);
     return static_cast<nshogi_color_t>(State->getSideToMove());
 }
 
@@ -60,48 +60,48 @@ void stateApiUndoMove(nshogi_state_t* CState) {
     State->undoMove();
 }
 
-nshogi_repetition_t stateApiGetRepetition(nshogi_state_t* CState) {
-    core::State* State = reinterpret_cast<core::State*>(CState);
+nshogi_repetition_t stateApiGetRepetition(const nshogi_state_t* CState) {
+    const core::State* State = reinterpret_cast<const core::State*>(CState);
     return static_cast<nshogi_repetition_t>(State->getRepetitionStatus());
 }
 
-int stateApiGetPly(nshogi_state_t* CState) {
-    core::State* State = reinterpret_cast<core::State*>(CState);
+int stateApiGetPly(const nshogi_state_t* CState) {
+    const core::State* State = reinterpret_cast<const core::State*>(CState);
     return State->getPly();
 }
 
-const nshogi_position_t* stateApiGetPosition(nshogi_state_t* CState) {
-    core::State* State = reinterpret_cast<core::State*>(CState);
+const nshogi_position_t* stateApiGetPosition(const nshogi_state_t* CState) {
+    const core::State* State = reinterpret_cast<const core::State*>(CState);
     return reinterpret_cast<const nshogi_position_t*>(&State->getPosition());
 }
 
-const nshogi_position_t* stateApiGetInitialPosition(nshogi_state_t* CState) {
-    core::State* State = reinterpret_cast<core::State*>(CState);
+const nshogi_position_t* stateApiGetInitialPosition(const nshogi_state_t* CState) {
+    const core::State* State = reinterpret_cast<const core::State*>(CState);
     return reinterpret_cast<const nshogi_position_t*>(&State->getInitialPosition());
 }
 
-int stateApiCanDeclare(nshogi_state_t* CState) {
-    core::State* State = reinterpret_cast<core::State*>(CState);
+int stateApiCanDeclare(const nshogi_state_t* CState) {
+    const core::State* State = reinterpret_cast<const core::State*>(CState);
     return static_cast<int>(State->canDeclare());
 }
 
-nshogi_move_t stateApiGetHistoryMove(nshogi_state_t* CState, uint16_t Ply) {
-    core::State* State = reinterpret_cast<core::State*>(CState);
+nshogi_move_t stateApiGetHistoryMove(const nshogi_state_t* CState, uint16_t Ply) {
+    const core::State* State = reinterpret_cast<const core::State*>(CState);
     return static_cast<nshogi_move_t>(State->getHistoryMove(Ply).value());
 }
 
-nshogi_move_t stateApiGetLastMove(nshogi_state_t* CState) {
-    core::State* State = reinterpret_cast<core::State*>(CState);
+nshogi_move_t stateApiGetLastMove(const nshogi_state_t* CState) {
+    const core::State* State = reinterpret_cast<const core::State*>(CState);
     return static_cast<nshogi_move_t>(State->getLastMove().value());
 }
 
-uint64_t stateApiGetHash(nshogi_state_t* CState) {
-    core::State* State = reinterpret_cast<core::State*>(CState);
+uint64_t stateApiGetHash(const nshogi_state_t* CState) {
+    const core::State* State = reinterpret_cast<const core::State*>(CState);
     return State->getHash();
 }
 
-int stateApiIsInCheck(nshogi_state_t* CState) {
-    core::State* State = reinterpret_cast<core::State*>(CState);
+int stateApiIsInCheck(const nshogi_state_t* CState) {
+    const core::State* State = reinterpret_cast<const core::State*>(CState);
     return static_cast<bool>(State->isInCheck());
 }
 
@@ -115,18 +115,18 @@ void stateApiDestroyStateConfig(nshogi_state_config_t* CStateConfig) {
     delete StateConfig;
 }
 
-uint16_t stateApiGetMaxPly(nshogi_state_config_t* CStateConfig) {
-    core::StateConfig* StateConfig = reinterpret_cast<core::StateConfig*>(CStateConfig);
+uint16_t stateApiGetMaxPly(const nshogi_state_config_t* CStateConfig) {
+    const core::StateConfig* StateConfig = reinterpret_cast<const core::StateConfig*>(CStateConfig);
     return StateConfig->MaxPly;
 }
 
-float stateApiGetBlackDrawValue(nshogi_state_config_t* CStateConfig) {
-    core::StateConfig* StateConfig = reinterpret_cast<core::StateConfig*>(CStateConfig);
+float stateApiGetBlackDrawValue(const nshogi_state_config_t* CStateConfig) {
+    const core::StateConfig* StateConfig = reinterpret_cast<const core::StateConfig*>(CStateConfig);
     return StateConfig->BlackDrawValue;
 }
 
-float stateApiGetWhiteDrawValue(nshogi_state_config_t* CStateConfig) {
-    core::StateConfig* StateConfig = reinterpret_cast<core::StateConfig*>(CStateConfig);
+float stateApiGetWhiteDrawValue(const nshogi_state_config_t* CStateConfig) {
+    const core::StateConfig* StateConfig = reinterpret_cast<const core::StateConfig*>(CStateConfig);
     return StateConfig->WhiteDrawValue;
 }
 

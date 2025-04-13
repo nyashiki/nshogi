@@ -182,22 +182,22 @@ typedef struct nshogi_position_api {
 typedef struct nshogi_state_api {
     void (*destroyState)(nshogi_state_t* state);
 
-    nshogi_state_t* (*clone)(nshogi_state_t* state);
+    nshogi_state_t* (*clone)(const nshogi_state_t* state);
 
     // Getter.
-    nshogi_color_t (*getSideToMove)(nshogi_state_t* state);
-    int (*getPly)(nshogi_state_t* state);
-    const nshogi_position_t* (*getPosition)(nshogi_state_t* state);
-    const nshogi_position_t* (*getInitialPosition)(nshogi_state_t* state);
-    nshogi_repetition_t (*getRepetition)(nshogi_state_t* state);
-    int (*canDeclare)(nshogi_state_t* state);
-    nshogi_move_t (*getHistoryMove)(nshogi_state_t* state, uint16_t ply);
-    nshogi_move_t (*getLastMove)(nshogi_state_t* state);
-    uint64_t (*getHash)(nshogi_state_t* state);
-    int (*isInCheck)(nshogi_state_t* state);
+    nshogi_color_t (*getSideToMove)(const nshogi_state_t* state);
+    int (*getPly)(const nshogi_state_t* state);
+    const nshogi_position_t* (*getPosition)(const nshogi_state_t* state);
+    const nshogi_position_t* (*getInitialPosition)(const nshogi_state_t* state);
+    nshogi_repetition_t (*getRepetition)(const nshogi_state_t* state);
+    int (*canDeclare)(const nshogi_state_t* state);
+    nshogi_move_t (*getHistoryMove)(const nshogi_state_t* state, uint16_t ply);
+    nshogi_move_t (*getLastMove)(const nshogi_state_t* state);
+    uint64_t (*getHash)(const nshogi_state_t* state);
+    int (*isInCheck)(const nshogi_state_t* state);
 
     // Operator.
-    int (*generateMoves)(nshogi_state_t* state, int wily_promote, nshogi_move_t* dest);
+    int (*generateMoves)(const nshogi_state_t* state, int wily_promote, nshogi_move_t* dest);
     void (*doMove)(nshogi_state_t* state, nshogi_move_t move);
     void (*undoMove)(nshogi_state_t* state);
 
@@ -206,9 +206,9 @@ typedef struct nshogi_state_api {
     void (*destroyStateConfig)(nshogi_state_config_t* state_config);
 
     // Getter.
-    uint16_t (*getMaxPly)(nshogi_state_config_t* state_config);
-    float (*getBlackDrawValue)(nshogi_state_config_t* state_config);
-    float (*getWhiteDrawValue)(nshogi_state_config_t* state_config);
+    uint16_t (*getMaxPly)(const nshogi_state_config_t* state_config);
+    float (*getBlackDrawValue)(const nshogi_state_config_t* state_config);
+    float (*getWhiteDrawValue)(const nshogi_state_config_t* state_config);
 
     // Setter.
     void (*setMaxPly)(nshogi_state_config_t* state_config, uint16_t max_ply);
@@ -217,12 +217,14 @@ typedef struct nshogi_state_api {
 } nshogi_state_api_t;
 
 typedef struct nshogi_ml_api {
-    void (*makeFeatureVector)(float* dest, nshogi_state_t*, nshogi_state_config_t*, nshogi_feature_type_t*, int num_features);
+    void (*makeFeatureVector)(float* dest, const nshogi_state_t*, const nshogi_state_config_t*, const nshogi_feature_type_t*, int num_features);
 } nshogi_ml_api_t;
 
 typedef struct nshogi_io_api {
     nshogi_state_t* (*createStateFromSfen)(const char* sfen);
     char* (*moveToSfen)(nshogi_move_t move);
+    char* (*stateToSfen)(const nshogi_state_t* state);
+    char* (*positionToSfen)(const nshogi_position_t* state);
 } nshogi_io_api_t;
 
 typedef struct nshogi_api {
@@ -233,7 +235,7 @@ typedef struct nshogi_api {
 
     // Utilities.
     int (*isDroppingPawn)(nshogi_move_t move);
-    int (*moveToIndex)(nshogi_state_t* state, nshogi_move_t move);
+    int (*moveToIndex)(const nshogi_state_t* state, nshogi_move_t move);
     nshogi_move_t (*winDeclarationMove)(void);
 } nshogi_api_t;
 
