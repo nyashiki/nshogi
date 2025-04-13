@@ -445,7 +445,7 @@ struct Move32 {
         : C_(M.C_) {
     }
 
-    constexpr Move32() {
+    explicit constexpr Move32() {
     }
 
     constexpr Move32& operator=(Move32 M) {
@@ -453,7 +453,7 @@ struct Move32 {
         return *this;
     }
 
-    constexpr Move32(Move16 M16);
+    explicit constexpr Move32(Move16 M16);
 
     constexpr bool operator<(Move32 M) const {
         return C_ < M.C_;
@@ -618,7 +618,7 @@ struct Move32 {
 ///
 struct Move16 {
  public:
-    constexpr Move16(Move32 M)
+    explicit constexpr Move16(Move32 M)
         : C_(M.C_ & 0xffff) {
     }
 

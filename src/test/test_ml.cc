@@ -1097,7 +1097,7 @@ TEST(ML, SimpleTeacherCopyConstructor) {
 
             SimpleTeacher.setState(State)
                 .setConfig(Config)
-                .setNextMove(RandomMove)
+                .setNextMove(nshogi::core::Move16(RandomMove))
                 .setWinner(State.getSideToMove());
 
             nshogi::ml::SimpleTeacher SimpleTeacher2(SimpleTeacher);
