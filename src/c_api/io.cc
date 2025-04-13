@@ -18,7 +18,7 @@ using namespace nshogi;
 
 namespace {
 
-nshogi_state_t* ioApiCreateStateFromSfen(char* Sfen) {
+nshogi_state_t* ioApiCreateStateFromSfen(const char* Sfen) {
     core::State* State = new core::State(io::sfen::StateBuilder::newState(Sfen));
     return reinterpret_cast<nshogi_state_t*>(State);
 }

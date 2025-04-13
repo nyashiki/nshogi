@@ -221,7 +221,7 @@ typedef struct nshogi_ml_api {
 } nshogi_ml_api_t;
 
 typedef struct nshogi_io_api {
-    nshogi_state_t* (*createStateFromSfen)(char* sfen);
+    nshogi_state_t* (*createStateFromSfen)(const char* sfen);
     char* (*moveToSfen)(nshogi_move_t move);
 } nshogi_io_api_t;
 
