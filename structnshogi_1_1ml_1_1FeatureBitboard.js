@@ -7,6 +7,7 @@ var structnshogi_1_1ml_1_1FeatureBitboard =
     [ "getValue", "structnshogi_1_1ml_1_1FeatureBitboard.html#ae76c1e73c59cb1dd95aa96883b242be2", null ],
     [ "isRotated", "structnshogi_1_1ml_1_1FeatureBitboard.html#a79556b2fb0e4bf5178417ccf2c4c96be", null ],
     [ "operator=", "structnshogi_1_1ml_1_1FeatureBitboard.html#a555bf0570551720d49cf8250d8751da3", null ],
+    [ "operator==", "structnshogi_1_1ml_1_1FeatureBitboard.html#ab1f9f79fd0b54bf4e70236f265ae90c9", null ],
     [ "nshogi::ml::internal::FeatureBitboardUtil", "structnshogi_1_1ml_1_1FeatureBitboard.html#a750e5926a565e5e852b60a21a0ce5642", null ],
     [ "C", "structnshogi_1_1ml_1_1FeatureBitboard.html#a6bc558d6c2d9cd6bba5c1e5ac2696740", null ],
     [ "F", "structnshogi_1_1ml_1_1FeatureBitboard.html#ae1021e7ed71c8ce5850812d1efc04667", null ]

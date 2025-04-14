@@ -2,6 +2,7 @@ var structnshogi_1_1ml_1_1SimpleTeacher =
 [
     [ "SimpleTeacher", "structnshogi_1_1ml_1_1SimpleTeacher.html#af90f7958d73e846af02f3a804945266f", null ],
     [ "SimpleTeacher", "structnshogi_1_1ml_1_1SimpleTeacher.html#af53f649d6863f0a18bed7fd05dd90104", null ],
+    [ "corruptMyself", "structnshogi_1_1ml_1_1SimpleTeacher.html#a04381b2409bf0db66e9296b4d201c8d2", null ],
     [ "equals", "structnshogi_1_1ml_1_1SimpleTeacher.html#a267baddeb83bffdda0869f85c25caba2", null ],
     [ "getConfig", "structnshogi_1_1ml_1_1SimpleTeacher.html#ac8fdf7ff7acfb57d4be9f68d955210cf", null ],
     [ "getNextMove", "structnshogi_1_1ml_1_1SimpleTeacher.html#a9c9f6e8430b04859494078ac6117482e", null ],

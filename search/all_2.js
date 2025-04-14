@@ -18,7 +18,7 @@ var searchData=
   ['computepiecescore_15',['computePieceScore',['../classnshogi_1_1core_1_1State.html#a2761a69152a8fdcfcef69b40f0192f76',1,'nshogi::core::State']]],
   ['constructat_16',['constructAt',['../structnshogi_1_1ml_1_1FeatureStackComptime.html#a4d3a708257dd3e473445b28797c1459b',1,'nshogi::ml::FeatureStackComptime']]],
   ['constructstand_17',['constructStand',['../namespacenshogi_1_1core.html#a73c97d63865c8ac32aac59184d242b1d',1,'nshogi::core']]],
-  ['corruptmyself_18',['corruptMyself',['../structnshogi_1_1ml_1_1AZTeacher.html#ae0c411c8e05da8e52669a0421791b01d',1,'nshogi::ml::AZTeacher']]],
+  ['corruptmyself_18',['corruptMyself',['../structnshogi_1_1ml_1_1SimpleTeacher.html#a04381b2409bf0db66e9296b4d201c8d2',1,'nshogi::ml::SimpleTeacher::corruptMyself()'],['../structnshogi_1_1ml_1_1AZTeacher.html#ae0c411c8e05da8e52669a0421791b01d',1,'nshogi::ml::AZTeacher::corruptMyself()']]],
   ['csa_2ecc_19',['csa.cc',['../csa_8cc.html',1,'']]],
   ['csa_2eh_20',['csa.h',['../csa_8h.html',1,'']]],
   ['csatomove32_21',['CSAToMove32',['../namespacenshogi_1_1io_1_1csa.html#af7a443f34597e25fc42f4d7735312485',1,'nshogi::io::csa']]],

@@ -12,7 +12,7 @@ var searchData=
   ['computepiecescore_9',['computePieceScore',['../classnshogi_1_1core_1_1State.html#a2761a69152a8fdcfcef69b40f0192f76',1,'nshogi::core::State']]],
   ['constructat_10',['constructAt',['../structnshogi_1_1ml_1_1FeatureStackComptime.html#a4d3a708257dd3e473445b28797c1459b',1,'nshogi::ml::FeatureStackComptime']]],
   ['constructstand_11',['constructStand',['../namespacenshogi_1_1core.html#a73c97d63865c8ac32aac59184d242b1d',1,'nshogi::core']]],
-  ['corruptmyself_12',['corruptMyself',['../structnshogi_1_1ml_1_1AZTeacher.html#ae0c411c8e05da8e52669a0421791b01d',1,'nshogi::ml::AZTeacher']]],
+  ['corruptmyself_12',['corruptMyself',['../structnshogi_1_1ml_1_1AZTeacher.html#ae0c411c8e05da8e52669a0421791b01d',1,'nshogi::ml::AZTeacher::corruptMyself()'],['../structnshogi_1_1ml_1_1SimpleTeacher.html#a04381b2409bf0db66e9296b4d201c8d2',1,'nshogi::ml::SimpleTeacher::corruptMyself()']]],
   ['csatomove32_13',['CSAToMove32',['../namespacenshogi_1_1io_1_1csa.html#af7a443f34597e25fc42f4d7735312485',1,'nshogi::io::csa']]],
   ['csatopiece_14',['CSAToPiece',['../namespacenshogi_1_1io_1_1csa.html#a081dc23bec7c1191e985951b1fa128e8',1,'nshogi::io::csa']]],
   ['csatopiecetype_15',['CSAToPieceType',['../namespacenshogi_1_1io_1_1csa.html#af34c56a0089a16e350a909406a9e3dbb',1,'nshogi::io::csa']]]

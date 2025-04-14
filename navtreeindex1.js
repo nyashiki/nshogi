@@ -1,7 +1,5 @@
 var NAVTREEINDEX1 =
 {
-"featuretype_8h.html#abce888ea1742cbf42378e26c43e4a125a395ce61af1298f5a8aea694df74e21df":[2,0,0,3,7,0,33],
-"featuretype_8h.html#abce888ea1742cbf42378e26c43e4a125a39dfaed1247588d71f84c17b36b5eae2":[2,0,0,3,7,0,35],
 "featuretype_8h.html#abce888ea1742cbf42378e26c43e4a125a3b5c82b520cd14f9f8e42909cc96ce55":[2,0,0,3,7,0,10],
 "featuretype_8h.html#abce888ea1742cbf42378e26c43e4a125a42f45bf85a243aa46296985018b1f4a6":[2,0,0,3,7,0,40],
 "featuretype_8h.html#abce888ea1742cbf42378e26c43e4a125a45667dda4bc7ec29ade0403e5ac65b41":[2,0,0,3,7,0,58],
@@ -101,8 +99,8 @@ var NAVTREEINDEX1 =
 "file_8h.html#af8bce1f157dfca191ab61861e1c34f15":[2,0,0,2,3,4],
 "file_8h_source.html":[2,0,0,2,3],
 "files.html":[2,0],
-"functions.html":[1,3,0,0],
 "functions.html":[1,3,0],
+"functions.html":[1,3,0,0],
 "functions_b.html":[1,3,0,1],
 "functions_c.html":[1,3,0,2],
 "functions_d.html":[1,3,0,3],
@@ -154,8 +152,8 @@ var NAVTREEINDEX1 =
 "movegenerator_8h_source.html":[2,0,0,1,5],
 "movelist_8h.html":[2,0,0,1,6],
 "movelist_8h_source.html":[2,0,0,1,6],
-"namespacemembers.html":[0,1,0],
 "namespacemembers.html":[0,1,0,0],
+"namespacemembers.html":[0,1,0],
 "namespacemembers_b.html":[0,1,0,1],
 "namespacemembers_c.html":[0,1,0,2],
 "namespacemembers_d.html":[0,1,0,3],
@@ -249,5 +247,7 @@ var NAVTREEINDEX1 =
 "namespacenshogi_1_1core.html#a48e95a20c4b8db53f6c955ddac0b0e12a469626d3d1bc62c84ba2faa1809b3942":[0,0,0,1,19,4],
 "namespacenshogi_1_1core.html#a48e95a20c4b8db53f6c955ddac0b0e12a56e00358be51411c6726af1d44d8ea3f":[0,0,0,1,19,6],
 "namespacenshogi_1_1core.html#a48e95a20c4b8db53f6c955ddac0b0e12a5773dd880fe6b7b441f68d8341340320":[0,0,0,1,19,12],
-"namespacenshogi_1_1core.html#a48e95a20c4b8db53f6c955ddac0b0e12a8d6e61cb86ed5f8c21eb35cedb83ce9d":[0,0,0,1,19,2]
+"namespacenshogi_1_1core.html#a48e95a20c4b8db53f6c955ddac0b0e12a8d6e61cb86ed5f8c21eb35cedb83ce9d":[0,0,0,1,19,2],
+"namespacenshogi_1_1core.html#a48e95a20c4b8db53f6c955ddac0b0e12a98dafe8515cf9ce068b23147e5dcbd91":[0,0,0,1,19,8],
+"namespacenshogi_1_1core.html#a48e95a20c4b8db53f6c955ddac0b0e12a9a3487123ce7e1880e5fba27a53dfcb6":[0,0,0,1,19,1]
 };

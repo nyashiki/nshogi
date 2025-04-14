@@ -127,6 +127,8 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a0697feacc5bf4faba24d84b08e7ae2fe"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a902f540a2ed946048240070d1501cec8"><td class="memItemLeft" align="right" valign="top">constexpr bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structnshogi_1_1core_1_1Move16.html#a902f540a2ed946048240070d1501cec8">isNone</a> () const</td></tr>
 <tr class="separator:a902f540a2ed946048240070d1501cec8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abac5e650f3afb6198138bf6840766dd3"><td class="memItemLeft" align="right" valign="top">constexpr bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structnshogi_1_1core_1_1Move16.html#abac5e650f3afb6198138bf6840766dd3">isWin</a> () const</td></tr>
+<tr class="separator:abac5e650f3afb6198138bf6840766dd3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae6a0d0726e048656a10cacc54f381d4d"><td class="memItemLeft" align="right" valign="top">constexpr bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structnshogi_1_1core_1_1Move16.html#ae6a0d0726e048656a10cacc54f381d4d">isInvalid</a> () const</td></tr>
 <tr class="separator:ae6a0d0726e048656a10cacc54f381d4d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3fbc66eea6b263a5ec00743c87a15559"><td class="memItemLeft" align="right" valign="top">constexpr <a class="el" href="namespacenshogi_1_1core.html#a4fc4e1258dfdd1f019167d58c1d7a6c1">Square</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structnshogi_1_1core_1_1Move16.html#a3fbc66eea6b263a5ec00743c87a15559">to</a> () const</td></tr>
@@ -146,12 +148,12 @@ Public Member Functions</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-static-methods" name="pub-static-methods"></a>
 Static Public Member Functions</h2></td></tr>
+<tr class="memitem:a7fd98a31a3ab2afdb5ace4b6c5f8c967"><td class="memItemLeft" align="right" valign="top">static constexpr <a class="el" href="structnshogi_1_1core_1_1Move16.html">Move16</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structnshogi_1_1core_1_1Move16.html#a7fd98a31a3ab2afdb5ace4b6c5f8c967">MoveWin</a> ()</td></tr>
+<tr class="separator:a7fd98a31a3ab2afdb5ace4b6c5f8c967"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a58f5bd9aa08d2bddcf1693e4d66d9029"><td class="memItemLeft" align="right" valign="top">static constexpr <a class="el" href="structnshogi_1_1core_1_1Move16.html">Move16</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structnshogi_1_1core_1_1Move16.html#a58f5bd9aa08d2bddcf1693e4d66d9029">MoveNone</a> ()</td></tr>
 <tr class="separator:a58f5bd9aa08d2bddcf1693e4d66d9029"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:afdd83e6eff3010e67260e873b030f780"><td class="memItemLeft" align="right" valign="top">static constexpr <a class="el" href="structnshogi_1_1core_1_1Move16.html">Move16</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structnshogi_1_1core_1_1Move16.html#afdd83e6eff3010e67260e873b030f780">MoveInvalid</a> ()</td></tr>
 <tr class="separator:afdd83e6eff3010e67260e873b030f780"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a7fd98a31a3ab2afdb5ace4b6c5f8c967"><td class="memItemLeft" align="right" valign="top">static constexpr <a class="el" href="structnshogi_1_1core_1_1Move16.html">Move16</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structnshogi_1_1core_1_1Move16.html#a7fd98a31a3ab2afdb5ace4b6c5f8c967">MoveWin</a> ()</td></tr>
-<tr class="separator:a7fd98a31a3ab2afdb5ace4b6c5f8c967"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac24dfe382c1e750a91121c2c08d144f0"><td class="memItemLeft" align="right" valign="top">static constexpr <a class="el" href="structnshogi_1_1core_1_1Move16.html">Move16</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structnshogi_1_1core_1_1Move16.html#ac24dfe382c1e750a91121c2c08d144f0">fromValue</a> (uint16_t Value)</td></tr>
 <tr class="separator:ac24dfe382c1e750a91121c2c08d144f0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
@@ -183,7 +185,7 @@ Friends</h2></td></tr>
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">constexpr</span></span>  </td>
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">explicit</span><span class="mlabel">constexpr</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">
@@ -358,6 +360,31 @@ Friends</h2></td></tr>
       <table class="memname">
         <tr>
           <td class="memname">constexpr bool nshogi::core::Move16::isNone </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">constexpr</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="abac5e650f3afb6198138bf6840766dd3" name="abac5e650f3afb6198138bf6840766dd3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abac5e650f3afb6198138bf6840766dd3">&#9670;&#160;</a></span>isWin()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">constexpr bool nshogi::core::Move16::isWin </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td> const</td>
