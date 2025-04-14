@@ -11,10 +11,12 @@
 #define NSHOGI_TEST_COMMON_H
 
 #include <chrono>
+#include <cmath>
 #include <concepts>
 #include <cstdint>
 #include <functional>
 #include <iostream>
+#include <source_location>
 #include <sstream>
 #include <stdexcept>
 #include <string>
@@ -158,7 +160,11 @@ class TestBody {
         auto&& _Expected = (Expected);                                         \
         if (_Actual != _Expected) {                                            \
             std::ostringstream Oss;                                            \
-            Oss << "Test failed: " << #Actual << " == " << #Expected;          \
+            std::source_location Loc = std::source_location::current();        \
+            Oss << "Test failed: " << #Actual << " == " << #Expected           \
+                << std::endl;                                                  \
+            Oss << "In function " << Loc.function_name() << " at "             \
+                << Loc.file_name() << " line " << Loc.line() << std::endl;     \
             throw std::runtime_error(Oss.str());                               \
         }                                                                      \
     } while (false)
@@ -169,7 +175,11 @@ class TestBody {
         auto&& _Expected = (Expected);                                         \
         if (_Actual == _Expected) {                                            \
             std::ostringstream Oss;                                            \
-            Oss << "Test failed: " << #Actual << " != " << #Expected;          \
+            std::source_location Loc = std::source_location::current();        \
+            Oss << "Test failed: " << #Actual << " != " << #Expected           \
+                << std::endl;                                                  \
+            Oss << "In function " << Loc.function_name() << " at "             \
+                << Loc.file_name() << " line " << Loc.line() << std::endl;     \
             throw std::runtime_error(Oss.str());                               \
         }                                                                      \
     } while (false)
@@ -177,33 +187,47 @@ class TestBody {
 #define TEST_ASSERT_STREQ(Actual, Expected)                                    \
     if (std::string(Actual) != std::string(Expected)) {                        \
         std::ostringstream Oss;                                                \
+        std::source_location Loc = std::source_location::current();            \
         Oss << "Test failed: " << #Actual << " == " << #Expected << "\n"       \
             << "    Expected: " << (Expected) << "\n"                          \
-            << "    Actual: " << (Actual);                                     \
+            << "    Actual: " << (Actual) << std::endl;                        \
+        Oss << "In function " << Loc.function_name() << " at "                 \
+            << Loc.file_name() << " line " << Loc.line() << std::endl;         \
         throw std::runtime_error(Oss.str());                                   \
     }
 
 #define TEST_ASSERT_TRUE(Condition)                                            \
     if (!(Condition)) {                                                        \
         std::ostringstream Oss;                                                \
-        Oss << "Test failed:\n    Expected " << #Condition << " is true.";     \
+        std::source_location Loc = std::source_location::current();            \
+        Oss << "Test failed:\n    Expected " << #Condition << " is true."      \
+            << std::endl;                                                      \
+        Oss << "In function " << Loc.function_name() << " at "                 \
+            << Loc.file_name() << " line " << Loc.line() << std::endl;         \
         throw std::runtime_error(Oss.str());                                   \
     }
 
 #define TEST_ASSERT_FALSE(Condition)                                           \
     if (Condition) {                                                           \
         std::ostringstream Oss;                                                \
-        Oss << "Test failed:\n    Expected " << #Condition << " is false.";    \
+        std::source_location Loc = std::source_location::current();            \
+        Oss << "Test failed:\n    Expected " << #Condition << " is false."     \
+            << std::endl;                                                      \
+        Oss << "In function " << Loc.function_name() << " at "                 \
+            << Loc.file_name() << " line " << Loc.line() << std::endl;         \
         throw std::runtime_error(Oss.str());                                   \
     }
 
 #define TEST_ASSERT_FLOAT_EQ(Actual, Expected, Tolerance)                      \
     if (std::fabs((Actual) - (Expected)) > (Tolerance)) {                      \
         std::ostringstream Oss;                                                \
+        std::source_location Loc = std::source_location::current();            \
         Oss << "Test failed: " << "\n"                                         \
             << "    Expected: " << (Expected) << "\n"                          \
             << "    Actual: " << (Actual) << "\n"                              \
-            << "    Tolerance: " << (Tolerance);                               \
+            << "    Tolerance: " << (Tolerance) << std::endl;                  \
+        Oss << "In function " << Loc.function_name() << " at "                 \
+            << Loc.file_name() << " line " << Loc.line() << std::endl;         \
         throw std::runtime_error(Oss.str());                                   \
     }
 

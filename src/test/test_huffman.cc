@@ -28,8 +28,8 @@ bool testPositionEquality(const nshogi::core::Position& Pos) {
 bool testHuffmanEquality(const nshogi::core::Position& Pos) {
     nshogi::core::HuffmanCode HC = nshogi::core::HuffmanCode::encode(Pos);
     nshogi::core::HuffmanCode HC2 = nshogi::core::HuffmanCode::encode(Pos);
-
-    return (HC == HC2) && !(HC != HC2);
+    nshogi::core::HuffmanCode HC3 = nshogi::core::HuffmanCode(HC.data());
+    return (HC == HC2) && !(HC != HC2) && (HC == HC3);
 }
 
 bool testDiffHuffmanCodeOneMoveAfter(const nshogi::core::Position& Pos) {
@@ -86,8 +86,13 @@ TEST(Huffman, Constructor) {
             nshogi::core::HuffmanCode HC1 =
                 nshogi::core::HuffmanCode::encode(State.getPosition());
             nshogi::core::HuffmanCode HC2(HC1);
+            nshogi::core::HuffmanCode HC3 = nshogi::core::HuffmanCode::encode(
+                State.getPosition(),
+                State.getKingSquare(nshogi::core::Color::Black),
+                State.getKingSquare(nshogi::core::Color::White));
 
             TEST_ASSERT_EQ(HC1, HC2);
+            TEST_ASSERT_EQ(HC1, HC3);
         }
     }
 }

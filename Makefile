@@ -74,7 +74,12 @@ SOURCES :=                                 \
 	src/io/huffman.cc                  \
 	src/io/sfen.cc                     \
 	src/io/csa.cc                      \
-	src/io/file.cc
+	src/io/file.cc                     \
+    src/c_api/api.cc                   \
+    src/c_api/position.cc              \
+    src/c_api/state.cc                 \
+    src/c_api/ml.cc                    \
+    src/c_api/io.cc
 
 TEST_SOURCES :=                         \
 	src/test/test_main.cc           \
@@ -89,7 +94,8 @@ TEST_SOURCES :=                         \
 	src/test/test_sfen.cc           \
 	src/test/test_huffman.cc     	\
 	src/test/test_solver.cc		\
-	src/test/test_ml.cc
+	src/test/test_ml.cc             \
+    src/test/test_capi.cc
 
 BENCH_SOURCES :=                          \
 	src/bench/bench_main.cc           \
@@ -219,6 +225,7 @@ install: $(SHARED_TARGET) $(STATIC_TARGET)
 	install -m 644 src/io/*.h $(PREFIX)/include/nshogi/io
 	install -m 644 src/ml/*.h $(PREFIX)/include/nshogi/ml
 	install -m 644 src/solver/*.h $(PREFIX)/include/nshogi/solver
+	install -m 644 src/c_api.h $(PREFIX)/include/nshogi/c_api.h
 
 .PHONY: test-static
 test-static: $(TEST_STATIC_TARGET)

@@ -45,19 +45,19 @@ AZTeacher::AZTeacher(const AZTeacher& T) {
 }
 
 void AZTeacher::corruptMyself() {
-    static std::mt19937_64 mt(20230711);
+    static std::mt19937_64 Mt(20230711);
 
     for (std::size_t I = 0; I < SfenCStrLength; ++I) {
-        Sfen[I] = (char)mt();
+        Sfen[I] = (char)Mt();
     }
 
-    SideToMove = (core::Color)mt();
-    Winner = (core::Color)mt();
-    NumMoves = (uint8_t)mt();
+    SideToMove = (core::Color)Mt();
+    Winner = (core::Color)Mt();
+    NumMoves = (uint8_t)Mt();
 
     char Buffer[1024];
     for (std::size_t I = 0; I < 1024; ++I) {
-        Buffer[I] = (char)mt();
+        Buffer[I] = (char)Mt();
     }
 
     for (std::size_t I = 0; I < NumSavedPlayouts; ++I) {
@@ -67,15 +67,15 @@ void AZTeacher::corruptMyself() {
     std::memcpy(reinterpret_cast<char*>(Visits.data()), Buffer,
                 NumSavedPlayouts * sizeof(uint16_t));
 
-    EndingRule = (core::EndingRule)mt();
-    MaxPly = (uint16_t)mt();
+    EndingRule = (core::EndingRule)Mt();
+    MaxPly = (uint16_t)Mt();
 
     std::memcpy(reinterpret_cast<char*>(&BlackDrawValue), &Buffer[512],
                 sizeof(float));
     std::memcpy(reinterpret_cast<char*>(&WhiteDrawValue), &Buffer[544],
                 sizeof(float));
 
-    Declared = (bool)mt();
+    Declared = (bool)Mt();
 }
 
 bool AZTeacher::equals(const AZTeacher& T) const {

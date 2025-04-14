@@ -93,10 +93,6 @@ RepetitionStatus State::getRepetitionStatus(bool Strict) const {
     }
 }
 
-uint8_t State::getStandCount(Color C, PieceTypeKind Type) const {
-    return Impl->getStandCount(C, Type);
-}
-
 bool State::isInCheck() const {
     return !Impl->getCheckerBB().isZero();
 }

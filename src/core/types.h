@@ -445,7 +445,7 @@ struct Move32 {
         : C_(M.C_) {
     }
 
-    constexpr Move32() {
+    explicit constexpr Move32() {
     }
 
     constexpr Move32& operator=(Move32 M) {
@@ -453,7 +453,7 @@ struct Move32 {
         return *this;
     }
 
-    constexpr Move32(Move16 M16);
+    explicit constexpr Move32(Move16 M16);
 
     constexpr bool operator<(Move32 M) const {
         return C_ < M.C_;
@@ -618,12 +618,16 @@ struct Move32 {
 ///
 struct Move16 {
  public:
-    constexpr Move16(Move32 M)
+    explicit constexpr Move16(Move32 M)
         : C_(M.C_ & 0xffff) {
     }
 
     constexpr Move16(const Move16& M)
         : C_(M.C_) {
+    }
+
+    static constexpr Move16 MoveWin() {
+        return Move16(Move32::MoveWin());
     }
 
     constexpr Move16() {
@@ -658,12 +662,12 @@ struct Move16 {
         return C_ == 0;
     }
 
-    constexpr bool isInvalid() const {
-        return C_ == MoveInvalid().value();
+    constexpr bool isWin() const {
+        return C_ == MoveWin().value();
     }
 
-    static constexpr Move16 MoveWin() {
-        return Move16(Move32::MoveWin());
+    constexpr bool isInvalid() const {
+        return C_ == MoveInvalid().value();
     }
 
     ///

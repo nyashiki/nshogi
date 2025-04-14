@@ -11,6 +11,9 @@
 #include "../core/positionbuilder.h"
 #include "../core/statebuilder.h"
 
+#include <cstring>
+#include <random>
+
 namespace nshogi {
 namespace ml {
 
@@ -83,6 +86,24 @@ bool SimpleTeacher::equals(const SimpleTeacher& ST) const {
            MaxPly == ST.MaxPly && DrawValues[0] == ST.DrawValues[0] &&
            DrawValues[1] == ST.DrawValues[1] && NextMove == ST.NextMove &&
            Winner == ST.Winner;
+}
+
+void SimpleTeacher::corruptMyself() {
+    std::mt19937_64 Mt(20250413);
+
+    HuffmanCode = core::HuffmanCode(Mt(), Mt(), Mt(), Mt());
+    Ply = (uint16_t)Mt();
+
+    MaxPly = (uint16_t)Mt();
+    uint32_t Buffer[2] = {
+        (uint32_t)Mt(),
+        (uint32_t)Mt(),
+    };
+    std::memcpy((void*)&DrawValues[0], &Buffer[0], sizeof(float));
+    std::memcpy((void*)&DrawValues[1], &Buffer[1], sizeof(float));
+
+    NextMove = core::Move16::fromValue((uint16_t)Mt());
+    Winner = (core::Color)Mt();
 }
 
 } // namespace ml

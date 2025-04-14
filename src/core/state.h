@@ -110,14 +110,6 @@ class State {
     RepetitionStatus getRepetitionStatus(bool Strict = false) const;
 
     ///
-    /// @brief Get the number of pieces on the stand
-    ///        (i.e., mochigoma in Japanese).
-    /// @param C The color of the piece.
-    /// @param Type The type of the piece.
-    ///
-    uint8_t getStandCount(Color C, PieceTypeKind Type) const;
-
-    ///
     /// @brief Return true if the king of the current turn is in check.
     ///
     bool isInCheck() const;
