@@ -161,7 +161,7 @@ PYBIND11_MODULE(nshogi, Module) {
         .def("get_stand_count",
              [](const nshogi::core::State& State, nshogi::core::Color C,
                 nshogi::core::PieceTypeKind Type) {
-                 return State.getStandCount(C, Type);
+                 return State.getPosition().getStandCount(C, Type);
              })
         .def("get_piece_on",
              [](const nshogi::core::State& S, int Square) {
