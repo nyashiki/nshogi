@@ -14,8 +14,8 @@
 #include "../core/state.h"
 #include "../core/statebuilder.h"
 #include "../core/stateconfig.h"
-#include "../io/file.h"
 #include "../io/sfen.h"
+#include "../io/file.h"
 #include "../ml/azteacher.h"
 #include "../ml/featurestack.h"
 #include "../ml/internal/featurebitboardutil.h"
@@ -24,7 +24,6 @@
 
 #include <filesystem>
 #include <fstream>
-#include <iostream>
 #include <random>
 
 namespace {
@@ -51,6 +50,11 @@ void checkFeatureTypeColor(const nshogi::core::State& State,
         TEST_ASSERT_EQ(Features.get(1).getValue(), 1.0f);
         TEST_ASSERT_EQ(FeatureBitboardUtil::getBitboard(Features.get(1)),
                        nshogi::core::internal::bitboard::Bitboard::AllBB());
+    }
+
+    for (std::size_t I = 0; I < Features.size(); ++I) {
+        const auto Copy = nshogi::ml::FeatureBitboard(Features.get(I));
+        TEST_ASSERT_TRUE(Features.get(I) == Copy);
     }
 }
 
@@ -191,6 +195,11 @@ void checkFeatureTypeSmallStand(const nshogi::core::State& State,
         nshogi::ml::FeatureType::FT_MyStandPawn2,
         nshogi::ml::FeatureType::FT_MyStandPawn3,
         nshogi::ml::FeatureType::FT_MyStandPawn4,
+        nshogi::ml::FeatureType::FT_MyStandPawn5,
+        nshogi::ml::FeatureType::FT_MyStandPawn6,
+        nshogi::ml::FeatureType::FT_MyStandPawn7,
+        nshogi::ml::FeatureType::FT_MyStandPawn8,
+        nshogi::ml::FeatureType::FT_MyStandPawn9,
         nshogi::ml::FeatureType::FT_MyStandLance1,
         nshogi::ml::FeatureType::FT_MyStandLance2,
         nshogi::ml::FeatureType::FT_MyStandLance3,
@@ -211,6 +220,11 @@ void checkFeatureTypeSmallStand(const nshogi::core::State& State,
         nshogi::ml::FeatureType::FT_OpStandPawn2,
         nshogi::ml::FeatureType::FT_OpStandPawn3,
         nshogi::ml::FeatureType::FT_OpStandPawn4,
+        nshogi::ml::FeatureType::FT_OpStandPawn5,
+        nshogi::ml::FeatureType::FT_OpStandPawn6,
+        nshogi::ml::FeatureType::FT_OpStandPawn7,
+        nshogi::ml::FeatureType::FT_OpStandPawn8,
+        nshogi::ml::FeatureType::FT_OpStandPawn9,
         nshogi::ml::FeatureType::FT_OpStandLance1,
         nshogi::ml::FeatureType::FT_OpStandLance2,
         nshogi::ml::FeatureType::FT_OpStandLance3,
@@ -236,7 +250,8 @@ void checkFeatureTypeSmallStand(const nshogi::core::State& State,
              {nshogi::core::PTK_Pawn, nshogi::core::PTK_Lance,
               nshogi::core::PTK_Knight, nshogi::core::PTK_Silver,
               nshogi::core::PTK_Gold}) {
-            for (uint8_t Count = 1; Count <= 4; ++Count) {
+            const uint8_t CountMax = (Type == nshogi::core::PieceTypeKind::PTK_Pawn) ? 9 : 4;
+            for (uint8_t Count = 1; Count <= CountMax; ++Count) {
                 if (State.getPosition().getStandCount(C, Type) >= Count) {
                     TEST_ASSERT_EQ(Features.get(I).getValue(), 1.0f);
                     TEST_ASSERT_EQ(
@@ -262,6 +277,11 @@ void checkFeatureTypeSmallStandRuntime(
          nshogi::ml::FeatureType::FT_MyStandPawn2,
          nshogi::ml::FeatureType::FT_MyStandPawn3,
          nshogi::ml::FeatureType::FT_MyStandPawn4,
+         nshogi::ml::FeatureType::FT_MyStandPawn5,
+         nshogi::ml::FeatureType::FT_MyStandPawn6,
+         nshogi::ml::FeatureType::FT_MyStandPawn7,
+         nshogi::ml::FeatureType::FT_MyStandPawn8,
+         nshogi::ml::FeatureType::FT_MyStandPawn9,
          nshogi::ml::FeatureType::FT_MyStandLance1,
          nshogi::ml::FeatureType::FT_MyStandLance2,
          nshogi::ml::FeatureType::FT_MyStandLance3,
@@ -282,6 +302,11 @@ void checkFeatureTypeSmallStandRuntime(
          nshogi::ml::FeatureType::FT_OpStandPawn2,
          nshogi::ml::FeatureType::FT_OpStandPawn3,
          nshogi::ml::FeatureType::FT_OpStandPawn4,
+         nshogi::ml::FeatureType::FT_OpStandPawn5,
+         nshogi::ml::FeatureType::FT_OpStandPawn6,
+         nshogi::ml::FeatureType::FT_OpStandPawn7,
+         nshogi::ml::FeatureType::FT_OpStandPawn8,
+         nshogi::ml::FeatureType::FT_OpStandPawn9,
          nshogi::ml::FeatureType::FT_OpStandLance1,
          nshogi::ml::FeatureType::FT_OpStandLance2,
          nshogi::ml::FeatureType::FT_OpStandLance3,
@@ -307,7 +332,8 @@ void checkFeatureTypeSmallStandRuntime(
              {nshogi::core::PTK_Pawn, nshogi::core::PTK_Lance,
               nshogi::core::PTK_Knight, nshogi::core::PTK_Silver,
               nshogi::core::PTK_Gold}) {
-            for (uint8_t Count = 1; Count <= 4; ++Count) {
+            const uint8_t CountMax = (Type == nshogi::core::PieceTypeKind::PTK_Pawn) ? 9 : 4;
+            for (uint8_t Count = 1; Count <= CountMax; ++Count) {
                 if (State.getPosition().getStandCount(C, Type) >= Count) {
                     TEST_ASSERT_EQ(Features.get(I).getValue(), 1.0f);
                     TEST_ASSERT_EQ(
@@ -1217,4 +1243,31 @@ TEST(ML, SimpleTeacherWinnerWhite) {
 TEST(ML, SimpleTeacherEqualsItself) {
     nshogi::ml::SimpleTeacher SimpleTeacher;
     TEST_ASSERT_TRUE(SimpleTeacher.equals(SimpleTeacher));
+}
+
+TEST(ML, SimpleTeacherSaveAndLoad) {
+    nshogi::ml::SimpleTeacher T1;
+
+    const int N = 100;
+
+    const std::string Path = std::filesystem::temp_directory_path().string() +
+                             "/simple_teacher_test.bin";
+
+    for (int I = 0; I < N; ++I) {
+        T1.corruptMyself();
+
+        {
+            std::ofstream Ofs(Path, std::ios::out | std::ios::binary);
+            nshogi::io::file::save(Ofs, T1);
+        }
+
+        {
+            std::ifstream Ifs(Path, std::ios::in | std::ios::binary);
+
+            auto T2 = nshogi::io::file::load<nshogi::ml::SimpleTeacher>(Ifs);
+
+            TEST_ASSERT_TRUE(T1.equals(T2));
+            TEST_ASSERT_TRUE(T2.equals(T1));
+        }
+    }
 }

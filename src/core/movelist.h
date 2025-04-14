@@ -12,7 +12,6 @@
 
 #include "types.h"
 #include <cstddef>
-#include <initializer_list>
 
 namespace nshogi {
 namespace core {
@@ -30,16 +29,6 @@ struct MoveList {
     MoveList(const MoveList&) = delete;
     MoveList& operator=(const MoveList&) = delete;
     MoveList& operator=(MoveList&&) = delete;
-
-    MoveList(std::initializer_list<Move32> Ms) {
-        Move32* Head = Moves;
-
-        for (const auto& M : Ms) {
-            *Head++ = M;
-        }
-
-        Tail = Head;
-    }
 
     inline const Move32* begin() const {
         return Moves;

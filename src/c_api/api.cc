@@ -16,7 +16,6 @@
 #include "../core/types.h"
 #include "../core/state.h"
 #include "../core/initializer.h"
-#include "../ml/common.h"
 #include "../io/sfen.h"
 
 using namespace nshogi;
@@ -44,12 +43,6 @@ int apiIsDroppingPawn(nshogi_move_t CMove) {
     return Move.drop() && Move.pieceType() == core::PTK_Pawn;
 }
 
-int apiMoveToIndex(const nshogi_state_t* CState, nshogi_move_t CMove) {
-    const core::State* State = reinterpret_cast<const core::State*>(CState);
-    core::Move32 Move = core::Move32::fromValue(CMove);
-    return static_cast<int>(ml::getMoveIndex(State->getSideToMove(), Move));
-}
-
 nshogi_move_t apiWinDeclarationMove() {
     core::Move32 Move = core::Move32::MoveWin();
     return static_cast<nshogi_move_t>(Move.value());
@@ -72,7 +65,6 @@ nshogi_api_t* nshogiApi(void) {
         Api.ioApi = ioApiImpl;
 
         Api.isDroppingPawn = apiIsDroppingPawn;
-        Api.moveToIndex = apiMoveToIndex;
         Api.winDeclarationMove = apiWinDeclarationMove;
 
         Initialized = true;

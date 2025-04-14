@@ -94,7 +94,8 @@ TEST_SOURCES :=                         \
 	src/test/test_sfen.cc           \
 	src/test/test_huffman.cc     	\
 	src/test/test_solver.cc		\
-	src/test/test_ml.cc
+	src/test/test_ml.cc             \
+    src/test/test_capi.cc
 
 BENCH_SOURCES :=                          \
 	src/bench/bench_main.cc           \

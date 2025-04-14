@@ -23,6 +23,12 @@ nshogi_state_t* ioApiCreateStateFromSfen(const char* Sfen) {
     return reinterpret_cast<nshogi_state_t*>(State);
 }
 
+nshogi_move_t ioApiCreateMoveFromSfen(const nshogi_state_t* CState, const char* CSfen) {
+    const core::State* State = reinterpret_cast<const core::State*>(CState);
+    core::Move32 Move = io::sfen::sfenToMove32(State->getPosition(), CSfen);
+    return static_cast<nshogi_move_t>(Move.value());
+}
+
 char* ioApiMoveToSfen(nshogi_move_t CMove) {
     core::Move32 Move = core::Move32::fromValue(CMove);
     std::string Sfen = io::sfen::move32ToSfen(Move);
@@ -62,6 +68,7 @@ nshogi_io_api_t* c_api::io::getApi() {
 
     if (!Initialized) {
         Api.createStateFromSfen = ioApiCreateStateFromSfen;
+        Api.createMoveFromSfen = ioApiCreateMoveFromSfen;
         Api.moveToSfen = ioApiMoveToSfen;
         Api.stateToSfen = ioApiStateToSfen;
         Api.positionToSfen = ioApiPositionToSfen;

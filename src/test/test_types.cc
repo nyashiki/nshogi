@@ -526,11 +526,13 @@ TEST(Types, SpecialMove) {
     using namespace nshogi::core;
 
     TEST_ASSERT_TRUE(Move32::MoveNone().isNone());
-    TEST_ASSERT_FALSE(Move32::MoveNone().isInvalid());
     TEST_ASSERT_TRUE(Move32::MoveInvalid().isInvalid());
-    TEST_ASSERT_FALSE(Move32::MoveInvalid().isNone());
+    TEST_ASSERT_TRUE(Move32::MoveWin().isWin());
     TEST_ASSERT_TRUE(Move16::MoveNone().isNone());
-    TEST_ASSERT_FALSE(Move16::MoveNone().isInvalid());
     TEST_ASSERT_TRUE(Move16::MoveInvalid().isInvalid());
+    TEST_ASSERT_TRUE(Move16::MoveWin().isWin());
+    TEST_ASSERT_FALSE(Move32::MoveNone().isInvalid());
+    TEST_ASSERT_FALSE(Move32::MoveInvalid().isNone());
+    TEST_ASSERT_FALSE(Move16::MoveNone().isInvalid());
     TEST_ASSERT_FALSE(Move16::MoveInvalid().isNone());
 }

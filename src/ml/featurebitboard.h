@@ -37,16 +37,20 @@ struct alignas(16) FeatureBitboard {
         return *this;
     }
 
+    inline const char* data() const {
+        return reinterpret_cast<const char*>(C);
+    }
+
+    bool operator==(const FeatureBitboard& FB) const {
+        return std::memcmp(data(), FB.data(), sizeof(FeatureBitboard)) == 0;
+    }
+
     float getValue() const {
         return F[3];
     }
 
     bool isRotated() const {
         return C[11];
-    }
-
-    const char* data() const {
-        return reinterpret_cast<const char*>(C);
     }
 
     template <core::IterateOrder Order>

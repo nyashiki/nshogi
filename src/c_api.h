@@ -218,10 +218,12 @@ typedef struct nshogi_state_api {
 
 typedef struct nshogi_ml_api {
     void (*makeFeatureVector)(float* dest, const nshogi_state_t*, const nshogi_state_config_t*, const nshogi_feature_type_t*, int num_features);
+    int (*moveToIndex)(const nshogi_state_t* state, nshogi_move_t move);
 } nshogi_ml_api_t;
 
 typedef struct nshogi_io_api {
     nshogi_state_t* (*createStateFromSfen)(const char* sfen);
+    nshogi_move_t (*createMoveFromSfen)(const nshogi_state_t* state, const char* sfen);
     char* (*moveToSfen)(nshogi_move_t move);
     char* (*stateToSfen)(const nshogi_state_t* state);
     char* (*positionToSfen)(const nshogi_position_t* state);
@@ -235,7 +237,6 @@ typedef struct nshogi_api {
 
     // Utilities.
     int (*isDroppingPawn)(nshogi_move_t move);
-    int (*moveToIndex)(const nshogi_state_t* state, nshogi_move_t move);
     nshogi_move_t (*winDeclarationMove)(void);
 } nshogi_api_t;
 

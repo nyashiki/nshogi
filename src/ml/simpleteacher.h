@@ -37,6 +37,11 @@ struct SimpleTeacher {
 
     bool equals(const SimpleTeacher&) const;
 
+    /// Generate completely random noisy data.
+    /// This function is for test.
+    [[maybe_unused]]
+    void corruptMyself();
+
  protected:
     // State.
     core::HuffmanCode HuffmanCode;

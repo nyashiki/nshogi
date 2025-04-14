@@ -47,9 +47,13 @@ void testRecomputeHelper(const nshogi::core::State& State) {
 
     TEST_ASSERT_EQ(Adapter->getKingSquare<nshogi::core::Black>(),
                    DummyAdapter->getKingSquare<nshogi::core::Black>());
+    TEST_ASSERT_EQ(Adapter->getKingSquare<nshogi::core::Black>(),
+                   State.getKingSquare(nshogi::core::Black));
 
     TEST_ASSERT_EQ(Adapter->getKingSquare<nshogi::core::White>(),
                    DummyAdapter->getKingSquare<nshogi::core::White>());
+    TEST_ASSERT_EQ(Adapter->getKingSquare<nshogi::core::White>(),
+                   State.getKingSquare(nshogi::core::White));
 
     TEST_ASSERT_EQ(
         Adapter->getDefendingOpponentSliderBB<nshogi::core::Black>(),
@@ -144,18 +148,15 @@ void testPieceScore(const nshogi::core::State& S, uint8_t BlackScore,
         Adapter->computePieceScore<nshogi::core::Black>(5, 1, false);
     const uint8_t WhiteScoreComputed =
         Adapter->computePieceScore<nshogi::core::White>(5, 1, false);
-
-    if (BlackScoreComputed != BlackScore) {
-        std::cout << (int)BlackScoreComputed << ", " << (int)BlackScore
-                  << std::endl;
-    }
-    if (WhiteScoreComputed != WhiteScore) {
-        std::cout << (int)WhiteScoreComputed << ", " << (int)WhiteScore
-                  << std::endl;
-    }
+    const uint8_t BlackScoreComputed2 =
+        S.computePieceScore(nshogi::core::Black, 5, 1, false);
+    const uint8_t WhiteScoreComputed2 =
+        S.computePieceScore(nshogi::core::White, 5, 1, false);
 
     TEST_ASSERT_EQ(BlackScoreComputed, BlackScore);
     TEST_ASSERT_EQ(WhiteScoreComputed, WhiteScore);
+    TEST_ASSERT_EQ(BlackScoreComputed2, BlackScore);
+    TEST_ASSERT_EQ(WhiteScoreComputed2, WhiteScore);
 }
 
 void testEntryingScore(const nshogi::core::State& S, uint8_t BlackScore,

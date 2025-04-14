@@ -9,6 +9,7 @@
 
 #include "ml.h"
 
+#include "../ml/common.h"
 #include "../ml/featuretype.h"
 #include "../ml/featurestack.h"
 
@@ -37,6 +38,12 @@ void mlApiMakeFeatureVector(
     FSR.extract<core::IterateOrder::ESWN>(Dest);
 }
 
+int mlApiMoveToIndex(const nshogi_state_t* CState, nshogi_move_t CMove) {
+    const core::State* State = reinterpret_cast<const core::State*>(CState);
+    core::Move32 Move = core::Move32::fromValue(CMove);
+    return static_cast<int>(ml::getMoveIndex(State->getSideToMove(), Move));
+}
+
 } // namespace
 
 nshogi_ml_api_t* c_api::ml::getApi() {
@@ -45,6 +52,7 @@ nshogi_ml_api_t* c_api::ml::getApi() {
 
     if (!Initialized) {
         Api.makeFeatureVector = mlApiMakeFeatureVector;
+        Api.moveToIndex = mlApiMoveToIndex;
 
         Initialized = true;
     }
