@@ -16,10 +16,10 @@
 #include <cstdint>
 #include <functional>
 #include <iostream>
+#include <source_location>
 #include <sstream>
 #include <stdexcept>
 #include <string>
-#include <source_location>
 #include <type_traits>
 #include <vector>
 
@@ -163,9 +163,8 @@ class TestBody {
             std::source_location Loc = std::source_location::current();        \
             Oss << "Test failed: " << #Actual << " == " << #Expected           \
                 << std::endl;                                                  \
-            Oss << "In function " << Loc.function_name()                       \
-                << " at " << Loc.file_name()                                   \
-                << " line " << Loc.line() << std::endl;                        \
+            Oss << "In function " << Loc.function_name() << " at "             \
+                << Loc.file_name() << " line " << Loc.line() << std::endl;     \
             throw std::runtime_error(Oss.str());                               \
         }                                                                      \
     } while (false)
@@ -179,9 +178,8 @@ class TestBody {
             std::source_location Loc = std::source_location::current();        \
             Oss << "Test failed: " << #Actual << " != " << #Expected           \
                 << std::endl;                                                  \
-            Oss << "In function " << Loc.function_name()                       \
-                << " at " << Loc.file_name()                                   \
-                << " line " << Loc.line() << std::endl;                        \
+            Oss << "In function " << Loc.function_name() << " at "             \
+                << Loc.file_name() << " line " << Loc.line() << std::endl;     \
             throw std::runtime_error(Oss.str());                               \
         }                                                                      \
     } while (false)
@@ -193,9 +191,8 @@ class TestBody {
         Oss << "Test failed: " << #Actual << " == " << #Expected << "\n"       \
             << "    Expected: " << (Expected) << "\n"                          \
             << "    Actual: " << (Actual) << std::endl;                        \
-        Oss << "In function " << Loc.function_name()                           \
-            << " at " << Loc.file_name()                                       \
-            << " line " << Loc.line() << std::endl;                            \
+        Oss << "In function " << Loc.function_name() << " at "                 \
+            << Loc.file_name() << " line " << Loc.line() << std::endl;         \
         throw std::runtime_error(Oss.str());                                   \
     }
 
@@ -203,11 +200,10 @@ class TestBody {
     if (!(Condition)) {                                                        \
         std::ostringstream Oss;                                                \
         std::source_location Loc = std::source_location::current();            \
-        Oss << "Test failed:\n    Expected " << #Condition                     \
-            << " is true." << std::endl;                                       \
-        Oss << "In function " << Loc.function_name()                           \
-            << " at " << Loc.file_name()                                       \
-            << " line " << Loc.line() << std::endl;                            \
+        Oss << "Test failed:\n    Expected " << #Condition << " is true."      \
+            << std::endl;                                                      \
+        Oss << "In function " << Loc.function_name() << " at "                 \
+            << Loc.file_name() << " line " << Loc.line() << std::endl;         \
         throw std::runtime_error(Oss.str());                                   \
     }
 
@@ -215,11 +211,10 @@ class TestBody {
     if (Condition) {                                                           \
         std::ostringstream Oss;                                                \
         std::source_location Loc = std::source_location::current();            \
-        Oss << "Test failed:\n    Expected " << #Condition                     \
-            << " is false." << std::endl;                                      \
-        Oss << "In function " << Loc.function_name()                           \
-            << " at " << Loc.file_name()                                       \
-            << " line " << Loc.line() << std::endl;                            \
+        Oss << "Test failed:\n    Expected " << #Condition << " is false."     \
+            << std::endl;                                                      \
+        Oss << "In function " << Loc.function_name() << " at "                 \
+            << Loc.file_name() << " line " << Loc.line() << std::endl;         \
         throw std::runtime_error(Oss.str());                                   \
     }
 
@@ -230,11 +225,9 @@ class TestBody {
         Oss << "Test failed: " << "\n"                                         \
             << "    Expected: " << (Expected) << "\n"                          \
             << "    Actual: " << (Actual) << "\n"                              \
-            << "    Tolerance: " << (Tolerance)                                \
-            << std::endl;                                                      \
-        Oss << "In function " << Loc.function_name()                           \
-            << " at " << Loc.file_name()                                       \
-            << " line " << Loc.line() << std::endl;                            \
+            << "    Tolerance: " << (Tolerance) << std::endl;                  \
+        Oss << "In function " << Loc.function_name() << " at "                 \
+            << Loc.file_name() << " line " << Loc.line() << std::endl;         \
         throw std::runtime_error(Oss.str());                                   \
     }
 

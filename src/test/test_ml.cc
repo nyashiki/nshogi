@@ -14,8 +14,8 @@
 #include "../core/state.h"
 #include "../core/statebuilder.h"
 #include "../core/stateconfig.h"
-#include "../io/sfen.h"
 #include "../io/file.h"
+#include "../io/sfen.h"
 #include "../ml/azteacher.h"
 #include "../ml/featurestack.h"
 #include "../ml/internal/featurebitboardutil.h"
@@ -250,7 +250,8 @@ void checkFeatureTypeSmallStand(const nshogi::core::State& State,
              {nshogi::core::PTK_Pawn, nshogi::core::PTK_Lance,
               nshogi::core::PTK_Knight, nshogi::core::PTK_Silver,
               nshogi::core::PTK_Gold}) {
-            const uint8_t CountMax = (Type == nshogi::core::PieceTypeKind::PTK_Pawn) ? 9 : 4;
+            const uint8_t CountMax =
+                (Type == nshogi::core::PieceTypeKind::PTK_Pawn) ? 9 : 4;
             for (uint8_t Count = 1; Count <= CountMax; ++Count) {
                 if (State.getPosition().getStandCount(C, Type) >= Count) {
                     TEST_ASSERT_EQ(Features.get(I).getValue(), 1.0f);
@@ -332,7 +333,8 @@ void checkFeatureTypeSmallStandRuntime(
              {nshogi::core::PTK_Pawn, nshogi::core::PTK_Lance,
               nshogi::core::PTK_Knight, nshogi::core::PTK_Silver,
               nshogi::core::PTK_Gold}) {
-            const uint8_t CountMax = (Type == nshogi::core::PieceTypeKind::PTK_Pawn) ? 9 : 4;
+            const uint8_t CountMax =
+                (Type == nshogi::core::PieceTypeKind::PTK_Pawn) ? 9 : 4;
             for (uint8_t Count = 1; Count <= CountMax; ++Count) {
                 if (State.getPosition().getStandCount(C, Type) >= Count) {
                     TEST_ASSERT_EQ(Features.get(I).getValue(), 1.0f);

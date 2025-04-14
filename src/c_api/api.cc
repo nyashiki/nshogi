@@ -8,14 +8,14 @@
 //
 
 #include "../c_api.h"
+#include "io.h"
+#include "ml.h"
 #include "position.h"
 #include "state.h"
-#include "ml.h"
-#include "io.h"
 
-#include "../core/types.h"
-#include "../core/state.h"
 #include "../core/initializer.h"
+#include "../core/state.h"
+#include "../core/types.h"
 #include "../io/sfen.h"
 
 using namespace nshogi;

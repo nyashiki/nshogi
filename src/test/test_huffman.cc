@@ -86,11 +86,10 @@ TEST(Huffman, Constructor) {
             nshogi::core::HuffmanCode HC1 =
                 nshogi::core::HuffmanCode::encode(State.getPosition());
             nshogi::core::HuffmanCode HC2(HC1);
-            nshogi::core::HuffmanCode HC3 =
-                nshogi::core::HuffmanCode::encode(
-                        State.getPosition(),
-                        State.getKingSquare(nshogi::core::Color::Black),
-                        State.getKingSquare(nshogi::core::Color::White));
+            nshogi::core::HuffmanCode HC3 = nshogi::core::HuffmanCode::encode(
+                State.getPosition(),
+                State.getKingSquare(nshogi::core::Color::Black),
+                State.getKingSquare(nshogi::core::Color::White));
 
             TEST_ASSERT_EQ(HC1, HC2);
             TEST_ASSERT_EQ(HC1, HC3);

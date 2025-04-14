@@ -9,8 +9,8 @@
 
 #include "state.h"
 
-#include "../core/state.h"
 #include "../core/movegenerator.h"
+#include "../core/state.h"
 #include "../io/sfen.h"
 
 using namespace nshogi;
@@ -27,12 +27,13 @@ nshogi_state_t* stateApiClone(const nshogi_state_t* CState) {
     return reinterpret_cast<nshogi_state_t*>(new core::State(State->clone()));
 }
 
-int stateApiGenerateMoves(const nshogi_state_t* CState, int WilyPromote, nshogi_move_t* Moves) {
+int stateApiGenerateMoves(const nshogi_state_t* CState, int WilyPromote,
+                          nshogi_move_t* Moves) {
     const core::State* State = reinterpret_cast<const core::State*>(CState);
 
-    auto generateLegalMoves = (WilyPromote)
-        ? core::MoveGenerator::generateLegalMoves<true>
-        : core::MoveGenerator::generateLegalMoves<false>;
+    auto generateLegalMoves =
+        (WilyPromote) ? core::MoveGenerator::generateLegalMoves<true>
+                      : core::MoveGenerator::generateLegalMoves<false>;
 
     const core::MoveList MoveList = generateLegalMoves(*State);
 
@@ -75,9 +76,11 @@ const nshogi_position_t* stateApiGetPosition(const nshogi_state_t* CState) {
     return reinterpret_cast<const nshogi_position_t*>(&State->getPosition());
 }
 
-const nshogi_position_t* stateApiGetInitialPosition(const nshogi_state_t* CState) {
+const nshogi_position_t*
+stateApiGetInitialPosition(const nshogi_state_t* CState) {
     const core::State* State = reinterpret_cast<const core::State*>(CState);
-    return reinterpret_cast<const nshogi_position_t*>(&State->getInitialPosition());
+    return reinterpret_cast<const nshogi_position_t*>(
+        &State->getInitialPosition());
 }
 
 int stateApiCanDeclare(const nshogi_state_t* CState) {
@@ -85,7 +88,8 @@ int stateApiCanDeclare(const nshogi_state_t* CState) {
     return static_cast<int>(State->canDeclare());
 }
 
-nshogi_move_t stateApiGetHistoryMove(const nshogi_state_t* CState, uint16_t Ply) {
+nshogi_move_t stateApiGetHistoryMove(const nshogi_state_t* CState,
+                                     uint16_t Ply) {
     const core::State* State = reinterpret_cast<const core::State*>(CState);
     return static_cast<nshogi_move_t>(State->getHistoryMove(Ply).value());
 }
@@ -111,37 +115,46 @@ nshogi_state_config_t* stateApiCreateStateConfig(void) {
 }
 
 void stateApiDestroyStateConfig(nshogi_state_config_t* CStateConfig) {
-    core::StateConfig* StateConfig = reinterpret_cast<core::StateConfig*>(CStateConfig);
+    core::StateConfig* StateConfig =
+        reinterpret_cast<core::StateConfig*>(CStateConfig);
     delete StateConfig;
 }
 
 uint16_t stateApiGetMaxPly(const nshogi_state_config_t* CStateConfig) {
-    const core::StateConfig* StateConfig = reinterpret_cast<const core::StateConfig*>(CStateConfig);
+    const core::StateConfig* StateConfig =
+        reinterpret_cast<const core::StateConfig*>(CStateConfig);
     return StateConfig->MaxPly;
 }
 
 float stateApiGetBlackDrawValue(const nshogi_state_config_t* CStateConfig) {
-    const core::StateConfig* StateConfig = reinterpret_cast<const core::StateConfig*>(CStateConfig);
+    const core::StateConfig* StateConfig =
+        reinterpret_cast<const core::StateConfig*>(CStateConfig);
     return StateConfig->BlackDrawValue;
 }
 
 float stateApiGetWhiteDrawValue(const nshogi_state_config_t* CStateConfig) {
-    const core::StateConfig* StateConfig = reinterpret_cast<const core::StateConfig*>(CStateConfig);
+    const core::StateConfig* StateConfig =
+        reinterpret_cast<const core::StateConfig*>(CStateConfig);
     return StateConfig->WhiteDrawValue;
 }
 
 void stateApiSetMaxPly(nshogi_state_config_t* CStateConfig, uint16_t MaxPly) {
-    core::StateConfig* StateConfig = reinterpret_cast<core::StateConfig*>(CStateConfig);
+    core::StateConfig* StateConfig =
+        reinterpret_cast<core::StateConfig*>(CStateConfig);
     StateConfig->MaxPly = MaxPly;
 }
 
-void stateApiSetBlackDrawValue(nshogi_state_config_t* CStateConfig, float Value) {
-    core::StateConfig* StateConfig = reinterpret_cast<core::StateConfig*>(CStateConfig);
+void stateApiSetBlackDrawValue(nshogi_state_config_t* CStateConfig,
+                               float Value) {
+    core::StateConfig* StateConfig =
+        reinterpret_cast<core::StateConfig*>(CStateConfig);
     StateConfig->BlackDrawValue = Value;
 }
 
-void stateApiSetWhiteDrawValue(nshogi_state_config_t* CStateConfig, float Value) {
-    core::StateConfig* StateConfig = reinterpret_cast<core::StateConfig*>(CStateConfig);
+void stateApiSetWhiteDrawValue(nshogi_state_config_t* CStateConfig,
+                               float Value) {
+    core::StateConfig* StateConfig =
+        reinterpret_cast<core::StateConfig*>(CStateConfig);
     StateConfig->WhiteDrawValue = Value;
 }
 

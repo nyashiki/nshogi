@@ -11,8 +11,8 @@
 #include "../core/positionbuilder.h"
 #include "../core/statebuilder.h"
 
-#include <random>
 #include <cstring>
+#include <random>
 
 namespace nshogi {
 namespace ml {

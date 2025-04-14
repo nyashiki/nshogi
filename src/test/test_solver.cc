@@ -234,9 +234,12 @@ TEST(Mate1Ply, ProblemsColorTemplate) {
     std::string Line;
     while (std::getline(Ifs, Line)) {
         auto State = nshogi::io::sfen::StateBuilder::newState(Line);
-        auto CheckmateMove = State.getSideToMove() == nshogi::core::Color::Black
-            ? nshogi::solver::mate1ply::solve<nshogi::core::Color::Black>(State)
-            : nshogi::solver::mate1ply::solve<nshogi::core::Color::White>(State);
+        auto CheckmateMove =
+            State.getSideToMove() == nshogi::core::Color::Black
+                ? nshogi::solver::mate1ply::solve<nshogi::core::Color::Black>(
+                      State)
+                : nshogi::solver::mate1ply::solve<nshogi::core::Color::White>(
+                      State);
 
         TEST_ASSERT_FALSE(CheckmateMove.isNone());
     }
@@ -248,9 +251,12 @@ TEST(Mate1Ply, NoMatesColorTemplate) {
     std::string Line;
     while (std::getline(Ifs, Line)) {
         auto State = nshogi::io::sfen::StateBuilder::newState(Line);
-        auto CheckmateMove = State.getSideToMove() == nshogi::core::Color::Black
-            ? nshogi::solver::mate1ply::solve<nshogi::core::Color::Black>(State)
-            : nshogi::solver::mate1ply::solve<nshogi::core::Color::White>(State);
+        auto CheckmateMove =
+            State.getSideToMove() == nshogi::core::Color::Black
+                ? nshogi::solver::mate1ply::solve<nshogi::core::Color::Black>(
+                      State)
+                : nshogi::solver::mate1ply::solve<nshogi::core::Color::White>(
+                      State);
 
         TEST_ASSERT_TRUE(CheckmateMove.isNone());
     }
