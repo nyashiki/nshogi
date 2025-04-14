@@ -490,7 +490,7 @@ TEST(CAPI, WinDeclarationMove) {
 }
 
 TEST(CAPI, MLFeatureVector) {
-    float* Dest = static_cast<float*>(malloc(3 * 9 * 9 * sizeof(float)));
+    float* Dest = static_cast<float*>(malloc(4 * 9 * 9 * sizeof(float)));
 
     nshogi_feature_type_t Features[] = {
         NSHOGI_FT_BLACK,
