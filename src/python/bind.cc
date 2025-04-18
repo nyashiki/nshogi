@@ -29,6 +29,7 @@
 #include "../ml/internal/featurebitboardutil.h"
 #include "../ml/teacherloader.h"
 #include "../ml/teacherwriter.h"
+#include "../ml/utils.h"
 
 #include <string>
 #include <vector>
@@ -611,14 +612,7 @@ PYBIND11_MODULE(nshogi, Module) {
     pybind11::class_<
         nshogi::ml::TeacherLoaderForFixedSizeTeacher<nshogi::ml::AZTeacher>>(
         MLModule, "AZTeacherLoader")
-        .def(pybind11::init<const std::string&>())
-        .def("shuffle",
-             [](const nshogi::ml::TeacherLoaderForFixedSizeTeacher<
-                    nshogi::ml::AZTeacher>& Loader,
-                const std::string& OutputPath, uint64_t Seed) {
-                 nshogi::ml::ThreadsafeTeacherWriter<
-                     nshogi::ml::AZTeacher>::shuffle(Loader, OutputPath, Seed);
-             })
+        .def(pybind11::init<const std::string&, bool>(), pybind11::arg("path"), pybind11::arg("shuffle"))
         .def("filter",
              [](const nshogi::ml::TeacherLoaderForFixedSizeTeacher<
                     nshogi::ml::AZTeacher>& Loader,
@@ -642,15 +636,7 @@ PYBIND11_MODULE(nshogi, Module) {
 
     pybind11::class_<nshogi::ml::TeacherLoaderForFixedSizeTeacher<
         nshogi::ml::SimpleTeacher>>(MLModule, "SimpleTeacherLoader")
-        .def(pybind11::init<const std::string&>())
-        .def("shuffle",
-             [](const nshogi::ml::TeacherLoaderForFixedSizeTeacher<
-                    nshogi::ml::SimpleTeacher>& Loader,
-                const std::string& OutputPath, uint64_t Seed) {
-                 nshogi::ml::ThreadsafeTeacherWriter<
-                     nshogi::ml::SimpleTeacher>::shuffle(Loader, OutputPath,
-                                                         Seed);
-             })
+        .def(pybind11::init<const std::string&, bool>(), pybind11::arg("path"), pybind11::arg("shuffle"))
         .def("__len__", &nshogi::ml::TeacherLoaderForFixedSizeTeacher<
                             nshogi::ml::SimpleTeacher>::size)
         .def("__getitem__", &nshogi::ml::TeacherLoaderForFixedSizeTeacher<
