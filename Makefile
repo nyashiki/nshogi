@@ -71,6 +71,7 @@ SOURCES :=                                 \
 	src/ml/simpleteacher.cc            \
 	src/ml/teacherloader.cc            \
 	src/ml/teacherwriter.cc            \
+    src/ml/utils.cc                    \
 	src/io/huffman.cc                  \
 	src/io/sfen.cc                     \
 	src/io/csa.cc                      \
