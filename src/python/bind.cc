@@ -356,7 +356,9 @@ PYBIND11_MODULE(nshogi, Module) {
         .value("OP_DECLARATION_SCORE",
                nshogi::ml::FeatureType::FT_OpDeclarationScore)
         .value("MY_PIECE_SCORE", nshogi::ml::FeatureType::FT_MyPieceScore)
-        .value("OP_PIECE_SCORE", nshogi::ml::FeatureType::FT_OpPieceScore);
+        .value("OP_PIECE_SCORE", nshogi::ml::FeatureType::FT_OpPieceScore)
+        .value("MY_ATTACK", nshogi::ml::FeatureType::FT_MyAttack)
+        .value("OP_ATTACK", nshogi::ml::FeatureType::FT_OpAttack);
 
     MLModule.def("move_to_index", (std::size_t(*)(nshogi::core::Color,
                                                   const nshogi::core::Move32)) &
