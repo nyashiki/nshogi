@@ -73,6 +73,10 @@ class StateImpl {
         return Helper.ColorBB[C] & Helper.TypeBB[Type];
     }
 
+    inline bitboard::Bitboard getBitboard(PieceTypeKind Type) const {
+        return Helper.TypeBB[Type];
+    }
+
     inline const bitboard::Bitboard getCheckerBB() const {
         return Helper.getCurrentStepHelper().CheckerBB;
     }

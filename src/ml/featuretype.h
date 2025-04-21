@@ -19,9 +19,11 @@ enum class FeatureType {
 
     FT_MyPawn, FT_MyLance, FT_MyKnight, FT_MySilver, FT_MyGold, FT_MyKing, FT_MyBishop, FT_MyRook,
     FT_MyProPawn, FT_MyProLance, FT_MyProKnight, FT_MyProSilver, FT_MyProBishop, FT_MyProRook,
+    FT_MyBishopAndProBishop, FT_MyRookAndProRook,
 
     FT_OpPawn, FT_OpLance, FT_OpKnight, FT_OpSilver, FT_OpGold, FT_OpKing, FT_OpBishop, FT_OpRook,
     FT_OpProPawn, FT_OpProLance, FT_OpProKnight, FT_OpProSilver, FT_OpProBishop, FT_OpProRook,
+    FT_OpBishopAndProBishop, FT_OpRookAndProRook,
 
     FT_MyStandPawn1,   FT_MyStandPawn2,   FT_MyStandPawn3,   FT_MyStandPawn4,
     FT_MyStandPawn5,   FT_MyStandPawn6,   FT_MyStandPawn7,   FT_MyStandPawn8, FT_MyStandPawn9,

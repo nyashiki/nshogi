@@ -184,6 +184,11 @@ struct FeatureStackComptime : FeatureStack {
             *FB = processPiece<C, C>(State, core::PTK_ProBishop);
         } else if constexpr (HeadType == FeatureType::FT_MyProRook) {
             *FB = processPiece<C, C>(State, core::PTK_ProRook);
+        } else if constexpr (HeadType == FeatureType::FT_MyBishopAndProBishop) {
+            *FB = processPiece<C, C>(State, core::PTK_Bishop,
+                                     core::PTK_ProBishop);
+        } else if constexpr (HeadType == FeatureType::FT_MyRookAndProRook) {
+            *FB = processPiece<C, C>(State, core::PTK_Rook, core::PTK_ProRook);
         } else if constexpr (HeadType == FeatureType::FT_OpPawn) {
             *FB = processPiece<C, ~C>(State, core::PTK_Pawn);
         } else if constexpr (HeadType == FeatureType::FT_OpLance) {
@@ -212,6 +217,11 @@ struct FeatureStackComptime : FeatureStack {
             *FB = processPiece<C, ~C>(State, core::PTK_ProBishop);
         } else if constexpr (HeadType == FeatureType::FT_OpProRook) {
             *FB = processPiece<C, ~C>(State, core::PTK_ProRook);
+        } else if constexpr (HeadType == FeatureType::FT_OpBishopAndProBishop) {
+            *FB = processPiece<C, ~C>(State, core::PTK_Bishop,
+                                      core::PTK_ProBishop);
+        } else if constexpr (HeadType == FeatureType::FT_OpRookAndProRook) {
+            *FB = processPiece<C, ~C>(State, core::PTK_Rook, core::PTK_ProRook);
         } else if constexpr (HeadType == FeatureType::FT_MyStandPawn1) {
             *FB = processStand<C>(State, core::PTK_Pawn, 1);
         } else if constexpr (HeadType == FeatureType::FT_MyStandPawn2) {

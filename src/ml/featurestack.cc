@@ -122,6 +122,17 @@ FeatureBitboard processPiece(const core::State& State,
         Adapter->getBitboard<PieceColor>(Type), 1, MyColor == core::White);
 }
 
+template <core::Color MyColor, core::Color PieceColor>
+FeatureBitboard processPiece(const core::State& State,
+                             core::PieceTypeKind Type1,
+                             core::PieceTypeKind Type2) {
+    core::internal::ImmutableStateAdapter Adapter(State);
+    return internal::FeatureBitboardUtil::makeFeatureBitboard(
+        (Adapter->getBitboard(Type1) | Adapter->getBitboard(Type2)) &
+            Adapter->getBitboard<PieceColor>(),
+        1, MyColor == core::White);
+}
+
 template FeatureBitboard
 processPiece<core::Black, core::Black>(const core::State& State,
                                        core::PieceTypeKind Type);
@@ -134,6 +145,23 @@ processPiece<core::White, core::Black>(const core::State& State,
 template FeatureBitboard
 processPiece<core::White, core::White>(const core::State& State,
                                        core::PieceTypeKind Type);
+
+template FeatureBitboard
+processPiece<core::Black, core::Black>(const core::State& State,
+                                       core::PieceTypeKind Type1,
+                                       core::PieceTypeKind Type2);
+template FeatureBitboard
+processPiece<core::Black, core::White>(const core::State& State,
+                                       core::PieceTypeKind Type1,
+                                       core::PieceTypeKind Type2);
+template FeatureBitboard
+processPiece<core::White, core::Black>(const core::State& State,
+                                       core::PieceTypeKind Type1,
+                                       core::PieceTypeKind Type2);
+template FeatureBitboard
+processPiece<core::White, core::White>(const core::State& State,
+                                       core::PieceTypeKind Type1,
+                                       core::PieceTypeKind Type2);
 
 template <core::Color MyColor>
 FeatureBitboard processStand(const core::State& State, core::PieceTypeKind Type,
@@ -275,6 +303,12 @@ void FeatureStackRuntime::process(const std::vector<FeatureType>& Types,
             Features[I] = processPiece<C, C>(State, core::PTK_ProBishop);
         } else if (Type == FeatureType::FT_MyProRook) {
             Features[I] = processPiece<C, C>(State, core::PTK_ProRook);
+        } else if (Type == FeatureType::FT_MyBishopAndProBishop) {
+            Features[I] = processPiece<C, C>(State, core::PTK_Bishop,
+                                             core::PTK_ProBishop);
+        } else if (Type == FeatureType::FT_MyRookAndProRook) {
+            Features[I] =
+                processPiece<C, C>(State, core::PTK_Rook, core::PTK_ProRook);
         } else if (Type == FeatureType::FT_OpPawn) {
             Features[I] = processPiece<C, ~C>(State, core::PTK_Pawn);
         } else if (Type == FeatureType::FT_OpLance) {
@@ -303,6 +337,12 @@ void FeatureStackRuntime::process(const std::vector<FeatureType>& Types,
             Features[I] = processPiece<C, ~C>(State, core::PTK_ProBishop);
         } else if (Type == FeatureType::FT_OpProRook) {
             Features[I] = processPiece<C, ~C>(State, core::PTK_ProRook);
+        } else if (Type == FeatureType::FT_OpBishopAndProBishop) {
+            Features[I] = processPiece<C, ~C>(State, core::PTK_Bishop,
+                                              core::PTK_ProBishop);
+        } else if (Type == FeatureType::FT_OpRookAndProRook) {
+            Features[I] =
+                processPiece<C, ~C>(State, core::PTK_Rook, core::PTK_ProRook);
         } else if (Type == FeatureType::FT_MyStandPawn1) {
             Features[I] = processStand<C>(State, core::PTK_Pawn, 1);
         } else if (Type == FeatureType::FT_MyStandPawn2) {
