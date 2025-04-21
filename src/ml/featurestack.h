@@ -185,7 +185,8 @@ struct FeatureStackComptime : FeatureStack {
         } else if constexpr (HeadType == FeatureType::FT_MyProRook) {
             *FB = processPiece<C, C>(State, core::PTK_ProRook);
         } else if constexpr (HeadType == FeatureType::FT_MyBishopAndProBishop) {
-            *FB = processPiece<C, C>(State, core::PTK_Bishop, core::PTK_ProBishop);
+            *FB = processPiece<C, C>(State, core::PTK_Bishop,
+                                     core::PTK_ProBishop);
         } else if constexpr (HeadType == FeatureType::FT_MyRookAndProRook) {
             *FB = processPiece<C, C>(State, core::PTK_Rook, core::PTK_ProRook);
         } else if constexpr (HeadType == FeatureType::FT_OpPawn) {
@@ -217,7 +218,8 @@ struct FeatureStackComptime : FeatureStack {
         } else if constexpr (HeadType == FeatureType::FT_OpProRook) {
             *FB = processPiece<C, ~C>(State, core::PTK_ProRook);
         } else if constexpr (HeadType == FeatureType::FT_OpBishopAndProBishop) {
-            *FB = processPiece<C, ~C>(State, core::PTK_Bishop, core::PTK_ProBishop);
+            *FB = processPiece<C, ~C>(State, core::PTK_Bishop,
+                                      core::PTK_ProBishop);
         } else if constexpr (HeadType == FeatureType::FT_OpRookAndProRook) {
             *FB = processPiece<C, ~C>(State, core::PTK_Rook, core::PTK_ProRook);
         } else if constexpr (HeadType == FeatureType::FT_MyStandPawn1) {
