@@ -1,5 +1,11 @@
 var NAVTREEINDEX1 =
 {
+"featuretype_8h.html#abce888ea1742cbf42378e26c43e4a125a155dbf81820d7b34fc295aae6638b75a":[2,0,0,3,7,0,32],
+"featuretype_8h.html#abce888ea1742cbf42378e26c43e4a125a168f866b25b23a0bf74c34eb29e61be9":[2,0,0,3,7,0,12],
+"featuretype_8h.html#abce888ea1742cbf42378e26c43e4a125a1b2fbb6afe1b66f9d468b4132d4ef214":[2,0,0,3,7,0,60],
+"featuretype_8h.html#abce888ea1742cbf42378e26c43e4a125a20f05da4e0cb0a3613ec1e6e93bc369c":[2,0,0,3,7,0,61],
+"featuretype_8h.html#abce888ea1742cbf42378e26c43e4a125a21e51b834d30937eea99838e3da66c5b":[2,0,0,3,7,0,6],
+"featuretype_8h.html#abce888ea1742cbf42378e26c43e4a125a22a204b45be936933bb0d53781dc5c64":[2,0,0,3,7,0,85],
 "featuretype_8h.html#abce888ea1742cbf42378e26c43e4a125a25b2a4ff7d1a930123d4efd762ac6315":[2,0,0,3,7,0,77],
 "featuretype_8h.html#abce888ea1742cbf42378e26c43e4a125a27ba952b12a475071bc88f867473d64f":[2,0,0,3,7,0,18],
 "featuretype_8h.html#abce888ea1742cbf42378e26c43e4a125a2bd9232268215ba8fb9080544f9f03cb":[2,0,0,3,7,0,33],
@@ -29,6 +35,7 @@ var NAVTREEINDEX1 =
 "featuretype_8h.html#abce888ea1742cbf42378e26c43e4a125a632e820e74c0ada283d94facb90b9fa0":[2,0,0,3,7,0,100],
 "featuretype_8h.html#abce888ea1742cbf42378e26c43e4a125a65b74e2fbc52d783b7ee1e9258505e45":[2,0,0,3,7,0,103],
 "featuretype_8h.html#abce888ea1742cbf42378e26c43e4a125a666203d628b7f0c72ed0f0f45e8a0a60":[2,0,0,3,7,0,41],
+"featuretype_8h.html#abce888ea1742cbf42378e26c43e4a125a68de3682a8562f10b331b0cb2c9999c6":[2,0,0,3,7,0,106],
 "featuretype_8h.html#abce888ea1742cbf42378e26c43e4a125a69bca96f7c52cce5f1578bea74fce2eb":[2,0,0,3,7,0,20],
 "featuretype_8h.html#abce888ea1742cbf42378e26c43e4a125a6a8331403395527d93e52ef361c5c505":[2,0,0,3,7,0,91],
 "featuretype_8h.html#abce888ea1742cbf42378e26c43e4a125a6b24dc6c1c890cfc7541266756ca9505":[2,0,0,3,7,0,15],
@@ -48,6 +55,7 @@ var NAVTREEINDEX1 =
 "featuretype_8h.html#abce888ea1742cbf42378e26c43e4a125a918d062be80bb5ce0a684e1abdfd95c1":[2,0,0,3,7,0,28],
 "featuretype_8h.html#abce888ea1742cbf42378e26c43e4a125a933fa0180e967d87b37383efbfaeb9e3":[2,0,0,3,7,0,46],
 "featuretype_8h.html#abce888ea1742cbf42378e26c43e4a125a95581a66fa586d715a6541f016679bfe":[2,0,0,3,7,0,27],
+"featuretype_8h.html#abce888ea1742cbf42378e26c43e4a125a9689fc9aeec55c0d11cb6abce2e8eae2":[2,0,0,3,7,0,107],
 "featuretype_8h.html#abce888ea1742cbf42378e26c43e4a125a96abb5ef41d90b9660d047af24d007f7":[2,0,0,3,7,0,81],
 "featuretype_8h.html#abce888ea1742cbf42378e26c43e4a125a9e4debdf2a4af5b27fda3926deb3dbf7":[2,0,0,3,7,0,3],
 "featuretype_8h.html#abce888ea1742cbf42378e26c43e4a125aa171dd0f4efd461f858b55c5f5d55a89":[2,0,0,3,7,0,51],
@@ -108,8 +116,8 @@ var NAVTREEINDEX1 =
 "file_8h.html#af8bce1f157dfca191ab61861e1c34f15":[2,0,0,2,3,4],
 "file_8h_source.html":[2,0,0,2,3],
 "files.html":[2,0],
-"functions.html":[1,3,0],
 "functions.html":[1,3,0,0],
+"functions.html":[1,3,0],
 "functions_b.html":[1,3,0,1],
 "functions_c.html":[1,3,0,2],
 "functions_d.html":[1,3,0,3],
@@ -241,13 +249,5 @@ var NAVTREEINDEX1 =
 "namespacenshogi_1_1core.html#a31bbefbdbc08642dd7fffa28c0533659af352878e66f01a049c2241ad02d9a078":[0,0,0,1,13,3],
 "namespacenshogi_1_1core.html#a37376703aa6edadf49ea2c9f77d24166":[0,0,0,1,48],
 "namespacenshogi_1_1core.html#a3a3a28df9648d41ae7f2de3efa82aa46":[0,0,0,1,30],
-"namespacenshogi_1_1core.html#a3cd6894f2fd23c50f27108dbd70782e0":[0,0,0,1,35],
-"namespacenshogi_1_1core.html#a4461c5e44e5d77c47e2172e73c92e0f6":[0,0,0,1,39],
-"namespacenshogi_1_1core.html#a45140d529f684dbeade9152df24d176a":[0,0,0,1,15],
-"namespacenshogi_1_1core.html#a45140d529f684dbeade9152df24d176aa22558995b6488213220bc5352e652b41":[0,0,0,1,15,1],
-"namespacenshogi_1_1core.html#a45140d529f684dbeade9152df24d176aa27769e6c945aba60dd0bd548088418d0":[0,0,0,1,15,3],
-"namespacenshogi_1_1core.html#a45140d529f684dbeade9152df24d176aa8134f6fb7e786d2daf0d0dbf45e9c789":[0,0,0,1,15,0],
-"namespacenshogi_1_1core.html#a45140d529f684dbeade9152df24d176aaa3b6c84423a5dbdaf821c76ff292a02f":[0,0,0,1,15,2],
-"namespacenshogi_1_1core.html#a48e95a20c4b8db53f6c955ddac0b0e12":[0,0,0,1,19],
-"namespacenshogi_1_1core.html#a48e95a20c4b8db53f6c955ddac0b0e12a07d49956a3e785e4ff2c7f55f5bb0b76":[0,0,0,1,19,9]
+"namespacenshogi_1_1core.html#a3cd6894f2fd23c50f27108dbd70782e0":[0,0,0,1,35]
 };

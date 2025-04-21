@@ -106,6 +106,8 @@ var featuretype_8h =
       [ "FT_MyDeclarationScore", "featuretype_8h.html#abce888ea1742cbf42378e26c43e4a125ade44003edbed35febe8c76473899eaca", null ],
       [ "FT_OpDeclarationScore", "featuretype_8h.html#abce888ea1742cbf42378e26c43e4a125a65b74e2fbc52d783b7ee1e9258505e45", null ],
       [ "FT_MyPieceScore", "featuretype_8h.html#abce888ea1742cbf42378e26c43e4a125aaa87113b4623cb7d8cf7cab09cedcf93", null ],
-      [ "FT_OpPieceScore", "featuretype_8h.html#abce888ea1742cbf42378e26c43e4a125abaa3ba0612be7af7a11f365907b5aa01", null ]
+      [ "FT_OpPieceScore", "featuretype_8h.html#abce888ea1742cbf42378e26c43e4a125abaa3ba0612be7af7a11f365907b5aa01", null ],
+      [ "FT_MyAttack", "featuretype_8h.html#abce888ea1742cbf42378e26c43e4a125a68de3682a8562f10b331b0cb2c9999c6", null ],
+      [ "FT_OpAttack", "featuretype_8h.html#abce888ea1742cbf42378e26c43e4a125a9689fc9aeec55c0d11cb6abce2e8eae2", null ]
     ] ]
 ];

@@ -266,6 +266,8 @@ Enumerations</h2></td></tr>
 , <br />
 &#160;&#160;<a class="el" href="namespacenshogi_1_1ml.html#abce888ea1742cbf42378e26c43e4a125aaa87113b4623cb7d8cf7cab09cedcf93">FT_MyPieceScore</a>
 , <a class="el" href="namespacenshogi_1_1ml.html#abce888ea1742cbf42378e26c43e4a125abaa3ba0612be7af7a11f365907b5aa01">FT_OpPieceScore</a>
+, <a class="el" href="namespacenshogi_1_1ml.html#abce888ea1742cbf42378e26c43e4a125a68de3682a8562f10b331b0cb2c9999c6">FT_MyAttack</a>
+, <a class="el" href="namespacenshogi_1_1ml.html#abce888ea1742cbf42378e26c43e4a125a9689fc9aeec55c0d11cb6abce2e8eae2">FT_OpAttack</a>
 <br />
  }</td></tr>
 <tr class="separator:abce888ea1742cbf42378e26c43e4a125"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -372,6 +374,17 @@ Functions</h2></td></tr>
 <tr class="separator:af6766577548e632485ec76ae795b7380"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:abba07768037609f494c2ff6a9b5fc0ab"><td class="memItemLeft" align="right" valign="top">template <a class="el" href="structnshogi_1_1ml_1_1FeatureBitboard.html">FeatureBitboard</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacenshogi_1_1ml.html#abba07768037609f494c2ff6a9b5fc0ab">processPieceScore&lt; core::White &gt;</a> (const <a class="el" href="classnshogi_1_1core_1_1State.html">core::State</a> &amp;State)</td></tr>
 <tr class="separator:abba07768037609f494c2ff6a9b5fc0ab"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a71d1a4a9fc51ca36dc5d3528892b9b76"><td class="memTemplParams" colspan="2">template&lt;<a class="el" href="namespacenshogi_1_1core.html#a31bbefbdbc08642dd7fffa28c0533659">core::Color</a> MyColor, <a class="el" href="namespacenshogi_1_1core.html#a31bbefbdbc08642dd7fffa28c0533659">core::Color</a> TargetColor&gt; </td></tr>
+<tr class="memitem:a71d1a4a9fc51ca36dc5d3528892b9b76"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="structnshogi_1_1ml_1_1FeatureBitboard.html">FeatureBitboard</a>&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacenshogi_1_1ml.html#a71d1a4a9fc51ca36dc5d3528892b9b76">processAttack</a> (const <a class="el" href="classnshogi_1_1core_1_1State.html">core::State</a> &amp;State)</td></tr>
+<tr class="separator:a71d1a4a9fc51ca36dc5d3528892b9b76"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af71dbd95703a8ff133671ffd4847172c"><td class="memItemLeft" align="right" valign="top">template <a class="el" href="structnshogi_1_1ml_1_1FeatureBitboard.html">FeatureBitboard</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacenshogi_1_1ml.html#af71dbd95703a8ff133671ffd4847172c">processAttack&lt; core::Black, core::Black &gt;</a> (const <a class="el" href="classnshogi_1_1core_1_1State.html">core::State</a> &amp;State)</td></tr>
+<tr class="separator:af71dbd95703a8ff133671ffd4847172c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adf79692305493547ab7c026618ba9b3a"><td class="memItemLeft" align="right" valign="top">template <a class="el" href="structnshogi_1_1ml_1_1FeatureBitboard.html">FeatureBitboard</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacenshogi_1_1ml.html#adf79692305493547ab7c026618ba9b3a">processAttack&lt; core::Black, core::White &gt;</a> (const <a class="el" href="classnshogi_1_1core_1_1State.html">core::State</a> &amp;State)</td></tr>
+<tr class="separator:adf79692305493547ab7c026618ba9b3a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aae4046379899f7c57c1d4ab9d9bf1d22"><td class="memItemLeft" align="right" valign="top">template <a class="el" href="structnshogi_1_1ml_1_1FeatureBitboard.html">FeatureBitboard</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacenshogi_1_1ml.html#aae4046379899f7c57c1d4ab9d9bf1d22">processAttack&lt; core::White, core::Black &gt;</a> (const <a class="el" href="classnshogi_1_1core_1_1State.html">core::State</a> &amp;State)</td></tr>
+<tr class="separator:aae4046379899f7c57c1d4ab9d9bf1d22"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a209c5758cbf91463b7da0746d023157c"><td class="memItemLeft" align="right" valign="top">template <a class="el" href="structnshogi_1_1ml_1_1FeatureBitboard.html">FeatureBitboard</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacenshogi_1_1ml.html#a209c5758cbf91463b7da0746d023157c">processAttack&lt; core::White, core::White &gt;</a> (const <a class="el" href="classnshogi_1_1core_1_1State.html">core::State</a> &amp;State)</td></tr>
+<tr class="separator:a209c5758cbf91463b7da0746d023157c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a398da8120d07846dea0dc07ca64cb377"><td class="memTemplParams" colspan="2">template&lt;<a class="el" href="namespacenshogi_1_1core.html#a31bbefbdbc08642dd7fffa28c0533659">core::Color</a> C&gt; </td></tr>
 <tr class="memitem:a398da8120d07846dea0dc07ca64cb377"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="structnshogi_1_1ml_1_1FeatureBitboard.html">FeatureBitboard</a>&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacenshogi_1_1ml.html#a398da8120d07846dea0dc07ca64cb377">processIsBlackTurn</a> ()</td></tr>
 <tr class="separator:a398da8120d07846dea0dc07ca64cb377"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -517,6 +530,8 @@ Variables</h2></td></tr>
 <tr><td class="fieldname"><a id="abce888ea1742cbf42378e26c43e4a125a65b74e2fbc52d783b7ee1e9258505e45" name="abce888ea1742cbf42378e26c43e4a125a65b74e2fbc52d783b7ee1e9258505e45"></a>FT_OpDeclarationScore&#160;</td><td class="fielddoc"></td></tr>
 <tr><td class="fieldname"><a id="abce888ea1742cbf42378e26c43e4a125aaa87113b4623cb7d8cf7cab09cedcf93" name="abce888ea1742cbf42378e26c43e4a125aaa87113b4623cb7d8cf7cab09cedcf93"></a>FT_MyPieceScore&#160;</td><td class="fielddoc"></td></tr>
 <tr><td class="fieldname"><a id="abce888ea1742cbf42378e26c43e4a125abaa3ba0612be7af7a11f365907b5aa01" name="abce888ea1742cbf42378e26c43e4a125abaa3ba0612be7af7a11f365907b5aa01"></a>FT_OpPieceScore&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="abce888ea1742cbf42378e26c43e4a125a68de3682a8562f10b331b0cb2c9999c6" name="abce888ea1742cbf42378e26c43e4a125a68de3682a8562f10b331b0cb2c9999c6"></a>FT_MyAttack&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="abce888ea1742cbf42378e26c43e4a125a9689fc9aeec55c0d11cb6abce2e8eae2" name="abce888ea1742cbf42378e26c43e4a125a9689fc9aeec55c0d11cb6abce2e8eae2"></a>FT_OpAttack&#160;</td><td class="fielddoc"></td></tr>
 </table>
 
 </div>
@@ -662,6 +677,98 @@ Variables</h2></td></tr>
 <span class="mlabels"><span class="mlabel">inline</span></span>  </td>
   </tr>
 </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a71d1a4a9fc51ca36dc5d3528892b9b76" name="a71d1a4a9fc51ca36dc5d3528892b9b76"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a71d1a4a9fc51ca36dc5d3528892b9b76">&#9670;&#160;</a></span>processAttack()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;<a class="el" href="namespacenshogi_1_1core.html#a31bbefbdbc08642dd7fffa28c0533659">core::Color</a> MyColor, <a class="el" href="namespacenshogi_1_1core.html#a31bbefbdbc08642dd7fffa28c0533659">core::Color</a> TargetColor&gt; </div>
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structnshogi_1_1ml_1_1FeatureBitboard.html">FeatureBitboard</a> nshogi::ml::processAttack </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="classnshogi_1_1core_1_1State.html">core::State</a> &amp;&#160;</td>
+          <td class="paramname"><em>State</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="af71dbd95703a8ff133671ffd4847172c" name="af71dbd95703a8ff133671ffd4847172c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af71dbd95703a8ff133671ffd4847172c">&#9670;&#160;</a></span>processAttack&lt; core::Black, core::Black &gt;()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">template <a class="el" href="structnshogi_1_1ml_1_1FeatureBitboard.html">FeatureBitboard</a> <a class="el" href="namespacenshogi_1_1ml.html#a71d1a4a9fc51ca36dc5d3528892b9b76">nshogi::ml::processAttack</a>&lt; <a class="el" href="namespacenshogi_1_1core.html#a31bbefbdbc08642dd7fffa28c0533659a75ec2d688132f4e4fe69358ded79a1a3">core::Black</a>, <a class="el" href="namespacenshogi_1_1core.html#a31bbefbdbc08642dd7fffa28c0533659a75ec2d688132f4e4fe69358ded79a1a3">core::Black</a> &gt; </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="classnshogi_1_1core_1_1State.html">core::State</a> &amp;&#160;</td>
+          <td class="paramname"><em>State</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="adf79692305493547ab7c026618ba9b3a" name="adf79692305493547ab7c026618ba9b3a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#adf79692305493547ab7c026618ba9b3a">&#9670;&#160;</a></span>processAttack&lt; core::Black, core::White &gt;()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">template <a class="el" href="structnshogi_1_1ml_1_1FeatureBitboard.html">FeatureBitboard</a> <a class="el" href="namespacenshogi_1_1ml.html#a71d1a4a9fc51ca36dc5d3528892b9b76">nshogi::ml::processAttack</a>&lt; <a class="el" href="namespacenshogi_1_1core.html#a31bbefbdbc08642dd7fffa28c0533659a75ec2d688132f4e4fe69358ded79a1a3">core::Black</a>, <a class="el" href="namespacenshogi_1_1core.html#a31bbefbdbc08642dd7fffa28c0533659a5fc087f8cd9de5378ea62e827ede03a4">core::White</a> &gt; </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="classnshogi_1_1core_1_1State.html">core::State</a> &amp;&#160;</td>
+          <td class="paramname"><em>State</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="aae4046379899f7c57c1d4ab9d9bf1d22" name="aae4046379899f7c57c1d4ab9d9bf1d22"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aae4046379899f7c57c1d4ab9d9bf1d22">&#9670;&#160;</a></span>processAttack&lt; core::White, core::Black &gt;()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">template <a class="el" href="structnshogi_1_1ml_1_1FeatureBitboard.html">FeatureBitboard</a> <a class="el" href="namespacenshogi_1_1ml.html#a71d1a4a9fc51ca36dc5d3528892b9b76">nshogi::ml::processAttack</a>&lt; <a class="el" href="namespacenshogi_1_1core.html#a31bbefbdbc08642dd7fffa28c0533659a5fc087f8cd9de5378ea62e827ede03a4">core::White</a>, <a class="el" href="namespacenshogi_1_1core.html#a31bbefbdbc08642dd7fffa28c0533659a75ec2d688132f4e4fe69358ded79a1a3">core::Black</a> &gt; </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="classnshogi_1_1core_1_1State.html">core::State</a> &amp;&#160;</td>
+          <td class="paramname"><em>State</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a209c5758cbf91463b7da0746d023157c" name="a209c5758cbf91463b7da0746d023157c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a209c5758cbf91463b7da0746d023157c">&#9670;&#160;</a></span>processAttack&lt; core::White, core::White &gt;()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">template <a class="el" href="structnshogi_1_1ml_1_1FeatureBitboard.html">FeatureBitboard</a> <a class="el" href="namespacenshogi_1_1ml.html#a71d1a4a9fc51ca36dc5d3528892b9b76">nshogi::ml::processAttack</a>&lt; <a class="el" href="namespacenshogi_1_1core.html#a31bbefbdbc08642dd7fffa28c0533659a5fc087f8cd9de5378ea62e827ede03a4">core::White</a>, <a class="el" href="namespacenshogi_1_1core.html#a31bbefbdbc08642dd7fffa28c0533659a5fc087f8cd9de5378ea62e827ede03a4">core::White</a> &gt; </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="classnshogi_1_1core_1_1State.html">core::State</a> &amp;&#160;</td>
+          <td class="paramname"><em>State</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
 </div><div class="memdoc">
 
 </div>

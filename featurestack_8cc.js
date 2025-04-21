@@ -1,5 +1,10 @@
 var featurestack_8cc =
 [
+    [ "processAttack", "featurestack_8cc.html#a71d1a4a9fc51ca36dc5d3528892b9b76", null ],
+    [ "processAttack< core::Black, core::Black >", "featurestack_8cc.html#af71dbd95703a8ff133671ffd4847172c", null ],
+    [ "processAttack< core::Black, core::White >", "featurestack_8cc.html#adf79692305493547ab7c026618ba9b3a", null ],
+    [ "processAttack< core::White, core::Black >", "featurestack_8cc.html#aae4046379899f7c57c1d4ab9d9bf1d22", null ],
+    [ "processAttack< core::White, core::White >", "featurestack_8cc.html#a209c5758cbf91463b7da0746d023157c", null ],
     [ "processCheck", "featurestack_8cc.html#a758051aa64b452b7f29d1be36287886a", null ],
     [ "processDeclarationScore< core::Black >", "featurestack_8cc.html#a064b6a3f879a6cc3f8124f0b7657a0b8", null ],
     [ "processDeclarationScore< core::White >", "featurestack_8cc.html#a7308ebbee68d8b8f652a7e07bc793726", null ],
