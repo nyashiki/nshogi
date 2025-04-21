@@ -37,8 +37,10 @@ TEST(CAPI, FeatureType) {
     TEST_ASSERT_EQ(NSHOGI_FT_MYPROSILVER, (int)FeatureType::FT_MyProSilver);
     TEST_ASSERT_EQ(NSHOGI_FT_MYPROBISHOP, (int)FeatureType::FT_MyProBishop);
     TEST_ASSERT_EQ(NSHOGI_FT_MYPROROOK, (int)FeatureType::FT_MyProRook);
-    TEST_ASSERT_EQ(NSHOGI_FT_MYBISHOP_AND_PROBISHOP, (int)FeatureType::FT_MyBishopAndProBishop);
-    TEST_ASSERT_EQ(NSHOGI_FT_MYROOK_AND_PROROOK, (int)FeatureType::FT_MyRookAndProRook);
+    TEST_ASSERT_EQ(NSHOGI_FT_MYBISHOP_AND_PROBISHOP,
+                   (int)FeatureType::FT_MyBishopAndProBishop);
+    TEST_ASSERT_EQ(NSHOGI_FT_MYROOK_AND_PROROOK,
+                   (int)FeatureType::FT_MyRookAndProRook);
 
     TEST_ASSERT_EQ(NSHOGI_FT_OPPAWN, (int)FeatureType::FT_OpPawn);
     TEST_ASSERT_EQ(NSHOGI_FT_OPLANCE, (int)FeatureType::FT_OpLance);
@@ -54,8 +56,10 @@ TEST(CAPI, FeatureType) {
     TEST_ASSERT_EQ(NSHOGI_FT_OPPROSILVER, (int)FeatureType::FT_OpProSilver);
     TEST_ASSERT_EQ(NSHOGI_FT_OPPROBISHOP, (int)FeatureType::FT_OpProBishop);
     TEST_ASSERT_EQ(NSHOGI_FT_OPPROROOK, (int)FeatureType::FT_OpProRook);
-    TEST_ASSERT_EQ(NSHOGI_FT_OPBISHOP_AND_PROBISHOP, (int)FeatureType::FT_OpBishopAndProBishop);
-    TEST_ASSERT_EQ(NSHOGI_FT_OPROOK_AND_PROROOK, (int)FeatureType::FT_OpRookAndProRook);
+    TEST_ASSERT_EQ(NSHOGI_FT_OPBISHOP_AND_PROBISHOP,
+                   (int)FeatureType::FT_OpBishopAndProBishop);
+    TEST_ASSERT_EQ(NSHOGI_FT_OPROOK_AND_PROROOK,
+                   (int)FeatureType::FT_OpRookAndProRook);
 
     TEST_ASSERT_EQ(NSHOGI_FT_MYSTANDPAWN1, (int)FeatureType::FT_MyStandPawn1);
     TEST_ASSERT_EQ(NSHOGI_FT_MYSTANDPAWN2, (int)FeatureType::FT_MyStandPawn2);
@@ -70,20 +74,30 @@ TEST(CAPI, FeatureType) {
     TEST_ASSERT_EQ(NSHOGI_FT_MYSTANDLANCE2, (int)FeatureType::FT_MyStandLance2);
     TEST_ASSERT_EQ(NSHOGI_FT_MYSTANDLANCE3, (int)FeatureType::FT_MyStandLance3);
     TEST_ASSERT_EQ(NSHOGI_FT_MYSTANDLANCE4, (int)FeatureType::FT_MyStandLance4);
-    TEST_ASSERT_EQ(NSHOGI_FT_MYSTANDKNIGHT1, (int)FeatureType::FT_MyStandKnight1);
-    TEST_ASSERT_EQ(NSHOGI_FT_MYSTANDKNIGHT2, (int)FeatureType::FT_MyStandKnight2);
-    TEST_ASSERT_EQ(NSHOGI_FT_MYSTANDKNIGHT3, (int)FeatureType::FT_MyStandKnight3);
-    TEST_ASSERT_EQ(NSHOGI_FT_MYSTANDKNIGHT4, (int)FeatureType::FT_MyStandKnight4);
-    TEST_ASSERT_EQ(NSHOGI_FT_MYSTANDSILVER1, (int)FeatureType::FT_MyStandSilver1);
-    TEST_ASSERT_EQ(NSHOGI_FT_MYSTANDSILVER2, (int)FeatureType::FT_MyStandSilver2);
-    TEST_ASSERT_EQ(NSHOGI_FT_MYSTANDSILVER3, (int)FeatureType::FT_MyStandSilver3);
-    TEST_ASSERT_EQ(NSHOGI_FT_MYSTANDSILVER4, (int)FeatureType::FT_MyStandSilver4);
+    TEST_ASSERT_EQ(NSHOGI_FT_MYSTANDKNIGHT1,
+                   (int)FeatureType::FT_MyStandKnight1);
+    TEST_ASSERT_EQ(NSHOGI_FT_MYSTANDKNIGHT2,
+                   (int)FeatureType::FT_MyStandKnight2);
+    TEST_ASSERT_EQ(NSHOGI_FT_MYSTANDKNIGHT3,
+                   (int)FeatureType::FT_MyStandKnight3);
+    TEST_ASSERT_EQ(NSHOGI_FT_MYSTANDKNIGHT4,
+                   (int)FeatureType::FT_MyStandKnight4);
+    TEST_ASSERT_EQ(NSHOGI_FT_MYSTANDSILVER1,
+                   (int)FeatureType::FT_MyStandSilver1);
+    TEST_ASSERT_EQ(NSHOGI_FT_MYSTANDSILVER2,
+                   (int)FeatureType::FT_MyStandSilver2);
+    TEST_ASSERT_EQ(NSHOGI_FT_MYSTANDSILVER3,
+                   (int)FeatureType::FT_MyStandSilver3);
+    TEST_ASSERT_EQ(NSHOGI_FT_MYSTANDSILVER4,
+                   (int)FeatureType::FT_MyStandSilver4);
     TEST_ASSERT_EQ(NSHOGI_FT_MYSTANDGOLD1, (int)FeatureType::FT_MyStandGold1);
     TEST_ASSERT_EQ(NSHOGI_FT_MYSTANDGOLD2, (int)FeatureType::FT_MyStandGold2);
     TEST_ASSERT_EQ(NSHOGI_FT_MYSTANDGOLD3, (int)FeatureType::FT_MyStandGold3);
     TEST_ASSERT_EQ(NSHOGI_FT_MYSTANDGOLD4, (int)FeatureType::FT_MyStandGold4);
-    TEST_ASSERT_EQ(NSHOGI_FT_MYSTANDBISHOP1, (int)FeatureType::FT_MyStandBishop1);
-    TEST_ASSERT_EQ(NSHOGI_FT_MYSTANDBISHOP2, (int)FeatureType::FT_MyStandBishop2);
+    TEST_ASSERT_EQ(NSHOGI_FT_MYSTANDBISHOP1,
+                   (int)FeatureType::FT_MyStandBishop1);
+    TEST_ASSERT_EQ(NSHOGI_FT_MYSTANDBISHOP2,
+                   (int)FeatureType::FT_MyStandBishop2);
     TEST_ASSERT_EQ(NSHOGI_FT_MYSTANDROOK1, (int)FeatureType::FT_MyStandRook1);
     TEST_ASSERT_EQ(NSHOGI_FT_MYSTANDROOK2, (int)FeatureType::FT_MyStandRook2);
 
@@ -100,20 +114,30 @@ TEST(CAPI, FeatureType) {
     TEST_ASSERT_EQ(NSHOGI_FT_OPSTANDLANCE2, (int)FeatureType::FT_OpStandLance2);
     TEST_ASSERT_EQ(NSHOGI_FT_OPSTANDLANCE3, (int)FeatureType::FT_OpStandLance3);
     TEST_ASSERT_EQ(NSHOGI_FT_OPSTANDLANCE4, (int)FeatureType::FT_OpStandLance4);
-    TEST_ASSERT_EQ(NSHOGI_FT_OPSTANDKNIGHT1, (int)FeatureType::FT_OpStandKnight1);
-    TEST_ASSERT_EQ(NSHOGI_FT_OPSTANDKNIGHT2, (int)FeatureType::FT_OpStandKnight2);
-    TEST_ASSERT_EQ(NSHOGI_FT_OPSTANDKNIGHT3, (int)FeatureType::FT_OpStandKnight3);
-    TEST_ASSERT_EQ(NSHOGI_FT_OPSTANDKNIGHT4, (int)FeatureType::FT_OpStandKnight4);
-    TEST_ASSERT_EQ(NSHOGI_FT_OPSTANDSILVER1, (int)FeatureType::FT_OpStandSilver1);
-    TEST_ASSERT_EQ(NSHOGI_FT_OPSTANDSILVER2, (int)FeatureType::FT_OpStandSilver2);
-    TEST_ASSERT_EQ(NSHOGI_FT_OPSTANDSILVER3, (int)FeatureType::FT_OpStandSilver3);
-    TEST_ASSERT_EQ(NSHOGI_FT_OPSTANDSILVER4, (int)FeatureType::FT_OpStandSilver4);
+    TEST_ASSERT_EQ(NSHOGI_FT_OPSTANDKNIGHT1,
+                   (int)FeatureType::FT_OpStandKnight1);
+    TEST_ASSERT_EQ(NSHOGI_FT_OPSTANDKNIGHT2,
+                   (int)FeatureType::FT_OpStandKnight2);
+    TEST_ASSERT_EQ(NSHOGI_FT_OPSTANDKNIGHT3,
+                   (int)FeatureType::FT_OpStandKnight3);
+    TEST_ASSERT_EQ(NSHOGI_FT_OPSTANDKNIGHT4,
+                   (int)FeatureType::FT_OpStandKnight4);
+    TEST_ASSERT_EQ(NSHOGI_FT_OPSTANDSILVER1,
+                   (int)FeatureType::FT_OpStandSilver1);
+    TEST_ASSERT_EQ(NSHOGI_FT_OPSTANDSILVER2,
+                   (int)FeatureType::FT_OpStandSilver2);
+    TEST_ASSERT_EQ(NSHOGI_FT_OPSTANDSILVER3,
+                   (int)FeatureType::FT_OpStandSilver3);
+    TEST_ASSERT_EQ(NSHOGI_FT_OPSTANDSILVER4,
+                   (int)FeatureType::FT_OpStandSilver4);
     TEST_ASSERT_EQ(NSHOGI_FT_OPSTANDGOLD1, (int)FeatureType::FT_OpStandGold1);
     TEST_ASSERT_EQ(NSHOGI_FT_OPSTANDGOLD2, (int)FeatureType::FT_OpStandGold2);
     TEST_ASSERT_EQ(NSHOGI_FT_OPSTANDGOLD3, (int)FeatureType::FT_OpStandGold3);
     TEST_ASSERT_EQ(NSHOGI_FT_OPSTANDGOLD4, (int)FeatureType::FT_OpStandGold4);
-    TEST_ASSERT_EQ(NSHOGI_FT_OPSTANDBISHOP1, (int)FeatureType::FT_OpStandBishop1);
-    TEST_ASSERT_EQ(NSHOGI_FT_OPSTANDBISHOP2, (int)FeatureType::FT_OpStandBishop2);
+    TEST_ASSERT_EQ(NSHOGI_FT_OPSTANDBISHOP1,
+                   (int)FeatureType::FT_OpStandBishop1);
+    TEST_ASSERT_EQ(NSHOGI_FT_OPSTANDBISHOP2,
+                   (int)FeatureType::FT_OpStandBishop2);
     TEST_ASSERT_EQ(NSHOGI_FT_OPSTANDROOK1, (int)FeatureType::FT_OpStandRook1);
     TEST_ASSERT_EQ(NSHOGI_FT_OPSTANDROOK2, (int)FeatureType::FT_OpStandRook2);
 
@@ -129,8 +153,10 @@ TEST(CAPI, FeatureType) {
     TEST_ASSERT_EQ(NSHOGI_FT_MYDRAWVALUE, (int)FeatureType::FT_MyDrawValue);
     TEST_ASSERT_EQ(NSHOGI_FT_OPDRAWVALUE, (int)FeatureType::FT_OpDrawValue);
 
-    TEST_ASSERT_EQ(NSHOGI_FT_MYDECLARATIONSCORE, (int)FeatureType::FT_MyDeclarationScore);
-    TEST_ASSERT_EQ(NSHOGI_FT_OPDECLARATIONSCORE, (int)FeatureType::FT_OpDeclarationScore);
+    TEST_ASSERT_EQ(NSHOGI_FT_MYDECLARATIONSCORE,
+                   (int)FeatureType::FT_MyDeclarationScore);
+    TEST_ASSERT_EQ(NSHOGI_FT_OPDECLARATIONSCORE,
+                   (int)FeatureType::FT_OpDeclarationScore);
     TEST_ASSERT_EQ(NSHOGI_FT_MYPIECESCORE, (int)FeatureType::FT_MyPieceScore);
     TEST_ASSERT_EQ(NSHOGI_FT_OPPIECESCORE, (int)FeatureType::FT_OpPieceScore);
 
