@@ -238,6 +238,22 @@ processPieceScore<core::Black>(const core::State& State);
 template FeatureBitboard
 processPieceScore<core::White>(const core::State& State);
 
+template <core::Color MyColor, core::Color TargetColor>
+FeatureBitboard processAttack(const core::State& State) {
+    core::internal::ImmutableStateAdapter Adapter(State);
+    return internal::FeatureBitboardUtil::makeFeatureBitboard(
+        Adapter->getAttackBB<TargetColor>(), 1.0f, MyColor == core::White);
+}
+
+template FeatureBitboard
+processAttack<core::Black, core::Black>(const core::State& State);
+template FeatureBitboard
+processAttack<core::Black, core::White>(const core::State& State);
+template FeatureBitboard
+processAttack<core::White, core::Black>(const core::State& State);
+template FeatureBitboard
+processAttack<core::White, core::White>(const core::State& State);
+
 FeatureStackRuntime::FeatureStackRuntime(const std::vector<FeatureType>& Types,
                                          const core::State& State,
                                          const core::StateConfig& Config) {
@@ -477,6 +493,10 @@ void FeatureStackRuntime::process(const std::vector<FeatureType>& Types,
             Features[I] = processPieceScore<C>(State);
         } else if (Type == FeatureType::FT_OpPieceScore) {
             Features[I] = processPieceScore<~C>(State);
+        } else if (Type == FeatureType::FT_MyAttack) {
+            Features[I] = processAttack<C, C>(State);
+        } else if (Type == FeatureType::FT_OpAttack) {
+            Features[I] = processAttack<C, ~C>(State);
         } else {
             assert(false);
         }

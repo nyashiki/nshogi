@@ -277,6 +277,8 @@ typedef enum {
     NSHOGI_FT_OPDECLARATIONSCORE,
     NSHOGI_FT_MYPIECESCORE,
     NSHOGI_FT_OPPIECESCORE,
+    NSHOGI_FT_MYATTACK,
+    NSHOGI_FT_OPATTACK,
 } nshogi_feature_type_t;
 
 typedef struct nshogi_position nshogi_position_t;
