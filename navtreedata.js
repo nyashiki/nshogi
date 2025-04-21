@@ -55,11 +55,11 @@ var NAVTREE =
 var NAVTREEINDEX =
 [
 "annotated.html",
-"featuretype_8h.html#abce888ea1742cbf42378e26c43e4a125a3b5c82b520cd14f9f8e42909cc96ce55",
-"namespacenshogi_1_1core.html#a48e95a20c4b8db53f6c955ddac0b0e12a9e4f0b9c436df425600886cde2d2daac",
-"namespacenshogi_1_1ml.html#abce888ea1742cbf42378e26c43e4a125a2f8b47da7e0b0f24f6c54de0e4ce70c3",
-"structnshogi_1_1core_1_1Move32.html#ac3733d7afc827d280296f9e21b3ce1e0",
-"types_8h.html#a1d943458557474713e82f4225d7fe7b4a64d3e31da64f682e331b0f2cc653b7c1"
+"featuretype_8h.html#abce888ea1742cbf42378e26c43e4a125a25b2a4ff7d1a930123d4efd762ac6315",
+"namespacenshogi_1_1core.html#a48e95a20c4b8db53f6c955ddac0b0e12a15812c1cff04da1429dcf6033c797b50",
+"namespacenshogi_1_1ml.html#abce888ea1742cbf42378e26c43e4a125a112f98574be1c1d1ead6ea32bd3120fe",
+"structnshogi_1_1core_1_1Move32.html#a4b16f860c4ee04be227e941732678323",
+"types_8h.html#a0935af9ce5c5fcfc8b6a7ef4ea9cf16d"
 ];
 
 var SYNCONMSG = 'click to disable panel synchronisation';
