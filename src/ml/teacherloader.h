@@ -10,7 +10,10 @@
 #ifndef NSHOGI_ML_TEACHERLOADER_H
 #define NSHOGI_ML_TEACHERLOADER_H
 
+#include "utils.h"
+
 #include <string>
+#include <memory>
 
 namespace nshogi {
 namespace ml {
@@ -18,7 +21,7 @@ namespace ml {
 template <typename TeacherType>
 class TeacherLoaderForFixedSizeTeacher {
  public:
-    TeacherLoaderForFixedSizeTeacher(const std::string& TeacherPath);
+    TeacherLoaderForFixedSizeTeacher(const std::string& TeacherPath, bool Shuffle);
 
     TeacherType operator[](std::size_t Index) const;
 
@@ -28,6 +31,9 @@ class TeacherLoaderForFixedSizeTeacher {
     const std::string Path;
     std::size_t TeacherSizeUnit;
     std::size_t NumTeachers;
+
+    const bool ShuffleEnabled;
+    std::unique_ptr<utils::PermutationGenerator> PG;
 };
 
 } // namespace ml

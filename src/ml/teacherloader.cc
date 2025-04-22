@@ -15,14 +15,16 @@
 #include <cstdint>
 #include <fstream>
 #include <iostream>
+#include <random>
 
 namespace nshogi {
 namespace ml {
 
 template <typename TeacherType>
 TeacherLoaderForFixedSizeTeacher<TeacherType>::TeacherLoaderForFixedSizeTeacher(
-    const std::string& TeacherPath)
-    : Path(TeacherPath) {
+    const std::string& TeacherPath, bool Shuffle)
+    : Path(TeacherPath)
+    , ShuffleEnabled(Shuffle) {
     std::ifstream Ifs(Path, std::ios::in | std::ios::binary);
 
     if (!Ifs) {
@@ -38,9 +40,7 @@ TeacherLoaderForFixedSizeTeacher<TeacherType>::TeacherLoaderForFixedSizeTeacher(
     // Now we got the size of the teacher unit.
     // Hence now we can compute the number of
     // teacher entries that the file has.
-
     Ifs.seekg(0, std::ios_base::end);
-
     const std::size_t FileSize = (std::size_t)Ifs.tellg();
 
     if (FileSize % TeacherSizeUnit != 0) {
@@ -52,6 +52,11 @@ TeacherLoaderForFixedSizeTeacher<TeacherType>::TeacherLoaderForFixedSizeTeacher(
     }
 
     NumTeachers = FileSize / TeacherSizeUnit;
+
+    if (ShuffleEnabled) {
+        std::random_device RD;
+        PG = std::make_unique<utils::PermutationGenerator>(RD(), NumTeachers);
+    }
 }
 
 template <typename TeacherType>
@@ -62,6 +67,10 @@ std::size_t TeacherLoaderForFixedSizeTeacher<TeacherType>::size() const {
 template <typename TeacherType>
 TeacherType TeacherLoaderForFixedSizeTeacher<TeacherType>::operator[](
     std::size_t Index) const {
+    if (ShuffleEnabled) {
+        Index = PG->generate(Index);
+    }
+
     assert(Index < NumTeachers);
 
     std::ifstream Ifs(Path, std::ios::in | std::ios::binary);
