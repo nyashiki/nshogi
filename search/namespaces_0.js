@@ -17,5 +17,6 @@ var searchData=
   ['nshogi_14',['nshogi',['../namespacenshogi.html',1,'']]],
   ['sfen_15',['sfen',['../namespacenshogi_1_1io_1_1sfen.html',1,'nshogi::io']]],
   ['simple_5fteacher_16',['simple_teacher',['../namespacenshogi_1_1io_1_1file_1_1simple__teacher.html',1,'nshogi::io::file']]],
-  ['solver_17',['solver',['../namespacenshogi_1_1solver.html',1,'nshogi']]]
+  ['solver_17',['solver',['../namespacenshogi_1_1solver.html',1,'nshogi']]],
+  ['utils_18',['utils',['../namespacenshogi_1_1ml_1_1utils.html',1,'nshogi::ml']]]
 ];

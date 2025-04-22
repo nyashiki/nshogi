@@ -11,6 +11,7 @@ var hierarchy =
     [ "nshogi::core::Move32", "structnshogi_1_1core_1_1Move32.html", null ],
     [ "nshogi::core::MoveGenerator", "classnshogi_1_1core_1_1MoveGenerator.html", null ],
     [ "nshogi::core::MoveList", "structnshogi_1_1core_1_1MoveList.html", null ],
+    [ "nshogi::ml::utils::PermutationGenerator", "classnshogi_1_1ml_1_1utils_1_1PermutationGenerator.html", null ],
     [ "nshogi::core::Position", "structnshogi_1_1core_1_1Position.html", null ],
     [ "nshogi::core::PositionBuilder", "classnshogi_1_1core_1_1PositionBuilder.html", [
       [ "nshogi::io::csa::PositionBuilder", "classnshogi_1_1io_1_1csa_1_1PositionBuilder.html", null ],

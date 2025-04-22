@@ -2,7 +2,7 @@ var searchData=
 [
   ['teacherloader_2ecc_0',['teacherloader.cc',['../teacherloader_8cc.html',1,'']]],
   ['teacherloader_2eh_1',['teacherloader.h',['../teacherloader_8h.html',1,'']]],
-  ['teacherloaderforfixedsizeteacher_2',['TeacherLoaderForFixedSizeTeacher',['../classnshogi_1_1ml_1_1TeacherLoaderForFixedSizeTeacher.html',1,'nshogi::ml::TeacherLoaderForFixedSizeTeacher&lt; TeacherType &gt;'],['../classnshogi_1_1ml_1_1TeacherLoaderForFixedSizeTeacher.html#ad1d1c57d1be93667f8b1aa8a0b81d03c',1,'nshogi::ml::TeacherLoaderForFixedSizeTeacher::TeacherLoaderForFixedSizeTeacher()']]],
+  ['teacherloaderforfixedsizeteacher_2',['TeacherLoaderForFixedSizeTeacher',['../classnshogi_1_1ml_1_1TeacherLoaderForFixedSizeTeacher.html',1,'nshogi::ml::TeacherLoaderForFixedSizeTeacher&lt; TeacherType &gt;'],['../classnshogi_1_1ml_1_1TeacherLoaderForFixedSizeTeacher.html#ac1b98ccd67615b2b8b4e7d3f18f90ef4',1,'nshogi::ml::TeacherLoaderForFixedSizeTeacher::TeacherLoaderForFixedSizeTeacher()']]],
   ['teacherwriter_2ecc_3',['teacherwriter.cc',['../teacherwriter_8cc.html',1,'']]],
   ['teacherwriter_2eh_4',['teacherwriter.h',['../teacherwriter_8h.html',1,'']]],
   ['threadsafeteacherwriter_5',['ThreadsafeTeacherWriter',['../classnshogi_1_1ml_1_1ThreadsafeTeacherWriter.html',1,'nshogi::ml::ThreadsafeTeacherWriter&lt; TeacherType &gt;'],['../classnshogi_1_1ml_1_1ThreadsafeTeacherWriter.html#a2b3e02b665fa4cfc327353993e8e831f',1,'nshogi::ml::ThreadsafeTeacherWriter::ThreadsafeTeacherWriter()']]],

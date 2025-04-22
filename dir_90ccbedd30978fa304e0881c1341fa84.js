@@ -14,5 +14,7 @@ var dir_90ccbedd30978fa304e0881c1341fa84 =
     [ "teacherloader.cc", "teacherloader_8cc.html", null ],
     [ "teacherloader.h", "teacherloader_8h.html", "teacherloader_8h" ],
     [ "teacherwriter.cc", "teacherwriter_8cc.html", null ],
-    [ "teacherwriter.h", "teacherwriter_8h.html", "teacherwriter_8h" ]
+    [ "teacherwriter.h", "teacherwriter_8h.html", "teacherwriter_8h" ],
+    [ "utils.cc", "utils_8cc.html", null ],
+    [ "utils.h", "utils_8h.html", "utils_8h" ]
 ];

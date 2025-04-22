@@ -5,6 +5,7 @@ var namespacenshogi_1_1ml =
       [ "sigmoid", "namespacenshogi_1_1ml_1_1math.html#a4818c72d852a9fe2bf79c591f87e2a9f", null ],
       [ "softmax_", "namespacenshogi_1_1ml_1_1math.html#a231349c41f17eda4ba84d62cacb0c03f", null ]
     ] ],
+    [ "utils", "namespacenshogi_1_1ml_1_1utils.html", "namespacenshogi_1_1ml_1_1utils" ],
     [ "AZTeacher", "structnshogi_1_1ml_1_1AZTeacher.html", "structnshogi_1_1ml_1_1AZTeacher" ],
     [ "FeatureBitboard", "structnshogi_1_1ml_1_1FeatureBitboard.html", "structnshogi_1_1ml_1_1FeatureBitboard" ],
     [ "FeatureStack", "structnshogi_1_1ml_1_1FeatureStack.html", "structnshogi_1_1ml_1_1FeatureStack" ],

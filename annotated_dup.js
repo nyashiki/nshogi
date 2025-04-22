@@ -25,6 +25,9 @@ var annotated_dup =
         ] ]
       ] ],
       [ "ml", "namespacenshogi_1_1ml.html", [
+        [ "utils", "namespacenshogi_1_1ml_1_1utils.html", [
+          [ "PermutationGenerator", "classnshogi_1_1ml_1_1utils_1_1PermutationGenerator.html", "classnshogi_1_1ml_1_1utils_1_1PermutationGenerator" ]
+        ] ],
         [ "AZTeacher", "structnshogi_1_1ml_1_1AZTeacher.html", "structnshogi_1_1ml_1_1AZTeacher" ],
         [ "FeatureBitboard", "structnshogi_1_1ml_1_1FeatureBitboard.html", "structnshogi_1_1ml_1_1FeatureBitboard" ],
         [ "FeatureStack", "structnshogi_1_1ml_1_1FeatureStack.html", "structnshogi_1_1ml_1_1FeatureStack" ],
