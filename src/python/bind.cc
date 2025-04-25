@@ -82,6 +82,14 @@ PYBIND11_MODULE(nshogi, Module) {
         .def_property_readonly("drop", &nshogi::core::Move32::drop)
         .def_property_readonly("promote", &nshogi::core::Move32::promote);
 
+    pybind11::enum_<nshogi::core::RepetitionStatus>(Module, "RepetitionStatus")
+        .value("NO_REPETITION", nshogi::core::RepetitionStatus::NoRepetition)
+        .value("REPETITION", nshogi::core::RepetitionStatus::Repetition)
+        .value("WIN_REPETITION", nshogi::core::RepetitionStatus::WinRepetition)
+        .value("LOSS_REPETITION", nshogi::core::RepetitionStatus::LossRepetition)
+        .value("SUPERIOR_REPETITION", nshogi::core::RepetitionStatus::SuperiorRepetition)
+        .value("INFERIOR_REPETITION", nshogi::core::RepetitionStatus::InferiorRepetition);
+
     pybind11::enum_<nshogi::core::PieceTypeKind>(Module, "PieceType")
         .value("EMPTY", nshogi::core::PTK_Empty)
         .value("PAWN", nshogi::core::PTK_Pawn)
