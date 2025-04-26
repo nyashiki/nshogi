@@ -68,6 +68,59 @@ class TestState(unittest.TestCase):
 
                 state.do_move(random.choice(legal_moves))
 
+    def test_repetition(self):
+        no_repetition_sfens = [
+            ("startpos", False),
+            ("2k6/9/KR7/9/9/9/9/9/9 b - 1 moves 8c7c 7a8a 7c8c 8a7a 8c7c", True),
+            ("9/9/9/9/9/9/1rk6/9/K8 w - 1 moves 8g9g 9i8i 9g8g 8i9i 8g8a", False),
+        ]
+
+        repetition_sfens = [
+            ("lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL b - 1 moves 2h3h 8b7b 3h2h 7b8b", False),
+        ]
+
+        superior_repetition_sfens = [
+            ("+Bn1g1g2l/2s1ks3/p1Ppppn1p/2+BP3r1/2pN5/1p4ppP/P2gPP3/8K/L5GNL w RL2s3p 1 moves S*2g 1h1g 2g1h+ 1g1h S*2g", False),
+        ]
+
+        win_repetition_sfens = [
+            ("2k6/9/KR7/9/9/9/9/9/9 b - 1 moves 8c7c 7a8a 7c8c 8a7a 8c7c", False),
+            ("9/9/9/9/9/9/1rk6/9/K8 w - 1 moves 8g9g 9i8i 9g8g 8i9i 8g9g", False),
+        ]
+
+        inferior_repetition_sfens = [
+            ("l3k2Bl/1r1sg4/1l1pps2p/2P1np3/1P4p2/2G1RP1N1/+p1KPP3P/3S5/1+n2G2+bL b GPsn5p 1 moves G*4a 5a6a 4a5a 6a5a", False),
+        ]
+
+        loss_repetition_sfens = [
+            ("2k6/9/KR7/9/9/9/9/9/9 b - 1 moves 8c7c 7a8a 7c8c 8a7a", False),
+            ("9/9/9/9/9/9/1rk6/9/K8 w - 1 moves 8g9g 9i8i 9g8g 8i9i", False),
+        ]
+
+        for (sfen, strict) in no_repetition_sfens:
+            s = nshogi.io.sfen.make_state_from_sfen(sfen)
+            self.assertEqual(nshogi.RepetitionStatus.NO_REPETITION, s.get_repetition(strict))
+
+        for (sfen, strict) in repetition_sfens:
+            s = nshogi.io.sfen.make_state_from_sfen(sfen)
+            self.assertEqual(nshogi.RepetitionStatus.REPETITION, s.get_repetition(strict))
+
+        for (sfen, strict) in superior_repetition_sfens:
+            s = nshogi.io.sfen.make_state_from_sfen(sfen)
+            self.assertEqual(nshogi.RepetitionStatus.SUPERIOR_REPETITION, s.get_repetition(strict))
+
+        for (sfen, strict) in win_repetition_sfens:
+            s = nshogi.io.sfen.make_state_from_sfen(sfen)
+            self.assertEqual(nshogi.RepetitionStatus.WIN_REPETITION, s.get_repetition(strict))
+
+        for (sfen, strict) in inferior_repetition_sfens:
+            s = nshogi.io.sfen.make_state_from_sfen(sfen)
+            self.assertEqual(nshogi.RepetitionStatus.INFERIOR_REPETITION, s.get_repetition(strict))
+
+        for (sfen, strict) in loss_repetition_sfens:
+            s = nshogi.io.sfen.make_state_from_sfen(sfen)
+            self.assertEqual(nshogi.RepetitionStatus.LOSS_REPETITION, s.get_repetition(strict))
+
 class TestML(unittest.TestCase):
     def setUp(self):
         self.sfens = []
