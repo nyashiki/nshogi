@@ -43,6 +43,11 @@ template <core::Color MyColor, core::Color PieceColor>
 FeatureBitboard processPiece(const core::State& State,
                              core::PieceTypeKind Type);
 
+template <core::Color MyColor, core::Color PieceColor>
+FeatureBitboard processPiece(const core::State& State,
+                             core::PieceTypeKind Type1,
+                             core::PieceTypeKind Type2);
+
 template <core::Color MyColor>
 FeatureBitboard processStand(const core::State& State, core::PieceTypeKind Type,
                              uint8_t Count);

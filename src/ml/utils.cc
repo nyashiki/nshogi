@@ -60,9 +60,8 @@ uint64_t PermutationGenerator::findPrimeNumber() const {
             continue;
         }
 
-        const uint64_t Distance = (N > MaxValue_ / 2)
-            ? (N - MaxValue_ / 2)
-            : (MaxValue_ / 2 - N);
+        const uint64_t Distance =
+            (N > MaxValue_ / 2) ? (N - MaxValue_ / 2) : (MaxValue_ / 2 - N);
 
         if (Distance > DistanceMax) {
             DistanceMax = Distance;

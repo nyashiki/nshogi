@@ -12,8 +12,8 @@
 
 #include "utils.h"
 
-#include <string>
 #include <memory>
+#include <string>
 
 namespace nshogi {
 namespace ml {
@@ -21,7 +21,8 @@ namespace ml {
 template <typename TeacherType>
 class TeacherLoaderForFixedSizeTeacher {
  public:
-    TeacherLoaderForFixedSizeTeacher(const std::string& TeacherPath, bool Shuffle);
+    TeacherLoaderForFixedSizeTeacher(const std::string& TeacherPath,
+                                     bool Shuffle);
 
     TeacherType operator[](std::size_t Index) const;
 
