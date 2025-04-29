@@ -86,9 +86,12 @@ PYBIND11_MODULE(nshogi, Module) {
         .value("NO_REPETITION", nshogi::core::RepetitionStatus::NoRepetition)
         .value("REPETITION", nshogi::core::RepetitionStatus::Repetition)
         .value("WIN_REPETITION", nshogi::core::RepetitionStatus::WinRepetition)
-        .value("LOSS_REPETITION", nshogi::core::RepetitionStatus::LossRepetition)
-        .value("SUPERIOR_REPETITION", nshogi::core::RepetitionStatus::SuperiorRepetition)
-        .value("INFERIOR_REPETITION", nshogi::core::RepetitionStatus::InferiorRepetition);
+        .value("LOSS_REPETITION",
+               nshogi::core::RepetitionStatus::LossRepetition)
+        .value("SUPERIOR_REPETITION",
+               nshogi::core::RepetitionStatus::SuperiorRepetition)
+        .value("INFERIOR_REPETITION",
+               nshogi::core::RepetitionStatus::InferiorRepetition);
 
     pybind11::enum_<nshogi::core::PieceTypeKind>(Module, "PieceType")
         .value("EMPTY", nshogi::core::PTK_Empty)
@@ -626,7 +629,8 @@ PYBIND11_MODULE(nshogi, Module) {
     pybind11::class_<
         nshogi::ml::TeacherLoaderForFixedSizeTeacher<nshogi::ml::AZTeacher>>(
         MLModule, "AZTeacherLoader")
-        .def(pybind11::init<const std::string&, bool>(), pybind11::arg("path"), pybind11::arg("shuffle"))
+        .def(pybind11::init<const std::string&, bool>(), pybind11::arg("path"),
+             pybind11::arg("shuffle"))
         .def("filter",
              [](const nshogi::ml::TeacherLoaderForFixedSizeTeacher<
                     nshogi::ml::AZTeacher>& Loader,
@@ -650,7 +654,8 @@ PYBIND11_MODULE(nshogi, Module) {
 
     pybind11::class_<nshogi::ml::TeacherLoaderForFixedSizeTeacher<
         nshogi::ml::SimpleTeacher>>(MLModule, "SimpleTeacherLoader")
-        .def(pybind11::init<const std::string&, bool>(), pybind11::arg("path"), pybind11::arg("shuffle"))
+        .def(pybind11::init<const std::string&, bool>(), pybind11::arg("path"),
+             pybind11::arg("shuffle"))
         .def("__len__", &nshogi::ml::TeacherLoaderForFixedSizeTeacher<
                             nshogi::ml::SimpleTeacher>::size)
         .def("__getitem__", &nshogi::ml::TeacherLoaderForFixedSizeTeacher<
