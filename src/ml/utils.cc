@@ -59,6 +59,10 @@ uint64_t PermutationGenerator::findPrimeNumber() const {
 
     std::mt19937_64 MT(Seed_);
 
+    if (MaxValue_ <= 3) {
+        return 1;
+    }
+
     for (uint64_t I = 0; I < 10000; ++I) {
         uint64_t N = MT() % MaxValue_;
         if (N % 2 == 0) {
