@@ -18,11 +18,11 @@ namespace utils {
 
 PermutationGenerator::PermutationGenerator(uint64_t Seed, uint64_t MaxValue)
     : Seed_([Seed, MaxValue] {
-            if (MaxValue == 0) {
-                throw std::runtime_error("MaxValue must not be 0.");
-            }
-            return Seed % MaxValue;
-        }())
+        if (MaxValue == 0) {
+            throw std::runtime_error("MaxValue must not be 0.");
+        }
+        return Seed % MaxValue;
+    }())
     , MaxValue_(MaxValue)
     , Multiplier_(findPrimeNumber()) {
 }
