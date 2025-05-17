@@ -20,6 +20,7 @@
 #include "../ml/featurestack.h"
 #include "../ml/internal/featurebitboardutil.h"
 #include "../ml/simpleteacher.h"
+#include "../ml/utils.h"
 #include "common.h"
 
 #include <filesystem>
@@ -1270,6 +1271,22 @@ TEST(ML, SimpleTeacherSaveAndLoad) {
 
             TEST_ASSERT_TRUE(T1.equals(T2));
             TEST_ASSERT_TRUE(T2.equals(T1));
+        }
+    }
+}
+
+TEST(ML, PermutationGenerator) {
+    for (std::size_t N = 1; N < 1000; ++N) {
+        std::vector<bool> Filled(N, false);
+        for (uint64_t Seed = 0; Seed < 100; ++Seed) {
+            nshogi::ml::utils::PermutationGenerator PG(Seed, N);
+            for (uint64_t I = 0; I < (uint64_t)N; ++I) {
+                Filled[PG(I)] = true;
+            }
+
+            for (uint64_t I = 0; I < (uint64_t)N; ++I) {
+                TEST_ASSERT_TRUE(Filled[I]);
+            }
         }
     }
 }
