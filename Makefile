@@ -193,7 +193,11 @@ $(STATIC_TARGET): $(OBJECTS)
 
 $(PYTHON_TARGET): $(PYTHON_OBJECTS) $(STATIC_TARGET)
 	@[ -d $(dir $@) ] || mkdir -p $(dir $@)
+ifeq ($(shell uname), Darwin)
 	$(CXX) -shared -o $@ $(PYTHON_OBJECTS) $(STATIC_TARGET) $(OPTIM) $(ARCH_FLAGS) $(PYTHON_CXX_FLAGS) -fPIC $(LINKS) $(PYTHON_LINKS)
+else
+	$(CXX) -shared -o $@ $(PYTHON_OBJECTS) -Wl,--whole-archive $(STATIC_TARGET) -Wl,--no-whole-archive $(OPTIM) $(ARCH_FLAGS) $(PYTHON_CXX_FLAGS) -fPIC $(LINKS) $(PYTHON_LINKS)
+endif
 
 $(TEST_STATIC_TARGET): $(TEST_OBJECTS) $(STATIC_TARGET)
 	@[ -d $(dir $@) ] || mkdir -p $(dir $@)
