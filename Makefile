@@ -197,7 +197,7 @@ $(PYTHON_TARGET): $(PYTHON_OBJECTS) $(STATIC_TARGET)
 
 $(TEST_STATIC_TARGET): $(TEST_OBJECTS) $(STATIC_TARGET)
 	@[ -d $(dir $@) ] || mkdir -p $(dir $@)
-	$(CXX) -o $@ $(TEST_OBJECTS) $(STATIC_TARGET) $(OPTIM) $(ARCH_FLAGS) $(CXX_FLAGS) $(LINKS)
+	$(CXX) -o $@ $(TEST_OBJECTS) -Wl,--whole-archive $(STATIC_TARGET) -Wl,--no-whole-archive $(OPTIM) $(ARCH_FLAGS) $(CXX_FLAGS) $(LINKS)
 
 $(TEST_SHARED_TARGET): $(TEST_OBJECTS) $(SHARED_TARGET)
 	@[ -d $(dir $@) ] || mkdir -p $(dir $@)
