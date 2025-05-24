@@ -66,6 +66,7 @@ SOURCES :=                                 \
 	src/solver/internal/mate1ply.cc    \
 	src/solver/dfs.cc                  \
     src/solver/dfpn.cc                 \
+    src/solver/internal/dfpn.cc        \
 	src/ml/azteacher.cc                \
 	src/ml/featurebitboard.cc          \
 	src/ml/featurestack.cc             \

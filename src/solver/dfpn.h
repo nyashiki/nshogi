@@ -18,6 +18,15 @@
 
 namespace nshogi {
 namespace solver {
+
+namespace internal {
+namespace dfpn {
+
+class SolverImpl;
+
+} // namespace dfpn
+} // namespace internal
+
 namespace dfpn {
 
 class Solver {
@@ -31,8 +40,7 @@ class Solver {
     uint64_t searchedNodeCount() const;
 
  private:
-    class SolverImpl;
-    std::unique_ptr<SolverImpl> Impl;
+    std::unique_ptr<internal::dfpn::SolverImpl> Impl;
 };
 
 } // namespace dfpn
