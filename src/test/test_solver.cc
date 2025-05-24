@@ -13,6 +13,7 @@
 #include "../core/statebuilder.h"
 #include "../io/sfen.h"
 #include "../solver/dfs.h"
+#include "../solver/dfpn.h"
 #include "../solver/mate1ply.h"
 
 #include <fstream>
@@ -293,6 +294,97 @@ TEST(Mate7Ply, Problems) {
     while (std::getline(Ifs, Line)) {
         auto State = nshogi::io::sfen::StateBuilder::newState(Line);
         auto CheckmateMove = nshogi::solver::dfs::solve(&State, 7);
+
+        TEST_ASSERT_FALSE(CheckmateMove.isNone());
+    }
+}
+
+TEST(DfPn, Mate1Ply) {
+    std::ifstream Ifs("./res/test/mate-1-ply.txt");
+
+    nshogi::solver::dfpn::Solver Solver(64);
+    std::string Line;
+    while (std::getline(Ifs, Line)) {
+        auto State = nshogi::io::sfen::StateBuilder::newState(Line);
+        auto CheckmateMove = Solver.solve(&State);
+
+        TEST_ASSERT_FALSE(CheckmateMove.isNone());
+    }
+}
+
+TEST(DfPn, NoMate1Ply) {
+    std::ifstream Ifs("./res/test/no-mate-1-ply.txt");
+
+    nshogi::solver::dfpn::Solver Solver(64);
+    std::string Line;
+    while (std::getline(Ifs, Line)) {
+        auto State = nshogi::io::sfen::StateBuilder::newState(Line);
+        auto PV = Solver.solveWithPV(&State);
+
+        TEST_ASSERT_TRUE(PV.size() == 0 || PV.size() > 1);
+    }
+}
+
+TEST(DfPn, Mate3Ply) {
+    std::ifstream Ifs("./res/test/mate-3-ply.txt");
+
+    nshogi::solver::dfpn::Solver Solver(64);
+    std::string Line;
+    while (std::getline(Ifs, Line)) {
+        auto State = nshogi::io::sfen::StateBuilder::newState(Line);
+        auto CheckmateMove = Solver.solve(&State);
+
+        TEST_ASSERT_FALSE(CheckmateMove.isNone());
+    }
+}
+
+TEST(DfPn, Mate5Ply) {
+    std::ifstream Ifs("./res/test/mate-5-ply.txt");
+
+    nshogi::solver::dfpn::Solver Solver(64);
+    std::string Line;
+    while (std::getline(Ifs, Line)) {
+        auto State = nshogi::io::sfen::StateBuilder::newState(Line);
+        auto CheckmateMove = Solver.solve(&State);
+
+        TEST_ASSERT_FALSE(CheckmateMove.isNone());
+    }
+}
+
+TEST(DfPn, Mate7Ply) {
+    std::ifstream Ifs("./res/test/mate-7-ply.txt");
+
+    nshogi::solver::dfpn::Solver Solver(64);
+    std::string Line;
+    while (std::getline(Ifs, Line)) {
+        auto State = nshogi::io::sfen::StateBuilder::newState(Line);
+        auto CheckmateMove = Solver.solve(&State);
+
+        TEST_ASSERT_FALSE(CheckmateMove.isNone());
+    }
+}
+
+TEST(DfPn, Mate9Ply) {
+    std::ifstream Ifs("./res/test/mate-9-ply.txt");
+
+    nshogi::solver::dfpn::Solver Solver(64);
+    std::string Line;
+    while (std::getline(Ifs, Line)) {
+        auto State = nshogi::io::sfen::StateBuilder::newState(Line);
+        auto CheckmateMove = Solver.solve(&State);
+
+        TEST_ASSERT_FALSE(CheckmateMove.isNone());
+    }
+}
+
+TEST(DfPn, Mate11Ply) {
+    std::ifstream Ifs("./res/test/mate-11-ply.txt");
+
+    nshogi::solver::dfpn::Solver Solver(64);
+    std::string Line;
+    while (std::getline(Ifs, Line)) {
+        auto State = nshogi::io::sfen::StateBuilder::newState(Line);
+        auto CheckmateMove = Solver.solve(&State);
 
         TEST_ASSERT_FALSE(CheckmateMove.isNone());
     }
