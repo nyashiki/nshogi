@@ -115,10 +115,13 @@ struct alignas(256) DfPnTTBundle {
 
 class Solver::SolverImpl {
  public:
-    SolverImpl();
+    SolverImpl(std::size_t MemoryMB, uint64_t MaxDepth, uint64_t MaxNodeCount);
     ~SolverImpl();
 
     core::Move32 solve(core::State* S);
+    std::vector<core::Move32> solveWithPV(core::State* S);
+
+    uint64_t searchedNodeCount() const;
 
  private:
     template <core::Color C>
@@ -151,17 +154,26 @@ class Solver::SolverImpl {
     template <core::Color C, bool Attacking>
     core::Move32 search(core::internal::StateImpl* S, uint64_t Depth, DfPnValue* ThisValue, DfPnValue* Threshold);
 
+    template <core::Color C, bool Attacking>
+    std::vector<core::Move32> findPV(core::internal::StateImpl* S, uint64_t Depth) const;
+    std::vector<core::Move32> findPV(core::internal::StateImpl* S) const;
+
     std::size_t TTSize;
     std::unique_ptr<DfPnTTBundle[]> TT;
 
+    const uint64_t MaxDepth;
+    const uint64_t MaxNodeCount;
     uint8_t Generation;
+    uint64_t SearchedNodeCount;
 };
 
-Solver::SolverImpl::SolverImpl() {
+Solver::SolverImpl::SolverImpl(std::size_t MemoryMB, uint64_t MaxDepth_, uint64_t MaxNodeCount_)
+    : MaxDepth(MaxDepth_)
+    , MaxNodeCount(MaxNodeCount_) {
     static_assert(sizeof(DfPnTTEntry) == 32);
     static_assert(sizeof(DfPnTTBundle) == 256);
 
-    TTSize = 2048ULL * 1024ULL * 1024ULL / sizeof(DfPnTTBundle);
+    TTSize = MemoryMB * 1024ULL * 1024ULL / sizeof(DfPnTTBundle);
     TT = std::make_unique<DfPnTTBundle[]>(TTSize);
 
     for (std::size_t I = 0; I < TTSize; ++I) {
@@ -171,6 +183,7 @@ Solver::SolverImpl::SolverImpl() {
     }
 
     Generation = 0;
+    SearchedNodeCount = 0;
 }
 
 Solver::SolverImpl::~SolverImpl() {
@@ -307,18 +320,24 @@ core::Move32 Solver::SolverImpl::search(core::internal::StateImpl* S, uint64_t D
         }
     }
 
+    // Depth limit.
+    if (MaxDepth > 0 && Depth >= MaxDepth) {
+        *ThisValue = DfPnValue(DfPnValue::Infinity, 0);
+        return core::Move32::MoveNone();
+    }
+
     // Step 2: search.
     if constexpr (Attacking) { // OR node.
-        while (true) {
+        while (MaxNodeCount == 0 || SearchedNodeCount < MaxNodeCount) {
             uint32_t MinProof = DfPnValue::Infinity;
             uint32_t MinProof2 = DfPnValue::Infinity;
             uint32_t SumDisproof = 0;
             DfPnValue BestChildValue;
             core::Move32 BestMove;
             for (const core::Move32 Move : Moves) {
-                S->doMove(Move);
+                S->doMove<C>(Move);
                 DfPnValue ChildValue = loadFromTT<~C>(S, Depth + 1);
-                S->undoMove();
+                S->undoMove<~C>();
 
                 if (ChildValue.ProofNumber < MinProof) {
                     MinProof2 = MinProof;
@@ -345,18 +364,20 @@ core::Move32 Solver::SolverImpl::search(core::internal::StateImpl* S, uint64_t D
                     : std::min(Threshold->DisproofNumber + BestChildValue.DisproofNumber - SumDisproof, DfPnValue::Infinity)
             );
 
-            S->doMove(BestMove);
+            S->doMove<C>(BestMove);
             search<~C, !Attacking>(S, Depth + 1, &BestChildValue, &ChildThreshold);
-            S->undoMove();
+            S->undoMove<~C>();
+            ++SearchedNodeCount;
 
             if (BestChildValue.ProofNumber == 0) {
                 ThisValue->ProofNumber = 0;
                 ThisValue->DisproofNumber = DfPnValue::Infinity;
                 return BestMove;
             }
-       }
+        }
+        return core::Move32::MoveNone();
     } else { // AND node.
-        while (true) {
+        while (MaxNodeCount == 0 || SearchedNodeCount < MaxNodeCount) {
             uint32_t SumProof = 0;
             uint32_t MinDisproof = DfPnValue::Infinity;
             uint32_t MinDisproof2 = DfPnValue::Infinity;
@@ -364,9 +385,9 @@ core::Move32 Solver::SolverImpl::search(core::internal::StateImpl* S, uint64_t D
             core::Move32 BestMove;
 
             for (const core::Move32 Move : Moves) {
-                S->doMove(Move);
+                S->doMove<C>(Move);
                 DfPnValue ChildValue = loadFromTT<~C>(S, Depth + 1);
-                S->undoMove();
+                S->undoMove<~C>();
 
                 SumProof += ChildValue.ProofNumber;
 
@@ -394,9 +415,10 @@ core::Move32 Solver::SolverImpl::search(core::internal::StateImpl* S, uint64_t D
                 std::min({Threshold->DisproofNumber, MinDisproof2 + 1, DfPnValue::Infinity})
             );
 
-            S->doMove(BestMove);
+            S->doMove<C>(BestMove);
             search<~C, !Attacking>(S, Depth + 1, &BestChildValue, &ChildThreshold);
-            S->undoMove();
+            S->undoMove<~C>();
+            ++SearchedNodeCount;
 
             if (BestChildValue.DisproofNumber == 0) {
                 ThisValue->ProofNumber = DfPnValue::Infinity;
@@ -404,11 +426,66 @@ core::Move32 Solver::SolverImpl::search(core::internal::StateImpl* S, uint64_t D
                 return BestMove;
             }
         }
+        return core::Move32::MoveNone();
     }
+}
+
+template <core::Color C, bool Attacking>
+std::vector<core::Move32> Solver::SolverImpl::findPV(core::internal::StateImpl* S, uint64_t Depth) const {
+    const auto Moves = Attacking
+        ? core::internal::MoveGeneratorInternal::generateLegalCheckMoves<C, true>(*S)
+        : core::internal::MoveGeneratorInternal::generateLegalEvasionMoves<C, true>(*S);
+
+    if (Moves.size() == 0) {
+        return { };
+    }
+
+    std::vector<core::Move32> BestPV;
+    for (const core::Move32 Move : Moves) {
+        S->doMove<C>(Move);
+
+        const auto ChildValue = loadFromTT<~C>(S, Depth + 1);
+        std::vector<core::Move32> SubPV { };
+        if (ChildValue.ProofNumber == 0) {
+            SubPV = findPV<~C, !Attacking>(S, Depth + 1);
+        }
+
+        S->undoMove<~C>();
+
+        if (ChildValue.ProofNumber != 0) {
+            continue;
+        }
+
+        if (SubPV.size() + 1 > BestPV.size()) {
+            BestPV.clear();
+            BestPV.reserve(SubPV.size() + 1);
+            BestPV.push_back(Move);
+            BestPV.insert(
+                    BestPV.end(),
+                    std::make_move_iterator(SubPV.begin()),
+                    std::make_move_iterator(SubPV.end()));
+        }
+    }
+
+    if (BestPV.size() == 0) {
+        const core::Move32 Checkmate1Ply = solver::internal::mate1ply::solve<C>(*S);
+        if (!Checkmate1Ply.isNone()) {
+            return { Checkmate1Ply };
+        }
+    }
+
+    return BestPV;
+}
+
+std::vector<core::Move32> Solver::SolverImpl::findPV(core::internal::StateImpl* S) const {
+    return (S->getSideToMove() == core::Black)
+        ? findPV<core::Black, true>(S, 0)
+        : findPV<core::White, true>(S, 0);
 }
 
 core::Move32 Solver::SolverImpl::solve(core::State* S) {
     ++Generation;
+    SearchedNodeCount = 0;
 
     core::internal::MutableStateAdapter Adapter(*S);
 
@@ -431,11 +508,32 @@ core::Move32 Solver::SolverImpl::solve(core::State* S) {
             // Disproven.
             return core::Move32::MoveNone();
         }
+
+        if (MaxNodeCount > 0 && searchedNodeCount() >= MaxNodeCount) {
+            return core::Move32::MoveNone();
+        }
     }
 }
 
-Solver::Solver()
-    : Impl(std::make_unique<SolverImpl>()) {
+std::vector<core::Move32> Solver::SolverImpl::solveWithPV(core::State* S) {
+    // First, just solve the problem.
+    core::Move32 SolvedMove = solve(S);
+
+    if (SolvedMove.isNone()) {
+        return { };
+    }
+
+    // Then, traverse the tree through a terminal node with the longest move sequence.
+    core::internal::MutableStateAdapter Adapter(*S);
+    return findPV(Adapter.get());
+}
+
+uint64_t Solver::SolverImpl::searchedNodeCount() const {
+    return SearchedNodeCount;
+}
+
+Solver::Solver(std::size_t MemoryMB, uint64_t MaxDepth, uint64_t MaxNodeCount)
+    : Impl(std::make_unique<SolverImpl>(MemoryMB, MaxDepth, MaxNodeCount)) {
 }
 
 Solver::~Solver() {
@@ -443,6 +541,14 @@ Solver::~Solver() {
 
 core::Move32 Solver::solve(core::State* S) {
     return Impl->solve(S);
+}
+
+std::vector<core::Move32> Solver::solveWithPV(core::State* S) {
+    return Impl->solveWithPV(S);
+}
+
+uint64_t Solver::searchedNodeCount() const {
+    return Impl->searchedNodeCount();
 }
 
 } // namespace dfpn

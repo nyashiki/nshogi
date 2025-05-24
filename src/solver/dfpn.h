@@ -8,6 +8,7 @@
 //
 
 #include <memory>
+#include <vector>
 
 #ifndef NSHOGI_SOLVER_DFPN_H
 #define NSHOGI_SOLVER_DFPN_H
@@ -21,10 +22,13 @@ namespace dfpn {
 
 class Solver {
  public:
-    Solver();
+    Solver(std::size_t MemoryMB, uint64_t MaxDepth = 64, uint64_t MaxNodeCount = 1000000);
     ~Solver();
 
     core::Move32 solve(core::State* S);
+    std::vector<core::Move32> solveWithPV(core::State* S);
+
+    uint64_t searchedNodeCount() const;
 
  private:
     class SolverImpl;
