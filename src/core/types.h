@@ -47,6 +47,8 @@ enum struct RepetitionStatus : uint8_t {
     LossRepetition,
     SuperiorRepetition,
     InferiorRepetition,
+
+    NumRepetitionStatus,
 };
 
 // clang-format off
