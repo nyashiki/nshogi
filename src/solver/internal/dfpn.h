@@ -38,75 +38,85 @@ struct DfPnValue {
     uint32_t ProofNumber;
     uint32_t DisproofNumber;
 
-    static constexpr uint32_t Infinity = 1 << 20;
+    static constexpr uint32_t Infinity = 1 << 15;
 };
 
-// sizeof(DfPnTTEntry) == 32 byte.
+// sizeof(DfPnTTEntry) == 16 byte.
 struct DfPnTTEntry {
  public:
     uint64_t hash() const {
-        return DataU64[0];
+        return DataU64[1] & HASH_MASK;
     }
 
     core::Stands standsSideToMove() const {
-        return static_cast<core::Stands>(DataU32[2]);
+        return static_cast<core::Stands>(DataU32[0]);
     }
 
-    uint32_t proofNumber() const {
-        return DataU32[3];
+    uint16_t proofNumber() const {
+        return DataU16[2];
     }
 
-    uint32_t disproofNumber() const {
-        return DataU32[4];
+    uint16_t disproofNumber() const {
+        return DataU16[3];
     }
 
-    uint8_t generation() const {
-        return DataU8[20];
+    uint16_t generation() const {
+        return (uint16_t)(DataU64[1] >> HASH_BITS);
+    }
+
+    bool isSameHash(uint64_t Hash) const {
+        return (Hash >> (64 - HASH_BITS)) == hash();
     }
 
     void setHash(uint64_t Hash) {
-        DataU64[0] = Hash;
+        const uint64_t Generation = DataU64[1] & GENERATION_MASK;
+        DataU64[1] = Generation | (Hash >> (64 - HASH_BITS));
     }
 
     void setStandsSideToMove(core::Stands Stands) {
-        DataU32[2] = static_cast<uint32_t>(Stands);
+        DataU32[0] = static_cast<uint32_t>(Stands);
     }
 
-    void setProofNumber(uint32_t Proof) {
-        DataU32[3] = Proof;
+    void setProofNumber(uint16_t Proof) {
+        DataU16[2] = Proof;
     }
 
-    void setDisproofNumber(uint32_t Disproof) {
-        DataU32[4] = Disproof;
+    void setDisproofNumber(uint16_t Disproof) {
+        DataU16[3] = Disproof;
     }
 
-    void setGeneration(uint8_t Generation) {
-        DataU8[20] = Generation;
+    void setGeneration(uint16_t Generation) {
+        const uint64_t Hash = DataU64[1] & HASH_MASK;
+        DataU64[1] = ((uint64_t)Generation << HASH_BITS) | Hash;
     }
 
  private:
+    static constexpr int HASH_BITS = 48;
+    static constexpr uint64_t HASH_MASK = (1ULL << HASH_BITS) - 1ULL;
+    static constexpr uint64_t GENERATION_MASK = ~HASH_MASK;
+
     union {
-        // DataU64[0]: hash.
-        // DataU64[1-3]: unused.
-        uint64_t DataU64[4];
+        // DataU64[1]: hash.
+        uint64_t DataU64[2];
 
-        // DataU32[0-1]: unused.
-        // DataU32[2]: `Stands` for the side to move.
-        // DataU32[3]: proof number.
-        // DataU32[4]: disproof number.
-        // DataU32[5-7]: unused.
-        uint32_t DataU32[8];
+        // DataU32[0]: `Stands` for the side to move.
+        // DataU32[1-]: unused.
+        uint32_t DataU32[4];
 
-        // DataU8[0-19]: unused.
-        // Datau8[20]: generation.
-        uint8_t DataU8[32];
+        // DataU16[2]: proof number.
+        // DataU16[3]: disproof number.
+        // DataU16[4-6]: hash.
+        // DataU16[7]: generation.
+        uint16_t DataU16[8];
     };
 };
 
 // sizeof(DfPnTTBundle) == 256 byte.
 struct alignas(256) DfPnTTBundle {
-    static constexpr std::size_t BundleSize = 8;
+    static constexpr std::size_t BundleSize = 15;
     DfPnTTEntry Entries[BundleSize];
+    uint32_t DeleteIndex = 0;
+    uint32_t Dummy[3];
 };
 
 class SolverImpl {
@@ -120,7 +130,7 @@ class SolverImpl {
     uint64_t searchedNodeCount() const;
 
  private:
-    template <core::Color C>
+    template <core::Color C, bool Attacking>
     class TTSaver {
      public:
         TTSaver(SolverImpl* SI, core::internal::StateImpl* S, uint64_t Depth, DfPnValue* Value)
@@ -131,7 +141,7 @@ class SolverImpl {
         }
 
         ~TTSaver() {
-            Impl->storeToTT<C>(State, ThisDepth, *Target);
+            Impl->storeToTT<C, Attacking>(State, ThisDepth, *Target);
         }
 
      private:
@@ -141,11 +151,11 @@ class SolverImpl {
         DfPnValue* Target;
     };
 
-    template <core::Color C>
+    template <core::Color C, bool Attacking>
     void storeToTT(core::internal::StateImpl* S, uint64_t Depth, const DfPnValue& Value);
 
-    template <core::Color C>
-    DfPnValue loadFromTT(core::internal::StateImpl* S, uint64_t Depth) const;
+    template <core::Color C, bool Attacking>
+    DfPnValue loadFromTT(core::internal::StateImpl* S, uint64_t Depth, bool* IsFound) const;
 
     template <core::Color C, bool Attacking>
     core::Move32 search(core::internal::StateImpl* S, uint64_t Depth, DfPnValue* ThisValue, DfPnValue* Threshold);
@@ -159,7 +169,7 @@ class SolverImpl {
 
     const uint64_t MaxDepth;
     const uint64_t MaxNodeCount;
-    uint8_t Generation;
+    uint16_t Generation;
     uint64_t SearchedNodeCount;
 };
 
