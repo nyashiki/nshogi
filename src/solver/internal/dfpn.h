@@ -38,7 +38,7 @@ struct DfPnValue {
     uint32_t ProofNumber;
     uint32_t DisproofNumber;
 
-    static constexpr uint32_t Infinity = 1 << 15;
+    static constexpr uint32_t Infinity = 1 << 14;
 };
 
 // sizeof(DfPnTTEntry) == 16 byte.
@@ -48,7 +48,7 @@ struct DfPnTTEntry {
         return DataU64[1] & HASH_MASK;
     }
 
-    core::Stands standsSideToMove() const {
+    core::Stands standsAttacking() const {
         return static_cast<core::Stands>(DataU32[0]);
     }
 
@@ -73,7 +73,7 @@ struct DfPnTTEntry {
         DataU64[1] = Generation | (Hash >> (64 - HASH_BITS));
     }
 
-    void setStandsSideToMove(core::Stands Stands) {
+    void setStandsAttacking(core::Stands Stands) {
         DataU32[0] = static_cast<uint32_t>(Stands);
     }
 
@@ -115,17 +115,25 @@ struct DfPnTTEntry {
 struct alignas(256) DfPnTTBundle {
     static constexpr std::size_t BundleSize = 15;
     DfPnTTEntry Entries[BundleSize];
-    uint32_t DeleteIndex = 0;
-    uint32_t Dummy[3];
+
+    core::RepetitionStatus repetitionStatus(std::size_t Index) const {
+        return static_cast<core::RepetitionStatus>(Reserved[Index]);
+    }
+
+    void setRepetitionStatus(std::size_t Index, core::RepetitionStatus RS) {
+        Reserved[Index] = static_cast<uint8_t>(RS);
+    }
+
+    uint8_t Reserved[16];
 };
 
 class SolverImpl {
  public:
-    SolverImpl(std::size_t MemoryMB, uint64_t MaxDepth, uint64_t MaxNodeCount);
+    SolverImpl(std::size_t MemoryMB);
     ~SolverImpl();
 
-    core::Move32 solve(core::State* S);
-    std::vector<core::Move32> solveWithPV(core::State* S);
+    core::Move32 solve(core::State* S, uint64_t MaxDepth, uint64_t MaxNodeCount);
+    std::vector<core::Move32> solveWithPV(core::State* S, uint64_t MaxDepth, uint64_t MaxNodeCount);
 
     uint64_t searchedNodeCount() const;
 
@@ -133,32 +141,34 @@ class SolverImpl {
     template <core::Color C, bool Attacking>
     class TTSaver {
      public:
-        TTSaver(SolverImpl* SI, core::internal::StateImpl* S, uint64_t Depth, DfPnValue* Value)
+        TTSaver(SolverImpl* SI, core::internal::StateImpl* S, core::RepetitionStatus RS, uint64_t Depth, DfPnValue* Value)
             : Impl(SI)
             , State(S)
+            , RepetitionStatus(RS)
             , ThisDepth(Depth)
             , Target(Value) {
         }
 
         ~TTSaver() {
-            Impl->storeToTT<C, Attacking>(State, ThisDepth, *Target);
+            Impl->storeToTT<C, Attacking>(State, RepetitionStatus, ThisDepth, *Target);
         }
 
      private:
         SolverImpl* Impl;
         core::internal::StateImpl* State;
+        core::RepetitionStatus RepetitionStatus;
         uint64_t ThisDepth;
         DfPnValue* Target;
     };
 
     template <core::Color C, bool Attacking>
-    void storeToTT(core::internal::StateImpl* S, uint64_t Depth, const DfPnValue& Value);
+    void storeToTT(core::internal::StateImpl* S, core::RepetitionStatus RS, uint64_t Depth, const DfPnValue& Value);
 
     template <core::Color C, bool Attacking>
     DfPnValue loadFromTT(core::internal::StateImpl* S, uint64_t Depth, bool* IsFound) const;
 
     template <core::Color C, bool Attacking>
-    core::Move32 search(core::internal::StateImpl* S, uint64_t Depth, DfPnValue* ThisValue, DfPnValue* Threshold);
+    core::Move32 search(core::internal::StateImpl* S, uint64_t Depth, DfPnValue* ThisValue, DfPnValue* Threshold, uint64_t MaxNodeCount, uint64_t MaxDepth);
 
     template <core::Color C, bool Attacking>
     std::vector<core::Move32> findPV(core::internal::StateImpl* S, uint64_t Depth) const;
@@ -167,14 +177,12 @@ class SolverImpl {
     std::size_t TTSize;
     std::unique_ptr<DfPnTTBundle[]> TT;
 
-    const uint64_t MaxDepth;
-    const uint64_t MaxNodeCount;
     uint16_t Generation;
     uint64_t SearchedNodeCount;
 };
 
 } // namespace dfpn
-} // namespaec internal
+} // namespace internal
 } // namespace solver
 } // namespace nshogi
 

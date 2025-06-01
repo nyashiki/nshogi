@@ -306,7 +306,7 @@ TEST(DfPn, Mate1Ply) {
     std::string Line;
     while (std::getline(Ifs, Line)) {
         auto State = nshogi::io::sfen::StateBuilder::newState(Line);
-        auto CheckmateMove = Solver.solve(&State);
+        auto CheckmateMove = Solver.solve(&State, 100000);
 
         TEST_ASSERT_FALSE(CheckmateMove.isNone());
     }
@@ -319,7 +319,7 @@ TEST(DfPn, NoMate1Ply) {
     std::string Line;
     while (std::getline(Ifs, Line)) {
         auto State = nshogi::io::sfen::StateBuilder::newState(Line);
-        auto PV = Solver.solveWithPV(&State);
+        auto PV = Solver.solveWithPV(&State, 100000);
 
         TEST_ASSERT_TRUE(PV.size() == 0 || PV.size() > 1);
     }
@@ -332,7 +332,7 @@ TEST(DfPn, Mate3Ply) {
     std::string Line;
     while (std::getline(Ifs, Line)) {
         auto State = nshogi::io::sfen::StateBuilder::newState(Line);
-        auto CheckmateMove = Solver.solve(&State);
+        auto CheckmateMove = Solver.solve(&State, 100000);
 
         TEST_ASSERT_FALSE(CheckmateMove.isNone());
     }
@@ -345,7 +345,7 @@ TEST(DfPn, Mate5Ply) {
     std::string Line;
     while (std::getline(Ifs, Line)) {
         auto State = nshogi::io::sfen::StateBuilder::newState(Line);
-        auto CheckmateMove = Solver.solve(&State);
+        auto CheckmateMove = Solver.solve(&State, 100000);
 
         TEST_ASSERT_FALSE(CheckmateMove.isNone());
     }
@@ -358,7 +358,7 @@ TEST(DfPn, Mate7Ply) {
     std::string Line;
     while (std::getline(Ifs, Line)) {
         auto State = nshogi::io::sfen::StateBuilder::newState(Line);
-        auto CheckmateMove = Solver.solve(&State);
+        auto CheckmateMove = Solver.solve(&State, 100000);
 
         TEST_ASSERT_FALSE(CheckmateMove.isNone());
     }
@@ -371,7 +371,7 @@ TEST(DfPn, Mate9Ply) {
     std::string Line;
     while (std::getline(Ifs, Line)) {
         auto State = nshogi::io::sfen::StateBuilder::newState(Line);
-        auto CheckmateMove = Solver.solve(&State);
+        auto CheckmateMove = Solver.solve(&State, 100000);
 
         TEST_ASSERT_FALSE(CheckmateMove.isNone());
     }
@@ -384,7 +384,7 @@ TEST(DfPn, Mate11Ply) {
     std::string Line;
     while (std::getline(Ifs, Line)) {
         auto State = nshogi::io::sfen::StateBuilder::newState(Line);
-        auto CheckmateMove = Solver.solve(&State);
+        auto CheckmateMove = Solver.solve(&State, 100000);
 
         TEST_ASSERT_FALSE(CheckmateMove.isNone());
     }
