@@ -81,6 +81,7 @@ SOURCES :=                                 \
     src/c_api/api.cc                   \
     src/c_api/position.cc              \
     src/c_api/state.cc                 \
+    src/c_api/solver.cc                \
     src/c_api/ml.cc                    \
     src/c_api/io.cc
 

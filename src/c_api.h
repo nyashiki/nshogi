@@ -334,6 +334,16 @@ typedef struct nshogi_state_api {
     void (*setWhiteDrawValue)(nshogi_state_config_t* state_config, float value);
 } nshogi_state_api_t;
 
+typedef struct nshogi_solver_dfpn nshogi_solver_dfpn_t;
+
+typedef struct nshogi_solver_api {
+    nshogi_move_t (*dfs)(nshogi_state_t*, int depth);
+
+    nshogi_solver_dfpn_t* (*createDfPnSolver)(long memory_mb);
+    void (*destroyDfPnSolver)(nshogi_solver_dfpn_t*);
+    nshogi_move_t (*solveByDfPn)(nshogi_state_t*, nshogi_solver_dfpn_t*, long max_node_count, int max_depth);
+} nshogi_solver_api_t;
+
 typedef struct nshogi_ml_api {
     void (*makeFeatureVector)(float* dest, const nshogi_state_t*,
                               const nshogi_state_config_t*,
@@ -353,11 +363,13 @@ typedef struct nshogi_io_api {
 typedef struct nshogi_api {
     nshogi_position_api_t* (*positionApi)(void);
     nshogi_state_api_t* (*stateApi)(void);
+    nshogi_solver_api_t* (*solverApi)(void);
     nshogi_ml_api_t* (*mlApi)(void);
     nshogi_io_api_t* (*ioApi)(void);
 
     // Utilities.
     int (*isDroppingPawn)(nshogi_move_t move);
+    int (*isMoveNone)(nshogi_move_t move);
     nshogi_move_t (*winDeclarationMove)(void);
 } nshogi_api_t;
 

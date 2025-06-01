@@ -16,6 +16,7 @@
 
 #include <cstring>
 #include <random>
+#include <fstream>
 
 TEST(CAPI, FeatureType) {
     using namespace nshogi::ml;
@@ -656,6 +657,38 @@ TEST(CAPI, WinDeclarationMove) {
 
     TEST_ASSERT_EQ(static_cast<uint32_t>(WinMove),
                    nshogi::core::Move32::MoveWin().value());
+}
+
+TEST(CAPI, DFS) {
+    std::ifstream Ifs("./res/test/mate-5-ply.txt");
+
+    std::string Line;
+    while (std::getline(Ifs, Line)) {
+        nshogi_state_t* State =
+            nshogiApi()->ioApi()->createStateFromSfen(Line.c_str());
+
+        nshogi_move_t CheckmateMove =
+            nshogiApi()->solverApi()->dfs(State, 5);
+
+        TEST_ASSERT_FALSE(nshogiApi()->isMoveNone(CheckmateMove));
+    }
+}
+
+TEST(CAPI, DfPn) {
+    std::ifstream Ifs("./res/test/mate-11-ply.txt");
+
+    nshogi_solver_dfpn_t* Solver = nshogiApi()->solverApi()->createDfPnSolver(64);
+    std::string Line;
+    while (std::getline(Ifs, Line)) {
+        nshogi_state_t* State =
+            nshogiApi()->ioApi()->createStateFromSfen(Line.c_str());
+
+        nshogi_move_t CheckmateMove =
+            nshogiApi()->solverApi()->solveByDfPn(State, Solver, 0, 0);
+
+        TEST_ASSERT_FALSE(nshogiApi()->isMoveNone(CheckmateMove));
+    }
+    nshogiApi()->solverApi()->destroyDfPnSolver(Solver);
 }
 
 TEST(CAPI, MLFeatureVector) {
