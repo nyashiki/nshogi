@@ -36,6 +36,11 @@ var annotated_dup =
         [ "SimpleTeacher", "structnshogi_1_1ml_1_1SimpleTeacher.html", "structnshogi_1_1ml_1_1SimpleTeacher" ],
         [ "TeacherLoaderForFixedSizeTeacher", "classnshogi_1_1ml_1_1TeacherLoaderForFixedSizeTeacher.html", "classnshogi_1_1ml_1_1TeacherLoaderForFixedSizeTeacher" ],
         [ "ThreadsafeTeacherWriter", "classnshogi_1_1ml_1_1ThreadsafeTeacherWriter.html", "classnshogi_1_1ml_1_1ThreadsafeTeacherWriter" ]
+      ] ],
+      [ "solver", "namespacenshogi_1_1solver.html", [
+        [ "dfpn", "namespacenshogi_1_1solver_1_1dfpn.html", [
+          [ "Solver", "classnshogi_1_1solver_1_1dfpn_1_1Solver.html", "classnshogi_1_1solver_1_1dfpn_1_1Solver" ]
+        ] ]
       ] ]
     ] ]
 ];

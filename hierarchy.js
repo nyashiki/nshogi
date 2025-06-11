@@ -18,6 +18,7 @@ var hierarchy =
       [ "nshogi::io::sfen::PositionBuilder", "classnshogi_1_1io_1_1sfen_1_1PositionBuilder.html", null ]
     ] ],
     [ "nshogi::ml::SimpleTeacher", "structnshogi_1_1ml_1_1SimpleTeacher.html", null ],
+    [ "nshogi::solver::dfpn::Solver", "classnshogi_1_1solver_1_1dfpn_1_1Solver.html", null ],
     [ "nshogi::core::SquareIterator< Order >", "structnshogi_1_1core_1_1SquareIterator.html", null ],
     [ "nshogi::core::State", "classnshogi_1_1core_1_1State.html", null ],
     [ "nshogi::core::StateBuilder", "classnshogi_1_1core_1_1StateBuilder.html", [

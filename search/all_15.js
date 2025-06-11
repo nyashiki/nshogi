@@ -4,5 +4,6 @@ var searchData=
   ['_7efeaturestackruntime_1',['~FeatureStackRuntime',['../structnshogi_1_1ml_1_1FeatureStackRuntime.html#aff9d2560826d5f6866dd3776426d8177',1,'nshogi::ml::FeatureStackRuntime']]],
   ['_7ehuffmancode_2',['~HuffmanCode',['../structnshogi_1_1core_1_1HuffmanCode.html#ad43205a9a7615b2150fd8bfcd4f2b907',1,'nshogi::core::HuffmanCode']]],
   ['_7eposition_3',['~Position',['../structnshogi_1_1core_1_1Position.html#a982e7f50134ff2f7c1311dc131baaeb7',1,'nshogi::core::Position']]],
-  ['_7estate_4',['~State',['../classnshogi_1_1core_1_1State.html#a68f199ead5787f52f3e898e4027736e1',1,'nshogi::core::State']]]
+  ['_7esolver_4',['~Solver',['../classnshogi_1_1solver_1_1dfpn_1_1Solver.html#afb34b49293b59b420fea82cd83261009',1,'nshogi::solver::dfpn::Solver']]],
+  ['_7estate_5',['~State',['../classnshogi_1_1core_1_1State.html#a68f199ead5787f52f3e898e4027736e1',1,'nshogi::core::State']]]
 ];

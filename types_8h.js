@@ -107,7 +107,8 @@ var types_8h =
       [ "WinRepetition", "types_8h.html#a12c9215be02d67fe5af6e9c59bcd0310acf95e95ab0a9b843716beb1436757c7b", null ],
       [ "LossRepetition", "types_8h.html#a12c9215be02d67fe5af6e9c59bcd0310ab40c1d6b547f5050dd847dee9ad158ec", null ],
       [ "SuperiorRepetition", "types_8h.html#a12c9215be02d67fe5af6e9c59bcd0310af4a077465cfc6f004f10240ffc33cfa1", null ],
-      [ "InferiorRepetition", "types_8h.html#a12c9215be02d67fe5af6e9c59bcd0310ab43538feee1b46a41c4f924ed5f84d96", null ]
+      [ "InferiorRepetition", "types_8h.html#a12c9215be02d67fe5af6e9c59bcd0310ab43538feee1b46a41c4f924ed5f84d96", null ],
+      [ "NumRepetitionStatus", "types_8h.html#a12c9215be02d67fe5af6e9c59bcd0310aec446bbf34af6adfb236f8108103b280", null ]
     ] ],
     [ "Square", "types_8h.html#a4fc4e1258dfdd1f019167d58c1d7a6c1", [
       [ "Sq9A", "types_8h.html#a4fc4e1258dfdd1f019167d58c1d7a6c1a4288b19f1d354d55680e98beed3f0f64", null ],

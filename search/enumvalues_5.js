@@ -11,7 +11,8 @@ var searchData=
   ['numfiles_8',['NumFiles',['../namespacenshogi_1_1core.html#a78bcec9d077124a47efbcd640b0201baa77c9cfc3846948420697a29ec4cffd02',1,'nshogi::core']]],
   ['numpiecetype_9',['NumPieceType',['../namespacenshogi_1_1core.html#a48e95a20c4b8db53f6c955ddac0b0e12adeffae25068b1e6838117e1a6886c039',1,'nshogi::core']]],
   ['numranks_10',['NumRanks',['../namespacenshogi_1_1core.html#ab77af5da8f4d8145e4925bd412b1b205a5dc0df0e0a4511369ad177d69d0a93d6',1,'nshogi::core']]],
-  ['numsquares_11',['NumSquares',['../namespacenshogi_1_1core.html#a4fc4e1258dfdd1f019167d58c1d7a6c1acf42a8918d87934334f18c63dfe52877',1,'nshogi::core']]],
-  ['numstandkinds_12',['NumStandKinds',['../namespacenshogi_1_1core.html#ab42e05dd57d7bb23ea0e9832fe62a98da0a0aa4fd3f8a3731500650897d8f71ad',1,'nshogi::core']]],
-  ['nwse_13',['NWSE',['../namespacenshogi_1_1core.html#ab8baa483d1eb2b34682c3aca88080269aa06e7c38117e253136c030306b93f505',1,'nshogi::core']]]
+  ['numrepetitionstatus_11',['NumRepetitionStatus',['../namespacenshogi_1_1core.html#a12c9215be02d67fe5af6e9c59bcd0310aec446bbf34af6adfb236f8108103b280',1,'nshogi::core']]],
+  ['numsquares_12',['NumSquares',['../namespacenshogi_1_1core.html#a4fc4e1258dfdd1f019167d58c1d7a6c1acf42a8918d87934334f18c63dfe52877',1,'nshogi::core']]],
+  ['numstandkinds_13',['NumStandKinds',['../namespacenshogi_1_1core.html#ab42e05dd57d7bb23ea0e9832fe62a98da0a0aa4fd3f8a3731500650897d8f71ad',1,'nshogi::core']]],
+  ['nwse_14',['NWSE',['../namespacenshogi_1_1core.html#ab8baa483d1eb2b34682c3aca88080269aa06e7c38117e253136c030306b93f505',1,'nshogi::core']]]
 ];
