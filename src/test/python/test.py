@@ -121,6 +121,117 @@ class TestState(unittest.TestCase):
             s = nshogi.io.sfen.make_state_from_sfen(sfen)
             self.assertEqual(nshogi.RepetitionStatus.LOSS_REPETITION, s.get_repetition(strict))
 
+class TestSolver(unittest.TestCase):
+    def setup(self):
+        self.dfpn = nshogi.solver.DfPn(memory_mb = 64)
+
+    def test_dfs_mate1ply(self):
+        with open("res/test/mate-1-ply.txt", "r") as f:
+            for line in f:
+                line = line.strip()
+
+                s = nshogi.io.sfen.make_state_from_sfen(line)
+
+                checkmate_move = nshogi.solver.dfs(s, 1)
+                self.assertFalse(checkmate_move.is_none())
+
+    def test_dfs_mate3ply(self):
+        with open("res/test/mate-3-ply.txt", "r") as f:
+            for line in f:
+                line = line.strip()
+
+                s = nshogi.io.sfen.make_state_from_sfen(line)
+
+                checkmate_move = nshogi.solver.dfs(s, 3)
+                self.assertFalse(checkmate_move.is_none())
+
+    def test_dfs_mate5ply(self):
+        with open("res/test/mate-5-ply.txt", "r") as f:
+            for line in f:
+                line = line.strip()
+
+                s = nshogi.io.sfen.make_state_from_sfen(line)
+
+                checkmate_move = nshogi.solver.dfs(s, 5)
+                self.assertFalse(checkmate_move.is_none())
+
+    def test_dfs_mate7ply(self):
+        with open("res/test/mate-7-ply.txt", "r") as f:
+            for line in f:
+                line = line.strip()
+
+                s = nshogi.io.sfen.make_state_from_sfen(line)
+
+                checkmate_move = nshogi.solver.dfs(s, 7)
+                self.assertFalse(checkmate_move.is_none())
+
+    def test_dfpn_mate1ply(self):
+        with open("res/test/mate-1-ply.txt", "r") as f:
+            solver = nshogi.solver.DfPn(64)
+            for line in f:
+                line = line.strip()
+
+                s = nshogi.io.sfen.make_state_from_sfen(line)
+
+                checkmate_move = solver.solve(s, with_pv=True)
+                self.assertTrue(len(checkmate_move) > 0)
+
+    def test_dfpn_mate3ply(self):
+        with open("res/test/mate-3-ply.txt", "r") as f:
+            solver = nshogi.solver.DfPn(64)
+            for line in f:
+                line = line.strip()
+
+                s = nshogi.io.sfen.make_state_from_sfen(line)
+
+                checkmate_move = solver.solve(s, with_pv=True)
+                self.assertTrue(len(checkmate_move) > 0)
+
+    def test_dfpn_mate5ply(self):
+        with open("res/test/mate-5-ply.txt", "r") as f:
+            solver = nshogi.solver.DfPn(64)
+            for line in f:
+                line = line.strip()
+
+                s = nshogi.io.sfen.make_state_from_sfen(line)
+
+                checkmate_move = solver.solve(s, with_pv=True)
+                self.assertTrue(len(checkmate_move) > 0)
+
+    def test_dfpn_mate7ply(self):
+        with open("res/test/mate-7-ply.txt", "r") as f:
+            solver = nshogi.solver.DfPn(64)
+            for line in f:
+                line = line.strip()
+
+                s = nshogi.io.sfen.make_state_from_sfen(line)
+
+                checkmate_move = solver.solve(s, with_pv=True)
+                self.assertTrue(len(checkmate_move) > 0)
+
+
+    def test_dfpn_mate9ply(self):
+        with open("res/test/mate-9-ply.txt", "r") as f:
+            solver = nshogi.solver.DfPn(64)
+            for line in f:
+                line = line.strip()
+
+                s = nshogi.io.sfen.make_state_from_sfen(line)
+
+                checkmate_move = solver.solve(s, with_pv=True)
+                self.assertTrue(len(checkmate_move) > 0)
+
+    def test_dfpn_mate11ply(self):
+        with open("res/test/mate-11-ply.txt", "r") as f:
+            solver = nshogi.solver.DfPn(64)
+            for line in f:
+                line = line.strip()
+
+                s = nshogi.io.sfen.make_state_from_sfen(line)
+
+                checkmate_move = solver.solve(s, with_pv=True)
+                self.assertTrue(len(checkmate_move) > 0)
+
 class TestML(unittest.TestCase):
     def setUp(self):
         self.sfens = []

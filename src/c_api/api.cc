@@ -11,6 +11,7 @@
 #include "io.h"
 #include "ml.h"
 #include "position.h"
+#include "solver.h"
 #include "state.h"
 
 #include "../core/initializer.h"
@@ -30,6 +31,10 @@ nshogi_state_api_t* stateApiImpl() {
     return c_api::state::getApi();
 }
 
+nshogi_solver_api_t* solverApiImpl() {
+    return c_api::solver::getApi();
+}
+
 nshogi_ml_api_t* mlApiImpl() {
     return c_api::ml::getApi();
 }
@@ -41,6 +46,11 @@ nshogi_io_api_t* ioApiImpl() {
 int apiIsDroppingPawn(nshogi_move_t CMove) {
     core::Move32 Move = core::Move32::fromValue(CMove);
     return Move.drop() && Move.pieceType() == core::PTK_Pawn;
+}
+
+int apiIsMoveNone(nshogi_move_t CMove) {
+    core::Move32 Move = core::Move32::fromValue(CMove);
+    return static_cast<int>(Move.isNone());
 }
 
 nshogi_move_t apiWinDeclarationMove() {
@@ -61,10 +71,12 @@ nshogi_api_t* nshogiApi(void) {
 
         Api.positionApi = positionApiImpl;
         Api.stateApi = stateApiImpl;
+        Api.solverApi = solverApiImpl;
         Api.mlApi = mlApiImpl;
         Api.ioApi = ioApiImpl;
 
         Api.isDroppingPawn = apiIsDroppingPawn;
+        Api.isMoveNone = apiIsMoveNone;
         Api.winDeclarationMove = apiWinDeclarationMove;
 
         Initialized = true;

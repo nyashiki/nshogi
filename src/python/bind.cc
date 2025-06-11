@@ -19,6 +19,9 @@
 #include "../core/state.h"
 #include "../core/stateconfig.h"
 
+#include "../solver/dfpn.h"
+#include "../solver/dfs.h"
+
 #include "../io/csa.h"
 #include "../io/file.h"
 #include "../io/sfen.h"
@@ -80,7 +83,8 @@ PYBIND11_MODULE(nshogi, Module) {
         .def_property_readonly("capture_piece_type",
                                &nshogi::core::Move32::capturePieceType)
         .def_property_readonly("drop", &nshogi::core::Move32::drop)
-        .def_property_readonly("promote", &nshogi::core::Move32::promote);
+        .def_property_readonly("promote", &nshogi::core::Move32::promote)
+        .def("is_none", &nshogi::core::Move32::isNone);
 
     pybind11::enum_<nshogi::core::RepetitionStatus>(Module, "RepetitionStatus")
         .value("NO_REPETITION", nshogi::core::RepetitionStatus::NoRepetition)
@@ -224,6 +228,27 @@ PYBIND11_MODULE(nshogi, Module) {
                        &nshogi::core::StateConfig::BlackDrawValue)
         .def_readwrite("white_draw_value",
                        &nshogi::core::StateConfig::WhiteDrawValue);
+
+    auto SolverModule = Module.def_submodule("solver");
+    SolverModule.def("dfs", &nshogi::solver::dfs::solve);
+
+    pybind11::class_<nshogi::solver::dfpn::Solver>(SolverModule, "DfPn")
+        .def(pybind11::init<std::size_t>(), pybind11::arg("memory_mb"))
+        .def(
+            "solve",
+            [](nshogi::solver::dfpn::Solver& Solver, nshogi::core::State& State,
+               bool WithPV, uint64_t MaxNodeCount, uint64_t MaxDepth) {
+                if (WithPV) {
+                    return pybind11::cast(
+                        Solver.solveWithPV(&State, MaxNodeCount, MaxDepth));
+                } else {
+                    return pybind11::cast(
+                        Solver.solve(&State, MaxNodeCount, MaxDepth));
+                }
+            },
+            pybind11::arg("state"), pybind11::arg("with_pv") = true,
+            pybind11::arg("max_node_count") = 0,
+            pybind11::arg("max_depth") = 0);
 
     auto IOModule = Module.def_submodule("io");
     auto SfenModule = IOModule.def_submodule("sfen");

@@ -81,6 +81,10 @@ class StateImpl {
         return Helper.getCurrentStepHelper().CheckerBB;
     }
 
+    inline uint64_t getBoardHash() const {
+        return HashValue.getValue();
+    }
+
     inline uint64_t getHash() const {
         return HashValue.getValue() ^
                ((uint64_t)(getPosition().getStand<Black>()) << 33) ^
