@@ -9,8 +9,8 @@
 
 #include "solver.h"
 #include "../core/state.h"
-#include "../solver/dfs.h"
 #include "../solver/dfpn.h"
+#include "../solver/dfs.h"
 
 using namespace nshogi;
 
@@ -32,11 +32,14 @@ void solverApiDestroyDfPnSolver(nshogi_solver_dfpn_t* CSolver) {
     delete Solver;
 }
 
-nshogi_move_t solverApiSolveByDfPn(nshogi_state_t* CState, nshogi_solver_dfpn_t* CSolver, long MaxNodeCount, int MaxDepth) {
+nshogi_move_t solverApiSolveByDfPn(nshogi_state_t* CState,
+                                   nshogi_solver_dfpn_t* CSolver,
+                                   long MaxNodeCount, int MaxDepth) {
     core::State* State = reinterpret_cast<core::State*>(CState);
     auto Solver = reinterpret_cast<solver::dfpn::Solver*>(CSolver);
 
-    auto CheckmateMove = Solver->solve(State, (uint64_t)MaxNodeCount, (uint64_t)MaxDepth);
+    auto CheckmateMove =
+        Solver->solve(State, (uint64_t)MaxNodeCount, (uint64_t)MaxDepth);
     return CheckmateMove.value();
 }
 

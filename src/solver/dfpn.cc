@@ -21,11 +21,13 @@ Solver::Solver(std::size_t MemoryMB)
 Solver::~Solver() {
 }
 
-core::Move32 Solver::solve(core::State* S, uint64_t MaxNodeCount, uint64_t MaxDepth) {
+core::Move32 Solver::solve(core::State* S, uint64_t MaxNodeCount,
+                           uint64_t MaxDepth) {
     return Impl->solve(S, MaxNodeCount, MaxDepth);
 }
 
-std::vector<core::Move32> Solver::solveWithPV(core::State* S, uint64_t MaxNodeCount, uint64_t MaxDepth) {
+std::vector<core::Move32>
+Solver::solveWithPV(core::State* S, uint64_t MaxNodeCount, uint64_t MaxDepth) {
     return Impl->solveWithPV(S, MaxNodeCount, MaxDepth);
 }
 

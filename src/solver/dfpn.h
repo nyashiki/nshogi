@@ -34,8 +34,11 @@ class Solver {
     Solver(std::size_t MemoryMB);
     ~Solver();
 
-    core::Move32 solve(core::State* S, uint64_t MaxNodeCount = 1000000, uint64_t MaxDepth = 64);
-    std::vector<core::Move32> solveWithPV(core::State* S, uint64_t MaxNodeCount = 1000000, uint64_t MaxDepth = 64);
+    core::Move32 solve(core::State* S, uint64_t MaxNodeCount = 1000000,
+                       uint64_t MaxDepth = 64);
+    std::vector<core::Move32> solveWithPV(core::State* S,
+                                          uint64_t MaxNodeCount = 1000000,
+                                          uint64_t MaxDepth = 64);
 
     uint64_t searchedNodeCount() const;
 

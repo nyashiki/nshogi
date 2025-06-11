@@ -39,12 +39,15 @@ SolverImpl::~SolverImpl() {
 }
 
 template <core::Color C, bool Attacking>
-void SolverImpl::storeToTT(
-        core::internal::StateImpl* S, core::RepetitionStatus RS, uint64_t Depth, const DfPnValue& Value) {
-    const core::Stands StandsAttacking =
-        (Attacking) ? S->getPosition().getStand<C>() : S->getPosition().getStand<~C>();
+void SolverImpl::storeToTT(core::internal::StateImpl* S,
+                           core::RepetitionStatus RS, uint64_t Depth,
+                           const DfPnValue& Value) {
+    const core::Stands StandsAttacking = (Attacking)
+                                             ? S->getPosition().getStand<C>()
+                                             : S->getPosition().getStand<~C>();
     const uint64_t Hash = S->getBoardHash();
-    const std::size_t Index = (((Hash + 2 * Depth) << 1) | (uint64_t)Attacking) % TTSize;
+    const std::size_t Index =
+        (((Hash + 2 * Depth) << 1) | (uint64_t)Attacking) % TTSize;
 
     std::size_t DeleteIndex = 0;
     uint16_t PnPlusDnMax = 0;
@@ -63,15 +66,17 @@ void SolverImpl::storeToTT(
             return;
         }
 
-        const uint16_t PnPlusDn = Entry->proofNumber() + Entry->disproofNumber();
+        const uint16_t PnPlusDn =
+            Entry->proofNumber() + Entry->disproofNumber();
 
         if (PnPlusDn < DfPnValue::Infinity) {
-            const uint16_t PnMaxDn = std::max(Entry->proofNumber(), Entry->disproofNumber());
+            const uint16_t PnMaxDn =
+                std::max(Entry->proofNumber(), Entry->disproofNumber());
             if (PnPlusDn > PnPlusDnMax) {
                 PnPlusDnMax = PnPlusDn;
                 PnMaxDnMax = PnMaxDn;
                 DeleteIndex = I;
-            } else if(PnMaxDn == PnPlusDnMax) {
+            } else if (PnMaxDn == PnPlusDnMax) {
                 if (PnMaxDn > PnMaxDnMax) {
                     PnMaxDnMax = PnMaxDn;
                     DeleteIndex = I;
@@ -88,25 +93,28 @@ void SolverImpl::storeToTT(
 
             if (RS == core::RepetitionStatus::NoRepetition) {
                 if (Value.ProofNumber == 0) {
-                    if (core::isSuperiorOrEqual(Entry->standsAttacking(), StandsAttacking)) {
+                    if (core::isSuperiorOrEqual(Entry->standsAttacking(),
+                                                StandsAttacking)) {
                         Entry->setStandsAttacking(StandsAttacking);
                         Entry->setProofNumber((uint16_t)Value.ProofNumber);
-                        Entry->setDisproofNumber((uint16_t)Value.DisproofNumber);
+                        Entry->setDisproofNumber(
+                            (uint16_t)Value.DisproofNumber);
                         return;
                     }
                 }
                 if (Value.DisproofNumber == 0) {
-                    if (core::isSuperiorOrEqual(StandsAttacking, Entry->standsAttacking())) {
+                    if (core::isSuperiorOrEqual(StandsAttacking,
+                                                Entry->standsAttacking())) {
                         Entry->setStandsAttacking(StandsAttacking);
                         Entry->setProofNumber((uint16_t)Value.ProofNumber);
-                        Entry->setDisproofNumber((uint16_t)Value.DisproofNumber);
+                        Entry->setDisproofNumber(
+                            (uint16_t)Value.DisproofNumber);
                         return;
                     }
                 }
             }
         }
     }
-
 
     DfPnTTEntry* Entry = &TT[Index].Entries[DeleteIndex];
     Entry->setHash(Hash);
@@ -118,11 +126,14 @@ void SolverImpl::storeToTT(
 }
 
 template <core::Color C, bool Attacking>
-DfPnValue SolverImpl::loadFromTT(core::internal::StateImpl* S, uint64_t Depth, bool* IsFound) const {
-    const core::Stands StandsAttacking =
-        (Attacking) ? S->getPosition().getStand<C>() : S->getPosition().getStand<~C>();
+DfPnValue SolverImpl::loadFromTT(core::internal::StateImpl* S, uint64_t Depth,
+                                 bool* IsFound) const {
+    const core::Stands StandsAttacking = (Attacking)
+                                             ? S->getPosition().getStand<C>()
+                                             : S->getPosition().getStand<~C>();
     const uint64_t Hash = S->getBoardHash();
-    const std::size_t Index = (((Hash + 2 * Depth) << 1) | (uint64_t)Attacking) % TTSize;
+    const std::size_t Index =
+        (((Hash + 2 * Depth) << 1) | (uint64_t)Attacking) % TTSize;
     for (std::size_t I = 0; I < DfPnTTBundle::BundleSize; ++I) {
         const DfPnTTEntry* Entry = &TT[Index].Entries[I];
 
@@ -133,20 +144,26 @@ DfPnValue SolverImpl::loadFromTT(core::internal::StateImpl* S, uint64_t Depth, b
         if (Entry->isSameHash(Hash)) {
             if (Entry->standsAttacking() == StandsAttacking) {
                 *IsFound = true;
-                return DfPnValue((uint32_t)Entry->proofNumber(), (uint32_t)Entry->disproofNumber());
+                return DfPnValue((uint32_t)Entry->proofNumber(),
+                                 (uint32_t)Entry->disproofNumber());
             }
 
-            if (TT[Index].repetitionStatus(I) == core::RepetitionStatus::NoRepetition) {
+            if (TT[Index].repetitionStatus(I) ==
+                core::RepetitionStatus::NoRepetition) {
                 if (Entry->proofNumber() == 0) {
-                    if (core::isSuperiorOrEqual(StandsAttacking, Entry->standsAttacking())) {
+                    if (core::isSuperiorOrEqual(StandsAttacking,
+                                                Entry->standsAttacking())) {
                         *IsFound = true;
-                        return DfPnValue((uint32_t)Entry->proofNumber(), (uint32_t)Entry->disproofNumber());
+                        return DfPnValue((uint32_t)Entry->proofNumber(),
+                                         (uint32_t)Entry->disproofNumber());
                     }
                 }
                 if (Entry->disproofNumber() == 0) {
-                    if (core::isSuperiorOrEqual(Entry->standsAttacking(), StandsAttacking)) {
+                    if (core::isSuperiorOrEqual(Entry->standsAttacking(),
+                                                StandsAttacking)) {
                         *IsFound = true;
-                        return DfPnValue((uint32_t)Entry->proofNumber(), (uint32_t)Entry->disproofNumber());
+                        return DfPnValue((uint32_t)Entry->proofNumber(),
+                                         (uint32_t)Entry->disproofNumber());
                     }
                 }
             }
@@ -159,11 +176,13 @@ DfPnValue SolverImpl::loadFromTT(core::internal::StateImpl* S, uint64_t Depth, b
 }
 
 template <core::Color C, bool Attacking>
-core::Move32 SolverImpl::search(core::internal::StateImpl* S, uint64_t Depth, DfPnValue* ThisValue, DfPnValue* Threshold, uint64_t MaxNodeCount, uint64_t MaxDepth) {
+core::Move32 SolverImpl::search(core::internal::StateImpl* S, uint64_t Depth,
+                                DfPnValue* ThisValue, DfPnValue* Threshold,
+                                uint64_t MaxNodeCount, uint64_t MaxDepth) {
     ++SearchedNodeCount;
 
     if (ThisValue->ProofNumber >= Threshold->ProofNumber ||
-            ThisValue->DisproofNumber >= Threshold->DisproofNumber) {
+        ThisValue->DisproofNumber >= Threshold->DisproofNumber) {
         Threshold->ProofNumber = ThisValue->ProofNumber;
         Threshold->DisproofNumber = ThisValue->DisproofNumber;
         return core::Move32::MoveNone();
@@ -180,9 +199,12 @@ core::Move32 SolverImpl::search(core::internal::StateImpl* S, uint64_t Depth, Df
     }
 
     // Checkmate.
-    const auto Moves = Attacking
-        ? core::internal::MoveGeneratorInternal::generateLegalCheckMoves<C, true>(*S)
-        : core::internal::MoveGeneratorInternal::generateLegalEvasionMoves<C, true>(*S);
+    const auto Moves =
+        Attacking
+            ? core::internal::MoveGeneratorInternal::generateLegalCheckMoves<
+                  C, true>(*S)
+            : core::internal::MoveGeneratorInternal::generateLegalEvasionMoves<
+                  C, true>(*S);
 
     if constexpr (Attacking) {
         if (Moves.size() == 0) {
@@ -208,26 +230,33 @@ core::Move32 SolverImpl::search(core::internal::StateImpl* S, uint64_t Depth, Df
             for (const core::Move32 Move : Moves) {
                 S->doMove<C>(Move);
                 bool IsFound;
-                DfPnValue ChildValue = loadFromTT<~C, !Attacking>(S, Depth + 1, &IsFound);
+                DfPnValue ChildValue =
+                    loadFromTT<~C, !Attacking>(S, Depth + 1, &IsFound);
 
                 if (!IsFound) {
                     const auto ChildRepetitionStatus = S->getRepetitionStatus();
-                    if (ChildRepetitionStatus != core::RepetitionStatus::NoRepetition) {
+                    if (ChildRepetitionStatus !=
+                        core::RepetitionStatus::NoRepetition) {
                         ChildValue = DfPnValue(DfPnValue::Infinity, 0);
                     } else {
-                        const auto NextMoves = core::internal::MoveGeneratorInternal::generateLegalEvasionMoves<~C, true>(*S);
+                        const auto NextMoves =
+                            core::internal::MoveGeneratorInternal::
+                                generateLegalEvasionMoves<~C, true>(*S);
                         if (NextMoves.size() == 0) {
                             const core::Move32 LastMove = S->getLastMove();
-                            if (LastMove.drop() && LastMove.pieceType() == core::PieceTypeKind::PTK_Pawn) {
+                            if (LastMove.drop() &&
+                                LastMove.pieceType() ==
+                                    core::PieceTypeKind::PTK_Pawn) {
                                 ChildValue = DfPnValue(DfPnValue::Infinity, 0);
-                            } else  {
+                            } else {
                                 ChildValue = DfPnValue(0, DfPnValue::Infinity);
                             }
                         } else {
                             ChildValue.ProofNumber = (uint32_t)NextMoves.size();
                         }
                     }
-                    storeToTT<~C, !Attacking>(S, ChildRepetitionStatus, Depth + 1, ChildValue);
+                    storeToTT<~C, !Attacking>(S, ChildRepetitionStatus,
+                                              Depth + 1, ChildValue);
                 }
 
                 S->undoMove<~C>();
@@ -244,22 +273,28 @@ core::Move32 SolverImpl::search(core::internal::StateImpl* S, uint64_t Depth, Df
             }
             SumDisproof = std::min(DfPnValue::Infinity, SumDisproof);
 
-            if (MinProof >= Threshold->ProofNumber || SumDisproof >= Threshold->DisproofNumber) {
+            if (MinProof >= Threshold->ProofNumber ||
+                SumDisproof >= Threshold->DisproofNumber) {
                 ThisValue->ProofNumber = MinProof;
                 ThisValue->DisproofNumber = SumDisproof;
                 return BestMove;
             }
 
-            assert(Threshold->DisproofNumber + BestChildValue.DisproofNumber > SumDisproof);
+            assert(Threshold->DisproofNumber + BestChildValue.DisproofNumber >
+                   SumDisproof);
             DfPnValue ChildThreshold(
-                std::min({Threshold->ProofNumber, MinProof2 + 1, DfPnValue::Infinity}),
-                (ThisValue->DisproofNumber >= DfPnValue::Infinity || Threshold->DisproofNumber >= DfPnValue::Infinity)
+                std::min({Threshold->ProofNumber, MinProof2 + 1,
+                          DfPnValue::Infinity}),
+                (ThisValue->DisproofNumber >= DfPnValue::Infinity ||
+                 Threshold->DisproofNumber >= DfPnValue::Infinity)
                     ? DfPnValue::Infinity
-                    : std::min(Threshold->DisproofNumber + BestChildValue.DisproofNumber - SumDisproof, DfPnValue::Infinity)
-            );
+                    : std::min(Threshold->DisproofNumber +
+                                   BestChildValue.DisproofNumber - SumDisproof,
+                               DfPnValue::Infinity));
 
             S->doMove<C>(BestMove);
-            search<~C, !Attacking>(S, Depth + 1, &BestChildValue, &ChildThreshold, MaxNodeCount, MaxDepth);
+            search<~C, !Attacking>(S, Depth + 1, &BestChildValue,
+                                   &ChildThreshold, MaxNodeCount, MaxDepth);
             S->undoMove<~C>();
 
             if (BestChildValue.ProofNumber == 0) {
@@ -280,7 +315,8 @@ core::Move32 SolverImpl::search(core::internal::StateImpl* S, uint64_t Depth, Df
             for (const core::Move32 Move : Moves) {
                 S->doMove<C>(Move);
                 bool IsFound;
-                DfPnValue ChildValue = loadFromTT<~C, !Attacking>(S, Depth + 1, &IsFound);
+                DfPnValue ChildValue =
+                    loadFromTT<~C, !Attacking>(S, Depth + 1, &IsFound);
                 S->undoMove<~C>();
 
                 SumProof += ChildValue.ProofNumber;
@@ -296,22 +332,28 @@ core::Move32 SolverImpl::search(core::internal::StateImpl* S, uint64_t Depth, Df
             }
             SumProof = std::min(DfPnValue::Infinity, SumProof);
 
-            if (SumProof >= Threshold->ProofNumber || MinDisproof >= Threshold->DisproofNumber) {
+            if (SumProof >= Threshold->ProofNumber ||
+                MinDisproof >= Threshold->DisproofNumber) {
                 ThisValue->ProofNumber = SumProof;
                 ThisValue->DisproofNumber = MinDisproof;
                 return core::Move32::MoveNone();
             }
 
-            assert(Threshold->ProofNumber + BestChildValue.ProofNumber > SumProof);
+            assert(Threshold->ProofNumber + BestChildValue.ProofNumber >
+                   SumProof);
             DfPnValue ChildThreshold(
-                (ThisValue->ProofNumber >= DfPnValue::Infinity || Threshold->ProofNumber >= DfPnValue::Infinity)
-                ? DfPnValue::Infinity
-                : std::min(Threshold->ProofNumber + BestChildValue.ProofNumber - SumProof, DfPnValue::Infinity),
-                std::min({Threshold->DisproofNumber, MinDisproof2 + 1, DfPnValue::Infinity})
-            );
+                (ThisValue->ProofNumber >= DfPnValue::Infinity ||
+                 Threshold->ProofNumber >= DfPnValue::Infinity)
+                    ? DfPnValue::Infinity
+                    : std::min(Threshold->ProofNumber +
+                                   BestChildValue.ProofNumber - SumProof,
+                               DfPnValue::Infinity),
+                std::min({Threshold->DisproofNumber, MinDisproof2 + 1,
+                          DfPnValue::Infinity}));
 
             S->doMove<C>(BestMove);
-            search<~C, !Attacking>(S, Depth + 1, &BestChildValue, &ChildThreshold, MaxNodeCount, MaxDepth);
+            search<~C, !Attacking>(S, Depth + 1, &BestChildValue,
+                                   &ChildThreshold, MaxNodeCount, MaxDepth);
             S->undoMove<~C>();
 
             if (BestChildValue.DisproofNumber == 0) {
@@ -325,21 +367,26 @@ core::Move32 SolverImpl::search(core::internal::StateImpl* S, uint64_t Depth, Df
 }
 
 template <core::Color C, bool Attacking>
-std::vector<core::Move32> SolverImpl::findPV(core::internal::StateImpl* S, uint64_t Depth) const {
-    const auto Moves = Attacking
-        ? core::internal::MoveGeneratorInternal::generateLegalCheckMoves<C, true>(*S)
-        : core::internal::MoveGeneratorInternal::generateLegalEvasionMoves<C, true>(*S);
+std::vector<core::Move32> SolverImpl::findPV(core::internal::StateImpl* S,
+                                             uint64_t Depth) const {
+    const auto Moves =
+        Attacking
+            ? core::internal::MoveGeneratorInternal::generateLegalCheckMoves<
+                  C, true>(*S)
+            : core::internal::MoveGeneratorInternal::generateLegalEvasionMoves<
+                  C, true>(*S);
 
     if (Moves.size() == 0) {
-        return { };
+        return {};
     }
 
     std::vector<core::Move32> BestPV;
     for (const core::Move32 Move : Moves) {
         S->doMove<C>(Move);
         bool IsFound;
-        const auto ChildValue = loadFromTT<~C, !Attacking>(S, Depth + 1, &IsFound);
-        std::vector<core::Move32> SubPV { };
+        const auto ChildValue =
+            loadFromTT<~C, !Attacking>(S, Depth + 1, &IsFound);
+        std::vector<core::Move32> SubPV{};
         if (ChildValue.ProofNumber == 0) {
             SubPV = findPV<~C, !Attacking>(S, Depth + 1);
         }
@@ -354,23 +401,23 @@ std::vector<core::Move32> SolverImpl::findPV(core::internal::StateImpl* S, uint6
             BestPV.clear();
             BestPV.reserve(SubPV.size() + 1);
             BestPV.push_back(Move);
-            BestPV.insert(
-                    BestPV.end(),
-                    std::make_move_iterator(SubPV.begin()),
-                    std::make_move_iterator(SubPV.end()));
+            BestPV.insert(BestPV.end(), std::make_move_iterator(SubPV.begin()),
+                          std::make_move_iterator(SubPV.end()));
         }
     }
 
     return BestPV;
 }
 
-std::vector<core::Move32> SolverImpl::findPV(core::internal::StateImpl* S) const {
+std::vector<core::Move32>
+SolverImpl::findPV(core::internal::StateImpl* S) const {
     return (S->getSideToMove() == core::Black)
-        ? findPV<core::Black, true>(S, 0)
-        : findPV<core::White, true>(S, 0);
+               ? findPV<core::Black, true>(S, 0)
+               : findPV<core::White, true>(S, 0);
 }
 
-core::Move32 SolverImpl::solve(core::State* S, uint64_t MaxNodeCount, uint64_t MaxDepth) {
+core::Move32 SolverImpl::solve(core::State* S, uint64_t MaxNodeCount,
+                               uint64_t MaxDepth) {
     ++Generation;
     SearchedNodeCount = 0;
 
@@ -382,9 +429,12 @@ core::Move32 SolverImpl::solve(core::State* S, uint64_t MaxNodeCount, uint64_t M
     DfPnValue Threshold(DfPnValue::Infinity, DfPnValue::Infinity);
 
     while (true) {
-        const core::Move32 BestMove = (SideToMove == core::Black)
-            ? search<core::Black, true>(Adapter.get(), 0, &RootValue, &Threshold, MaxNodeCount, MaxDepth)
-            : search<core::White, true>(Adapter.get(), 0, &RootValue, &Threshold, MaxNodeCount, MaxDepth);
+        const core::Move32 BestMove =
+            (SideToMove == core::Black)
+                ? search<core::Black, true>(Adapter.get(), 0, &RootValue,
+                                            &Threshold, MaxNodeCount, MaxDepth)
+                : search<core::White, true>(Adapter.get(), 0, &RootValue,
+                                            &Threshold, MaxNodeCount, MaxDepth);
 
         if (RootValue.ProofNumber == 0) {
             // Proven.
@@ -402,15 +452,18 @@ core::Move32 SolverImpl::solve(core::State* S, uint64_t MaxNodeCount, uint64_t M
     }
 }
 
-std::vector<core::Move32> SolverImpl::solveWithPV(core::State* S, uint64_t MaxNodeCount, uint64_t MaxDepth) {
+std::vector<core::Move32> SolverImpl::solveWithPV(core::State* S,
+                                                  uint64_t MaxNodeCount,
+                                                  uint64_t MaxDepth) {
     // First, just solve the problem.
     core::Move32 SolvedMove = solve(S, MaxNodeCount, MaxDepth);
 
     if (SolvedMove.isNone()) {
-        return { };
+        return {};
     }
 
-    // Then, traverse the tree through a terminal node with the longest move sequence.
+    // Then, traverse the tree through a terminal node with the longest move
+    // sequence.
     core::internal::MutableStateAdapter Adapter(*S);
     return findPV(Adapter.get());
 }

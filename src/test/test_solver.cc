@@ -12,8 +12,8 @@
 #include "../core/positionbuilder.h"
 #include "../core/statebuilder.h"
 #include "../io/sfen.h"
-#include "../solver/dfs.h"
 #include "../solver/dfpn.h"
+#include "../solver/dfs.h"
 #include "../solver/mate1ply.h"
 
 #include <fstream>

@@ -11,8 +11,8 @@
 #include "io.h"
 #include "ml.h"
 #include "position.h"
-#include "state.h"
 #include "solver.h"
+#include "state.h"
 
 #include "../core/initializer.h"
 #include "../core/state.h"

@@ -15,8 +15,8 @@
 #include "common.h"
 
 #include <cstring>
-#include <random>
 #include <fstream>
+#include <random>
 
 TEST(CAPI, FeatureType) {
     using namespace nshogi::ml;
@@ -667,8 +667,7 @@ TEST(CAPI, DFS) {
         nshogi_state_t* State =
             nshogiApi()->ioApi()->createStateFromSfen(Line.c_str());
 
-        nshogi_move_t CheckmateMove =
-            nshogiApi()->solverApi()->dfs(State, 5);
+        nshogi_move_t CheckmateMove = nshogiApi()->solverApi()->dfs(State, 5);
 
         TEST_ASSERT_FALSE(nshogiApi()->isMoveNone(CheckmateMove));
     }
@@ -677,7 +676,8 @@ TEST(CAPI, DFS) {
 TEST(CAPI, DfPn) {
     std::ifstream Ifs("./res/test/mate-11-ply.txt");
 
-    nshogi_solver_dfpn_t* Solver = nshogiApi()->solverApi()->createDfPnSolver(64);
+    nshogi_solver_dfpn_t* Solver =
+        nshogiApi()->solverApi()->createDfPnSolver(64);
     std::string Line;
     while (std::getline(Ifs, Line)) {
         nshogi_state_t* State =
