@@ -122,7 +122,6 @@ DfPnValue SolverImpl::loadFromTT(core::internal::StateImpl* S, uint64_t Depth, b
     const core::Stands StandsAttacking =
         (Attacking) ? S->getPosition().getStand<C>() : S->getPosition().getStand<~C>();
     const uint64_t Hash = S->getBoardHash();
-    // const std::size_t Index = (Hash + 2 * Depth) % TTSize;
     const std::size_t Index = (((Hash + 2 * Depth) << 1) | (uint64_t)Attacking) % TTSize;
     for (std::size_t I = 0; I < DfPnTTBundle::BundleSize; ++I) {
         const DfPnTTEntry* Entry = &TT[Index].Entries[I];
