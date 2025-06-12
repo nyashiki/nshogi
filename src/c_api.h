@@ -353,12 +353,16 @@ typedef struct nshogi_ml_api {
 } nshogi_ml_api_t;
 
 typedef struct nshogi_io_api {
+    int (*canCreateStateFromSfen)(const char* sfen);
+    int (*canCreateMoveFromSfen)(const nshogi_state_t* state, const char* sfen);
     nshogi_state_t* (*createStateFromSfen)(const char* sfen);
     nshogi_move_t (*createMoveFromSfen)(const nshogi_state_t* state,
                                         const char* sfen);
-    char* (*moveToSfen)(nshogi_move_t move);
-    char* (*stateToSfen)(const nshogi_state_t* state);
-    char* (*positionToSfen)(const nshogi_position_t* state);
+    int32_t (*moveToSfen)(char* dest, nshogi_move_t move);
+    int32_t (*stateToSfen)(char* dest, int32_t max_length,
+                           const nshogi_state_t* state);
+    int32_t (*positionToSfen)(char* dest, int32_t max_length,
+                              const nshogi_position_t* state);
 } nshogi_io_api_t;
 
 typedef struct nshogi_api {
