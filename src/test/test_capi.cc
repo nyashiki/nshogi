@@ -659,6 +659,12 @@ TEST(CAPI, InvalidState) {
             nshogiApi()->ioApi()->canCreateStateFromSfen(InvalidSfen) == 0);
 }
 
+TEST(CAPI, ValidState) {
+    const char* ValidSfen = "startpos";
+    TEST_ASSERT_TRUE(
+            nshogiApi()->ioApi()->canCreateStateFromSfen(ValidSfen) > 0);
+}
+
 TEST(CAPI, InsufficientMemorySize) {
     char Sfen[16384];
 
