@@ -501,8 +501,8 @@ TEST(CAPI, DoAndUndo) {
         nshogi_state_t* State =
             nshogiApi()->ioApi()->createStateFromSfen("startpos");
         TEST_ASSERT_TRUE(nshogiApi()->ioApi()->positionToSfen(
-            InitialPositionSfen, MaxLength,
-            nshogiApi()->stateApi()->getPosition(State)) > 0);
+                             InitialPositionSfen, MaxLength,
+                             nshogiApi()->stateApi()->getPosition(State)) > 0);
 
         for (int Ply = 0; Ply < 1024; ++Ply) {
             int MoveCount =
@@ -518,13 +518,15 @@ TEST(CAPI, DoAndUndo) {
                 break;
             }
 
-            TEST_ASSERT_TRUE(nshogiApi()->ioApi()->stateToSfen(StateSfen, MaxLength, State) > 0);
+            TEST_ASSERT_TRUE(nshogiApi()->ioApi()->stateToSfen(
+                                 StateSfen, MaxLength, State) > 0);
 
             for (int J = 0; J < MoveCount; ++J) {
                 nshogi_move_t M = Moves[(std::size_t)J];
 
                 char SfenMove[16];
-                TEST_ASSERT_TRUE(nshogiApi()->ioApi()->moveToSfen(SfenMove, M) > 0);
+                TEST_ASSERT_TRUE(nshogiApi()->ioApi()->moveToSfen(SfenMove, M) >
+                                 0);
                 nshogi_move_t M_ =
                     nshogiApi()->ioApi()->createMoveFromSfen(State, SfenMove);
                 TEST_ASSERT_EQ(M, M_);
@@ -542,14 +544,16 @@ TEST(CAPI, DoAndUndo) {
                 nshogiApi()->stateApi()->undoMove(State);
 
                 char DoAndUndoSfen[MaxLength];
-                TEST_ASSERT_TRUE(
-                        nshogiApi()->ioApi()->stateToSfen(DoAndUndoSfen, MaxLength, State) > 0);
+                TEST_ASSERT_TRUE(nshogiApi()->ioApi()->stateToSfen(
+                                     DoAndUndoSfen, MaxLength, State) > 0);
                 TEST_ASSERT_EQ(std::strcmp(StateSfen, DoAndUndoSfen), 0);
 
                 char InitialPositionSfenCurrent[MaxLength];
                 TEST_ASSERT_TRUE(
-                        nshogiApi()->ioApi()->positionToSfen(InitialPositionSfenCurrent, MaxLength,
-                            nshogiApi()->stateApi()->getInitialPosition(State)) > 0);
+                    nshogiApi()->ioApi()->positionToSfen(
+                        InitialPositionSfenCurrent, MaxLength,
+                        nshogiApi()->stateApi()->getInitialPosition(State)) >
+                    0);
 
                 TEST_ASSERT_EQ(std::strcmp(InitialPositionSfen,
                                            InitialPositionSfenCurrent),
@@ -607,10 +611,10 @@ TEST(CAPI, Clone) {
 
             char Sfen[MaxLength];
             TEST_ASSERT_TRUE(
-                    nshogiApi()->ioApi()->stateToSfen(Sfen, MaxLength, State) > 0);
+                nshogiApi()->ioApi()->stateToSfen(Sfen, MaxLength, State) > 0);
             char ClonedSfen[MaxLength];
-            TEST_ASSERT_TRUE(
-                    nshogiApi()->ioApi()->stateToSfen(ClonedSfen, MaxLength, ClonedState) > 0);
+            TEST_ASSERT_TRUE(nshogiApi()->ioApi()->stateToSfen(
+                                 ClonedSfen, MaxLength, ClonedState) > 0);
 
             TEST_ASSERT_EQ(std::strcmp(Sfen, ClonedSfen), 0);
 
@@ -656,13 +660,13 @@ TEST(CAPI, StateConfig) {
 TEST(CAPI, InvalidState) {
     const char* InvalidSfen = "invalid example";
     TEST_ASSERT_TRUE(
-            nshogiApi()->ioApi()->canCreateStateFromSfen(InvalidSfen) == 0);
+        nshogiApi()->ioApi()->canCreateStateFromSfen(InvalidSfen) == 0);
 }
 
 TEST(CAPI, ValidState) {
     const char* ValidSfen = "startpos";
-    TEST_ASSERT_TRUE(
-            nshogiApi()->ioApi()->canCreateStateFromSfen(ValidSfen) > 0);
+    TEST_ASSERT_TRUE(nshogiApi()->ioApi()->canCreateStateFromSfen(ValidSfen) >
+                     0);
 }
 
 TEST(CAPI, InsufficientMemorySize) {
@@ -672,12 +676,12 @@ TEST(CAPI, InsufficientMemorySize) {
         nshogiApi()->ioApi()->createStateFromSfen("startpos");
 
     // MaxLength is not sufficient.
-    TEST_ASSERT_TRUE(
-            nshogiApi()->ioApi()->stateToSfen(Sfen, /* MaxLength = */ 63, State) == 0);
+    TEST_ASSERT_TRUE(nshogiApi()->ioApi()->stateToSfen(
+                         Sfen, /* MaxLength = */ 63, State) == 0);
 
     // MaxLength is sufficient.
-    TEST_ASSERT_TRUE(
-            nshogiApi()->ioApi()->stateToSfen(Sfen, /* MaxLength = */ 64, State) > 0);
+    TEST_ASSERT_TRUE(nshogiApi()->ioApi()->stateToSfen(
+                         Sfen, /* MaxLength = */ 64, State) > 0);
 
     nshogiApi()->stateApi()->destroyState(State);
 }

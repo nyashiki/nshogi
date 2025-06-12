@@ -22,8 +22,8 @@ namespace {
 
 int ioApiCanCreateStateFromSfen(const char* Sfen) {
     try {
-        std::unique_ptr<core::State> State =
-            std::make_unique<core::State>(io::sfen::StateBuilder::newState(Sfen));
+        std::unique_ptr<core::State> State = std::make_unique<core::State>(
+            io::sfen::StateBuilder::newState(Sfen));
     } catch (const std::runtime_error&) {
         return 0;
     }
@@ -32,7 +32,7 @@ int ioApiCanCreateStateFromSfen(const char* Sfen) {
 }
 
 int ioApiCanCreateMoveFromSfen(const nshogi_state_t* CState,
-        const char* CSfen) {
+                               const char* CSfen) {
     try {
         const core::State* State = reinterpret_cast<const core::State*>(CState);
         io::sfen::sfenToMove32(State->getPosition(), CSfen);
@@ -63,7 +63,8 @@ int32_t ioApiMoveToSfen(char* Dest, nshogi_move_t CMove) {
     return static_cast<int32_t>(Sfen.size());
 }
 
-int32_t ioApiStateToSfen(char* Dest, int32_t MaxLength, const nshogi_state_t* CState) {
+int32_t ioApiStateToSfen(char* Dest, int32_t MaxLength,
+                         const nshogi_state_t* CState) {
     const core::State* State = reinterpret_cast<const core::State*>(CState);
     std::string Sfen = io::sfen::stateToSfen(*State);
 
@@ -75,7 +76,8 @@ int32_t ioApiStateToSfen(char* Dest, int32_t MaxLength, const nshogi_state_t* CS
     return static_cast<int32_t>(Sfen.size());
 }
 
-int32_t ioApiPositionToSfen(char* Dest, int32_t MaxLength, const nshogi_position_t* CPosition) {
+int32_t ioApiPositionToSfen(char* Dest, int32_t MaxLength,
+                            const nshogi_position_t* CPosition) {
     const core::Position* Position =
         reinterpret_cast<const core::Position*>(CPosition);
     std::string Sfen = io::sfen::positionToSfen(*Position);
