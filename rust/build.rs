@@ -1,0 +1,44 @@
+fn main() {
+    cc::Build::new()
+        .cpp(true)
+        .files([
+            "../src/buildinfo/capability.cc",
+            "../src/c_api/api.cc",
+            "../src/c_api/io.cc",
+            "../src/c_api/ml.cc",
+            "../src/c_api/move.cc",
+            "../src/c_api/position.cc",
+            "../src/c_api/solver.cc",
+            "../src/c_api/state.cc",
+            "../src/core/internal/bitboard.cc",
+            "../src/core/internal/hash.cc",
+            "../src/core/internal/huffmanimpl.cc",
+            "../src/core/internal/movegenerator.cc",
+            "../src/core/internal/statehelper.cc",
+            "../src/core/internal/stateimpl.cc",
+            "../src/core/huffman.cc",
+            "../src/core/initializer.cc",
+            "../src/core/movegenerator.cc",
+            "../src/core/position.cc",
+            "../src/core/positionbuilder.cc",
+            "../src/core/state.cc",
+            "../src/core/statebuilder.cc",
+            "../src/io/csa.cc",
+            "../src/io/file.cc",
+            "../src/io/huffman.cc",
+            "../src/io/sfen.cc",
+            "../src/ml/featurebitboard.cc",
+            "../src/ml/featurestack.cc",
+            "../src/ml/simpleteacher.cc",
+            "../src/ml/teacherloader.cc",
+            "../src/ml/utils.cc",
+            "../src/solver/internal/dfpn.cc",
+            "../src/solver/internal/mate1ply.cc",
+            "../src/solver/dfpn.cc",
+            "../src/solver/dfs.cc",
+            "../src/solver/mate1ply.cc",
+            "../src/solver/dfpn.cc",
+        ])
+        .flags(["-std=c++20", "-DUSE_AVX2", "-DUSE_PEXT", "-march=native"])
+        .compile("nshogi");
+}
