@@ -104,12 +104,11 @@ core::Move32 sfenToMove32(const core::Position& Pos, const std::string& Sfen) {
     }
 
     if (Sfen.size() < 4) {
-        throw std::runtime_error(
-            "invalid sfen string (length check error).\n" +
-            ("    Position:" + positionToSfen(Pos) +
-             "\n"
-             "    Sfen: " +
-             Sfen));
+        throw std::runtime_error("invalid sfen string (length check error).\n" +
+                                 ("    Position:" + positionToSfen(Pos) +
+                                  "\n"
+                                  "    Sfen: " +
+                                  Sfen));
     }
 
     core::File ToFile = charToFile(Sfen[2]);
