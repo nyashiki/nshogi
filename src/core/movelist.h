@@ -45,7 +45,7 @@ struct MoveList {
         return Moves[Index];
     }
 
-    [[maybe_unused]] inline const Move32* find(Move32 Move) const {
+    inline const Move32* find(Move32 Move) const {
         for (const auto& EachMove : *this) {
             if (EachMove == Move) {
                 return &EachMove;
