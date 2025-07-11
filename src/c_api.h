@@ -287,6 +287,17 @@ typedef struct nshogi_state_config nshogi_state_config_t;
 
 // Api.
 
+typedef struct nshogi_move_api {
+    int8_t (*to)(nshogi_move_t);
+    int8_t (*from)(nshogi_move_t);
+    int (*drop)(nshogi_move_t);
+    int (*promote)(nshogi_move_t);
+    uint8_t (*pieceType)(nshogi_move_t);
+    uint8_t (*capturePieceType)(nshogi_move_t);
+    int (*isNone)(nshogi_move_t move);
+    nshogi_move_t (*winMove)(void);
+} nshogi_move_api_t;
+
 typedef struct nshogi_position_api {
     nshogi_color_t (*getSideToMove)(const nshogi_position_t* position);
     nshogi_piece_t (*pieceOn)(const nshogi_position_t* position,
@@ -362,20 +373,16 @@ typedef struct nshogi_io_api {
     int32_t (*stateToSfen)(char* dest, int32_t max_length,
                            const nshogi_state_t* state);
     int32_t (*positionToSfen)(char* dest, int32_t max_length,
-                              const nshogi_position_t* state);
+                              const nshogi_position_t* position);
 } nshogi_io_api_t;
 
 typedef struct nshogi_api {
+    nshogi_move_api_t* (*moveApi)(void);
     nshogi_position_api_t* (*positionApi)(void);
     nshogi_state_api_t* (*stateApi)(void);
     nshogi_solver_api_t* (*solverApi)(void);
     nshogi_ml_api_t* (*mlApi)(void);
     nshogi_io_api_t* (*ioApi)(void);
-
-    // Utilities.
-    int (*isDroppingPawn)(nshogi_move_t move);
-    int (*isMoveNone)(nshogi_move_t move);
-    nshogi_move_t (*winDeclarationMove)(void);
 } nshogi_api_t;
 
 nshogi_api_t* nshogiApi(void);

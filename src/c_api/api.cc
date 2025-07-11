@@ -10,55 +10,15 @@
 #include "../c_api.h"
 #include "io.h"
 #include "ml.h"
+#include "move.h"
 #include "position.h"
 #include "solver.h"
 #include "state.h"
 
 #include "../core/initializer.h"
-#include "../core/state.h"
 #include "../core/types.h"
-#include "../io/sfen.h"
 
 using namespace nshogi;
-
-namespace {
-
-nshogi_position_api_t* positionApiImpl() {
-    return c_api::position::getApi();
-}
-
-nshogi_state_api_t* stateApiImpl() {
-    return c_api::state::getApi();
-}
-
-nshogi_solver_api_t* solverApiImpl() {
-    return c_api::solver::getApi();
-}
-
-nshogi_ml_api_t* mlApiImpl() {
-    return c_api::ml::getApi();
-}
-
-nshogi_io_api_t* ioApiImpl() {
-    return c_api::io::getApi();
-}
-
-int apiIsDroppingPawn(nshogi_move_t CMove) {
-    core::Move32 Move = core::Move32::fromValue(CMove);
-    return Move.drop() && Move.pieceType() == core::PTK_Pawn;
-}
-
-int apiIsMoveNone(nshogi_move_t CMove) {
-    core::Move32 Move = core::Move32::fromValue(CMove);
-    return static_cast<int>(Move.isNone());
-}
-
-nshogi_move_t apiWinDeclarationMove() {
-    core::Move32 Move = core::Move32::MoveWin();
-    return static_cast<nshogi_move_t>(Move.value());
-}
-
-} // namespace
 
 extern "C" {
 
@@ -69,15 +29,12 @@ nshogi_api_t* nshogiApi(void) {
     if (!Initialized) {
         core::initializer::initializeAll();
 
-        Api.positionApi = positionApiImpl;
-        Api.stateApi = stateApiImpl;
-        Api.solverApi = solverApiImpl;
-        Api.mlApi = mlApiImpl;
-        Api.ioApi = ioApiImpl;
-
-        Api.isDroppingPawn = apiIsDroppingPawn;
-        Api.isMoveNone = apiIsMoveNone;
-        Api.winDeclarationMove = apiWinDeclarationMove;
+        Api.moveApi = c_api::move::getApi;
+        Api.positionApi = c_api::position::getApi;
+        Api.stateApi = c_api::state::getApi;
+        Api.solverApi = c_api::solver::getApi;
+        Api.mlApi = c_api::ml::getApi;
+        Api.ioApi = c_api::io::getApi;
 
         Initialized = true;
     }
