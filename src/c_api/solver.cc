@@ -38,8 +38,7 @@ nshogi_move_t solverApiSolveByDfPn(nshogi_state_t* CState,
     core::State* State = reinterpret_cast<core::State*>(CState);
     auto Solver = reinterpret_cast<solver::dfpn::Solver*>(CSolver);
 
-    auto CheckmateMove =
-        Solver->solve(State, MaxNodeCount, (uint64_t)MaxDepth);
+    auto CheckmateMove = Solver->solve(State, MaxNodeCount, (uint64_t)MaxDepth);
     return CheckmateMove.value();
 }
 
