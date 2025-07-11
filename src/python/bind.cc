@@ -74,7 +74,36 @@ PYBIND11_MODULE(nshogi, Module) {
         .value("BLACK", nshogi::core::Black)
         .value("WHITE", nshogi::core::White);
 
-    pybind11::enum_<nshogi::core::Square>(Module, "Square");
+    // clang-format off
+    pybind11::enum_<nshogi::core::Square>(Module, "Square")
+        .value("SQ9A", nshogi::core::Sq9A) .value("SQ8A", nshogi::core::Sq8A) .value("SQ7A", nshogi::core::Sq7A)
+        .value("SQ6A", nshogi::core::Sq6A) .value("SQ5A", nshogi::core::Sq5A) .value("SQ4A", nshogi::core::Sq4A)
+        .value("SQ3A", nshogi::core::Sq3A) .value("SQ2A", nshogi::core::Sq2A) .value("SQ1A", nshogi::core::Sq1A)
+        .value("SQ9B", nshogi::core::Sq9B) .value("SQ8B", nshogi::core::Sq8B) .value("SQ7B", nshogi::core::Sq7B)
+        .value("SQ6B", nshogi::core::Sq6B) .value("SQ5B", nshogi::core::Sq5B) .value("SQ4B", nshogi::core::Sq4B)
+        .value("SQ3B", nshogi::core::Sq3B) .value("SQ2B", nshogi::core::Sq2B) .value("SQ1B", nshogi::core::Sq1B)
+        .value("SQ9C", nshogi::core::Sq9C) .value("SQ8C", nshogi::core::Sq8C) .value("SQ7C", nshogi::core::Sq7C)
+        .value("SQ6C", nshogi::core::Sq6C) .value("SQ5C", nshogi::core::Sq5C) .value("SQ4C", nshogi::core::Sq4C)
+        .value("SQ3C", nshogi::core::Sq3C) .value("SQ2C", nshogi::core::Sq2C) .value("SQ1C", nshogi::core::Sq1C)
+        .value("SQ9D", nshogi::core::Sq9D) .value("SQ8D", nshogi::core::Sq8D) .value("SQ7D", nshogi::core::Sq7D)
+        .value("SQ6D", nshogi::core::Sq6D) .value("SQ5D", nshogi::core::Sq5D) .value("SQ4D", nshogi::core::Sq4D)
+        .value("SQ3D", nshogi::core::Sq3D) .value("SQ2D", nshogi::core::Sq2D) .value("SQ1D", nshogi::core::Sq1D)
+        .value("SQ9E", nshogi::core::Sq9E) .value("SQ8E", nshogi::core::Sq8E) .value("SQ7E", nshogi::core::Sq7E)
+        .value("SQ6E", nshogi::core::Sq6E) .value("SQ5E", nshogi::core::Sq5E) .value("SQ4E", nshogi::core::Sq4E)
+        .value("SQ3E", nshogi::core::Sq3E) .value("SQ2E", nshogi::core::Sq2E) .value("SQ1E", nshogi::core::Sq1E)
+        .value("SQ9F", nshogi::core::Sq9F) .value("SQ8F", nshogi::core::Sq8F) .value("SQ7F", nshogi::core::Sq7F)
+        .value("SQ6F", nshogi::core::Sq6F) .value("SQ5F", nshogi::core::Sq5F) .value("SQ4F", nshogi::core::Sq4F)
+        .value("SQ3F", nshogi::core::Sq3F) .value("SQ2F", nshogi::core::Sq2F) .value("SQ1F", nshogi::core::Sq1F)
+        .value("SQ9G", nshogi::core::Sq9G) .value("SQ8G", nshogi::core::Sq8G) .value("SQ7G", nshogi::core::Sq7G)
+        .value("SQ6G", nshogi::core::Sq6G) .value("SQ5G", nshogi::core::Sq5G) .value("SQ4G", nshogi::core::Sq4G)
+        .value("SQ3G", nshogi::core::Sq3G) .value("SQ2G", nshogi::core::Sq2G) .value("SQ1G", nshogi::core::Sq1G)
+        .value("SQ9H", nshogi::core::Sq9H) .value("SQ8H", nshogi::core::Sq8H) .value("SQ7H", nshogi::core::Sq7H)
+        .value("SQ6H", nshogi::core::Sq6H) .value("SQ5H", nshogi::core::Sq5H) .value("SQ4H", nshogi::core::Sq4H)
+        .value("SQ3H", nshogi::core::Sq3H) .value("SQ2H", nshogi::core::Sq2H) .value("SQ1H", nshogi::core::Sq1H)
+        .value("SQ9I", nshogi::core::Sq9I) .value("SQ8I", nshogi::core::Sq8I) .value("SQ7I", nshogi::core::Sq7I)
+        .value("SQ6I", nshogi::core::Sq6I) .value("SQ5I", nshogi::core::Sq5I) .value("SQ4I", nshogi::core::Sq4I)
+        .value("SQ3I", nshogi::core::Sq3I) .value("SQ2I", nshogi::core::Sq2I) .value("SQ1I", nshogi::core::Sq1I);
+    // clang-format on
 
     pybind11::class_<nshogi::core::Move32>(Module, "Move")
         .def_property_readonly("from", &nshogi::core::Move32::from)
