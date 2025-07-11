@@ -393,6 +393,11 @@ bool StateImpl::canDeclare() const {
     }
 }
 
+template void StateImpl::doMove<Black>(Move32 Move);
+template void StateImpl::doMove<White>(Move32 Move);
+template void StateImpl::undoMove<Black>();
+template void StateImpl::undoMove<White>();
+
 } // namespace internal
 } // namespace core
 } // namespace nshogi
