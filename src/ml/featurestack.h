@@ -128,7 +128,7 @@ struct FeatureStackComptime : FeatureStack {
     }
 
     const FeatureBitboard& get(std::size_t Index) const {
-        assert(Index >= 0 && Index < sizeof...(FeatureTypes));
+        assert(Index < sizeof...(FeatureTypes));
 
         return Features[Index];
     }

@@ -24,7 +24,10 @@ class MoveGeneratorInternal;
 
 struct MoveList {
  public:
-    MoveList(MoveList&&) noexcept = default;
+    MoveList(MoveList&& Other) noexcept {
+        Tail = Moves + Other.size();
+        std::copy(Other.Moves, Other.Moves + Other.size(), Moves);
+    }
 
     MoveList(const MoveList&) = delete;
     MoveList& operator=(const MoveList&) = delete;
@@ -42,7 +45,7 @@ struct MoveList {
         return Moves[Index];
     }
 
-    [[maybe_unused]] inline const Move32* find(Move32 Move) const {
+    inline const Move32* find(Move32 Move) const {
         for (const auto& EachMove : *this) {
             if (EachMove == Move) {
                 return &EachMove;

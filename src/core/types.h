@@ -443,17 +443,11 @@ struct Move16;
 ///
 struct Move32 {
  public:
-    constexpr Move32(const Move32& M)
-        : C_(M.C_) {
-    }
-
     explicit constexpr Move32() {
     }
 
-    constexpr Move32& operator=(Move32 M) {
-        C_ = M.C_;
-        return *this;
-    }
+    constexpr Move32(const Move32& M) = default;
+    constexpr Move32& operator=(const Move32& M) = default;
 
     explicit constexpr Move32(Move16 M16);
 
@@ -620,24 +614,18 @@ struct Move32 {
 ///
 struct Move16 {
  public:
+    constexpr Move16() {
+    }
+
     explicit constexpr Move16(Move32 M)
         : C_(M.C_ & 0xffff) {
     }
 
-    constexpr Move16(const Move16& M)
-        : C_(M.C_) {
-    }
+    constexpr Move16(const Move16& M) = default;
+    constexpr Move16& operator=(const Move16& M) = default;
 
     static constexpr Move16 MoveWin() {
         return Move16(Move32::MoveWin());
-    }
-
-    constexpr Move16() {
-    }
-
-    constexpr Move16& operator=(Move16 M) {
-        C_ = M.C_;
-        return *this;
     }
 
     constexpr bool operator<(Move16 M) const {
