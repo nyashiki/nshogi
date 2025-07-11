@@ -36,7 +36,8 @@ uint8_t moveApiPieceType(nshogi_move_t CMove) {
 }
 
 uint8_t moveApiCapturePieceType(nshogi_move_t CMove) {
-    return static_cast<uint8_t>(core::Move32::fromValue(CMove).capturePieceType());
+    return static_cast<uint8_t>(
+        core::Move32::fromValue(CMove).capturePieceType());
 }
 
 int moveApiIsNone(nshogi_move_t CMove) {

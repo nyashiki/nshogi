@@ -532,15 +532,13 @@ TEST(CAPI, DoAndUndo) {
                 TEST_ASSERT_EQ(M, M_);
 
                 if (std::strncmp(SfenMove, "P*", 2) == 0) {
-                    TEST_ASSERT_TRUE(
-                        nshogiApi()->moveApi()->drop(M) &&
-                        (nshogiApi()->moveApi()->pieceType(M) == NSHOGI_PTK_PAWN)
-                    );
+                    TEST_ASSERT_TRUE(nshogiApi()->moveApi()->drop(M) &&
+                                     (nshogiApi()->moveApi()->pieceType(M) ==
+                                      NSHOGI_PTK_PAWN));
                 } else {
-                    TEST_ASSERT_FALSE(
-                        nshogiApi()->moveApi()->drop(M) &&
-                        (nshogiApi()->moveApi()->pieceType(M) == NSHOGI_PTK_PAWN)
-                    );
+                    TEST_ASSERT_FALSE(nshogiApi()->moveApi()->drop(M) &&
+                                      (nshogiApi()->moveApi()->pieceType(M) ==
+                                       NSHOGI_PTK_PAWN));
                 }
 
                 nshogiApi()->stateApi()->doMove(State, M);

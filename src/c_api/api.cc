@@ -8,9 +8,9 @@
 //
 
 #include "../c_api.h"
-#include "move.h"
 #include "io.h"
 #include "ml.h"
+#include "move.h"
 #include "position.h"
 #include "solver.h"
 #include "state.h"
