@@ -22,7 +22,7 @@ nshogi_move_t solverApiDFS(nshogi_state_t* CState, int Depth) {
     return CheckmateMove.value();
 }
 
-nshogi_solver_dfpn_t* solverApiCreateDfPnSolver(long MemoryMB) {
+nshogi_solver_dfpn_t* solverApiCreateDfPnSolver(uint64_t MemoryMB) {
     auto Solver = new solver::dfpn::Solver((std::size_t)MemoryMB);
     return reinterpret_cast<nshogi_solver_dfpn_t*>(Solver);
 }
@@ -34,12 +34,11 @@ void solverApiDestroyDfPnSolver(nshogi_solver_dfpn_t* CSolver) {
 
 nshogi_move_t solverApiSolveByDfPn(nshogi_state_t* CState,
                                    nshogi_solver_dfpn_t* CSolver,
-                                   long MaxNodeCount, int MaxDepth) {
+                                   uint64_t MaxNodeCount, int MaxDepth) {
     core::State* State = reinterpret_cast<core::State*>(CState);
     auto Solver = reinterpret_cast<solver::dfpn::Solver*>(CSolver);
 
-    auto CheckmateMove =
-        Solver->solve(State, (uint64_t)MaxNodeCount, (uint64_t)MaxDepth);
+    auto CheckmateMove = Solver->solve(State, MaxNodeCount, (uint64_t)MaxDepth);
     return CheckmateMove.value();
 }
 
