@@ -24,7 +24,10 @@ class MoveGeneratorInternal;
 
 struct MoveList {
  public:
-    MoveList(MoveList&&) noexcept = default;
+    MoveList(MoveList&& Other) noexcept {
+        Tail = Moves + Other.size();
+        std::copy(Other.Moves, Other.Moves + Other.size(), Moves);
+    }
 
     MoveList(const MoveList&) = delete;
     MoveList& operator=(const MoveList&) = delete;
