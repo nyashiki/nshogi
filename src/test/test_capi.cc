@@ -532,9 +532,15 @@ TEST(CAPI, DoAndUndo) {
                 TEST_ASSERT_EQ(M, M_);
 
                 if (std::strncmp(SfenMove, "P*", 2) == 0) {
-                    TEST_ASSERT_TRUE(nshogiApi()->isDroppingPawn(M));
+                    TEST_ASSERT_TRUE(
+                        nshogiApi()->moveApi()->drop(M) &&
+                        (nshogiApi()->moveApi()->pieceType(M) == NSHOGI_PTK_PAWN)
+                    );
                 } else {
-                    TEST_ASSERT_FALSE(nshogiApi()->isDroppingPawn(M));
+                    TEST_ASSERT_FALSE(
+                        nshogiApi()->moveApi()->drop(M) &&
+                        (nshogiApi()->moveApi()->pieceType(M) == NSHOGI_PTK_PAWN)
+                    );
                 }
 
                 nshogiApi()->stateApi()->doMove(State, M);
@@ -687,7 +693,7 @@ TEST(CAPI, InsufficientMemorySize) {
 }
 
 TEST(CAPI, WinDeclarationMove) {
-    nshogi_move_t WinMove = nshogiApi()->winDeclarationMove();
+    nshogi_move_t WinMove = nshogiApi()->moveApi()->winMove();
 
     TEST_ASSERT_EQ(static_cast<uint32_t>(WinMove),
                    nshogi::core::Move32::MoveWin().value());
@@ -703,7 +709,7 @@ TEST(CAPI, DFS) {
 
         nshogi_move_t CheckmateMove = nshogiApi()->solverApi()->dfs(State, 5);
 
-        TEST_ASSERT_FALSE(nshogiApi()->isMoveNone(CheckmateMove));
+        TEST_ASSERT_FALSE(nshogiApi()->moveApi()->isNone(CheckmateMove));
     }
 }
 
@@ -720,7 +726,7 @@ TEST(CAPI, DfPn) {
         nshogi_move_t CheckmateMove =
             nshogiApi()->solverApi()->solveByDfPn(State, Solver, 0, 0);
 
-        TEST_ASSERT_FALSE(nshogiApi()->isMoveNone(CheckmateMove));
+        TEST_ASSERT_FALSE(nshogiApi()->moveApi()->isNone(CheckmateMove));
     }
     nshogiApi()->solverApi()->destroyDfPnSolver(Solver);
 }
