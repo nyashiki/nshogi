@@ -103,6 +103,15 @@ core::Move32 sfenToMove32(const core::Position& Pos, const std::string& Sfen) {
         return core::Move32::MoveWin();
     }
 
+    if (Sfen.size() < 4) {
+        throw std::runtime_error(
+            "invalid sfen string (length check error).\n" +
+            ("    Position:" + positionToSfen(Pos) +
+             "\n"
+             "    Sfen: " +
+             Sfen));
+    }
+
     core::File ToFile = charToFile(Sfen[2]);
     core::Rank ToRank = charToRank(Sfen[3]);
     core::Square ToSq = core::makeSquare(ToRank, ToFile);
