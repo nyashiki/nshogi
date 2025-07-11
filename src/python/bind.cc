@@ -502,7 +502,7 @@ PYBIND11_MODULE(nshogi, Module) {
 
                  assert(State.getPosition().sideToMove() == T.SideToMove);
 
-                 for (const auto& Move : LegalMoves) {
+                 for (const nshogi::core::Move32 Move : LegalMoves) {
                      const std::size_t Index =
                          nshogi::ml::getMoveIndex(T.SideToMove, Move);
                      Data[Index] = 1;
@@ -616,7 +616,7 @@ PYBIND11_MODULE(nshogi, Module) {
                  const auto LegalMoves =
                      nshogi::core::MoveGenerator::generateLegalMoves(State);
 
-                 for (const auto& Move : LegalMoves) {
+                 for (const nshogi::core::Move32 Move : LegalMoves) {
                      const std::size_t Index =
                          nshogi::ml::getMoveIndex(State.getSideToMove(), Move);
                      Data[Index] = 1.0f;
