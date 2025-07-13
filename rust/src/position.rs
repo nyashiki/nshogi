@@ -47,9 +47,9 @@ impl<'a> ToSfen for Position<'a> {
     ///
     /// ```
     /// use nshogi::io::ToSfen;
-    /// let state = nshogi::state::State::from_sfen("startpos").unwrap();
+    /// let state = nshogi::state::State::from_sfen("startpos moves 2g2f").unwrap();
     /// assert_eq!(
-    ///     "lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL b - 1",
+    ///     "lnsgkgsnl/1r5b1/ppppppppp/9/9/7P1/PPPPPPP1P/1B5R1/LNSGKGSNL w - 1",
     ///     state.get_position().to_sfen()
     /// );
     /// ```

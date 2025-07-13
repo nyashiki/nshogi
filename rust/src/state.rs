@@ -202,9 +202,9 @@ impl ToSfen for State {
     ///
     /// ```
     /// use nshogi::io::ToSfen;
-    /// let state = nshogi::state::State::from_sfen("startpos").unwrap();
+    /// let state = nshogi::state::State::from_sfen("startpos moves 2g2f").unwrap();
     /// assert_eq!(
-    ///     "lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL b - 1",
+    ///     "lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL b - 1 moves 2g2f",
     ///     state.to_sfen()
     /// );
     /// ```
