@@ -19,6 +19,11 @@ jobs:
     - name: Set environment variable
       if: ${{ matrix.os == 'ubuntu-24.04' }}
       run: echo 'SIMD=AVX2' >> $GITHUB_ENV
+    - name: Set up Rust
+      uses: actions-rs/toolchain@v1
+      with:
+        toolchain: stable
+        override: true
     - name: install libraries
       if: runner.os == 'Linux'
       run: pip3 install pybind11 numpy
@@ -40,3 +45,6 @@ jobs:
     - name: test Python library
       working-directory: ${{ env.working-directory }}
       run: make runtest-python
+    - name: test Rust library
+      working-directory: rust
+      run: cargo test --release
