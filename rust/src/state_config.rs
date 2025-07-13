@@ -5,13 +5,13 @@ use crate::nshogi::NSHOGI_STATE_API;
 
 /// Configuration for `State`: maximum ply history and draw scores.
 pub struct StateConfig {
-    pub(crate) handle: NonNull<c_void>
+    pub(crate) handle: NonNull<c_void>,
 }
 
 impl StateConfig {
     pub fn new() -> Self {
         Self {
-            handle: NSHOGI_STATE_API.create_state_config()
+            handle: NSHOGI_STATE_API.create_state_config(),
         }
     }
 

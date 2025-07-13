@@ -1,22 +1,20 @@
 use std::ffi::c_void;
 use std::ptr::NonNull;
 
-use crate::nshogi::{
-    NSHOGI_SOLVER_API
-};
+use crate::nshogi::NSHOGI_SOLVER_API;
 use crate::state::State;
 use crate::types::Move;
 
 /// Depth-First Proof-Number (*df-pn*) checkmate solver.
 pub struct DfPnSolver {
-    handle: NonNull<c_void>
+    handle: NonNull<c_void>,
 }
 
 impl DfPnSolver {
     /// Creates a new solver that may allocate up to `memory_mb` MB.
     pub fn new(memory_mb: usize) -> Self {
         Self {
-            handle: NSHOGI_SOLVER_API.create_dfpn_solver(memory_mb)
+            handle: NSHOGI_SOLVER_API.create_dfpn_solver(memory_mb),
         }
     }
 
@@ -50,7 +48,12 @@ impl DfPnSolver {
     /// );
     /// ```
     pub fn solve(&mut self, state: &mut State, max_node_count: u64, max_depth: i32) -> Move {
-        NSHOGI_SOLVER_API.solve_by_dfpn(self.handle.as_ptr(), state.handle.as_ptr(), max_node_count, max_depth)
+        NSHOGI_SOLVER_API.solve_by_dfpn(
+            self.handle.as_ptr(),
+            state.handle.as_ptr(),
+            max_node_count,
+            max_depth,
+        )
     }
 }
 
@@ -97,7 +100,8 @@ fn dfs_mate_1_ply() {
 
     for line in reader.lines() {
         let line = line.expect("Couldn't read a line.");
-        let mut state = State::from_sfen(&line).expect("Couldn't create state object from a sfen line.");
+        let mut state =
+            State::from_sfen(&line).expect("Couldn't create state object from a sfen line.");
 
         let checkmate_move = dfs(&mut state, 1);
         assert!(!checkmate_move.is_none());
@@ -114,7 +118,8 @@ fn dfs_mate_3_ply() {
 
     for line in reader.lines() {
         let line = line.expect("Couldn't read a line.");
-        let mut state = State::from_sfen(&line).expect("Couldn't create state object from a sfen line.");
+        let mut state =
+            State::from_sfen(&line).expect("Couldn't create state object from a sfen line.");
 
         let checkmate_move = dfs(&mut state, 3);
         assert!(!checkmate_move.is_none());
@@ -131,7 +136,8 @@ fn dfs_mate_5_ply() {
 
     for line in reader.lines() {
         let line = line.expect("Couldn't read a line.");
-        let mut state = State::from_sfen(&line).expect("Couldn't create state object from a sfen line.");
+        let mut state =
+            State::from_sfen(&line).expect("Couldn't create state object from a sfen line.");
 
         let checkmate_move = dfs(&mut state, 5);
         assert!(!checkmate_move.is_none());
@@ -150,7 +156,8 @@ fn dfpn_mate_1_ply() {
 
     for line in reader.lines() {
         let line = line.expect("Couldn't read a line.");
-        let mut state = State::from_sfen(&line).expect("Couldn't create state object from a sfen line.");
+        let mut state =
+            State::from_sfen(&line).expect("Couldn't create state object from a sfen line.");
 
         let checkmate_move = solver.solve(&mut state, 100000, 0);
         assert!(!checkmate_move.is_none());
@@ -169,7 +176,8 @@ fn dfpn_mate_3_ply() {
 
     for line in reader.lines() {
         let line = line.expect("Couldn't read a line.");
-        let mut state = State::from_sfen(&line).expect("Couldn't create state object from a sfen line.");
+        let mut state =
+            State::from_sfen(&line).expect("Couldn't create state object from a sfen line.");
 
         let checkmate_move = solver.solve(&mut state, 100000, 0);
         assert!(!checkmate_move.is_none());
@@ -188,7 +196,8 @@ fn dfpn_mate_5_ply() {
 
     for line in reader.lines() {
         let line = line.expect("Couldn't read a line.");
-        let mut state = State::from_sfen(&line).expect("Couldn't create state object from a sfen line.");
+        let mut state =
+            State::from_sfen(&line).expect("Couldn't create state object from a sfen line.");
 
         let checkmate_move = solver.solve(&mut state, 100000, 0);
         assert!(!checkmate_move.is_none());
@@ -207,7 +216,8 @@ fn dfpn_mate_7_ply() {
 
     for line in reader.lines() {
         let line = line.expect("Couldn't read a line.");
-        let mut state = State::from_sfen(&line).expect("Couldn't create state object from a sfen line.");
+        let mut state =
+            State::from_sfen(&line).expect("Couldn't create state object from a sfen line.");
 
         let checkmate_move = solver.solve(&mut state, 100000, 0);
         assert!(!checkmate_move.is_none());
@@ -226,7 +236,8 @@ fn dfpn_mate_9_ply() {
 
     for line in reader.lines() {
         let line = line.expect("Couldn't read a line.");
-        let mut state = State::from_sfen(&line).expect("Couldn't create state object from a sfen line.");
+        let mut state =
+            State::from_sfen(&line).expect("Couldn't create state object from a sfen line.");
 
         let checkmate_move = solver.solve(&mut state, 100000, 0);
         assert!(!checkmate_move.is_none());
@@ -245,7 +256,8 @@ fn dfpn_mate_11_ply() {
 
     for line in reader.lines() {
         let line = line.expect("Couldn't read a line.");
-        let mut state = State::from_sfen(&line).expect("Couldn't create state object from a sfen line.");
+        let mut state =
+            State::from_sfen(&line).expect("Couldn't create state object from a sfen line.");
 
         let checkmate_move = solver.solve(&mut state, 100000, 0);
         assert!(!checkmate_move.is_none());

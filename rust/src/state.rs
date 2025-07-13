@@ -4,9 +4,9 @@ use std::ptr::NonNull;
 use crate::nshogi::{NSHOGI_IO_API, NSHOGI_STATE_API};
 use crate::types::SfenParseError;
 
-use crate::position::Position;
-use crate::types::{Color, MoveGetError, Repetition, Move};
 use crate::io::ToSfen;
+use crate::position::Position;
+use crate::types::{Color, Move, MoveGetError, Repetition};
 
 /// `State` struct is responsible for controlling and maintaining
 /// the game state in Shogi. It includes functionality for tracking

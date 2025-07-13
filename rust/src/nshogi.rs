@@ -2,7 +2,9 @@ use std::ffi::{CStr, CString, c_char, c_void};
 use std::ptr::NonNull;
 use std::sync::LazyLock;
 
-use crate::types::{Color, MoveGetError, Piece, PieceType, Repetition, SfenParseError, Square, Move};
+use crate::types::{
+    Color, Move, MoveGetError, Piece, PieceType, Repetition, SfenParseError, Square,
+};
 
 // NShogi C APIs.
 
@@ -16,7 +18,7 @@ pub struct NShogiMoveCApi {
     piece_type: unsafe extern "C" fn(u32) -> u8,
     capture_piece_type: unsafe extern "C" fn(u32) -> u8,
     is_none: unsafe extern "C" fn(u32) -> i32,
-    win_move: unsafe extern "C" fn() -> u32
+    win_move: unsafe extern "C" fn() -> u32,
 }
 
 impl NShogiMoveCApi {
@@ -231,7 +233,12 @@ pub struct NShogiSolverCApi {
     dfs: unsafe extern "C" fn(*mut c_void, i32) -> u32,
     create_dfpn_solver: unsafe extern "C" fn(memory_mb: u64) -> *mut c_void,
     destroy_dfpn_solver: unsafe extern "C" fn(solver: *mut c_void),
-    solve_by_dfpn: unsafe extern "C" fn(state: *mut c_void, solver: *mut c_void, max_node_count: u64, max_depth: i32) -> u32
+    solve_by_dfpn: unsafe extern "C" fn(
+        state: *mut c_void,
+        solver: *mut c_void,
+        max_node_count: u64,
+        max_depth: i32,
+    ) -> u32,
 }
 
 impl NShogiSolverCApi {
@@ -247,8 +254,21 @@ impl NShogiSolverCApi {
         unsafe { (self.destroy_dfpn_solver)(handle) }
     }
 
-    pub fn solve_by_dfpn(&self, handle: *mut c_void, state: *mut c_void, max_node_count: u64, max_depth: i32) -> Move {
-        unsafe { Move::new((self.solve_by_dfpn)(state, handle, max_node_count, max_depth)) }
+    pub fn solve_by_dfpn(
+        &self,
+        handle: *mut c_void,
+        state: *mut c_void,
+        max_node_count: u64,
+        max_depth: i32,
+    ) -> Move {
+        unsafe {
+            Move::new((self.solve_by_dfpn)(
+                state,
+                handle,
+                max_node_count,
+                max_depth,
+            ))
+        }
     }
 }
 
@@ -266,7 +286,13 @@ pub struct NShogiMLCApi {
 }
 
 impl NShogiMLCApi {
-    pub fn make_feature_vector(&self, state: *const c_void, state_config: *const c_void, feature_types: *const i32, num_features: usize) -> Vec<f32> {
+    pub fn make_feature_vector(
+        &self,
+        state: *const c_void,
+        state_config: *const c_void,
+        feature_types: *const i32,
+        num_features: usize,
+    ) -> Vec<f32> {
         let mut buffer: Vec<f32> = Vec::with_capacity(num_features * 9 * 9);
 
         unsafe {
@@ -277,7 +303,8 @@ impl NShogiMLCApi {
                 state,
                 state_config,
                 feature_types,
-                num_features as i32);
+                num_features as i32,
+            );
         }
 
         buffer

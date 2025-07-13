@@ -1,8 +1,5 @@
-use crate::nshogi::{
-    NSHOGI_MOVE_API,
-    NSHOGI_IO_API
-};
 use crate::io::ToSfen;
+use crate::nshogi::{NSHOGI_IO_API, NSHOGI_MOVE_API};
 
 /// Side (color) of a player in shogi.
 ///

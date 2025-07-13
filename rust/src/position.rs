@@ -3,11 +3,11 @@ use std::ptr::NonNull;
 
 use std::marker::PhantomData;
 
-use crate::nshogi::NSHOGI_POSITION_API;
+use crate::io::ToSfen;
 use crate::nshogi::NSHOGI_IO_API;
+use crate::nshogi::NSHOGI_POSITION_API;
 use crate::state::State;
 use crate::types::{Color, Piece, PieceType, Square};
-use crate::io::ToSfen;
 
 /// Represents the positions of pieces in shogi.
 pub struct Position<'a> {

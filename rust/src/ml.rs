@@ -1,7 +1,7 @@
+use crate::nshogi::NSHOGI_ML_API;
 use crate::state::State;
 use crate::state_config::StateConfig;
 use crate::types::Move;
-use crate::nshogi::NSHOGI_ML_API;
 
 /// Discrete feature IDs used when converting a `State` into
 /// numerical (float) representation.
@@ -460,12 +460,17 @@ impl FeatureType {
 /// }
 /// ```
 #[inline]
-pub fn make_feature_vector(state: &State, state_config: &StateConfig, feature_types: &Vec<FeatureType>) -> Vec<f32> {
+pub fn make_feature_vector(
+    state: &State,
+    state_config: &StateConfig,
+    feature_types: &Vec<FeatureType>,
+) -> Vec<f32> {
     NSHOGI_ML_API.make_feature_vector(
         state.handle.as_ptr(),
         state_config.handle.as_ptr(),
         feature_types.as_ptr() as *const i32,
-        feature_types.len())
+        feature_types.len(),
+    )
 }
 
 /// Maps a concrete `Move` in the given `state` to a 0-based integer
@@ -489,7 +494,7 @@ pub fn make_feature_vector_color() {
     let fv = make_feature_vector(&state, &state_config, &feature_types);
     assert_eq!(feature_types.len() * 81, fv.len());
     assert!(fv[0..81].iter().all(|v| { *v == 1.0f32 }));
-    assert!(fv[81..81*2].iter().all(|v| { *v == 0.0f32 }));
+    assert!(fv[81..81 * 2].iter().all(|v| { *v == 0.0f32 }));
 }
 
 #[test]
@@ -528,9 +533,10 @@ pub fn make_feature_vector_piece() {
         (Piece::WHITE_PRO_ROOK, FeatureType::OP_PRO_ROOK),
     ];
 
-    let state = State::from_sfen("kgsnlbrp1/+s+n+l+p5/5+P+L+N+S/1PRBLNSGK/9/9/9/9/9 b G7Pg7p 1").unwrap();
+    let state =
+        State::from_sfen("kgsnlbrp1/+s+n+l+p5/5+P+L+N+S/1PRBLNSGK/9/9/9/9/9 b G7Pg7p 1").unwrap();
     let state_config = StateConfig::new();
-    let feature_types = piece_and_feature_type.iter().map(|v| { v.1 }).collect();
+    let feature_types = piece_and_feature_type.iter().map(|v| v.1).collect();
 
     let fv = make_feature_vector(&state, &state_config, &feature_types);
     assert_eq!(feature_types.len() * 81, fv.len());
