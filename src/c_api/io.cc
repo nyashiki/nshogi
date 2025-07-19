@@ -10,8 +10,8 @@
 #include "io.h"
 
 #include "../core/state.h"
-#include "../io/sfen.h"
 #include "../io/csa.h"
+#include "../io/sfen.h"
 
 #include <cstring>
 #include <memory>
@@ -93,8 +93,8 @@ int32_t ioApiPositionToSfen(char* Dest, int32_t MaxLength,
 
 int ioApiCanCreateStateFromCSA(const char* CSA) {
     try {
-        std::unique_ptr<core::State> State = std::make_unique<core::State>(
-            io::csa::StateBuilder::newState(CSA));
+        std::unique_ptr<core::State> State =
+            std::make_unique<core::State>(io::csa::StateBuilder::newState(CSA));
     } catch (const std::runtime_error&) {
         return 0;
     }
@@ -102,8 +102,7 @@ int ioApiCanCreateStateFromCSA(const char* CSA) {
     return 1;
 }
 
-int ioApiCanCreateMoveFromCSA(const nshogi_state_t* CState,
-                               const char* CSA) {
+int ioApiCanCreateMoveFromCSA(const nshogi_state_t* CState, const char* CSA) {
     try {
         const core::State* State = reinterpret_cast<const core::State*>(CState);
         io::csa::CSAToMove32(State->getPosition(), CSA);
@@ -115,19 +114,19 @@ int ioApiCanCreateMoveFromCSA(const nshogi_state_t* CState,
 }
 
 nshogi_state_t* ioApiCreateStateFromCSA(const char* CSA) {
-    core::State* State =
-        new core::State(io::csa::StateBuilder::newState(CSA));
+    core::State* State = new core::State(io::csa::StateBuilder::newState(CSA));
     return reinterpret_cast<nshogi_state_t*>(State);
 }
 
 nshogi_move_t ioApiCreateMoveFromCSA(const nshogi_state_t* CState,
-                                      const char* CSA) {
+                                     const char* CSA) {
     const core::State* State = reinterpret_cast<const core::State*>(CState);
     core::Move32 Move = io::csa::CSAToMove32(State->getPosition(), CSA);
     return static_cast<nshogi_move_t>(Move.value());
 }
 
-int32_t ioApiMoveToCSA(char* Dest, const nshogi_state_t* CState, nshogi_move_t CMove) {
+int32_t ioApiMoveToCSA(char* Dest, const nshogi_state_t* CState,
+                       nshogi_move_t CMove) {
     const core::State* State = reinterpret_cast<const core::State*>(CState);
     core::Move32 Move = core::Move32::fromValue(CMove);
     std::string CSA = io::csa::move32ToCSA(Move, State->getSideToMove());
@@ -136,7 +135,7 @@ int32_t ioApiMoveToCSA(char* Dest, const nshogi_state_t* CState, nshogi_move_t C
 }
 
 int32_t ioApiStateToCSA(char* Dest, int32_t MaxLength,
-                         const nshogi_state_t* CState) {
+                        const nshogi_state_t* CState) {
     const core::State* State = reinterpret_cast<const core::State*>(CState);
     std::string CSA = io::csa::stateToCSA(*State);
 
@@ -149,7 +148,7 @@ int32_t ioApiStateToCSA(char* Dest, int32_t MaxLength,
 }
 
 int32_t ioApiPositionToCSA(char* Dest, int32_t MaxLength,
-                            const nshogi_position_t* CPosition) {
+                           const nshogi_position_t* CPosition) {
     const core::Position* Position =
         reinterpret_cast<const core::Position*>(CPosition);
     std::string CSA = io::csa::positionToCSA(*Position);
