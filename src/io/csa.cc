@@ -377,19 +377,23 @@ StateBuilder::StateBuilder(const std::string& CSA)
     using namespace core;
 
     std::vector<std::string> CSASplitted = internal::utils::split(CSA, '\n');
+    bool MoveWinDetected = false;
 
     for (const auto& CSALine : CSASplitted) {
         auto CSAMove = internal::utils::split(CSALine, ',')[0];
         if (CSAMove.size() == 7) {
             if (CSALine[0] == '+' || CSALine[0] == '-') {
+                if (MoveWinDetected) {
+                    throw std::runtime_error("move after declaration");
+                }
+
                 core::Move32 Move =
                     CSAToMove32(Instance.getPosition(), CSALine);
                 Instance.doMove(Move);
             }
         } else {
             if (CSALine == "%KACHI") {
-                Instance.doMove(core::Move32::MoveWin());
-                break;
+                MoveWinDetected = true;
             }
         }
     }
