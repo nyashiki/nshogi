@@ -3,7 +3,7 @@ use std::ptr::NonNull;
 use std::sync::LazyLock;
 
 use crate::types::{
-    Color, Move, MoveGetError, Piece, PieceType, Repetition, SfenParseError, Square,
+    CSAParseError, Color, Move, MoveGetError, Piece, PieceType, Repetition, SfenParseError, Square,
 };
 
 // NShogi C APIs.
@@ -317,6 +317,7 @@ impl NShogiMLCApi {
 
 #[repr(C)]
 pub struct NShogiIOCApi {
+    // Sfen.
     can_create_state_from_sfen: unsafe extern "C" fn(*const c_char) -> i32,
     can_create_move_from_sfen: unsafe extern "C" fn(*const c_void, *const c_char) -> i32,
     create_state_from_sfen: unsafe extern "C" fn(*const c_char) -> *mut c_void,
@@ -324,6 +325,15 @@ pub struct NShogiIOCApi {
     move_to_sfen: unsafe extern "C" fn(*mut c_char, u32) -> i32,
     state_to_sfen: unsafe extern "C" fn(*mut c_char, i32, *const c_void) -> i32,
     position_to_sfen: unsafe extern "C" fn(*mut c_char, i32, *const c_void) -> i32,
+
+    // CSA.
+    can_create_state_from_csa: unsafe extern "C" fn(*const c_char) -> i32,
+    can_create_move_from_csa: unsafe extern "C" fn(*const c_void, *const c_char) -> i32,
+    create_state_from_csa: unsafe extern "C" fn(*const c_char) -> *mut c_void,
+    create_move_from_csa: unsafe extern "C" fn(*const c_void, *const c_char) -> u32,
+    move_to_csa: unsafe extern "C" fn(*mut c_char, *const c_void, u32) -> i32,
+    state_to_csa: unsafe extern "C" fn(*mut c_char, i32, *const c_void) -> i32,
+    position_to_csa: unsafe extern "C" fn(*mut c_char, i32, *const c_void) -> i32,
 }
 
 impl NShogiIOCApi {
@@ -389,6 +399,67 @@ impl NShogiIOCApi {
             let _ = (self.position_to_sfen)(buffer.as_mut_ptr(), BUFFER_SIZE as i32, c_position);
             let sfen = CStr::from_ptr(buffer.as_ptr()).to_str();
             sfen.unwrap().to_string()
+        }
+    }
+
+    pub fn create_state_from_csa(&self, csa: &str) -> Result<NonNull<c_void>, CSAParseError> {
+        unsafe {
+            let c_csa = CString::new(csa).expect("CSA string contains nul byte");
+            if (self.can_create_state_from_csa)(c_csa.as_ptr()) == 0 {
+                Err(CSAParseError::RuntimeError("Invalid CSA string."))
+            } else {
+                let c_state = (self.create_state_from_csa)(c_csa.as_ptr());
+                NonNull::new(c_state).ok_or(CSAParseError::InternalError(
+                        "create_state_from_csa returned null",
+                ))
+            }
+        }
+    }
+
+    pub fn create_move_from_csa(&self, state: *const c_void, csa: &str) -> Result<Move, CSAParseError> {
+        unsafe {
+            let c_csa = CString::new(csa).expect("csa string contains null byte");
+            if (self.can_create_move_from_sfen)(state, c_csa.as_ptr()) == 0 {
+                Err(CSAParseError::RuntimeError("Invalid csa string."))
+            } else {
+                Ok(Move::new((self.create_move_from_csa)(
+                            state,
+                            c_csa.as_ptr(),
+                )))
+            }
+        }
+    }
+
+    pub fn move_to_csa(&self, state: *const c_void, m: u32) -> String {
+        const BUFFER_SIZE: usize = 16;
+        let mut buffer = [0i8; BUFFER_SIZE];
+
+        unsafe {
+            let _ = (self.move_to_csa)(buffer.as_mut_ptr(), state, m);
+            let csa = CStr::from_ptr(buffer.as_ptr()).to_str();
+            csa.unwrap().to_string()
+        }
+    }
+
+    pub fn state_to_csa(&self, state: *const c_void) -> String {
+        const BUFFER_SIZE: usize = 16384;
+        let mut buffer = [0i8; BUFFER_SIZE];
+
+        unsafe {
+            let _ = (self.state_to_csa)(buffer.as_mut_ptr(), BUFFER_SIZE as i32, state);
+            let csa = CStr::from_ptr(buffer.as_ptr()).to_str();
+            csa.unwrap().to_string()
+        }
+    }
+
+    pub fn position_to_csa(&self, position: *const c_void) -> String {
+        const BUFFER_SIZE: usize = 16384;
+        let mut buffer = [0i8; BUFFER_SIZE];
+
+        unsafe {
+            let _ = (self.position_to_csa)(buffer.as_mut_ptr(), BUFFER_SIZE as i32, position);
+            let csa = CStr::from_ptr(buffer.as_ptr()).to_str();
+            csa.unwrap().to_string()
         }
     }
 }

@@ -17,3 +17,8 @@ pub trait ToSfen {
     /// Returns the sfen string.
     fn to_sfen(&self) -> String;
 }
+
+pub trait ToCSA {
+    /// Returns the CSA string.
+    fn to_csa(&self) -> String;
+}

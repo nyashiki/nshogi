@@ -2,8 +2,10 @@ use std::ffi::c_void;
 use std::ptr::NonNull;
 
 use crate::nshogi::{NSHOGI_IO_API, NSHOGI_STATE_API};
+use crate::types::CSAParseError;
 use crate::types::SfenParseError;
 
+use crate::io::ToCSA;
 use crate::io::ToSfen;
 use crate::position::Position;
 use crate::types::{Color, Move, MoveGetError, Repetition};
@@ -22,6 +24,12 @@ impl State {
     pub fn from_sfen(sfen: &str) -> Result<Self, SfenParseError> {
         NSHOGI_IO_API
             .create_state_from_sfen(sfen)
+            .map(|handle| Self { handle: handle })
+    }
+
+    pub fn from_csa(csa: &str) -> Result<Self, CSAParseError> {
+        NSHOGI_IO_API
+            .create_state_from_csa(csa)
             .map(|handle| Self { handle: handle })
     }
 
@@ -210,6 +218,34 @@ impl ToSfen for State {
     /// ```
     fn to_sfen(&self) -> String {
         NSHOGI_IO_API.state_to_sfen(self.handle.as_ptr())
+    }
+}
+
+impl ToCSA for State {
+    /// Returns the csa notation of the state.
+    ///
+    /// ```
+    /// use nshogi::io::ToCSA;
+    /// let state = nshogi::state::State::from_sfen("startpos moves 2g2f").unwrap();
+    /// assert_eq!(
+    ///     concat!(
+    ///         "P1-KY-KE-GI-KI-OU-KI-GI-KE-KY\n",
+    ///         "P2 * -HI *  *  *  *  * -KA * \n",
+    ///         "P3-FU-FU-FU-FU-FU-FU-FU-FU-FU\n",
+    ///         "P4 *  *  *  *  *  *  *  *  * \n",
+    ///         "P5 *  *  *  *  *  *  *  *  * \n",
+    ///         "P6 *  *  *  *  *  *  *  *  * \n",
+    ///         "P7+FU+FU+FU+FU+FU+FU+FU+FU+FU\n",
+    ///         "P8 * +KA *  *  *  *  * +HI * \n",
+    ///         "P9+KY+KE+GI+KI+OU+KI+GI+KE+KY\n",
+    ///         "+\n",
+    ///         "+2726FU\n"
+    ///     ),
+    ///     state.to_csa()
+    /// );
+    /// ```
+    fn to_csa(&self) -> String {
+        NSHOGI_IO_API.state_to_csa(self.handle.as_ptr())
     }
 }
 
