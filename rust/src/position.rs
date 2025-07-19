@@ -3,6 +3,7 @@ use std::ptr::NonNull;
 
 use std::marker::PhantomData;
 
+use crate::io::ToCSA;
 use crate::io::ToSfen;
 use crate::nshogi::NSHOGI_IO_API;
 use crate::nshogi::NSHOGI_POSITION_API;
@@ -55,5 +56,32 @@ impl<'a> ToSfen for Position<'a> {
     /// ```
     fn to_sfen(&self) -> String {
         NSHOGI_IO_API.position_to_sfen(self.handle.as_ptr())
+    }
+}
+
+impl<'a> ToCSA for Position<'a> {
+    /// Returns the csa notation of the state.
+    ///
+    /// ```
+    /// use nshogi::io::ToCSA;
+    /// let state = nshogi::state::State::from_sfen("startpos moves 2g2f").unwrap();
+    /// assert_eq!(
+    ///     concat!(
+    ///         "P1-KY-KE-GI-KI-OU-KI-GI-KE-KY\n",
+    ///         "P2 * -HI *  *  *  *  * -KA * \n",
+    ///         "P3-FU-FU-FU-FU-FU-FU-FU-FU-FU\n",
+    ///         "P4 *  *  *  *  *  *  *  *  * \n",
+    ///         "P5 *  *  *  *  *  *  *  *  * \n",
+    ///         "P6 *  *  *  *  *  *  * +FU * \n",
+    ///         "P7+FU+FU+FU+FU+FU+FU+FU * +FU\n",
+    ///         "P8 * +KA *  *  *  *  * +HI * \n",
+    ///         "P9+KY+KE+GI+KI+OU+KI+GI+KE+KY\n",
+    ///         "-\n",
+    ///     ),
+    ///     state.get_position().to_csa()
+    /// );
+    /// ```
+    fn to_csa(&self) -> String {
+        NSHOGI_IO_API.position_to_csa(self.handle.as_ptr())
     }
 }

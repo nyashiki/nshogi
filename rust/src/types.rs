@@ -1,5 +1,6 @@
 use crate::io::ToSfen;
 use crate::nshogi::{NSHOGI_IO_API, NSHOGI_MOVE_API};
+use crate::state::State;
 
 /// Side (color) of a player in shogi.
 ///
@@ -234,6 +235,12 @@ pub enum SfenParseError {
 }
 
 #[derive(Debug)]
+pub enum CSAParseError {
+    RuntimeError(&'static str),
+    InternalError(&'static str),
+}
+
+#[derive(Debug)]
 pub enum MoveGetError {
     OutOfIndex,
 }
@@ -255,8 +262,12 @@ impl Move {
     }
 
     /// Parses a sfen move string (e.g. "7g7f").
-    pub fn from_sfen(state: &crate::state::State, sfen: &str) -> Result<Self, SfenParseError> {
+    pub fn from_sfen(state: &State, sfen: &str) -> Result<Self, SfenParseError> {
         NSHOGI_IO_API.create_move_from_sfen(state.handle.as_ptr(), sfen)
+    }
+
+    pub fn from_csa(state: &State, csa: &str) -> Result<Self, CSAParseError> {
+        NSHOGI_IO_API.create_move_from_csa(state.handle.as_ptr(), csa)
     }
 
     /// Decodes the target square (0–80).
@@ -305,6 +316,15 @@ impl Move {
     pub fn win() -> Move {
         NSHOGI_MOVE_API.win()
     }
+
+    /// Returns the csa notattion of the state.
+    ///
+    /// This method is **not** provided by the `ToCSA` trait because
+    /// converting a move to CSA notation requires access to the current
+    /// `State`.  That context is **not** available inside the trait itself.
+    pub fn to_csa(&self, state: &State) -> String {
+        NSHOGI_IO_API.move_to_csa(state.handle.as_ptr(), self.value())
+    }
 }
 
 impl PartialEq for Move {
@@ -320,6 +340,7 @@ impl PartialEq for Move {
 }
 
 impl ToSfen for Move {
+    /// Returns the sfen notattion of the state.
     fn to_sfen(&self) -> String {
         NSHOGI_IO_API.move_to_sfen(self.value())
     }
