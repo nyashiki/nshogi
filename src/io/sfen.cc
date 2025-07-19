@@ -505,6 +505,7 @@ StateBuilder::StateBuilder(const std::string& Sfen)
     }
 
     std::string MoveSfen = "";
+    bool MoveWinDetected = false;
     while (Cursor < Sfen.size()) {
         char Scan = Sfen[Cursor];
 
@@ -514,9 +515,17 @@ StateBuilder::StateBuilder(const std::string& Sfen)
 
         ++Cursor;
         if (Scan == ' ' || Cursor == Sfen.size()) {
+            if (MoveWinDetected) {
+                throw std::runtime_error("move after declaration");
+            }
+
             core::Move32 Move = sfenToMove32(Instance.getPosition(), MoveSfen);
 
-            Instance.doMove(Move);
+            if (!Move.isWin()) {
+                Instance.doMove(Move);
+            } else {
+                MoveWinDetected = true;
+            }
 
             MoveSfen = "";
         }
