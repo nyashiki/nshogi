@@ -203,6 +203,10 @@ PYBIND11_MODULE(nshogi, Module) {
              [](const nshogi::core::State& S) {
                  return nshogi::io::sfen::stateToSfen(S);
              })
+        .def("to_csa",
+            [](const nshogi::core::State& S) {
+                return nshogi::io::csa::stateToCSA(S);
+            })
         .def("get_stand_count",
              [](const nshogi::core::State& State, nshogi::core::Color C,
                 nshogi::core::PieceTypeKind Type) {
