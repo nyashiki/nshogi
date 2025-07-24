@@ -24,6 +24,10 @@ class MoveGeneratorInternal;
 
 struct MoveList {
  public:
+    MoveList()
+        : Tail(Moves) {
+    }
+
     MoveList(MoveList&& Other) noexcept {
         Tail = Moves + Other.size();
         std::copy(Other.Moves, Other.Moves + Other.size(), Moves);
@@ -59,11 +63,12 @@ struct MoveList {
         return (std::size_t)(Tail - Moves);
     }
 
- private:
-    MoveList()
-        : Tail(Moves) {
+    inline void add(Move32 Move) {
+        *Tail = Move;
+        ++Tail;
     }
 
+ private:
     static constexpr std::size_t MoveCountMax = 600;
 
     Move32 Moves[MoveCountMax];
