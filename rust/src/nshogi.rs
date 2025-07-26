@@ -18,6 +18,9 @@ pub struct NShogiMoveCApi {
     piece_type: unsafe extern "C" fn(u32) -> u8,
     capture_piece_type: unsafe extern "C" fn(u32) -> u8,
     is_none: unsafe extern "C" fn(u32) -> i32,
+    is_win: unsafe extern "C" fn(u32) -> i32,
+
+    none_move: unsafe extern "C" fn() -> u32,
     win_move: unsafe extern "C" fn() -> u32,
 }
 
@@ -48,6 +51,14 @@ impl NShogiMoveCApi {
 
     pub fn is_none(&self, m: u32) -> bool {
         unsafe { (self.is_none)(m) != 0 }
+    }
+
+    pub fn is_win(&self, m: u32) -> bool {
+        unsafe { (self.is_win)(m) != 0 }
+    }
+
+    pub fn none(&self) -> Move {
+        unsafe { Move::new((self.none_move)()) }
     }
 
     pub fn win(&self) -> Move {
@@ -404,7 +415,7 @@ impl NShogiIOCApi {
 
     pub fn create_state_from_csa(&self, csa: &str) -> Result<NonNull<c_void>, CSAParseError> {
         unsafe {
-            let c_csa = CString::new(csa).expect("CSA string contains nul byte");
+            let c_csa = CString::new(csa).expect("CSA string contains null byte");
             if (self.can_create_state_from_csa)(c_csa.as_ptr()) == 0 {
                 Err(CSAParseError::RuntimeError("Invalid CSA string."))
             } else {

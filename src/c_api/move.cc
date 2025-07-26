@@ -44,6 +44,14 @@ int moveApiIsNone(nshogi_move_t CMove) {
     return static_cast<int>(core::Move32::fromValue(CMove).isNone());
 }
 
+int moveApiIsWin(nshogi_move_t CMove) {
+    return static_cast<int>(core::Move32::fromValue(CMove).isWin());
+}
+
+nshogi_move_t moveApiNoneMove() {
+    return static_cast<nshogi_move_t>(core::Move32::MoveNone().value());
+}
+
 nshogi_move_t moveApiWinMove() {
     return static_cast<nshogi_move_t>(core::Move32::MoveWin().value());
 }
@@ -62,6 +70,9 @@ nshogi_move_api_t* c_api::move::getApi() {
         Api.pieceType = moveApiPieceType;
         Api.capturePieceType = moveApiCapturePieceType;
         Api.isNone = moveApiIsNone;
+        Api.isWin = moveApiIsWin;
+
+        Api.noneMove = moveApiNoneMove;
         Api.winMove = moveApiWinMove;
 
         Initialized = true;
