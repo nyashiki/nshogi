@@ -463,7 +463,7 @@ impl FeatureType {
 pub fn make_feature_vector(
     state: &State,
     state_config: &StateConfig,
-    feature_types: &Vec<FeatureType>,
+    feature_types: &[FeatureType],
 ) -> Vec<f32> {
     NSHOGI_ML_API.make_feature_vector(
         state.handle.as_ptr(),
@@ -489,7 +489,7 @@ pub fn move_to_index(state: &State, m: &Move) -> usize {
 pub fn make_feature_vector_color() {
     let state = State::from_sfen("startpos").unwrap();
     let state_config = StateConfig::new();
-    let feature_types = vec![FeatureType::BLACK, FeatureType::WHITE];
+    let feature_types = [FeatureType::BLACK, FeatureType::WHITE];
 
     let fv = make_feature_vector(&state, &state_config, &feature_types);
     assert_eq!(feature_types.len() * 81, fv.len());
@@ -536,7 +536,7 @@ pub fn make_feature_vector_piece() {
     let state =
         State::from_sfen("kgsnlbrp1/+s+n+l+p5/5+P+L+N+S/1PRBLNSGK/9/9/9/9/9 b G7Pg7p 1").unwrap();
     let state_config = StateConfig::new();
-    let feature_types = piece_and_feature_type.iter().map(|v| v.1).collect();
+    let feature_types: Vec<FeatureType> = piece_and_feature_type.iter().map(|v| v.1).collect();
 
     let fv = make_feature_vector(&state, &state_config, &feature_types);
     assert_eq!(feature_types.len() * 81, fv.len());
