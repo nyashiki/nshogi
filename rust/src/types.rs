@@ -312,7 +312,20 @@ impl Move {
         NSHOGI_MOVE_API.is_none(self.0)
     }
 
+    /// `true` if this value is win move.
+    #[inline]
+    pub fn is_win(&self) -> bool {
+        NSHOGI_MOVE_API.is_win(self.0)
+    }
+
+    /// Returns the none move.
+    #[inline]
+    pub fn none() -> Move {
+        NSHOGI_MOVE_API.none()
+    }
+
     /// Returns the special win move for *declaration*.
+    #[inline]
     pub fn win() -> Move {
         NSHOGI_MOVE_API.win()
     }
@@ -325,6 +338,18 @@ impl Move {
     pub fn to_csa(&self, state: &State) -> String {
         NSHOGI_IO_API.move_to_csa(state.handle.as_ptr(), self.value())
     }
+}
+
+#[test]
+fn none_is_none() {
+    let none_move = Move::none();
+    assert!(none_move.is_none());
+}
+
+#[test]
+fn win_is_win() {
+    let win_move = Move::win();
+    assert!(win_move.is_win());
 }
 
 impl PartialEq for Move {

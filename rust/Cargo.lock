@@ -55,7 +55,7 @@ checksum = "d750af042f7ef4f724306de029d18836c26c1765a54a6a3f094cbd23a7267ffa"
 
 [[package]]
 name = "nshogi"
-version = "0.1.0"
+version = "0.1.2"
 dependencies = [
  "cc",
 ]

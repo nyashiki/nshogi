@@ -295,6 +295,10 @@ typedef struct nshogi_move_api {
     uint8_t (*pieceType)(nshogi_move_t);
     uint8_t (*capturePieceType)(nshogi_move_t);
     int (*isNone)(nshogi_move_t move);
+    int (*isWin)(nshogi_move_t move);
+
+    // Constants.
+    nshogi_move_t (*noneMove)(void);
     nshogi_move_t (*winMove)(void);
 } nshogi_move_api_t;
 
