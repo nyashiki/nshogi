@@ -261,7 +261,7 @@ class TestML(unittest.TestCase):
             state = nshogi.io.sfen.make_state_from_sfen(sfen)
 
             x = nshogi.ml.FeatureStack(feature_types, state, state_config)
-            x = x.to_numpy()
+            x = x.to_numpy().flatten()
 
             if state.side_to_move == nshogi.Color.BLACK:
                 self.assertTrue(all(x == 1))
@@ -279,7 +279,7 @@ class TestML(unittest.TestCase):
             state = nshogi.io.sfen.make_state_from_sfen(sfen)
 
             x = nshogi.ml.FeatureStack(feature_types, state, state_config)
-            x = x.to_numpy()
+            x = x.to_numpy().flatten()
 
             if state.side_to_move == nshogi.Color.WHITE:
                 self.assertTrue(all(x == 1))
@@ -315,7 +315,7 @@ class TestML(unittest.TestCase):
                 ]
 
                 x = nshogi.ml.FeatureStack(feature_types, state, state_config)
-                x = x.to_numpy()
+                x = x.to_numpy().flatten()
 
                 for i in range(81):
                     if state.side_to_move == nshogi.Color.BLACK:
@@ -372,7 +372,7 @@ class TestML(unittest.TestCase):
                 ]
 
                 x = nshogi.ml.FeatureStack(feature_types, state, state_config)
-                x = x.to_numpy()
+                x = x.to_numpy().flatten()
 
                 count = state.get_stand_count(state.side_to_move, piece_type)
 
@@ -424,7 +424,7 @@ class TestML(unittest.TestCase):
                 ]
 
                 x = nshogi.ml.FeatureStack(feature_types, state, state_config)
-                x = x.to_numpy()
+                x = x.to_numpy().flatten()
 
                 count = state.get_stand_count(nshogi.Color(1 - int(state.side_to_move)), piece_type)
 
@@ -444,7 +444,7 @@ class TestML(unittest.TestCase):
             state = nshogi.io.sfen.make_state_from_sfen(sfen)
 
             x = nshogi.ml.FeatureStack(feature_types, state, state_config)
-            x = x.to_numpy()
+            x = x.to_numpy().flatten()
 
             if state.is_in_check:
                 self.assertTrue(all(x == 1))
@@ -462,7 +462,7 @@ class TestML(unittest.TestCase):
             state = nshogi.io.sfen.make_state_from_sfen(sfen)
 
             x = nshogi.ml.FeatureStack(feature_types, state, state_config)
-            x = x.to_numpy()
+            x = x.to_numpy().flatten()
 
             expected = np.zeros(81)
 
@@ -490,7 +490,7 @@ class TestML(unittest.TestCase):
             state = nshogi.io.sfen.make_state_from_sfen(sfen)
 
             x = nshogi.ml.FeatureStack(feature_types, state, state_config)
-            x = x.to_numpy()
+            x = x.to_numpy().flatten()
 
             expected = np.zeros(81)
 
@@ -507,6 +507,32 @@ class TestML(unittest.TestCase):
             expected = 1.0 - expected
             self.assertTrue(all(expected == x))
 
+
+    def test_feature_channels_last(self):
+        feature_types = [
+            nshogi.ml.FeatureType.MY_PAWN,
+            nshogi.ml.FeatureType.OP_PAWN,
+        ]
+
+        state_config = nshogi.StateConfig()
+        for _ in range(100):
+            state = nshogi.io.sfen.make_state_from_sfen("startpos")
+
+            for ply in range(256):
+                x = nshogi.ml.FeatureStack(feature_types, state, state_config)
+                self.assertTrue(
+                        (x.to_numpy(channels_first=True) ==
+                         x.to_numpy(channels_first=False).transpose(2, 0, 1)
+                    ).all())
+
+                legal_moves = state.legal_moves
+
+                if len(legal_moves) == 0:
+                    break
+
+                sfen = state.to_sfen()
+
+                state.do_move(random.choice(legal_moves))
 
 if __name__ == "__main__":
     random.seed(42)

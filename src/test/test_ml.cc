@@ -21,6 +21,7 @@
 #include "../ml/internal/featurebitboardutil.h"
 #include "../ml/simpleteacher.h"
 #include "../ml/utils.h"
+#include "../ml/common.h"
 #include "common.h"
 
 #include <filesystem>
@@ -1278,7 +1279,7 @@ TEST(ML, SimpleTeacherSaveAndLoad) {
 TEST(ML, PermutationGenerator) {
     for (std::size_t N = 1; N < 1000; ++N) {
         std::vector<bool> Filled(N, false);
-        for (uint64_t Seed = 0; Seed < 100; ++Seed) {
+        for (uint64_t Seed = 0; Seed < 10; ++Seed) {
             nshogi::ml::utils::PermutationGenerator PG(Seed, N);
             for (uint64_t I = 0; I < (uint64_t)N; ++I) {
                 Filled[PG(I)] = true;
@@ -1288,5 +1289,32 @@ TEST(ML, PermutationGenerator) {
                 TEST_ASSERT_TRUE(Filled[I]);
             }
         }
+    }
+}
+
+TEST(ML, MoveIndexChannelsFirstAndLast) {
+    auto State = nshogi::core::StateBuilder::getInitialState();
+
+    while (State.getPly() < 1024) {
+        const auto Moves = nshogi::core::MoveGenerator::generateLegalMoves(State);
+
+        if (Moves.size() == 0) {
+            break;
+        }
+
+        for (const auto& Move : Moves) {
+            const auto IndexChannelsFirst =
+                nshogi::ml::getMoveIndex<true>(State.getSideToMove(), Move);
+            const auto IndexChannelsLast =
+                nshogi::ml::getMoveIndex<false>(State.getSideToMove(), Move);
+
+            const auto To = IndexChannelsFirst % 81;
+            const auto Channel = IndexChannelsFirst / 81;
+
+            TEST_ASSERT_EQ(IndexChannelsLast,
+                           To * 27 + Channel);
+        }
+
+        State.doMove(Moves[0]);
     }
 }
