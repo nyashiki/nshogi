@@ -47,13 +47,21 @@ class PyFeatureStack {
         : FeatureStack(Types, S, Config) {
     }
 
-    pybind11::array_t<float> to_numpy() const {
+    pybind11::array_t<float> to_numpy(bool ChannelsFirst) const {
         auto NpArray = pybind11::array_t<float>(
             (pybind11::ssize_t)nshogi::core::NumSquares *
             (pybind11::ssize_t)FeatureStack.size());
         auto Data = reinterpret_cast<float*>(NpArray.request().ptr);
 
-        FeatureStack.extract<nshogi::core::IterateOrder::Fastest>(Data);
+        if (ChannelsFirst) {
+            FeatureStack.extract<nshogi::core::IterateOrder::Fastest, true>(Data);
+            NpArray.resize(
+                {(pybind11::ssize_t)FeatureStack.size(), (pybind11::ssize_t)9, (pybind11::ssize_t)9});
+        } else {
+            FeatureStack.extract<nshogi::core::IterateOrder::Fastest, false>(Data);
+            NpArray.resize(
+                {(pybind11::ssize_t)9, (pybind11::ssize_t)9, (pybind11::ssize_t)FeatureStack.size()});
+        }
 
         return NpArray;
     }
@@ -430,15 +438,24 @@ PYBIND11_MODULE(nshogi, Module) {
         .value("MY_ATTACK", nshogi::ml::FeatureType::FT_MyAttack)
         .value("OP_ATTACK", nshogi::ml::FeatureType::FT_OpAttack);
 
-    MLModule.def("move_to_index", (std::size_t(*)(nshogi::core::Color,
-                                                  const nshogi::core::Move32)) &
-                                      nshogi::ml::getMoveIndex);
+    MLModule.def(
+            "move_to_index",
+            [](nshogi::core::Color Color, const nshogi::core::Move32 Move, bool ChannlesFirst) -> std::size_t {
+                if (ChannlesFirst) {
+                    return nshogi::ml::getMoveIndex<true>(Color, Move);
+                } else {
+                    return nshogi::ml::getMoveIndex<false>(Color, Move);
+                }
+            },
+            pybind11::arg("color"),
+            pybind11::arg("move"),
+            pybind11::arg("channels_first"));
 
     pybind11::class_<PyFeatureStack>(MLModule, "FeatureStack")
         .def(pybind11::init<const std::vector<nshogi::ml::FeatureType>&,
                             const nshogi::core::State&,
                             const nshogi::core::StateConfig&>())
-        .def("to_numpy", &PyFeatureStack::to_numpy);
+        .def("to_numpy", &PyFeatureStack::to_numpy, pybind11::arg("channels_first") = true);
 
     pybind11::class_<nshogi::ml::AZTeacher>(MLModule, "AZTeacher")
         .def("state",
@@ -461,7 +478,7 @@ PYBIND11_MODULE(nshogi, Module) {
              })
         .def("sfen", [](const nshogi::ml::AZTeacher& T) { return T.Sfen; })
         .def("policy",
-             [](const nshogi::ml::AZTeacher& T) {
+             [](const nshogi::ml::AZTeacher& T, bool ChannelsFirst) {
                  auto NpArray = pybind11::array_t<float>(
                      (pybind11::ssize_t)nshogi::ml::MoveIndexMax);
                  auto Data = reinterpret_cast<float*>(NpArray.request().ptr);
@@ -483,15 +500,17 @@ PYBIND11_MODULE(nshogi, Module) {
                  for (uint8_t I = 0; I < T.NumMoves; ++I) {
                      const auto Move = nshogi::io::sfen::sfenToMove32(
                          State.getPosition(), std::string(T.Moves[I].data()));
-                     const std::size_t Index =
-                         nshogi::ml::getMoveIndex(T.SideToMove, Move);
+                     const std::size_t Index = ChannelsFirst
+                             ? nshogi::ml::getMoveIndex<true>(T.SideToMove, Move)
+                             : nshogi::ml::getMoveIndex<false>(T.SideToMove, Move);
                      Data[Index] = (float)T.Visits[I] / (float)SumVisits;
                  }
 
                  return NpArray;
-             })
+             },
+             pybind11::arg("channels_first"))
         .def("legal_moves",
-             [](const nshogi::ml::AZTeacher& T) {
+             [](const nshogi::ml::AZTeacher& T, bool ChannelsFirst) {
                  auto NpArray = pybind11::array_t<float>(
                      (pybind11::ssize_t)nshogi::ml::MoveIndexMax);
                  auto Data = reinterpret_cast<float*>(NpArray.request().ptr);
@@ -507,15 +526,16 @@ PYBIND11_MODULE(nshogi, Module) {
                  assert(State.getPosition().sideToMove() == T.SideToMove);
 
                  for (const nshogi::core::Move32 Move : LegalMoves) {
-                     const std::size_t Index =
-                         nshogi::ml::getMoveIndex(T.SideToMove, Move);
+                     const std::size_t Index = ChannelsFirst
+                             ? nshogi::ml::getMoveIndex<true>(T.SideToMove, Move)
+                             : nshogi::ml::getMoveIndex<false>(T.SideToMove, Move);
                      Data[Index] = 1;
                  }
 
                  return NpArray;
-             })
+             }, pybind11::arg("channels_first"))
         .def("attacks",
-             [](const nshogi::ml::AZTeacher& T) {
+             [](const nshogi::ml::AZTeacher& T, bool ChannelsFirst) {
                  auto NpArray = pybind11::array_t<float>(2 * 81);
                  auto Data = reinterpret_cast<float*>(NpArray.request().ptr);
 
@@ -526,46 +546,21 @@ PYBIND11_MODULE(nshogi, Module) {
                      std::string(T.Sfen));
                  nshogi::core::internal::ImmutableStateAdapter Adapter(State);
 
-                 if (State.getSideToMove() == nshogi::core::Black) {
-                     const nshogi::core::internal::bitboard::Bitboard
-                         MyAttackBB =
-                             Adapter->getAttackBB<nshogi::core::Black>();
-                     const nshogi::core::internal::bitboard::Bitboard
-                         OpAttackBB =
-                             Adapter->getAttackBB<nshogi::core::White>();
+                 nshogi::ml::FeatureStackRuntime FSR(
+                         { nshogi::ml::FeatureType::FT_MyAttack,
+                           nshogi::ml::FeatureType::FT_OpAttack },
+                         State,
+                         nshogi::core::StateConfig()
+                 );
 
-                     const nshogi::ml::FeatureBitboard MyAttackFB =
-                         nshogi::ml::internal::FeatureBitboardUtil::
-                             makeFeatureBitboard(MyAttackBB, 1.0, false);
-                     const nshogi::ml::FeatureBitboard OpAttackFB =
-                         nshogi::ml::internal::FeatureBitboardUtil::
-                             makeFeatureBitboard(OpAttackBB, 1.0, false);
-
-                     MyAttackFB.extract<nshogi::core::IterateOrder::ESWN>(Data);
-                     OpAttackFB.extract<nshogi::core::IterateOrder::ESWN>(Data +
-                                                                          81);
+                 if (ChannelsFirst) {
+                     FSR.extract<nshogi::core::IterateOrder::Fastest, true>(Data);
                  } else {
-                     const nshogi::core::internal::bitboard::Bitboard
-                         MyAttackBB =
-                             Adapter->getAttackBB<nshogi::core::White>();
-                     const nshogi::core::internal::bitboard::Bitboard
-                         OpAttackBB =
-                             Adapter->getAttackBB<nshogi::core::Black>();
-
-                     const nshogi::ml::FeatureBitboard MyAttackFB =
-                         nshogi::ml::internal::FeatureBitboardUtil::
-                             makeFeatureBitboard(MyAttackBB, 1.0, true);
-                     const nshogi::ml::FeatureBitboard OpAttackFB =
-                         nshogi::ml::internal::FeatureBitboardUtil::
-                             makeFeatureBitboard(OpAttackBB, 1.0, true);
-
-                     MyAttackFB.extract<nshogi::core::IterateOrder::ESWN>(Data);
-                     OpAttackFB.extract<nshogi::core::IterateOrder::ESWN>(Data +
-                                                                          81);
+                     FSR.extract<nshogi::core::IterateOrder::Fastest, false>(Data);
                  }
 
                  return NpArray;
-             })
+             }, pybind11::arg("channels_first"))
         .def("value",
              [](const nshogi::ml::AZTeacher& T) {
                  if (T.SideToMove == T.Winner) {
@@ -590,26 +585,28 @@ PYBIND11_MODULE(nshogi, Module) {
                  return nshogi::io::sfen::stateToSfen(T.getState());
              })
         .def("policy",
-             [](const nshogi::ml::SimpleTeacher& T) {
+             [](const nshogi::ml::SimpleTeacher& T, bool ChannelsFirst) {
                  auto NpArray = pybind11::array_t<float>(
                      (pybind11::ssize_t)nshogi::ml::MoveIndexMax);
                  auto Data = reinterpret_cast<float*>(NpArray.request().ptr);
                  std::memset(reinterpret_cast<char*>(Data), 0,
                              nshogi::ml::MoveIndexMax * sizeof(float));
 
-                 const std::size_t Index = nshogi::ml::getMoveIndex(
-                     T.getState().getSideToMove(), T.getNextMove());
+                 const std::size_t Index = ChannelsFirst
+                            ? nshogi::ml::getMoveIndex<true>(T.getState().getSideToMove(), T.getNextMove())
+                            : nshogi::ml::getMoveIndex<false>(T.getState().getSideToMove(), T.getNextMove());
                  Data[Index] = 1.0f;
                  return NpArray;
-             })
+             }, pybind11::arg("channels_first"))
         .def("policy_index",
-             [](const nshogi::ml::SimpleTeacher& T) {
-                 const std::size_t Index = nshogi::ml::getMoveIndex(
-                     T.getState().getSideToMove(), T.getNextMove());
+             [](const nshogi::ml::SimpleTeacher& T, bool ChannelsFirst) {
+                 const std::size_t Index = ChannelsFirst
+                    ? nshogi::ml::getMoveIndex<true>(T.getState().getSideToMove(), T.getNextMove())
+                    : nshogi::ml::getMoveIndex<false>(T.getState().getSideToMove(), T.getNextMove());
                  return Index;
-             })
+             }, pybind11::arg("channels_first"))
         .def("legal_moves",
-             [](const nshogi::ml::SimpleTeacher& T) {
+             [](const nshogi::ml::SimpleTeacher& T, bool ChannelsFirst) {
                  auto NpArray = pybind11::array_t<float>(
                      (pybind11::ssize_t)nshogi::ml::MoveIndexMax);
                  auto Data = reinterpret_cast<float*>(NpArray.request().ptr);
@@ -621,14 +618,15 @@ PYBIND11_MODULE(nshogi, Module) {
                      nshogi::core::MoveGenerator::generateLegalMoves(State);
 
                  for (const nshogi::core::Move32 Move : LegalMoves) {
-                     const std::size_t Index =
-                         nshogi::ml::getMoveIndex(State.getSideToMove(), Move);
+                     const std::size_t Index = ChannelsFirst
+                        ? nshogi::ml::getMoveIndex<true>(State.getSideToMove(), Move)
+                        : nshogi::ml::getMoveIndex<false>(State.getSideToMove(), Move);
                      Data[Index] = 1.0f;
                  }
                  return NpArray;
-             })
+             }, pybind11::arg("channels_first"))
         .def("attacks",
-             [](const nshogi::ml::SimpleTeacher& T) {
+             [](const nshogi::ml::SimpleTeacher& T, bool ChannelsFirst) {
                  auto NpArray = pybind11::array_t<float>(2 * 81);
                  auto Data = reinterpret_cast<float*>(NpArray.request().ptr);
                  std::memset(reinterpret_cast<char*>(Data), 0,
@@ -637,41 +635,21 @@ PYBIND11_MODULE(nshogi, Module) {
                  const auto State = T.getState();
                  nshogi::core::internal::ImmutableStateAdapter Adapter(State);
 
-                 if (State.getSideToMove() == nshogi::core::Black) {
-                     const nshogi::core::internal::bitboard::Bitboard
-                         MyAttackBB =
-                             Adapter->getAttackBB<nshogi::core::Black>();
-                     const nshogi::core::internal::bitboard::Bitboard
-                         OpAttackBB =
-                             Adapter->getAttackBB<nshogi::core::White>();
-                     const nshogi::ml::FeatureBitboard MyAttackFB =
-                         nshogi::ml::internal::FeatureBitboardUtil::
-                             makeFeatureBitboard(MyAttackBB, 1.0f, false);
-                     const nshogi::ml::FeatureBitboard OpAttackFB =
-                         nshogi::ml::internal::FeatureBitboardUtil::
-                             makeFeatureBitboard(OpAttackBB, 1.0f, false);
-                     MyAttackFB.extract<nshogi::core::IterateOrder::ESWN>(Data);
-                     OpAttackFB.extract<nshogi::core::IterateOrder::ESWN>(Data +
-                                                                          81);
+                 nshogi::ml::FeatureStackRuntime FSR(
+                         { nshogi::ml::FeatureType::FT_MyAttack,
+                           nshogi::ml::FeatureType::FT_OpAttack },
+                         State,
+                         nshogi::core::StateConfig()
+                 );
+
+                 if (ChannelsFirst) {
+                     FSR.extract<nshogi::core::IterateOrder::Fastest, true>(Data);
                  } else {
-                     const nshogi::core::internal::bitboard::Bitboard
-                         MyAttackBB =
-                             Adapter->getAttackBB<nshogi::core::White>();
-                     const nshogi::core::internal::bitboard::Bitboard
-                         OpAttackBB =
-                             Adapter->getAttackBB<nshogi::core::Black>();
-                     const nshogi::ml::FeatureBitboard MyAttackFB =
-                         nshogi::ml::internal::FeatureBitboardUtil::
-                             makeFeatureBitboard(MyAttackBB, 1.0f, true);
-                     const nshogi::ml::FeatureBitboard OpAttackFB =
-                         nshogi::ml::internal::FeatureBitboardUtil::
-                             makeFeatureBitboard(OpAttackBB, 1.0f, true);
-                     MyAttackFB.extract<nshogi::core::IterateOrder::ESWN>(Data);
-                     OpAttackFB.extract<nshogi::core::IterateOrder::ESWN>(Data +
-                                                                          81);
+                     FSR.extract<nshogi::core::IterateOrder::Fastest, false>(Data);
                  }
+
                  return NpArray;
-             })
+             }, pybind11::arg("channels_first"))
         .def("value",
              [](const nshogi::ml::SimpleTeacher& T) {
                  if (T.getWinner() == nshogi::core::NoColor) {
