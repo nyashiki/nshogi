@@ -402,9 +402,6 @@ struct FeatureStackRuntime : FeatureStack {
         return Dest;
     }
 
-    template <core::IterateOrder Order, bool ChannelsFirst>
-    void extract(float* Dest) const;
-
     template <core::IterateOrder Order = core::IterateOrder::NWSE, bool ChannelsFirst = true>
     requires(ChannelsFirst)
     void extract(float* Dest) const {
