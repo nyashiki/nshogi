@@ -504,13 +504,14 @@ void FeatureStackRuntime::process(const std::vector<FeatureType>& Types,
 }
 
 template <core::IterateOrder Order, bool ChannelsFirst>
-requires(!ChannelsFirst)
+    requires(!ChannelsFirst)
 void FeatureStackRuntime::extract(float* Dest) const {
     core::SquareIterator<Order> SquareIt;
     for (auto It = SquareIt.begin(); It != SquareIt.end(); ++It) {
         for (std::size_t Channel = 0; Channel < Features.size(); ++Channel) {
             const core::internal::bitboard::Bitboard* BB =
-                reinterpret_cast<const core::internal::bitboard::Bitboard*>(Features[Channel].data());
+                reinterpret_cast<const core::internal::bitboard::Bitboard*>(
+                    Features[Channel].data());
 
             const bool IsRotated = Features[Channel].isRotated();
 
@@ -518,7 +519,8 @@ void FeatureStackRuntime::extract(float* Dest) const {
                 Dest[(std::size_t)*It * Features.size() + Channel] =
                     BB->isSet(*It) ? Features[Channel].getValue() : 0.0f;
             } else {
-                Dest[(std::size_t)(core::NumSquares - 1 - *It) * Features.size() +
+                Dest[(std::size_t)(core::NumSquares - 1 - *It) *
+                         Features.size() +
                      Channel] =
                     BB->isSet(*It) ? Features[Channel].getValue() : 0.0f;
             }
@@ -526,14 +528,14 @@ void FeatureStackRuntime::extract(float* Dest) const {
     }
 }
 
-template
-void FeatureStackRuntime::extract<core::IterateOrder::ESWN, false>(float* Dest) const;
-template
-void FeatureStackRuntime::extract<core::IterateOrder::NWSE, false>(float* Dest) const;
-template
-void FeatureStackRuntime::extract<core::IterateOrder::SENW, false>(float* Dest) const;
-template
-void FeatureStackRuntime::extract<core::IterateOrder::WNES, false>(float* Dest) const;
+template void FeatureStackRuntime::extract<core::IterateOrder::ESWN, false>(
+    float* Dest) const;
+template void FeatureStackRuntime::extract<core::IterateOrder::NWSE, false>(
+    float* Dest) const;
+template void FeatureStackRuntime::extract<core::IterateOrder::SENW, false>(
+    float* Dest) const;
+template void FeatureStackRuntime::extract<core::IterateOrder::WNES, false>(
+    float* Dest) const;
 
 } // namespace ml
 } // namespace nshogi

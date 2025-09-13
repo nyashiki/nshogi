@@ -17,11 +17,11 @@
 #include "../io/file.h"
 #include "../io/sfen.h"
 #include "../ml/azteacher.h"
+#include "../ml/common.h"
 #include "../ml/featurestack.h"
 #include "../ml/internal/featurebitboardutil.h"
 #include "../ml/simpleteacher.h"
 #include "../ml/utils.h"
-#include "../ml/common.h"
 #include "common.h"
 
 #include <filesystem>
@@ -1296,7 +1296,8 @@ TEST(ML, MoveIndexChannelsFirstAndLast) {
     auto State = nshogi::core::StateBuilder::getInitialState();
 
     while (State.getPly() < 1024) {
-        const auto Moves = nshogi::core::MoveGenerator::generateLegalMoves(State);
+        const auto Moves =
+            nshogi::core::MoveGenerator::generateLegalMoves(State);
 
         if (Moves.size() == 0) {
             break;
@@ -1311,8 +1312,7 @@ TEST(ML, MoveIndexChannelsFirstAndLast) {
             const auto To = IndexChannelsFirst % 81;
             const auto Channel = IndexChannelsFirst / 81;
 
-            TEST_ASSERT_EQ(IndexChannelsLast,
-                           To * 27 + Channel);
+            TEST_ASSERT_EQ(IndexChannelsLast, To * 27 + Channel);
         }
 
         State.doMove(Moves[0]);

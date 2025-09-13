@@ -109,7 +109,8 @@ struct FeatureStackComptime : FeatureStack {
         }
     }
 
-    template <core::IterateOrder Order = core::IterateOrder::NWSE, bool ChannelsFirst = true>
+    template <core::IterateOrder Order = core::IterateOrder::NWSE,
+              bool ChannelsFirst = true>
     std::vector<float> extract() const {
         std::vector<float> Dest(sizeof...(FeatureTypes) * core::NumSquares);
 
@@ -118,7 +119,8 @@ struct FeatureStackComptime : FeatureStack {
         return Dest;
     }
 
-    template <core::IterateOrder Order = core::IterateOrder::NWSE, bool ChannelsFirst = true>
+    template <core::IterateOrder Order = core::IterateOrder::NWSE,
+              bool ChannelsFirst = true>
     void extract(float* Dest) const {
         static_assert(ChannelsFirst,
                       "ChannelsFirst must be true in FeatureStackComptime.");
@@ -393,7 +395,8 @@ struct FeatureStackRuntime : FeatureStack {
 
     const FeatureBitboard& get(std::size_t Index) const;
 
-    template <core::IterateOrder Order = core::IterateOrder::NWSE, bool ChannelsFirst = true>
+    template <core::IterateOrder Order = core::IterateOrder::NWSE,
+              bool ChannelsFirst = true>
     std::vector<float> extract() const {
         std::vector<float> Dest(Features.size() * core::NumSquares);
 
@@ -402,16 +405,18 @@ struct FeatureStackRuntime : FeatureStack {
         return Dest;
     }
 
-    template <core::IterateOrder Order = core::IterateOrder::NWSE, bool ChannelsFirst = true>
-    requires(ChannelsFirst)
+    template <core::IterateOrder Order = core::IterateOrder::NWSE,
+              bool ChannelsFirst = true>
+        requires(ChannelsFirst)
     void extract(float* Dest) const {
         for (std::size_t Channel = 0; Channel < Features.size(); ++Channel) {
             Features[Channel].extract<Order>(Dest + Channel * core::NumSquares);
         }
     }
 
-    template <core::IterateOrder Order = core::IterateOrder::NWSE, bool ChannelsFirst = true>
-    requires(!ChannelsFirst)
+    template <core::IterateOrder Order = core::IterateOrder::NWSE,
+              bool ChannelsFirst = true>
+        requires(!ChannelsFirst)
     void extract(float* Dest) const;
 
     std::size_t size() const {
