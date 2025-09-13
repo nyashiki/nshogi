@@ -121,12 +121,17 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:aff9d2560826d5f6866dd3776426d8177"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7f390d6060bf3db9140060a834ca70f2"><td class="memItemLeft" align="right" valign="top">const <a class="el" href="structnshogi_1_1ml_1_1FeatureBitboard.html">FeatureBitboard</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structnshogi_1_1ml_1_1FeatureStackRuntime.html#a7f390d6060bf3db9140060a834ca70f2">get</a> (std::size_t Index) const</td></tr>
 <tr class="separator:a7f390d6060bf3db9140060a834ca70f2"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:acd0f8ffaa1cb2989b3570c0a9ff2fd5b"><td class="memTemplParams" colspan="2">template&lt;<a class="el" href="namespacenshogi_1_1core.html#ab8baa483d1eb2b34682c3aca88080269">core::IterateOrder</a> Order = core::IterateOrder::NWSE&gt; </td></tr>
-<tr class="memitem:acd0f8ffaa1cb2989b3570c0a9ff2fd5b"><td class="memTemplItemLeft" align="right" valign="top">std::vector&lt; float &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="structnshogi_1_1ml_1_1FeatureStackRuntime.html#acd0f8ffaa1cb2989b3570c0a9ff2fd5b">extract</a> () const</td></tr>
-<tr class="separator:acd0f8ffaa1cb2989b3570c0a9ff2fd5b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:acde6b2d2a041de9f290090d778e457d7"><td class="memTemplParams" colspan="2">template&lt;<a class="el" href="namespacenshogi_1_1core.html#ab8baa483d1eb2b34682c3aca88080269">core::IterateOrder</a> Order = core::IterateOrder::NWSE&gt; </td></tr>
-<tr class="memitem:acde6b2d2a041de9f290090d778e457d7"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="structnshogi_1_1ml_1_1FeatureStackRuntime.html#acde6b2d2a041de9f290090d778e457d7">extract</a> (float *Dest) const</td></tr>
-<tr class="separator:acde6b2d2a041de9f290090d778e457d7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7bdc809f4f9aad8f3ccb5cd005c1c41c"><td class="memTemplParams" colspan="2">template&lt;<a class="el" href="namespacenshogi_1_1core.html#ab8baa483d1eb2b34682c3aca88080269">core::IterateOrder</a> Order = core::IterateOrder::NWSE, bool ChannelsFirst = true&gt; </td></tr>
+<tr class="memitem:a7bdc809f4f9aad8f3ccb5cd005c1c41c"><td class="memTemplItemLeft" align="right" valign="top">std::vector&lt; float &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="structnshogi_1_1ml_1_1FeatureStackRuntime.html#a7bdc809f4f9aad8f3ccb5cd005c1c41c">extract</a> () const</td></tr>
+<tr class="separator:a7bdc809f4f9aad8f3ccb5cd005c1c41c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a72cb2b4f70438aa34431a6a1683118fa"><td class="memTemplParams" colspan="2">template&lt;<a class="el" href="namespacenshogi_1_1core.html#ab8baa483d1eb2b34682c3aca88080269">core::IterateOrder</a> Order = core::IterateOrder::NWSE, bool ChannelsFirst = true&gt; <br />
+requires (ChannelsFirst)</td></tr>
+<tr class="memitem:a72cb2b4f70438aa34431a6a1683118fa"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="structnshogi_1_1ml_1_1FeatureStackRuntime.html#a72cb2b4f70438aa34431a6a1683118fa">extract</a> (float *Dest) const</td></tr>
+<tr class="separator:a72cb2b4f70438aa34431a6a1683118fa"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a280f42c498192916028447b6581c4886"><td class="memTemplParams" colspan="2">template&lt;<a class="el" href="namespacenshogi_1_1core.html#ab8baa483d1eb2b34682c3aca88080269">core::IterateOrder</a> Order = core::IterateOrder::NWSE, bool ChannelsFirst = true&gt; <br />
+requires (!ChannelsFirst)</td></tr>
+<tr class="memitem:a280f42c498192916028447b6581c4886"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="structnshogi_1_1ml_1_1FeatureStackRuntime.html#a280f42c498192916028447b6581c4886">extract</a> (float *Dest) const</td></tr>
+<tr class="separator:a280f42c498192916028447b6581c4886"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4c644b656093c43689ffd7bcdc53c624"><td class="memItemLeft" align="right" valign="top">std::size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structnshogi_1_1ml_1_1FeatureStackRuntime.html#a4c644b656093c43689ffd7bcdc53c624">size</a> () const</td></tr>
 <tr class="separator:a4c644b656093c43689ffd7bcdc53c624"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_methods_structnshogi_1_1ml_1_1FeatureStack"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_structnshogi_1_1ml_1_1FeatureStack')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="structnshogi_1_1ml_1_1FeatureStack.html">nshogi::ml::FeatureStack</a></td></tr>
@@ -196,13 +201,13 @@ Public Member Functions</h2></td></tr>
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
-<a id="acd0f8ffaa1cb2989b3570c0a9ff2fd5b" name="acd0f8ffaa1cb2989b3570c0a9ff2fd5b"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#acd0f8ffaa1cb2989b3570c0a9ff2fd5b">&#9670;&#160;</a></span>extract() <span class="overload">[1/2]</span></h2>
+<a id="a7bdc809f4f9aad8f3ccb5cd005c1c41c" name="a7bdc809f4f9aad8f3ccb5cd005c1c41c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7bdc809f4f9aad8f3ccb5cd005c1c41c">&#9670;&#160;</a></span>extract() <span class="overload">[1/3]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="namespacenshogi_1_1core.html#ab8baa483d1eb2b34682c3aca88080269">core::IterateOrder</a> Order = core::IterateOrder::NWSE&gt; </div>
+template&lt;<a class="el" href="namespacenshogi_1_1core.html#ab8baa483d1eb2b34682c3aca88080269">core::IterateOrder</a> Order = core::IterateOrder::NWSE, bool ChannelsFirst = true&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
@@ -223,13 +228,14 @@ template&lt;<a class="el" href="namespacenshogi_1_1core.html#ab8baa483d1eb2b3468
 
 </div>
 </div>
-<a id="acde6b2d2a041de9f290090d778e457d7" name="acde6b2d2a041de9f290090d778e457d7"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#acde6b2d2a041de9f290090d778e457d7">&#9670;&#160;</a></span>extract() <span class="overload">[2/2]</span></h2>
+<a id="a72cb2b4f70438aa34431a6a1683118fa" name="a72cb2b4f70438aa34431a6a1683118fa"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a72cb2b4f70438aa34431a6a1683118fa">&#9670;&#160;</a></span>extract() <span class="overload">[2/3]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="namespacenshogi_1_1core.html#ab8baa483d1eb2b34682c3aca88080269">core::IterateOrder</a> Order = core::IterateOrder::NWSE&gt; </div>
+template&lt;<a class="el" href="namespacenshogi_1_1core.html#ab8baa483d1eb2b34682c3aca88080269">core::IterateOrder</a> Order, bool ChannelsFirst&gt; <br />
+requires (ChannelsFirst)</div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
@@ -247,6 +253,27 @@ template&lt;<a class="el" href="namespacenshogi_1_1core.html#ab8baa483d1eb2b3468
 <span class="mlabels"><span class="mlabel">inline</span></span>  </td>
   </tr>
 </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a280f42c498192916028447b6581c4886" name="a280f42c498192916028447b6581c4886"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a280f42c498192916028447b6581c4886">&#9670;&#160;</a></span>extract() <span class="overload">[3/3]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;<a class="el" href="namespacenshogi_1_1core.html#ab8baa483d1eb2b34682c3aca88080269">core::IterateOrder</a> Order = core::IterateOrder::NWSE, bool ChannelsFirst = true&gt; <br />
+requires (!ChannelsFirst)</div>
+      <table class="memname">
+        <tr>
+          <td class="memname">void nshogi::ml::FeatureStackRuntime::extract </td>
+          <td>(</td>
+          <td class="paramtype">float *&#160;</td>
+          <td class="paramname"><em>Dest</em></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
 </div><div class="memdoc">
 
 </div>

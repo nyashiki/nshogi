@@ -14,7 +14,7 @@ var searchData=
   ['getkingsquare_11',['getKingSquare',['../classnshogi_1_1core_1_1State.html#ade5a4479c42ccdfa57e1802c0cdb8a63',1,'nshogi::core::State']]],
   ['getlastmove_12',['getLastMove',['../classnshogi_1_1core_1_1State.html#a01b3ccadb5842a47fde1e86d0ae28076',1,'nshogi::core::State']]],
   ['getmove32frommove16_13',['getMove32FromMove16',['../classnshogi_1_1core_1_1State.html#a08a60a1962852a9e7c2526f0a77369f7',1,'nshogi::core::State']]],
-  ['getmoveindex_14',['getMoveIndex',['../namespacenshogi_1_1ml.html#afd042d0e031f3e8ff6a123acb7b99d24',1,'nshogi::ml::getMoveIndex(core::Color C, const core::Move16 Move)'],['../namespacenshogi_1_1ml.html#a2663138a2f46b4c174be0db9f978be15',1,'nshogi::ml::getMoveIndex(core::Color C, const core::Move32 Move)']]],
+  ['getmoveindex_14',['getMoveIndex',['../namespacenshogi_1_1ml.html#ab9f0db29cc738cc306fd345d5062cbaa',1,'nshogi::ml::getMoveIndex(core::Color C, const core::Move16 Move)'],['../namespacenshogi_1_1ml.html#a6bd659cc815c5017f00e513e9eb929bf',1,'nshogi::ml::getMoveIndex(core::Color C, const core::Move32 Move)']]],
   ['getnextmove_15',['getNextMove',['../structnshogi_1_1ml_1_1SimpleTeacher.html#a9c9f6e8430b04859494078ac6117482e',1,'nshogi::ml::SimpleTeacher']]],
   ['getpiecetype_16',['getPieceType',['../namespacenshogi_1_1core.html#a25573f3b2fc8c4d70d4b122a2b4225cb',1,'nshogi::core']]],
   ['getply_17',['getPly',['../classnshogi_1_1core_1_1State.html#a418131dbe642f20f8e177018034f92c6',1,'nshogi::core::State']]],

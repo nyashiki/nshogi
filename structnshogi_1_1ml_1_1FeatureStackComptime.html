@@ -124,12 +124,12 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:aa1575d48250653f34fe6dbfc8e069dd5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad4ad4a0db738426d6fcd1edcfb9104a7"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structnshogi_1_1ml_1_1FeatureStackComptime.html">FeatureStackComptime</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structnshogi_1_1ml_1_1FeatureStackComptime.html#ad4ad4a0db738426d6fcd1edcfb9104a7">operator=</a> (<a class="el" href="structnshogi_1_1ml_1_1FeatureStackComptime.html">FeatureStackComptime</a> &amp;&amp;FSC) noexcept</td></tr>
 <tr class="separator:ad4ad4a0db738426d6fcd1edcfb9104a7"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae5f45c2e5916f7d420bca35524c06985"><td class="memTemplParams" colspan="2">template&lt;<a class="el" href="namespacenshogi_1_1core.html#ab8baa483d1eb2b34682c3aca88080269">core::IterateOrder</a> Order = core::IterateOrder::NWSE&gt; </td></tr>
-<tr class="memitem:ae5f45c2e5916f7d420bca35524c06985"><td class="memTemplItemLeft" align="right" valign="top">std::vector&lt; float &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="structnshogi_1_1ml_1_1FeatureStackComptime.html#ae5f45c2e5916f7d420bca35524c06985">extract</a> () const</td></tr>
-<tr class="separator:ae5f45c2e5916f7d420bca35524c06985"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a02450861381219fac602034ef6dc2840"><td class="memTemplParams" colspan="2">template&lt;<a class="el" href="namespacenshogi_1_1core.html#ab8baa483d1eb2b34682c3aca88080269">core::IterateOrder</a> Order = core::IterateOrder::NWSE&gt; </td></tr>
-<tr class="memitem:a02450861381219fac602034ef6dc2840"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="structnshogi_1_1ml_1_1FeatureStackComptime.html#a02450861381219fac602034ef6dc2840">extract</a> (float *Dest) const</td></tr>
-<tr class="separator:a02450861381219fac602034ef6dc2840"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6d5489ee1a1bcd219f28ef4235d5ff78"><td class="memTemplParams" colspan="2">template&lt;<a class="el" href="namespacenshogi_1_1core.html#ab8baa483d1eb2b34682c3aca88080269">core::IterateOrder</a> Order = core::IterateOrder::NWSE, bool ChannelsFirst = true&gt; </td></tr>
+<tr class="memitem:a6d5489ee1a1bcd219f28ef4235d5ff78"><td class="memTemplItemLeft" align="right" valign="top">std::vector&lt; float &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="structnshogi_1_1ml_1_1FeatureStackComptime.html#a6d5489ee1a1bcd219f28ef4235d5ff78">extract</a> () const</td></tr>
+<tr class="separator:a6d5489ee1a1bcd219f28ef4235d5ff78"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aaa8f9e5fc7bd04d95b76ba5c5e9b590c"><td class="memTemplParams" colspan="2">template&lt;<a class="el" href="namespacenshogi_1_1core.html#ab8baa483d1eb2b34682c3aca88080269">core::IterateOrder</a> Order = core::IterateOrder::NWSE, bool ChannelsFirst = true&gt; </td></tr>
+<tr class="memitem:aaa8f9e5fc7bd04d95b76ba5c5e9b590c"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="structnshogi_1_1ml_1_1FeatureStackComptime.html#aaa8f9e5fc7bd04d95b76ba5c5e9b590c">extract</a> (float *Dest) const</td></tr>
+<tr class="separator:aaa8f9e5fc7bd04d95b76ba5c5e9b590c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:adf268dea40e67256fe730b4ed097af73"><td class="memItemLeft" align="right" valign="top">const <a class="el" href="structnshogi_1_1ml_1_1FeatureBitboard.html">FeatureBitboard</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structnshogi_1_1ml_1_1FeatureStackComptime.html#adf268dea40e67256fe730b4ed097af73">get</a> (std::size_t Index) const</td></tr>
 <tr class="separator:adf268dea40e67256fe730b4ed097af73"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0a8b4fac91d41211324c0824cd10bd0d"><td class="memItemLeft" align="right" valign="top">const <a class="el" href="structnshogi_1_1ml_1_1FeatureBitboard.html">FeatureBitboard</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structnshogi_1_1ml_1_1FeatureStackComptime.html#a0a8b4fac91d41211324c0824cd10bd0d">data</a> () const</td></tr>
@@ -314,15 +314,15 @@ template&lt;FeatureType... FeatureTypes&gt; </div>
 
 </div>
 </div>
-<a id="ae5f45c2e5916f7d420bca35524c06985" name="ae5f45c2e5916f7d420bca35524c06985"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ae5f45c2e5916f7d420bca35524c06985">&#9670;&#160;</a></span>extract() <span class="overload">[1/2]</span></h2>
+<a id="a6d5489ee1a1bcd219f28ef4235d5ff78" name="a6d5489ee1a1bcd219f28ef4235d5ff78"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6d5489ee1a1bcd219f28ef4235d5ff78">&#9670;&#160;</a></span>extract() <span class="overload">[1/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
 template&lt;FeatureType... FeatureTypes&gt; </div>
 <div class="memtemplate">
-template&lt;<a class="el" href="namespacenshogi_1_1core.html#ab8baa483d1eb2b34682c3aca88080269">core::IterateOrder</a> Order = core::IterateOrder::NWSE&gt; </div>
+template&lt;<a class="el" href="namespacenshogi_1_1core.html#ab8baa483d1eb2b34682c3aca88080269">core::IterateOrder</a> Order = core::IterateOrder::NWSE, bool ChannelsFirst = true&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
@@ -343,15 +343,15 @@ template&lt;<a class="el" href="namespacenshogi_1_1core.html#ab8baa483d1eb2b3468
 
 </div>
 </div>
-<a id="a02450861381219fac602034ef6dc2840" name="a02450861381219fac602034ef6dc2840"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a02450861381219fac602034ef6dc2840">&#9670;&#160;</a></span>extract() <span class="overload">[2/2]</span></h2>
+<a id="aaa8f9e5fc7bd04d95b76ba5c5e9b590c" name="aaa8f9e5fc7bd04d95b76ba5c5e9b590c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aaa8f9e5fc7bd04d95b76ba5c5e9b590c">&#9670;&#160;</a></span>extract() <span class="overload">[2/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
 template&lt;FeatureType... FeatureTypes&gt; </div>
 <div class="memtemplate">
-template&lt;<a class="el" href="namespacenshogi_1_1core.html#ab8baa483d1eb2b34682c3aca88080269">core::IterateOrder</a> Order = core::IterateOrder::NWSE&gt; </div>
+template&lt;<a class="el" href="namespacenshogi_1_1core.html#ab8baa483d1eb2b34682c3aca88080269">core::IterateOrder</a> Order = core::IterateOrder::NWSE, bool ChannelsFirst = true&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">

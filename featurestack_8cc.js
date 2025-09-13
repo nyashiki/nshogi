@@ -1,5 +1,9 @@
 var featurestack_8cc =
 [
+    [ "FeatureStackRuntime::extract< core::IterateOrder::ESWN, false >", "featurestack_8cc.html#a42ddf1dd74ca666a4e182c2d23f6ed7e", null ],
+    [ "FeatureStackRuntime::extract< core::IterateOrder::NWSE, false >", "featurestack_8cc.html#a3d14257c485b50bfd4b10ea45f4b8221", null ],
+    [ "FeatureStackRuntime::extract< core::IterateOrder::SENW, false >", "featurestack_8cc.html#af83ec78a37700b345fb0a16c6aa3736d", null ],
+    [ "FeatureStackRuntime::extract< core::IterateOrder::WNES, false >", "featurestack_8cc.html#abc1c183d0d4e14b6065ee0559634cf10", null ],
     [ "processAttack", "featurestack_8cc.html#a71d1a4a9fc51ca36dc5d3528892b9b76", null ],
     [ "processAttack< core::Black, core::Black >", "featurestack_8cc.html#af71dbd95703a8ff133671ffd4847172c", null ],
     [ "processAttack< core::Black, core::White >", "featurestack_8cc.html#adf79692305493547ab7c026618ba9b3a", null ],
