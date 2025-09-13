@@ -530,8 +530,6 @@ class TestML(unittest.TestCase):
                 if len(legal_moves) == 0:
                     break
 
-                sfen = state.to_sfen()
-
                 state.do_move(random.choice(legal_moves))
 
 if __name__ == "__main__":
