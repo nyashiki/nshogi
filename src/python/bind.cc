@@ -670,9 +670,11 @@ PYBIND11_MODULE(nshogi, Module) {
                 if (ChannelsFirst) {
                     FSR.extract<nshogi::core::IterateOrder::Fastest, true>(
                         Data);
+                    NpArray.resize({2, 9, 9});
                 } else {
                     FSR.extract<nshogi::core::IterateOrder::Fastest, false>(
                         Data);
+                    NpArray.resize({9, 9, 2});
                 }
 
                 return NpArray;

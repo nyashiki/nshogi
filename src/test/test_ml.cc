@@ -1318,3 +1318,81 @@ TEST(ML, MoveIndexChannelsFirstAndLast) {
         State.doMove(Moves[0]);
     }
 }
+
+TEST(ML, ChannelsFirstComptimeAndRuntime) {
+    auto State = nshogi::core::StateBuilder::getInitialState();
+
+    using Features = nshogi::ml::FeatureStackComptime<
+        nshogi::ml::FeatureType::FT_Black, nshogi::ml::FeatureType::FT_White,
+        nshogi::ml::FeatureType::FT_MyPawn, nshogi::ml::FeatureType::FT_OpPawn,
+        nshogi::ml::FeatureType::FT_MyKing, nshogi::ml::FeatureType::FT_OpKing>;
+
+    std::vector<nshogi::ml::FeatureType> FeatureTypes = {
+        nshogi::ml::FeatureType::FT_Black,  nshogi::ml::FeatureType::FT_White,
+        nshogi::ml::FeatureType::FT_MyPawn, nshogi::ml::FeatureType::FT_OpPawn,
+        nshogi::ml::FeatureType::FT_MyKing, nshogi::ml::FeatureType::FT_OpKing};
+
+    nshogi::core::StateConfig StateConfig;
+
+    while (State.getPly() < 1024) {
+        const auto Moves =
+            nshogi::core::MoveGenerator::generateLegalMoves(State);
+
+        if (Moves.size() == 0) {
+            break;
+        }
+
+        Features FSC(State, StateConfig);
+        nshogi::ml::FeatureStackRuntime FSR(FeatureTypes, State, StateConfig);
+
+        const auto FSCExtracted =
+            FSC.extract<nshogi::core::IterateOrder::Fastest, true>();
+        const auto FSRExtracted =
+            FSR.extract<nshogi::core::IterateOrder::Fastest, true>();
+
+        for (std::size_t I = 0; I < FSCExtracted.size(); ++I) {
+            TEST_ASSERT_FLOAT_EQ(FSCExtracted[I], FSRExtracted[I], 1e-6f);
+        }
+
+        State.doMove(Moves[0]);
+    }
+}
+
+TEST(ML, ChannelsLastComptimeAndRuntime) {
+    auto State = nshogi::core::StateBuilder::getInitialState();
+
+    using Features = nshogi::ml::FeatureStackComptime<
+        nshogi::ml::FeatureType::FT_Black, nshogi::ml::FeatureType::FT_White,
+        nshogi::ml::FeatureType::FT_MyPawn, nshogi::ml::FeatureType::FT_OpPawn,
+        nshogi::ml::FeatureType::FT_MyKing, nshogi::ml::FeatureType::FT_OpKing>;
+
+    std::vector<nshogi::ml::FeatureType> FeatureTypes = {
+        nshogi::ml::FeatureType::FT_Black,  nshogi::ml::FeatureType::FT_White,
+        nshogi::ml::FeatureType::FT_MyPawn, nshogi::ml::FeatureType::FT_OpPawn,
+        nshogi::ml::FeatureType::FT_MyKing, nshogi::ml::FeatureType::FT_OpKing};
+
+    nshogi::core::StateConfig StateConfig;
+
+    while (State.getPly() < 1024) {
+        const auto Moves =
+            nshogi::core::MoveGenerator::generateLegalMoves(State);
+
+        if (Moves.size() == 0) {
+            break;
+        }
+
+        Features FSC(State, StateConfig);
+        nshogi::ml::FeatureStackRuntime FSR(FeatureTypes, State, StateConfig);
+
+        const auto FSCExtracted =
+            FSC.extract<nshogi::core::IterateOrder::Fastest, false>();
+        const auto FSRExtracted =
+            FSR.extract<nshogi::core::IterateOrder::Fastest, false>();
+
+        for (std::size_t I = 0; I < FSCExtracted.size(); ++I) {
+            TEST_ASSERT_FLOAT_EQ(FSCExtracted[I], FSRExtracted[I], 1e-6f);
+        }
+
+        State.doMove(Moves[0]);
+    }
+}
