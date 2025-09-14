@@ -131,8 +131,10 @@ struct FeatureStackComptime : FeatureStack {
         } else {
             core::SquareIterator<Order> SquareIt;
             for (auto It = SquareIt.begin(); It != SquareIt.end(); ++It) {
-                for (std::size_t Channel = 0; Channel < sizeof...(FeatureTypes); ++Channel) {
-                    const uint64_t* BB = reinterpret_cast<const uint64_t*>(Features[Channel].data());
+                for (std::size_t Channel = 0; Channel < sizeof...(FeatureTypes);
+                     ++Channel) {
+                    const uint64_t* BB = reinterpret_cast<const uint64_t*>(
+                        Features[Channel].data());
 
                     const bool IsRotated = Features[Channel].isRotated();
 
@@ -142,7 +144,8 @@ struct FeatureStackComptime : FeatureStack {
                             Dest[(std::size_t)*It * Features.size() + Channel] =
                                 IsSet ? Features[Channel].getValue() : 0.0f;
                         } else {
-                            const bool IsSet = (BB[1] & (1ULL << (*It - 63))) != 0;
+                            const bool IsSet =
+                                (BB[1] & (1ULL << (*It - 63))) != 0;
                             Dest[(std::size_t)*It * Features.size() + Channel] =
                                 IsSet ? Features[Channel].getValue() : 0.0f;
                         }
@@ -154,7 +157,8 @@ struct FeatureStackComptime : FeatureStack {
                                  Channel] =
                                 IsSet ? Features[Channel].getValue() : 0.0f;
                         } else {
-                            const bool IsSet = (BB[1] & (1ULL << (*It - 63))) != 0;
+                            const bool IsSet =
+                                (BB[1] & (1ULL << (*It - 63))) != 0;
                             Dest[(std::size_t)(core::NumSquares - 1 - *It) *
                                      Features.size() +
                                  Channel] =
