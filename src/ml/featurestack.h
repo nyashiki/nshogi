@@ -122,12 +122,47 @@ struct FeatureStackComptime : FeatureStack {
     template <core::IterateOrder Order = core::IterateOrder::NWSE,
               bool ChannelsFirst = true>
     void extract(float* Dest) const {
-        static_assert(ChannelsFirst,
-                      "ChannelsFirst must be true in FeatureStackComptime.");
-        for (std::size_t Channel = 0; Channel < sizeof...(FeatureTypes);
-             ++Channel) {
-            Features[Channel].template extract<Order>(
-                Dest + Channel * core::NumSquares);
+        if constexpr (ChannelsFirst) {
+            for (std::size_t Channel = 0; Channel < sizeof...(FeatureTypes);
+                 ++Channel) {
+                Features[Channel].template extract<Order>(
+                    Dest + Channel * core::NumSquares);
+            }
+        } else {
+            core::SquareIterator<Order> SquareIt;
+            for (auto It = SquareIt.begin(); It != SquareIt.end(); ++It) {
+                for (std::size_t Channel = 0; Channel < sizeof...(FeatureTypes); ++Channel) {
+                    const uint64_t* BB = reinterpret_cast<const uint64_t*>(Features[Channel].data());
+
+                    const bool IsRotated = Features[Channel].isRotated();
+
+                    if (!IsRotated) {
+                        if (*It < 63) {
+                            const bool IsSet = (BB[0] & (1ULL << *It)) != 0;
+                            Dest[(std::size_t)*It * Features.size() + Channel] =
+                                IsSet ? Features[Channel].getValue() : 0.0f;
+                        } else {
+                            const bool IsSet = (BB[1] & (1ULL << (*It - 63))) != 0;
+                            Dest[(std::size_t)*It * Features.size() + Channel] =
+                                IsSet ? Features[Channel].getValue() : 0.0f;
+                        }
+                    } else {
+                        if (*It < 63) {
+                            const bool IsSet = (BB[0] & (1ULL << *It)) != 0;
+                            Dest[(std::size_t)(core::NumSquares - 1 - *It) *
+                                     Features.size() +
+                                 Channel] =
+                                IsSet ? Features[Channel].getValue() : 0.0f;
+                        } else {
+                            const bool IsSet = (BB[1] & (1ULL << (*It - 63))) != 0;
+                            Dest[(std::size_t)(core::NumSquares - 1 - *It) *
+                                     Features.size() +
+                                 Channel] =
+                                IsSet ? Features[Channel].getValue() : 0.0f;
+                        }
+                    }
+                }
+            }
         }
     }
 
