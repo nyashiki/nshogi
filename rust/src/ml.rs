@@ -407,6 +407,15 @@ impl FeatureType {
     /// one piece of the side not to move; `0.0` elsewhere.
     pub const OP_ATTACK: FeatureType = FeatureType(107);
 
+    /// Declaration-score-remaining plane: the remaining scores to reach
+    /// the declaration-win threshold for the side to move, divided by `28.0`
+    /// if Black is to move or by `27.0` if White is to move.
+    pub const MY_DECLARATION_SCORE_REMAINING: FeatureType = FeatureType(108);
+
+    /// Declaration-score-remaining plane: the remaining scores to reach
+    /// the declaration-win threshold for the side not to move.
+    pub const OP_DECLARATION_SCORE_REMAINING: FeatureType = FeatureType(109);
+
     pub fn value(&self) -> i32 {
         self.0
     }

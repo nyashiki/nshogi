@@ -52,6 +52,8 @@ enum class FeatureType {
     FT_MyPieceScore, FT_OpPieceScore,
 
     FT_MyAttack, FT_OpAttack,
+
+    FT_MyDeclarationRemaining, FT_OpDeclarationRemaining,
 };
 // clang-format on
 
