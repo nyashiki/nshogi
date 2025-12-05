@@ -694,7 +694,39 @@ PYBIND11_MODULE(nshogi, Module) {
              })
         .def("draw", [](const nshogi::ml::SimpleTeacher& T) {
             return (T.getWinner() == nshogi::core::NoColor) ? 1.0f : 0.0f;
-        });
+            })
+        .def("check", [](const nshogi::ml::SimpleTeacher& T) {
+            const auto State = T.getState();
+            nshogi::core::internal::ImmutableStateAdapter Adapter(State);
+            return Adapter->getCheckerBB().isZero() ? 0.0f : 1.0f;
+            })
+        .def("declaration_score",
+             [](const nshogi::ml::SimpleTeacher& T) {
+                const auto State = T.getState();
+                nshogi::core::internal::ImmutableStateAdapter Adapter(State);
+
+                if (State.getSideToMove() == nshogi::core::Black) {
+                    const float MyScore =
+                            (float)Adapter->computeDeclarationScore<nshogi::core::Black>() / 28.0f;
+                    const float OpScore =
+                            (float)Adapter->computeDeclarationScore<nshogi::core::White>() / 27.0f;
+                    auto NpArray = pybind11::array_t<float>(2);
+                    auto Data = reinterpret_cast<float*>(NpArray.request().ptr);
+                    Data[0] = MyScore;
+                    Data[1] = OpScore;
+                    return NpArray;
+                } else {
+                    const float MyScore =
+                            (float)Adapter->computeDeclarationScore<nshogi::core::White>() / 27.0f;
+                    const float OpScore =
+                            (float)Adapter->computeDeclarationScore<nshogi::core::Black>() / 28.0f;
+                    auto NpArray = pybind11::array_t<float>(2);
+                    auto Data = reinterpret_cast<float*>(NpArray.request().ptr);
+                    Data[0] = MyScore;
+                    Data[1] = OpScore;
+                    return NpArray;
+                }
+             });
 
     pybind11::class_<
         nshogi::ml::TeacherLoaderForFixedSizeTeacher<nshogi::ml::AZTeacher>>(
