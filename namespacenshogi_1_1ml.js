@@ -122,7 +122,9 @@ var namespacenshogi_1_1ml =
       [ "FT_MyPieceScore", "namespacenshogi_1_1ml.html#abce888ea1742cbf42378e26c43e4a125aaa87113b4623cb7d8cf7cab09cedcf93", null ],
       [ "FT_OpPieceScore", "namespacenshogi_1_1ml.html#abce888ea1742cbf42378e26c43e4a125abaa3ba0612be7af7a11f365907b5aa01", null ],
       [ "FT_MyAttack", "namespacenshogi_1_1ml.html#abce888ea1742cbf42378e26c43e4a125a68de3682a8562f10b331b0cb2c9999c6", null ],
-      [ "FT_OpAttack", "namespacenshogi_1_1ml.html#abce888ea1742cbf42378e26c43e4a125a9689fc9aeec55c0d11cb6abce2e8eae2", null ]
+      [ "FT_OpAttack", "namespacenshogi_1_1ml.html#abce888ea1742cbf42378e26c43e4a125a9689fc9aeec55c0d11cb6abce2e8eae2", null ],
+      [ "FT_MyDeclarationRemaining", "namespacenshogi_1_1ml.html#abce888ea1742cbf42378e26c43e4a125a5f19e430ca7c03c0f04e46db75d040a9", null ],
+      [ "FT_OpDeclarationRemaining", "namespacenshogi_1_1ml.html#abce888ea1742cbf42378e26c43e4a125a7e05f045b3d18dd55230f9cf4e9fadaa", null ]
     ] ],
     [ "FeatureBitboard::extract< core::IterateOrder::ESWN >", "namespacenshogi_1_1ml.html#a469da1bc8675e3db67663fae70b06f24", null ],
     [ "FeatureBitboard::extract< core::IterateOrder::NWSE >", "namespacenshogi_1_1ml.html#aa4f1112dba0c0d5797da2cc956dd1679", null ],
@@ -140,6 +142,9 @@ var namespacenshogi_1_1ml =
     [ "processAttack< core::White, core::Black >", "namespacenshogi_1_1ml.html#aae4046379899f7c57c1d4ab9d9bf1d22", null ],
     [ "processAttack< core::White, core::White >", "namespacenshogi_1_1ml.html#a209c5758cbf91463b7da0746d023157c", null ],
     [ "processCheck", "namespacenshogi_1_1ml.html#a758051aa64b452b7f29d1be36287886a", null ],
+    [ "processDeclarationRemaining", "namespacenshogi_1_1ml.html#a46f719d0f6b760c8d6a1506537b530c7", null ],
+    [ "processDeclarationRemaining< core::Black >", "namespacenshogi_1_1ml.html#a070e5c188f67114aafbb21ba94af44f1", null ],
+    [ "processDeclarationRemaining< core::White >", "namespacenshogi_1_1ml.html#a741d2ad6b550bec32b8515ba4683ec6f", null ],
     [ "processDeclarationScore", "namespacenshogi_1_1ml.html#aff813fc91e71619c16b6a3e15b0ce567", null ],
     [ "processDeclarationScore< core::Black >", "namespacenshogi_1_1ml.html#a064b6a3f879a6cc3f8124f0b7657a0b8", null ],
     [ "processDeclarationScore< core::White >", "namespacenshogi_1_1ml.html#a7308ebbee68d8b8f652a7e07bc793726", null ],

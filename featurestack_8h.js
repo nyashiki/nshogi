@@ -5,6 +5,7 @@ var featurestack_8h =
     [ "nshogi::ml::FeatureStackRuntime", "structnshogi_1_1ml_1_1FeatureStackRuntime.html", "structnshogi_1_1ml_1_1FeatureStackRuntime" ],
     [ "processAttack", "featurestack_8h.html#a71d1a4a9fc51ca36dc5d3528892b9b76", null ],
     [ "processCheck", "featurestack_8h.html#a758051aa64b452b7f29d1be36287886a", null ],
+    [ "processDeclarationRemaining", "featurestack_8h.html#a46f719d0f6b760c8d6a1506537b530c7", null ],
     [ "processDeclarationScore", "featurestack_8h.html#aff813fc91e71619c16b6a3e15b0ce567", null ],
     [ "processDrawValue", "featurestack_8h.html#abd517dcd6d9b7a300d5375ac7235291c", null ],
     [ "processIsBlackTurn", "featurestack_8h.html#a398da8120d07846dea0dc07ca64cb377", null ],

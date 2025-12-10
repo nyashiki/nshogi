@@ -270,6 +270,9 @@ Enumerations</h2></td></tr>
 , <a class="el" href="namespacenshogi_1_1ml.html#abce888ea1742cbf42378e26c43e4a125abaa3ba0612be7af7a11f365907b5aa01">FT_OpPieceScore</a>
 , <a class="el" href="namespacenshogi_1_1ml.html#abce888ea1742cbf42378e26c43e4a125a68de3682a8562f10b331b0cb2c9999c6">FT_MyAttack</a>
 , <a class="el" href="namespacenshogi_1_1ml.html#abce888ea1742cbf42378e26c43e4a125a9689fc9aeec55c0d11cb6abce2e8eae2">FT_OpAttack</a>
+, <br />
+&#160;&#160;<a class="el" href="namespacenshogi_1_1ml.html#abce888ea1742cbf42378e26c43e4a125a5f19e430ca7c03c0f04e46db75d040a9">FT_MyDeclarationRemaining</a>
+, <a class="el" href="namespacenshogi_1_1ml.html#abce888ea1742cbf42378e26c43e4a125a7e05f045b3d18dd55230f9cf4e9fadaa">FT_OpDeclarationRemaining</a>
 <br />
  }</td></tr>
 <tr class="separator:abce888ea1742cbf42378e26c43e4a125"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -389,6 +392,13 @@ Functions</h2></td></tr>
 <tr class="separator:aae4046379899f7c57c1d4ab9d9bf1d22"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a209c5758cbf91463b7da0746d023157c"><td class="memItemLeft" align="right" valign="top">template <a class="el" href="structnshogi_1_1ml_1_1FeatureBitboard.html">FeatureBitboard</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacenshogi_1_1ml.html#a209c5758cbf91463b7da0746d023157c">processAttack&lt; core::White, core::White &gt;</a> (const <a class="el" href="classnshogi_1_1core_1_1State.html">core::State</a> &amp;State)</td></tr>
 <tr class="separator:a209c5758cbf91463b7da0746d023157c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a46f719d0f6b760c8d6a1506537b530c7"><td class="memTemplParams" colspan="2">template&lt;<a class="el" href="namespacenshogi_1_1core.html#a31bbefbdbc08642dd7fffa28c0533659">core::Color</a> MyColor&gt; </td></tr>
+<tr class="memitem:a46f719d0f6b760c8d6a1506537b530c7"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="structnshogi_1_1ml_1_1FeatureBitboard.html">FeatureBitboard</a>&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacenshogi_1_1ml.html#a46f719d0f6b760c8d6a1506537b530c7">processDeclarationRemaining</a> (const <a class="el" href="classnshogi_1_1core_1_1State.html">core::State</a> &amp;State)</td></tr>
+<tr class="separator:a46f719d0f6b760c8d6a1506537b530c7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a070e5c188f67114aafbb21ba94af44f1"><td class="memItemLeft" align="right" valign="top">template <a class="el" href="structnshogi_1_1ml_1_1FeatureBitboard.html">FeatureBitboard</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacenshogi_1_1ml.html#a070e5c188f67114aafbb21ba94af44f1">processDeclarationRemaining&lt; core::Black &gt;</a> (const <a class="el" href="classnshogi_1_1core_1_1State.html">core::State</a> &amp;State)</td></tr>
+<tr class="separator:a070e5c188f67114aafbb21ba94af44f1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a741d2ad6b550bec32b8515ba4683ec6f"><td class="memItemLeft" align="right" valign="top">template <a class="el" href="structnshogi_1_1ml_1_1FeatureBitboard.html">FeatureBitboard</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacenshogi_1_1ml.html#a741d2ad6b550bec32b8515ba4683ec6f">processDeclarationRemaining&lt; core::White &gt;</a> (const <a class="el" href="classnshogi_1_1core_1_1State.html">core::State</a> &amp;State)</td></tr>
+<tr class="separator:a741d2ad6b550bec32b8515ba4683ec6f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a42ddf1dd74ca666a4e182c2d23f6ed7e"><td class="memItemLeft" align="right" valign="top">template void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacenshogi_1_1ml.html#a42ddf1dd74ca666a4e182c2d23f6ed7e">FeatureStackRuntime::extract&lt; core::IterateOrder::ESWN, false &gt;</a> (float *Dest) const</td></tr>
 <tr class="separator:a42ddf1dd74ca666a4e182c2d23f6ed7e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3d14257c485b50bfd4b10ea45f4b8221"><td class="memItemLeft" align="right" valign="top">template void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacenshogi_1_1ml.html#a3d14257c485b50bfd4b10ea45f4b8221">FeatureStackRuntime::extract&lt; core::IterateOrder::NWSE, false &gt;</a> (float *Dest) const</td></tr>
@@ -544,6 +554,8 @@ Variables</h2></td></tr>
 <tr><td class="fieldname"><a id="abce888ea1742cbf42378e26c43e4a125abaa3ba0612be7af7a11f365907b5aa01" name="abce888ea1742cbf42378e26c43e4a125abaa3ba0612be7af7a11f365907b5aa01"></a>FT_OpPieceScore&#160;</td><td class="fielddoc"></td></tr>
 <tr><td class="fieldname"><a id="abce888ea1742cbf42378e26c43e4a125a68de3682a8562f10b331b0cb2c9999c6" name="abce888ea1742cbf42378e26c43e4a125a68de3682a8562f10b331b0cb2c9999c6"></a>FT_MyAttack&#160;</td><td class="fielddoc"></td></tr>
 <tr><td class="fieldname"><a id="abce888ea1742cbf42378e26c43e4a125a9689fc9aeec55c0d11cb6abce2e8eae2" name="abce888ea1742cbf42378e26c43e4a125a9689fc9aeec55c0d11cb6abce2e8eae2"></a>FT_OpAttack&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="abce888ea1742cbf42378e26c43e4a125a5f19e430ca7c03c0f04e46db75d040a9" name="abce888ea1742cbf42378e26c43e4a125a5f19e430ca7c03c0f04e46db75d040a9"></a>FT_MyDeclarationRemaining&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="abce888ea1742cbf42378e26c43e4a125a7e05f045b3d18dd55230f9cf4e9fadaa" name="abce888ea1742cbf42378e26c43e4a125a7e05f045b3d18dd55230f9cf4e9fadaa"></a>FT_OpDeclarationRemaining&#160;</td><td class="fielddoc"></td></tr>
 </table>
 
 </div>
@@ -869,6 +881,62 @@ template&lt;<a class="el" href="namespacenshogi_1_1core.html#a31bbefbdbc08642dd7
       <table class="memname">
         <tr>
           <td class="memname"><a class="el" href="structnshogi_1_1ml_1_1FeatureBitboard.html">FeatureBitboard</a> nshogi::ml::processCheck </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="classnshogi_1_1core_1_1State.html">core::State</a> &amp;&#160;</td>
+          <td class="paramname"><em>State</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a46f719d0f6b760c8d6a1506537b530c7" name="a46f719d0f6b760c8d6a1506537b530c7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a46f719d0f6b760c8d6a1506537b530c7">&#9670;&#160;</a></span>processDeclarationRemaining()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;<a class="el" href="namespacenshogi_1_1core.html#a31bbefbdbc08642dd7fffa28c0533659">core::Color</a> MyColor&gt; </div>
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structnshogi_1_1ml_1_1FeatureBitboard.html">FeatureBitboard</a> nshogi::ml::processDeclarationRemaining </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="classnshogi_1_1core_1_1State.html">core::State</a> &amp;&#160;</td>
+          <td class="paramname"><em>State</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a070e5c188f67114aafbb21ba94af44f1" name="a070e5c188f67114aafbb21ba94af44f1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a070e5c188f67114aafbb21ba94af44f1">&#9670;&#160;</a></span>processDeclarationRemaining&lt; core::Black &gt;()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">template <a class="el" href="structnshogi_1_1ml_1_1FeatureBitboard.html">FeatureBitboard</a> <a class="el" href="namespacenshogi_1_1ml.html#a46f719d0f6b760c8d6a1506537b530c7">nshogi::ml::processDeclarationRemaining</a>&lt; <a class="el" href="namespacenshogi_1_1core.html#a31bbefbdbc08642dd7fffa28c0533659a75ec2d688132f4e4fe69358ded79a1a3">core::Black</a> &gt; </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="classnshogi_1_1core_1_1State.html">core::State</a> &amp;&#160;</td>
+          <td class="paramname"><em>State</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a741d2ad6b550bec32b8515ba4683ec6f" name="a741d2ad6b550bec32b8515ba4683ec6f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a741d2ad6b550bec32b8515ba4683ec6f">&#9670;&#160;</a></span>processDeclarationRemaining&lt; core::White &gt;()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">template <a class="el" href="structnshogi_1_1ml_1_1FeatureBitboard.html">FeatureBitboard</a> <a class="el" href="namespacenshogi_1_1ml.html#a46f719d0f6b760c8d6a1506537b530c7">nshogi::ml::processDeclarationRemaining</a>&lt; <a class="el" href="namespacenshogi_1_1core.html#a31bbefbdbc08642dd7fffa28c0533659a5fc087f8cd9de5378ea62e827ede03a4">core::White</a> &gt; </td>
           <td>(</td>
           <td class="paramtype">const <a class="el" href="classnshogi_1_1core_1_1State.html">core::State</a> &amp;&#160;</td>
           <td class="paramname"><em>State</em></td><td>)</td>
