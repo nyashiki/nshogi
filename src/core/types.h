@@ -76,7 +76,7 @@ inline constexpr PieceTypeKind demotePieceType(PieceTypeKind Pt) {
 }
 
 // clang-format off
-enum PieceKind : uint16_t {
+enum PieceKind : uint8_t {
     PK_Empty = 0,
     PK_BlackPawn    =  1, PK_BlackLance    =  2, PK_BlackKnight    =  3, PK_BlackSilver    =  4, PK_BlackBishop    =  5, PK_BlackRook    =  6, PK_BlackGold =  7, PK_BlackKing =  8,
     PK_BlackProPawn =  9, PK_BlackProLance = 10, PK_BlackProKnight = 11, PK_BlackProSilver = 12, PK_BlackProBishop = 13, PK_BlackProRook = 14,
