@@ -254,6 +254,22 @@ processAttack<core::White, core::Black>(const core::State& State);
 template FeatureBitboard
 processAttack<core::White, core::White>(const core::State& State);
 
+template <core::Color MyColor>
+FeatureBitboard processDeclarationRemaining(const core::State& State) {
+    core::internal::ImmutableStateAdapter Adapter(State);
+    const int32_t TargetScore = (MyColor == core::Black) ? 28 : 27;
+    const int32_t RemainingScore =
+        TargetScore - (int32_t)Adapter->computeDeclarationScore<MyColor>();
+    return internal::FeatureBitboardUtil::makeFeatureBitboard(
+        core::internal::bitboard::Bitboard::AllBB(),
+        (float)RemainingScore / (float)TargetScore, false);
+}
+
+template FeatureBitboard
+processDeclarationRemaining<core::Black>(const core::State& State);
+template FeatureBitboard
+processDeclarationRemaining<core::White>(const core::State& State);
+
 FeatureStackRuntime::FeatureStackRuntime(const std::vector<FeatureType>& Types,
                                          const core::State& State,
                                          const core::StateConfig& Config) {
@@ -497,6 +513,10 @@ void FeatureStackRuntime::process(const std::vector<FeatureType>& Types,
             Features[I] = processAttack<C, C>(State);
         } else if (Type == FeatureType::FT_OpAttack) {
             Features[I] = processAttack<C, ~C>(State);
+        } else if (Type == FeatureType::FT_MyDeclarationRemaining) {
+            Features[I] = processDeclarationRemaining<C>(State);
+        } else if (Type == FeatureType::FT_OpDeclarationRemaining) {
+            Features[I] = processDeclarationRemaining<~C>(State);
         } else {
             assert(false);
         }
