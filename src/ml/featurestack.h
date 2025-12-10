@@ -414,9 +414,11 @@ struct FeatureStackComptime : FeatureStack {
             *FB = processAttack<C, C>(State);
         } else if constexpr (HeadType == FeatureType::FT_OpAttack) {
             *FB = processAttack<C, ~C>(State);
-        } else if constexpr (HeadType == FeatureType::FT_MyDeclarationRemaining) {
+        } else if constexpr (HeadType ==
+                             FeatureType::FT_MyDeclarationRemaining) {
             *FB = processDeclarationRemaining<C>(State);
-        } else if constexpr (HeadType == FeatureType::FT_OpDeclarationRemaining) {
+        } else if constexpr (HeadType ==
+                             FeatureType::FT_OpDeclarationRemaining) {
             *FB = processDeclarationRemaining<~C>(State);
         } else {
             // A trick for check if `FeatureType` is handled in
