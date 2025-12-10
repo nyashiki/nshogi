@@ -54,7 +54,7 @@ enum struct RepetitionStatus : uint8_t {
 // clang-format off
 enum PieceTypeKind : uint8_t {
     PTK_Empty   = 0,
-    PTK_Pawn    = 1,     PTK_Lance = 2,     PTK_Knight = 3,    PTK_Silver =  4,     PTK_Bishop = 5,     PTK_Rook = 6, PTK_Gold = 7, PTK_King = 8,
+    PTK_Pawn    = 1,    PTK_Lance =  2,    PTK_Knight =  3,    PTK_Silver =  4,    PTK_Bishop =  5,    PTK_Rook =  6, PTK_Gold = 7, PTK_King = 8,
     PTK_ProPawn = 9, PTK_ProLance = 10, PTK_ProKnight = 11, PTK_ProSilver = 12, PTK_ProBishop = 13, PTK_ProRook = 14,
 
     NumPieceType = 15,
@@ -350,26 +350,26 @@ static constexpr uint32_t StandShifts[NumStandKinds] = {
 // clang-format off
 static constexpr uint32_t StandBits[NumStandKinds] = {
     0U,
-    1U <<   StandShifts[PTK_Pawn],
-    1U <<  StandShifts[PTK_Lance],
+    1U << StandShifts[PTK_Pawn  ],
+    1U << StandShifts[PTK_Lance ],
     1U << StandShifts[PTK_Knight],
     1U << StandShifts[PTK_Silver],
     1U << StandShifts[PTK_Bishop],
-    1U <<   StandShifts[PTK_Rook],
-    1U <<   StandShifts[PTK_Gold],
+    1U << StandShifts[PTK_Rook  ],
+    1U << StandShifts[PTK_Gold  ],
 };
 // clang-format on
 
 // clang-format off
 static constexpr uint32_t StandMasks[NumStandKinds] = {
-                                     0U,
-    0b11111U <<   StandShifts[PTK_Pawn],
-    0b00111U <<  StandShifts[PTK_Lance],
+    0U,
+    0b11111U << StandShifts[PTK_Pawn  ],
+    0b00111U << StandShifts[PTK_Lance ],
     0b00111U << StandShifts[PTK_Knight],
     0b00111U << StandShifts[PTK_Silver],
     0b00011U << StandShifts[PTK_Bishop],
-    0b00011U <<   StandShifts[PTK_Rook],
-    0b00111U <<   StandShifts[PTK_Gold],
+    0b00011U << StandShifts[PTK_Rook  ],
+    0b00111U << StandShifts[PTK_Gold  ],
 };
 // clang-format on
 

@@ -67,8 +67,8 @@ StateImpl::StateImpl(const Position& CurrentP, const Position& InitP)
 
 StateImpl::StateImpl(StateImpl&& S) noexcept
     : Pos(S.Pos)
-    , HashValue(S.HashValue)
-    , Helper(std::move(S.Helper)) {
+    , Helper(std::move(S.Helper))
+    , HashValue(S.HashValue) {
 }
 
 StateImpl StateImpl::clone() const {

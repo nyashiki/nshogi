@@ -764,8 +764,8 @@ class StateImpl {
 
  private:
     Position Pos;
-    Hash<uint64_t> HashValue;
     StateHelper Helper;
+    Hash<uint64_t> HashValue;
 
     template <Color C, bool UpdateCheckerBySliders>
     void setDefendingOpponentSliderBB(StepHelper* SHelper,
