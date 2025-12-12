@@ -495,7 +495,7 @@ struct alignas(16) Bitboard {
     }
 
     inline __attribute__((always_inline))
-    inline int countTrailingZero(uint64_t Value) const {
+    int countTrailingZero(uint64_t Value) const {
 #if defined(USE_BMI1)
         return (int)_tzcnt_u64(Value);
 #endif
