@@ -24,7 +24,7 @@ core::Move32 defence(core::internal::StateImpl* S, int Limit);
 
 template <core::Color C>
 core::Move32 attack(core::internal::StateImpl* S, int Limit) {
-    if (Limit < 1) {
+    if (Limit <= 0) {
         return core::Move32::MoveNone();
     }
 
@@ -68,6 +68,10 @@ core::Move32 defence(core::internal::StateImpl* S, int Limit) {
         core::internal::MoveGeneratorInternal::generateLegalEvasionMoves<C,
                                                                          true>(
             *S);
+
+    if (Limit <= 1 && DefenceMoves.size() > 0) {
+        return DefenceMoves[0];
+    }
 
     bool IsCheckmatedBy1Ply = true;
     for (const core::Move32 Move : DefenceMoves) {
