@@ -1,7 +1,6 @@
 #include "../core/movegenerator.h"
 #include "../core/state.h"
 #include "../core/statebuilder.h"
-#include <cstdio>
 
 namespace {
 
@@ -34,6 +33,4 @@ void benchPerft(int Ply) {
 
     [[maybe_unused]]
     volatile const auto Result = perftImpl(State, Ply);
-
-    // printf("%d: %lu\n", Ply, Result);
 }
