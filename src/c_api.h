@@ -364,7 +364,14 @@ typedef struct nshogi_ml_api {
     void (*makeFeatureVector)(float* dest, const nshogi_state_t*,
                               const nshogi_state_config_t*,
                               const nshogi_feature_type_t*, int num_features);
+    void (*makeFeatureVectorWithOption)(float* dest, const nshogi_state_t*,
+                              const nshogi_state_config_t*,
+                              const nshogi_feature_type_t*,
+                              int num_features,
+                              int channels_first);
     int (*moveToIndex)(const nshogi_state_t* state, nshogi_move_t move);
+    int (*moveToIndexWithOption)(const nshogi_state_t* state, nshogi_move_t move,
+                                 int channels_first);
 } nshogi_ml_api_t;
 
 typedef struct nshogi_io_api {
