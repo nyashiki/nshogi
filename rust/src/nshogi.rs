@@ -293,36 +293,48 @@ pub struct NShogiMLCApi {
         i32,
     ) -> (),
 
+    make_feature_vector_with_option: unsafe extern "C" fn(
+        *mut std::ffi::c_float,
+        *const std::ffi::c_void,
+        *const std::ffi::c_void,
+        *const std::ffi::c_int,
+        i32,
+        i32,
+    ) -> (),
+
     move_to_index: unsafe extern "C" fn(*const c_void, u32) -> i32,
+    move_to_index_with_option: unsafe extern "C" fn(*const c_void, u32, i32) -> i32,
 }
 
 impl NShogiMLCApi {
-    pub fn make_feature_vector(
+    pub fn make_feature_vector_with_option(
         &self,
         state: *const c_void,
         state_config: *const c_void,
         feature_types: *const i32,
         num_features: usize,
+        channels_first: bool,
     ) -> Vec<f32> {
         let mut buffer: Vec<f32> = Vec::with_capacity(num_features * 9 * 9);
 
         unsafe {
             buffer.set_len(num_features * 9 * 9);
 
-            (self.make_feature_vector)(
+            (self.make_feature_vector_with_option)(
                 buffer.as_mut_ptr(),
                 state,
                 state_config,
                 feature_types,
                 num_features as i32,
+                channels_first as i32,
             );
         }
 
         buffer
     }
 
-    pub fn move_to_index(&self, state: *const c_void, m: u32) -> usize {
-        unsafe { (self.move_to_index)(state, m) as usize }
+    pub fn move_to_index_with_option(&self, state: *const c_void, m: u32, channels_first: bool) -> usize {
+        unsafe { (self.move_to_index_with_option)(state, m, channels_first as i32) as usize }
     }
 }
 
