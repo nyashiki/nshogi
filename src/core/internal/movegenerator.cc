@@ -783,117 +783,52 @@ inline Move32* generateDroppingMovesImplAVX2(const StateImpl& S,
     const bool BishopExists = getStandCount<PTK_Bishop>(St) > 0;
     const bool RookExists = getStandCount<PTK_Rook>(St) > 0;
 
-    union alignas(32) DroppingPack256 {
-        __m256i Pack256;
-        __m128i Pack128[2];
-        uint64_t Pack64[4];
-        uint32_t Pack32[8];
-    };
+    alignas(32) uint32_t Pack32[8] = { };
 
-    DroppingPack256 DP;
     int MoveCount = 0;
+
     if (SilverExists) {
-        DP.Pack32[MoveCount] =
+        Pack32[MoveCount] =
             Move32::droppingMove((Square)0, PTK_Silver).value();
         ++MoveCount;
     }
     if (GoldExists) {
-        DP.Pack32[MoveCount] =
+        Pack32[MoveCount] =
             Move32::droppingMove((Square)0, PTK_Gold).value();
         ++MoveCount;
     }
     if (BishopExists) {
-        DP.Pack32[MoveCount] =
+        Pack32[MoveCount] =
             Move32::droppingMove((Square)0, PTK_Bishop).value();
         ++MoveCount;
     }
     if (RookExists) {
-        DP.Pack32[MoveCount] =
+        Pack32[MoveCount] =
             Move32::droppingMove((Square)0, PTK_Rook).value();
         ++MoveCount;
     }
     if (LanceExists) {
-        DP.Pack32[MoveCount] =
+        Pack32[MoveCount] =
             Move32::droppingMove((Square)0, PTK_Lance).value();
         ++MoveCount;
     }
     if (KnightExists) {
-        DP.Pack32[MoveCount] =
+        Pack32[MoveCount] =
             Move32::droppingMove((Square)0, PTK_Knight).value();
         ++MoveCount;
     }
 
+    __m256i Pack256 = _mm256_load_si256((const __m256i*)Pack32);
+
     /* if (Stands exist) */ {
         const Bitboard ToBB = FirstAndSecondFurthestBB[C].andNot(TargetSquares);
 
-        switch (MoveCount) {
-        case 1: {
-            ToBB.forEach([&](Square To) {
-                *List++ = Move32::fromValue(DP.Pack32[0] | (uint32_t)To);
-            });
-            break;
-        }
-        case 2: {
-            ToBB.forEach([&](Square To) {
-                DroppingPack256 Base;
-                uint64_t Tos = ((uint64_t)To << 32 | (uint64_t)To);
-                Base.Pack64[0] = DP.Pack64[0] | Tos;
-                *List++ = Move32::fromValue(Base.Pack32[0]);
-                *List++ = Move32::fromValue(Base.Pack32[1]);
-            });
-            break;
-        }
-        case 3: {
-            ToBB.forEach([&](Square To) {
-                DroppingPack256 Base;
-                __m128i Tos = _mm_set1_epi32((int32_t)To);
-                Base.Pack128[0] = _mm_or_si128(DP.Pack128[0], Tos);
-                *List++ = Move32::fromValue(Base.Pack32[0]);
-                *List++ = Move32::fromValue(Base.Pack32[1]);
-                *List++ = Move32::fromValue(Base.Pack32[2]);
-            });
-            break;
-        }
-        case 4: {
-            ToBB.forEach([&](Square To) {
-                DroppingPack256 Base;
-                __m128i Tos = _mm_set1_epi32((int32_t)To);
-                Base.Pack128[0] = _mm_or_si128(DP.Pack128[0], Tos);
-                *List++ = Move32::fromValue(Base.Pack32[0]);
-                *List++ = Move32::fromValue(Base.Pack32[1]);
-                *List++ = Move32::fromValue(Base.Pack32[2]);
-                *List++ = Move32::fromValue(Base.Pack32[3]);
-            });
-            break;
-        }
-        case 5: {
-            ToBB.forEach([&](Square To) {
-                DroppingPack256 Base;
-                __m256i Tos = _mm256_set1_epi32((int32_t)To);
-                Base.Pack256 = _mm256_or_si256(DP.Pack256, Tos);
-                *List++ = Move32::fromValue(Base.Pack32[0]);
-                *List++ = Move32::fromValue(Base.Pack32[1]);
-                *List++ = Move32::fromValue(Base.Pack32[2]);
-                *List++ = Move32::fromValue(Base.Pack32[3]);
-                *List++ = Move32::fromValue(Base.Pack32[4]);
-            });
-            break;
-        }
-        case 6: {
-            ToBB.forEach([&](Square To) {
-                DroppingPack256 Base;
-                __m256i Tos = _mm256_set1_epi32((int32_t)To);
-                Base.Pack256 = _mm256_or_si256(DP.Pack256, Tos);
-                *List++ = Move32::fromValue(Base.Pack32[0]);
-                *List++ = Move32::fromValue(Base.Pack32[1]);
-                *List++ = Move32::fromValue(Base.Pack32[2]);
-                *List++ = Move32::fromValue(Base.Pack32[3]);
-                *List++ = Move32::fromValue(Base.Pack32[4]);
-                *List++ = Move32::fromValue(Base.Pack32[5]);
-            });
-            break;
-        }
-        }
+        ToBB.forEach([&](Square To) {
+            __m256i Tos = _mm256_set1_epi32((int)To);
+            __m256i V = _mm256_or_si256(Pack256, Tos);
+            _mm256_storeu_si256(reinterpret_cast<__m256i*>(List), V);
+            List += MoveCount;
+        });
     }
 
     {
@@ -901,61 +836,13 @@ inline Move32* generateDroppingMovesImplAVX2(const StateImpl& S,
             --MoveCount;
         }
 
-        const Bitboard ToBB = TargetSquares & SecondFurthestBB[C];
-        switch (MoveCount) {
-        case 1: {
-            ToBB.forEach([&](Square To) {
-                *List++ = Move32::fromValue(DP.Pack32[0] | (uint32_t)To);
-            });
-            break;
-        }
-        case 2: {
-            ToBB.forEach([&](Square To) {
-                DroppingPack256 Base;
-                uint64_t Tos = ((uint64_t)To << 32 | (uint64_t)To);
-                Base.Pack64[0] = DP.Pack64[0] | Tos;
-                *List++ = Move32::fromValue(Base.Pack32[0]);
-                *List++ = Move32::fromValue(Base.Pack32[1]);
-            });
-            break;
-        }
-        case 3: {
-            ToBB.forEach([&](Square To) {
-                DroppingPack256 Base;
-                __m128i Tos = _mm_set1_epi32((int32_t)To);
-                Base.Pack128[0] = _mm_or_si128(DP.Pack128[0], Tos);
-                *List++ = Move32::fromValue(Base.Pack32[0]);
-                *List++ = Move32::fromValue(Base.Pack32[1]);
-                *List++ = Move32::fromValue(Base.Pack32[2]);
-            });
-            break;
-        }
-        case 4: {
-            ToBB.forEach([&](Square To) {
-                DroppingPack256 Base;
-                __m128i Tos = _mm_set1_epi32((int32_t)To);
-                Base.Pack128[0] = _mm_or_si128(DP.Pack128[0], Tos);
-                *List++ = Move32::fromValue(Base.Pack32[0]);
-                *List++ = Move32::fromValue(Base.Pack32[1]);
-                *List++ = Move32::fromValue(Base.Pack32[2]);
-                *List++ = Move32::fromValue(Base.Pack32[3]);
-            });
-            break;
-        }
-        case 5: {
-            ToBB.forEach([&](Square To) {
-                DroppingPack256 Base;
-                __m256i Tos = _mm256_set1_epi32((int32_t)To);
-                Base.Pack256 = _mm256_or_si256(DP.Pack256, Tos);
-                *List++ = Move32::fromValue(Base.Pack32[0]);
-                *List++ = Move32::fromValue(Base.Pack32[1]);
-                *List++ = Move32::fromValue(Base.Pack32[2]);
-                *List++ = Move32::fromValue(Base.Pack32[3]);
-                *List++ = Move32::fromValue(Base.Pack32[4]);
-            });
-            break;
-        }
-        }
+        const Bitboard ToBB = TargetSquares & Bitboard::SecondFurthestBB<C>();
+        ToBB.forEach([&](Square To) {
+            __m256i Tos = _mm256_set1_epi32((int)To);
+            __m256i V = _mm256_or_si256(Pack256, Tos);
+            _mm256_storeu_si256(reinterpret_cast<__m256i*>(List), V);
+            List += MoveCount;
+        });
     }
 
     {
@@ -963,49 +850,15 @@ inline Move32* generateDroppingMovesImplAVX2(const StateImpl& S,
             --MoveCount;
         }
 
-        const Bitboard ToBB = TargetSquares & FurthermostBB[C];
+        __m128i Pack128 = _mm256_castsi256_si128(Pack256);
 
-        switch (MoveCount) {
-        case 1: {
-            ToBB.forEach([&](Square To) {
-                *List++ = Move32::fromValue(DP.Pack32[0] | (uint32_t)To);
-            });
-            break;
-        }
-        case 2: {
-            ToBB.forEach([&](Square To) {
-                DroppingPack256 Base;
-                uint64_t Tos = ((uint64_t)To << 32 | (uint64_t)To);
-                Base.Pack64[0] = DP.Pack64[0] | Tos;
-                *List++ = Move32::fromValue(Base.Pack32[0]);
-                *List++ = Move32::fromValue(Base.Pack32[1]);
-            });
-            break;
-        }
-        case 3: {
-            ToBB.forEach([&](Square To) {
-                DroppingPack256 Base;
-                __m128i Tos = _mm_set1_epi32((int32_t)To);
-                Base.Pack128[0] = _mm_or_si128(DP.Pack128[0], Tos);
-                *List++ = Move32::fromValue(Base.Pack32[0]);
-                *List++ = Move32::fromValue(Base.Pack32[1]);
-                *List++ = Move32::fromValue(Base.Pack32[2]);
-            });
-            break;
-        }
-        case 4: {
-            ToBB.forEach([&](Square To) {
-                DroppingPack256 Base;
-                __m128i Tos = _mm_set1_epi32((int32_t)To);
-                Base.Pack128[0] = _mm_or_si128(DP.Pack128[0], Tos);
-                *List++ = Move32::fromValue(Base.Pack32[0]);
-                *List++ = Move32::fromValue(Base.Pack32[1]);
-                *List++ = Move32::fromValue(Base.Pack32[2]);
-                *List++ = Move32::fromValue(Base.Pack32[3]);
-            });
-            break;
-        }
-        }
+        const Bitboard ToBB = TargetSquares & Bitboard::FurthermostBB<C>();
+        ToBB.forEach([&](Square To) {
+            __m128i Tos = _mm_set1_epi32((int)To);
+            __m128i V = _mm_or_si128(Pack128, Tos);
+            _mm_storeu_si128(reinterpret_cast<__m128i*>(List), V);
+            List += MoveCount;
+        });
     }
 
     return List;
