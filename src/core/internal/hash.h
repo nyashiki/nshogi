@@ -24,7 +24,7 @@ struct Hash {
     Hash();
     Hash(const Hash<HashValueType>&);
 
-    Hash& operator=(const Hash& H) {
+    Hash& operator=(const Hash& H) noexcept {
         Value = H.Value;
         return *this;
     }
@@ -33,15 +33,15 @@ struct Hash {
     void refresh(const Position& Pos);
 
     template <Color C>
-    void update(PieceTypeKind Type, Square Sq) {
+    void update(PieceTypeKind Type, Square Sq) noexcept {
         Value ^= OnBoardHash[C][Type][Sq];
     }
 
-    inline void updateColor() {
+    inline void updateColor() noexcept {
         Value ^= ColorHash;
     }
 
-    inline HashValueType getValue() const {
+    inline HashValueType getValue() const noexcept {
         return Value;
     }
 

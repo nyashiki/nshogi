@@ -36,7 +36,7 @@ class MoveGenerator {
     ///         to reduce the move set.
     ///
     template <Color C, bool WilyPromote = true>
-    static MoveList generateLegalMoves(const State& S);
+    static MoveList generateLegalMoves(const State& S) noexcept;
 
     ///
     /// @brief Generate all legal check moves for a given state.
@@ -46,7 +46,7 @@ class MoveGenerator {
     ///         to reduce the move set.
     ///
     template <Color C, bool WilyPromote = true>
-    static MoveList generateLegalCheckMoves(const State& S);
+    static MoveList generateLegalCheckMoves(const State& S) noexcept;
 
     ///
     /// @brief Generate all legal moves for a given state.
@@ -54,7 +54,7 @@ class MoveGenerator {
     ///         to reduce the move set.
     ///
     template <bool WilyPromote = true>
-    static MoveList generateLegalMoves(const State& S);
+    static MoveList generateLegalMoves(const State& S) noexcept;
 
     ///
     /// @brief Generate all legal check moves for a given state.
@@ -62,7 +62,7 @@ class MoveGenerator {
     ///         to reduce the move set.
     ///
     template <bool WilyPromote = true>
-    static MoveList generateLegalCheckMoves(const State& S);
+    static MoveList generateLegalCheckMoves(const State& S) noexcept;
 };
 
 } // namespace core

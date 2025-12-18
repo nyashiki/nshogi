@@ -37,15 +37,15 @@ struct MoveList {
     MoveList& operator=(const MoveList&) = delete;
     MoveList& operator=(MoveList&&) = delete;
 
-    inline const Move32* begin() const {
+    inline const Move32* begin() const noexcept {
         return Moves;
     }
 
-    inline const Move32* end() const {
+    inline const Move32* end() const noexcept {
         return Tail;
     }
 
-    inline Move32 operator[](std::size_t Index) const {
+    inline Move32 operator[](std::size_t Index) const noexcept {
         return Moves[Index];
     }
 
@@ -59,19 +59,14 @@ struct MoveList {
         return end();
     }
 
-    inline std::size_t size() const {
+    inline std::size_t size() const noexcept {
         return (std::size_t)(Tail - Moves);
-    }
-
-    inline void add(Move32 Move) {
-        *Tail = Move;
-        ++Tail;
     }
 
  private:
     static constexpr std::size_t MoveCountMax = 600;
 
-    Move32 Moves[MoveCountMax];
+    alignas(32) Move32 Moves[MoveCountMax];
     Move32* Tail;
 
     friend class nshogi::core::internal::MoveGeneratorInternal;

@@ -53,10 +53,10 @@ struct StateHelper {
     ~StateHelper();
 
     void proceedOneStep(Move32 Move, uint64_t BoardHash, Stands BlackStand,
-                        Stands WhiteStand);
+                        Stands WhiteStand) noexcept;
     Move32 goBackOneStep();
 
-    inline const StepHelper& getCurrentStepHelper() const {
+    inline const StepHelper& getCurrentStepHelper() const noexcept {
         return getStepHelper(Ply);
     }
 
@@ -64,11 +64,11 @@ struct StateHelper {
         return SHelper[TargetPly];
     }
 
-    inline const Position& getInitialPosition() const {
+    inline const Position& getInitialPosition() const noexcept {
         return InitialPosition;
     }
 
-    inline uint16_t getPly(bool IncludeOffset = true) const {
+    inline uint16_t getPly(bool IncludeOffset = true) const noexcept {
         if (IncludeOffset) {
             return InitialPosition.getPlyOffset() + Ply;
         }

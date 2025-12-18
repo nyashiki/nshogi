@@ -49,19 +49,19 @@ State State::clone() const {
     return State(new internal::StateImpl(Impl->clone()));
 }
 
-Color State::getSideToMove() const {
+Color State::getSideToMove() const noexcept {
     return Impl->getSideToMove();
 }
 
-const Position& State::getPosition() const {
+const Position& State::getPosition() const noexcept {
     return Impl->getPosition();
 }
 
-const Position& State::getInitialPosition() const {
+const Position& State::getInitialPosition() const noexcept {
     return Impl->getInitialPosition();
 }
 
-uint16_t State::getPly(bool IncludeOffset) const {
+uint16_t State::getPly(bool IncludeOffset) const noexcept {
     return Impl->getPly(IncludeOffset);
 }
 
@@ -73,11 +73,11 @@ Move32 State::getLastMove() const {
     return Impl->getLastMove();
 }
 
-uint64_t State::getHash() const {
+uint64_t State::getHash() const noexcept {
     return Impl->getHash();
 }
 
-void State::doMove(Move32 Move) {
+void State::doMove(Move32 Move) noexcept {
     Impl->doMove(Move);
 }
 
@@ -85,7 +85,7 @@ void State::undoMove() {
     Impl->undoMove();
 }
 
-RepetitionStatus State::getRepetitionStatus(bool Strict) const {
+RepetitionStatus State::getRepetitionStatus(bool Strict) const noexcept {
     if (Strict) {
         return Impl->getRepetitionStatus<true>();
     } else {
@@ -93,21 +93,21 @@ RepetitionStatus State::getRepetitionStatus(bool Strict) const {
     }
 }
 
-bool State::isInCheck() const {
+bool State::isInCheck() const noexcept {
     return !Impl->getCheckerBB().isZero();
 }
 
-Square State::getKingSquare(Color C) const {
+Square State::getKingSquare(Color C) const noexcept {
     return Impl->getKingSquare(C);
 }
 
-Move32 State::getMove32FromMove16(Move16 M16) const {
+Move32 State::getMove32FromMove16(Move16 M16) const noexcept {
     return Impl->getMove32FromMove16(M16);
 }
 
 uint8_t State::computePieceScore(Color C, uint8_t SliderScoreUnit,
                                  uint8_t StepScoreUnit,
-                                 bool OnlyInPromotableZone) const {
+                                 bool OnlyInPromotableZone) const noexcept {
 
     if (C == Black) {
         return Impl->computePieceScore<Black>(SliderScoreUnit, StepScoreUnit,
@@ -118,7 +118,7 @@ uint8_t State::computePieceScore(Color C, uint8_t SliderScoreUnit,
     }
 }
 
-bool State::canDeclare() const {
+bool State::canDeclare() const noexcept {
     return Impl->canDeclare();
 }
 

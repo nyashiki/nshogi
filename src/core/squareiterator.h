@@ -74,30 +74,30 @@ struct SquareIterator {
         }
     }
 
-    Square operator*() const {
+    Square operator*() const noexcept {
         return Sq;
     }
 
-    bool operator==(const SquareIterator<Order>& It) const {
+    bool operator==(const SquareIterator<Order>& It) const noexcept {
         return Sq == It.Sq;
     }
 
-    bool operator!=(const SquareIterator<Order>& It) const {
+    bool operator!=(const SquareIterator<Order>& It) const noexcept {
         return !((*this) == It);
     }
 
-    SquareIterator<Order> begin() const {
+    SquareIterator<Order> begin() const noexcept {
         return SquareIterator<Order>();
     }
 
-    SquareIterator<Order> end() const {
+    SquareIterator<Order> end() const noexcept {
         SquareIterator<Order> It;
         It.Sq = NumSquares;
 
         return It;
     }
 
-    SquareIterator<Order>& operator++() {
+    SquareIterator<Order>& operator++() noexcept {
         if constexpr (Order == IterateOrder::Fastest ||
                       Order == IterateOrder::ESWN) {
             Sq = (Square)(Sq + 1);
@@ -140,7 +140,7 @@ struct SquareIterator {
         return *this;
     }
 
-    SquareIterator<Order>& operator+=(int Inc) {
+    SquareIterator<Order>& operator+=(int Inc) noexcept {
         for (int I = 0; I < Inc; ++I) {
             ++(*this);
         }

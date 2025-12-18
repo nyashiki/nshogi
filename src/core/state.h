@@ -58,22 +58,22 @@ class State {
     ///
     /// @brief Get the current color to play.
     ///
-    Color getSideToMove() const;
+    Color getSideToMove() const noexcept;
 
     ///
     /// @brief Get the current position.
     ///
-    const Position& getPosition() const;
+    const Position& getPosition() const noexcept;
 
     ///
     /// @brief Get the initial position of the state.
     ///
-    const Position& getInitialPosition() const;
+    const Position& getInitialPosition() const noexcept;
 
     ///
     /// @brief Get the current ply (i.e., how many moves are applied).
     ///
-    uint16_t getPly(bool IncludeOffset = true) const;
+    uint16_t getPly(bool IncludeOffset = true) const noexcept;
 
     ///
     /// @brief Get the history move.
@@ -89,12 +89,12 @@ class State {
     ///
     /// @brief Get the hash value of the state.
     ///
-    uint64_t getHash() const;
+    uint64_t getHash() const noexcept;
 
     ///
     /// @brief Apply a legal move.
     ///
-    void doMove(Move32 Move);
+    void doMove(Move32 Move) noexcept;
 
     ///
     /// @brief Undo the last move.
@@ -107,24 +107,24 @@ class State {
     ///               If true, the detection strictly follows the repetition
     ///               rules.
     ///
-    RepetitionStatus getRepetitionStatus(bool Strict = false) const;
+    RepetitionStatus getRepetitionStatus(bool Strict = false) const noexcept;
 
     ///
     /// @brief Return true if the king of the current turn is in check.
     ///
-    bool isInCheck() const;
+    bool isInCheck() const noexcept;
 
     ///
     /// @brief Get the square location of the king piece.
     /// @param C The color of the king.
     ///
-    Square getKingSquare(Color C) const;
+    Square getKingSquare(Color C) const noexcept;
 
     ///
     /// @brief Convert a `Move16` object to a `Move32` object.
     /// @param M16 The `Move16` object to be converted.
     ///
-    Move32 getMove32FromMove16(Move16 M16) const;
+    Move32 getMove32FromMove16(Move16 M16) const noexcept;
 
     ///
     /// @brief Compute the piece score used for the declaration rule.
@@ -136,12 +136,12 @@ class State {
     ///
     uint8_t computePieceScore(Color C, uint8_t SliderScoreUnit,
                               uint8_t StepScoreUnit,
-                              bool OnlyInPromotableZone) const;
+                              bool OnlyInPromotableZone) const noexcept;
 
     ///
     /// @brief Check if the current player can win by declaration.
     ///
-    bool canDeclare() const;
+    bool canDeclare() const noexcept;
 
  private:
     State() = delete;

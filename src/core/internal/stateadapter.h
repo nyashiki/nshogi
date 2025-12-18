@@ -23,11 +23,11 @@ class ImmutableStateAdapter {
         : Impl(S.Impl) {
     }
 
-    const StateImpl* operator->() const {
+    const StateImpl* operator->() const noexcept {
         return Impl;
     }
 
-    const StateImpl* get() const {
+    const StateImpl* get() const noexcept {
         return Impl;
     }
 
@@ -41,11 +41,11 @@ class MutableStateAdapter {
         : Impl(S.Impl) {
     }
 
-    StateImpl* operator->() const {
+    StateImpl* operator->() const noexcept {
         return Impl;
     }
 
-    StateImpl* get() const {
+    StateImpl* get() const noexcept {
         return Impl;
     }
 

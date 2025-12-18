@@ -78,10 +78,13 @@ extern Bitboard ForwardBB[NumSquares];
 extern Bitboard BackwardBB[NumSquares];
 
 struct alignas(16) Bitboard {
-    constexpr Bitboard() {
+    constexpr Bitboard() noexcept = default;
+
+    constexpr Bitboard(uint64_t High, uint64_t Low) noexcept
+        : Primitive{Low, High} {
     }
 
-    static constexpr Bitboard ZeroBB() {
+    static constexpr Bitboard ZeroBB() noexcept {
 #if defined(USE_SSE2)
         if (!std::is_constant_evaluated()) {
             return _mm_setzero_si128();
@@ -95,7 +98,7 @@ struct alignas(16) Bitboard {
         return Bitboard(0, 0);
     }
 
-    static constexpr Bitboard AllBB() {
+    static constexpr Bitboard AllBB() noexcept {
 #if defined(USE_SSE2)
         if (!std::is_constant_evaluated()) {
             return _mm_set_epi64x(0x3ffff, 0x7fffffffffffffff);
@@ -110,8 +113,22 @@ struct alignas(16) Bitboard {
         return Bitboard(0x3ffff, 0x7fffffffffffffff);
     }
 
-    constexpr Bitboard(uint64_t High, uint64_t Low)
-        : Primitive{Low, High} {
+    template <Color C>
+    static constexpr Bitboard FurthermostBB() noexcept {
+        if constexpr (C == Black) {
+            return RankBB[RankA];
+        } else {
+            return RankBB[RankI];
+        }
+    }
+
+    template <Color C>
+    static constexpr Bitboard SecondFurthestBB() noexcept {
+        if constexpr (C == Black) {
+            return RankBB[RankB];
+        } else {
+            return RankBB[RankH];
+        }
     }
 
 #if defined(USE_SSE2)
@@ -134,15 +151,6 @@ struct alignas(16) Bitboard {
     }
 #endif
 
-    void copyFrom(const Bitboard& BB) {
-#if defined(USE_SSE2) || defined(USE_NEON)
-        Bitboard_ = BB.Bitboard_;
-#else
-        Primitive[0] = BB.getPrimitive<false>();
-        Primitive[1] = BB.getPrimitive<true>();
-#endif
-    }
-
     constexpr Bitboard& operator=(Bitboard&& BB) noexcept {
 #if defined(USE_SSE2) || defined(USE_NEON)
         Bitboard_ = BB.Bitboard_;
@@ -163,8 +171,17 @@ struct alignas(16) Bitboard {
         return *this;
     }
 
+    void copyFrom(const Bitboard& BB) noexcept {
+#if defined(USE_SSE2) || defined(USE_NEON)
+        Bitboard_ = BB.Bitboard_;
+#else
+        Primitive[0] = BB.getPrimitive<false>();
+        Primitive[1] = BB.getPrimitive<true>();
+#endif
+    }
+
     // Getters.
-    inline __attribute__((always_inline)) constexpr bool isZero() const {
+    inline __attribute__((always_inline)) constexpr bool isZero() const noexcept {
 #if defined(USE_SSE41)
         if (!std::is_constant_evaluated()) {
             return _mm_testz_si128(Bitboard_, Bitboard_);
@@ -180,7 +197,7 @@ struct alignas(16) Bitboard {
     }
 
     inline __attribute__((always_inline)) constexpr bool
-    isSet(Square Sq) const {
+    isSet(Square Sq) const noexcept {
 #if defined(USE_SSE41)
         if (!std::is_constant_evaluated()) {
             return !_mm_testz_si128(Bitboard_, SquareBB[Sq].Bitboard_);
@@ -196,7 +213,7 @@ struct alignas(16) Bitboard {
     }
 
     // Setters.
-    inline __attribute__((always_inline)) constexpr void clear() {
+    inline __attribute__((always_inline)) constexpr void clear() noexcept {
 #if defined(USE_SSE2)
         if (!std::is_constant_evaluated()) {
             Bitboard_ = _mm_setzero_si128();
@@ -211,13 +228,13 @@ struct alignas(16) Bitboard {
 #endif
     }
 
-    inline __attribute__((always_inline)) constexpr void toggleBit(Square Sq) {
+    inline __attribute__((always_inline)) constexpr void toggleBit(Square Sq) noexcept {
         (*this) ^= SquareBB[Sq];
     }
 
     // Bit operations.
     inline __attribute__((always_inline)) constexpr Bitboard&
-    operator|=(const Bitboard& BB) {
+    operator|=(const Bitboard& BB) noexcept {
 #if defined(USE_SSE2)
         if (!std::is_constant_evaluated()) {
             Bitboard_ = _mm_or_si128(Bitboard_, BB.Bitboard_);
@@ -235,7 +252,7 @@ struct alignas(16) Bitboard {
     }
 
     inline __attribute__((always_inline)) constexpr Bitboard
-    operator|(const Bitboard& BB) const {
+    operator|(const Bitboard& BB) const noexcept {
         if (std::is_constant_evaluated()) {
             Bitboard Res(Primitive[1], Primitive[0]);
             Res |= BB;
@@ -248,7 +265,7 @@ struct alignas(16) Bitboard {
     }
 
     inline __attribute__((always_inline)) constexpr Bitboard&
-    operator&=(const Bitboard& BB) {
+    operator&=(const Bitboard& BB) noexcept {
 #if defined(USE_SSE2)
         if (!std::is_constant_evaluated()) {
             Bitboard_ = _mm_and_si128(Bitboard_, BB.Bitboard_);
@@ -266,7 +283,7 @@ struct alignas(16) Bitboard {
     }
 
     inline __attribute__((always_inline)) constexpr Bitboard
-    operator&(const Bitboard& BB) const {
+    operator&(const Bitboard& BB) const noexcept {
         if (std::is_constant_evaluated()) {
             Bitboard Res(Primitive[1], Primitive[0]);
             Res &= BB;
@@ -279,7 +296,7 @@ struct alignas(16) Bitboard {
     }
 
     inline __attribute__((always_inline)) constexpr Bitboard&
-    operator^=(const Bitboard& BB) {
+    operator^=(const Bitboard& BB) noexcept {
 #if defined(USE_SSE2)
         if (!std::is_constant_evaluated()) {
             Bitboard_ = _mm_xor_si128(Bitboard_, BB.Bitboard_);
@@ -297,7 +314,7 @@ struct alignas(16) Bitboard {
     }
 
     inline __attribute__((always_inline)) constexpr Bitboard
-    operator^(const Bitboard& BB) const {
+    operator^(const Bitboard& BB) const noexcept {
         if (std::is_constant_evaluated()) {
             Bitboard Res(Primitive[1], Primitive[0]);
             Res ^= BB;
@@ -310,7 +327,7 @@ struct alignas(16) Bitboard {
     }
 
     inline __attribute__((always_inline)) constexpr Bitboard
-    andNot(const Bitboard& BB) const {
+    andNot(const Bitboard& BB) const noexcept {
 #if defined(USE_SSE2)
         if (!std::is_constant_evaluated()) {
             return _mm_andnot_si128(Bitboard_, BB.Bitboard_);
@@ -324,13 +341,13 @@ struct alignas(16) Bitboard {
                 ~Primitive[0] & BB.Primitive[0]};
     }
 
-    inline __attribute__((always_inline)) constexpr Bitboard operator~() const {
+    inline __attribute__((always_inline)) constexpr Bitboard operator~() const noexcept {
         return andNot(AllBB());
     }
 
     template <int Shift>
     inline __attribute__((always_inline)) constexpr Bitboard
-    getRightShiftEpi64() const {
+    getRightShiftEpi64() const noexcept {
 #if defined(USE_SSE2)
         if (!std::is_constant_evaluated()) {
             return _mm_srli_epi64(Bitboard_, Shift);
@@ -344,7 +361,7 @@ struct alignas(16) Bitboard {
     }
 
     inline __attribute__((always_inline)) constexpr Bitboard
-    getRightShiftEpi64(int Shift) const {
+    getRightShiftEpi64(int Shift) const noexcept {
 #if defined(USE_SSE2)
         if (!std::is_constant_evaluated()) {
             return _mm_srli_epi64(Bitboard_, Shift);
@@ -360,7 +377,7 @@ struct alignas(16) Bitboard {
 
     template <int Shift>
     inline __attribute__((always_inline)) constexpr Bitboard
-    getRightShiftSi128() const {
+    getRightShiftSi128() const noexcept {
         // We can't use _mm_slli_si128 here when Shift % 8 == 0 holds because
         // the bitboard is composed of two 64-bit variables.
         // One of them uses 63 bits to represent the first 7 files (7 files * 9
@@ -383,7 +400,7 @@ struct alignas(16) Bitboard {
 
     template <int Shift>
     inline __attribute__((always_inline)) constexpr Bitboard
-    getLeftShiftEpi64() const {
+    getLeftShiftEpi64() const noexcept {
 #if defined(USE_SSE2)
         if (!std::is_constant_evaluated()) {
             return _mm_slli_epi64(Bitboard_, Shift);
@@ -397,7 +414,7 @@ struct alignas(16) Bitboard {
     }
 
     inline __attribute__((always_inline)) constexpr Bitboard
-    getLeftShiftEpi64(int Shift) const {
+    getLeftShiftEpi64(int Shift) const noexcept {
 #if defined(USE_SSE2)
         if (!std::is_constant_evaluated()) {
             return _mm_slli_epi64(Bitboard_, Shift);
@@ -413,7 +430,7 @@ struct alignas(16) Bitboard {
 
     template <int Shift>
     inline __attribute__((always_inline)) constexpr Bitboard
-    getLeftShiftSi128() const {
+    getLeftShiftSi128() const noexcept {
         // See the comment in getRightShiftSi128().
 #if defined(USE_SSE2)
         if (!std::is_constant_evaluated()) {
@@ -428,7 +445,7 @@ struct alignas(16) Bitboard {
                         Primitive[0] << Shift);
     }
 
-    constexpr bool operator==(const Bitboard& BB) const {
+    constexpr bool operator==(const Bitboard& BB) const noexcept {
 #if defined(USE_SSE2)
         if (!std::is_constant_evaluated()) {
             __m128i Result = _mm_cmpeq_epi8(Bitboard_, BB.Bitboard_); // Compare
@@ -442,7 +459,7 @@ struct alignas(16) Bitboard {
                Primitive[1] == BB.Primitive[1];
     }
 
-    constexpr bool operator!=(const Bitboard& BB) const {
+    constexpr bool operator!=(const Bitboard& BB) const noexcept {
 #if defined(USE_SSE2)
         if (!std::is_constant_evaluated()) {
             __m128i Result = _mm_cmpeq_epi8(Bitboard_, BB.Bitboard_); // Compare
@@ -458,7 +475,7 @@ struct alignas(16) Bitboard {
 
     [[maybe_unused]] [[nodiscard]] inline
         __attribute__((always_inline)) constexpr Bitboard
-        subtract(const Bitboard& BB) const {
+        subtract(const Bitboard& BB) const noexcept {
 #if defined(USE_SSE2)
         if (!std::is_constant_evaluated()) {
             return _mm_sub_epi64(Bitboard_, BB.Bitboard_);
@@ -474,7 +491,7 @@ struct alignas(16) Bitboard {
 
     template <bool High>
     [[nodiscard]] inline __attribute__((always_inline)) constexpr uint64_t
-    getPrimitive() const {
+    getPrimitive() const noexcept {
 #if defined(USE_SSE41)
         if (!std::is_constant_evaluated()) {
             // _mm_cvtsi128_si64 is faster by one latency than _mm_extract_epi64
@@ -492,7 +509,7 @@ struct alignas(16) Bitboard {
     }
 
     inline __attribute__((always_inline)) int
-    countTrailingZero(uint64_t Value) const {
+    countTrailingZero(uint64_t Value) const noexcept {
 #if defined(USE_BMI1)
         return (int)_tzcnt_u64(Value);
 #endif
@@ -500,7 +517,7 @@ struct alignas(16) Bitboard {
     }
 
     [[maybe_unused]] [[nodiscard]] inline __attribute__((always_inline)) Square
-    getOne() const {
+    getOne() const noexcept {
         uint64_t Low = getPrimitive<false>();
         if (Low > 0) {
             return static_cast<Square>(countTrailingZero(Low));
@@ -513,7 +530,7 @@ struct alignas(16) Bitboard {
     }
 
     inline __attribute__((always_inline)) Bitboard
-    pickUpMostSignificantBB() const {
+    pickUpMostSignificantBB() const noexcept {
         uint64_t High = getPrimitive<true>();
 
         if (High > 0) {
@@ -524,7 +541,7 @@ struct alignas(16) Bitboard {
         return SquareBB[63 - std::countl_zero(Low)];
     }
 
-    inline __attribute__((always_inline)) Square popOne() {
+    inline __attribute__((always_inline)) Square popOne() noexcept {
         const uint64_t Low = getPrimitive<false>();
         if (Low > 0) {
             Square Sq = static_cast<Square>(countTrailingZero(Low));
@@ -563,7 +580,7 @@ struct alignas(16) Bitboard {
     // std::function<void(Square)> can have overhead.
     template <typename FuncType>
         requires std::is_invocable_v<FuncType, Square>
-    inline __attribute__((always_inline)) void forEach(FuncType Func) const {
+    inline __attribute__((always_inline)) void forEach(FuncType Func) const noexcept {
         uint64_t B = getPrimitive<false>();
 
         while (B != 0) {
@@ -582,7 +599,7 @@ struct alignas(16) Bitboard {
 
     template <typename FuncType>
         requires std::is_invocable_r_v<bool, FuncType, Square>
-    inline __attribute__((always_inline)) bool any(FuncType Func) const {
+    inline __attribute__((always_inline)) bool any(FuncType Func) const noexcept {
         uint64_t B = getPrimitive<false>();
 
         while (B != 0) {
@@ -609,19 +626,19 @@ struct alignas(16) Bitboard {
         return false;
     }
 
-    [[maybe_unused]] [[nodiscard]] constexpr uint64_t horizontalOr() const {
+    [[maybe_unused]] [[nodiscard]] constexpr uint64_t horizontalOr() const noexcept {
         return getPrimitive<false>() | getPrimitive<true>();
     }
 
-    [[maybe_unused]] [[nodiscard]] constexpr uint64_t horizontalAnd() const {
+    [[maybe_unused]] [[nodiscard]] constexpr uint64_t horizontalAnd() const noexcept {
         return getPrimitive<false>() & getPrimitive<true>();
     }
 
-    [[maybe_unused]] [[nodiscard]] constexpr uint64_t horizontalXor() const {
+    [[maybe_unused]] [[nodiscard]] constexpr uint64_t horizontalXor() const noexcept {
         return getPrimitive<false>() ^ getPrimitive<true>();
     }
 
-    [[maybe_unused]] [[nodiscard]] uint8_t popCount() const {
+    [[maybe_unused]] [[nodiscard]] uint8_t popCount() const noexcept {
 #if defined(USE_AVX2)
         const auto Count1 = _mm_popcnt_u64(getPrimitive<false>());
         const auto Count2 = _mm_popcnt_u64(getPrimitive<true>());
@@ -634,11 +651,11 @@ struct alignas(16) Bitboard {
     }
 
 #if defined(USE_SSE2)
-    constexpr __m128i getRaw() const {
+    constexpr __m128i getRaw() const noexcept {
         return Bitboard_;
     }
 #elif defined(USE_NEON)
-    constexpr uint64x2_t getRaw() const {
+    constexpr uint64x2_t getRaw() const noexcept {
         return Bitboard_;
     }
 #endif
@@ -684,7 +701,7 @@ constexpr uint64_t CrossMagicBits = 7;
 extern MagicBitboard<CrossMagicBits> RookMagicBB[NumSquares];
 
 template <Color C, PieceTypeKind Type>
-inline constexpr Bitboard getAttackBB(Square From) {
+inline constexpr Bitboard getAttackBB(Square From) noexcept {
     static_assert(Type != PTK_Lance,
                   "getAttackBB() is not implemented for PieceType::PTK_Lance");
     static_assert(Type != PTK_Bishop,
@@ -719,8 +736,8 @@ inline constexpr Bitboard getAttackBB(Square From) {
 }
 
 template <Color C>
-inline Bitboard getLanceAttackBB(Square Sq, const Bitboard& OccupiedBB) {
-    if (FurthermostBB[C].isSet(Sq)) {
+inline Bitboard getLanceAttackBB(Square Sq, const Bitboard& OccupiedBB) noexcept {
+    if (Bitboard::FurthermostBB<C>().isSet(Sq)) {
         return bitboard::Bitboard::ZeroBB();
     }
 
@@ -735,7 +752,7 @@ inline Bitboard getLanceAttackBB(Square Sq, const Bitboard& OccupiedBB) {
 }
 
 template <PieceTypeKind Type>
-inline Bitboard getBishopAttackBB(Square Sq, const Bitboard& OccupiedBB) {
+inline Bitboard getBishopAttackBB(Square Sq, const Bitboard& OccupiedBB) noexcept {
     static_assert(
         Type == PTK_Bishop || Type == PTK_ProBishop,
         "the template parameter `Type` must be PTK_Bishop or PTK_ProBishop.");
@@ -768,7 +785,7 @@ inline Bitboard getBishopAttackBB(Square Sq, const Bitboard& OccupiedBB) {
 }
 
 template <PieceTypeKind Type>
-inline Bitboard getRookAttackBB(Square Sq, const Bitboard& OccupiedBB) {
+inline Bitboard getRookAttackBB(Square Sq, const Bitboard& OccupiedBB) noexcept {
     static_assert(
         Type == PTK_Rook || Type == PTK_ProRook,
         "the template parameter `Type` must be PTK_Rook or PTK_ProRook.");
@@ -800,24 +817,24 @@ inline Bitboard getRookAttackBB(Square Sq, const Bitboard& OccupiedBB) {
     return AttackBB;
 }
 
-inline bool isAttacked(const Bitboard& AttackBB, const Bitboard& ExistBB) {
+inline bool isAttacked(const Bitboard& AttackBB, const Bitboard& ExistBB) noexcept {
     return !(AttackBB & ExistBB).isZero();
 }
 
-inline Bitboard getBetweenBB(Square Sq1, Square Sq2) {
+inline Bitboard getBetweenBB(Square Sq1, Square Sq2) noexcept {
     return BetweenBB[Sq1][Sq2];
 }
 
-inline Bitboard getDiagBB(Square Sq) {
+inline Bitboard getDiagBB(Square Sq) noexcept {
     return DiagBB[Sq];
 }
 
-inline Bitboard getCrossBB(Square Sq) {
+inline Bitboard getCrossBB(Square Sq) noexcept {
     return CrossBB[Sq];
 }
 
 template <Color C>
-inline Bitboard getForwardBB(Square Sq) {
+inline Bitboard getForwardBB(Square Sq) noexcept {
     if constexpr (C == Black) {
         return ForwardBB[Sq];
     } else {

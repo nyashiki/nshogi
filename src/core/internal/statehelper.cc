@@ -55,7 +55,7 @@ StateHelper::~StateHelper() {
 }
 
 void StateHelper::proceedOneStep(Move32 Move, uint64_t BoardHash,
-                                 Stands BlackStand, Stands WhiteStand) {
+                                 Stands BlackStand, Stands WhiteStand) noexcept {
     SHelper.emplace_back();
 
     assert(Ply < SHelper.size());
