@@ -57,17 +57,6 @@ constexpr Bitboard RankBB[NumRanks] = {
     SquareBB[Sq9A] | SquareBB[Sq8A] | SquareBB[Sq7A] | SquareBB[Sq6A] | SquareBB[Sq5A] | SquareBB[Sq4A] | SquareBB[Sq3A] | SquareBB[Sq2A] | SquareBB[Sq1A],
 };
 
-// constexpr Bitboard AllBB =
-//     SquareBB[Sq9A] | SquareBB[Sq8A] | SquareBB[Sq7A] | SquareBB[Sq6A] | SquareBB[Sq5A] | SquareBB[Sq4A] | SquareBB[Sq3A] | SquareBB[Sq2A] | SquareBB[Sq1A] |
-//     SquareBB[Sq9B] | SquareBB[Sq8B] | SquareBB[Sq7B] | SquareBB[Sq6B] | SquareBB[Sq5B] | SquareBB[Sq4B] | SquareBB[Sq3B] | SquareBB[Sq2B] | SquareBB[Sq1B] |
-//     SquareBB[Sq9C] | SquareBB[Sq8C] | SquareBB[Sq7C] | SquareBB[Sq6C] | SquareBB[Sq5C] | SquareBB[Sq4C] | SquareBB[Sq3C] | SquareBB[Sq2C] | SquareBB[Sq1C] |
-//     SquareBB[Sq9D] | SquareBB[Sq8D] | SquareBB[Sq7D] | SquareBB[Sq6D] | SquareBB[Sq5D] | SquareBB[Sq4D] | SquareBB[Sq3D] | SquareBB[Sq2D] | SquareBB[Sq1D] |
-//     SquareBB[Sq9E] | SquareBB[Sq8E] | SquareBB[Sq7E] | SquareBB[Sq6E] | SquareBB[Sq5E] | SquareBB[Sq4E] | SquareBB[Sq3E] | SquareBB[Sq2E] | SquareBB[Sq1E] |
-//     SquareBB[Sq9F] | SquareBB[Sq8F] | SquareBB[Sq7F] | SquareBB[Sq6F] | SquareBB[Sq5F] | SquareBB[Sq4F] | SquareBB[Sq3F] | SquareBB[Sq2F] | SquareBB[Sq1F] |
-//     SquareBB[Sq9G] | SquareBB[Sq8G] | SquareBB[Sq7G] | SquareBB[Sq6G] | SquareBB[Sq5G] | SquareBB[Sq4G] | SquareBB[Sq3G] | SquareBB[Sq2G] | SquareBB[Sq1G] |
-//     SquareBB[Sq9H] | SquareBB[Sq8H] | SquareBB[Sq7H] | SquareBB[Sq6H] | SquareBB[Sq5H] | SquareBB[Sq4H] | SquareBB[Sq3H] | SquareBB[Sq2H] | SquareBB[Sq1H] |
-//     SquareBB[Sq9I] | SquareBB[Sq8I] | SquareBB[Sq7I] | SquareBB[Sq6I] | SquareBB[Sq5I] | SquareBB[Sq4I] | SquareBB[Sq3I] | SquareBB[Sq2I] | SquareBB[Sq1I];
-
 Bitboard KnightAttackBB[NumColors][NumSquares];
 Bitboard SilverAttackBB[NumColors][NumSquares];
 Bitboard GoldAttackBB[NumColors][NumSquares];
@@ -83,16 +72,6 @@ MagicBitboard<CrossMagicBits> RookMagicBB[NumSquares];
 constexpr Bitboard FirstAndSecondFurthestBB[NumColors] = {
     RankBB[RankA] | RankBB[RankB],
     RankBB[RankH] | RankBB[RankI],
-};
-
-constexpr Bitboard FurthermostBB[NumColors] = {
-    RankBB[RankA] | Bitboard(0, 0),  // small hack for compiletime initialization of array.
-    RankBB[RankI] | Bitboard(0, 0),
-};
-
-constexpr Bitboard SecondFurthestBB[NumColors] = {
-    RankBB[RankB] | Bitboard(0, 0),  // small hack for compiletime initialization of array.
-    RankBB[RankH] | Bitboard(0, 0),
 };
 
 constexpr Bitboard PromotableBB[NumColors] = {

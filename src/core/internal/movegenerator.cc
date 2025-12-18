@@ -61,7 +61,7 @@ generateOnBoardOneStepPawnMovesImpl(const StateImpl& S,
         }
 
         if constexpr (!WilyPromote) {
-            if (!FurthermostBB[C].isSet(To)) {
+            if (!Bitboard::FurthermostBB<C>().isSet(To)) {
                 if constexpr (Capture) {
                     const PieceTypeKind CaptureType =
                         getPieceType(S.getPosition().pieceOn(To));
@@ -400,7 +400,7 @@ inline Move32* generateOnBoardLanceMovesImpl(const StateImpl& S,
                 }
 
                 // Add a non-promoting move.
-                if (!FurthermostBB[C].isSet(To)) {
+                if (!Bitboard::FurthermostBB<C>().isSet(To)) {
                     // Filter out going the furthermost squares without
                     // promotion, because it violates the No-Unmovable-Pieces
                     // rule.
@@ -472,7 +472,7 @@ inline Move32* generateOnBoardLanceMovesImpl(const StateImpl& S,
                     }
 
                     // Add a non-promoting move.
-                    if (!FurthermostBB[C].isSet(To)) {
+                    if (!Bitboard::FurthermostBB<C>().isSet(To)) {
                         // Filter out going the furthermost squares without
                         // promotion, because it violates the
                         // No-Unmovable-Pieces rule.
@@ -1021,7 +1021,7 @@ inline Move32* generateDroppingMovesImplNeon(const StateImpl& S,
             --MoveCount;
         }
 
-        const Bitboard ToBB = TargetSquares & SecondFurthestBB[C];
+        const Bitboard ToBB = TargetSquares & Bitboard::SecondFurthestBB<C>();
         switch (MoveCount) {
         case 1: {
             ToBB.forEach([&](Square To) {
@@ -1084,7 +1084,7 @@ inline Move32* generateDroppingMovesImplNeon(const StateImpl& S,
             --MoveCount;
         }
 
-        const Bitboard ToBB = TargetSquares & FurthermostBB[C];
+        const Bitboard ToBB = TargetSquares & Bitboard::FurthermostBB<C>();
 
         switch (MoveCount) {
         case 1: {
@@ -1294,7 +1294,7 @@ inline Move32* generateDroppingMovesImpl(const StateImpl& S,
             --MoveCount;
         }
 
-        const Bitboard ToBB = TargetSquares & SecondFurthestBB[C];
+        const Bitboard ToBB = TargetSquares & Bitboard::SecondFurthestBB<C>();
         switch (MoveCount) {
         case 1:
             ToBB.forEach([&](Square To) {
@@ -1354,7 +1354,7 @@ inline Move32* generateDroppingMovesImpl(const StateImpl& S,
             --MoveCount;
         }
 
-        const Bitboard ToBB = TargetSquares & FurthermostBB[C];
+        const Bitboard ToBB = TargetSquares & Bitboard::FurthermostBB<C>();
         switch (MoveCount) {
         case 1:
             ToBB.forEach([&](Square To) {
@@ -1410,7 +1410,7 @@ inline Move32* generateDroppingStepCheckMovesImpl(const StateImpl& S,
         if ((PawnBB & FileBB[squareToFile(S.getKingSquare<~C>())]).isZero()) {
             if constexpr (C == Black) {
                 const Bitboard ToBB =
-                    TargetBB & ((FurthermostBB[White].andNot(
+                    TargetBB & ((Bitboard::FurthermostBB<White>().andNot(
                                      SquareBB[S.getKingSquare<~C>()]))
                                     .template getRightShiftEpi64<1>());
                 ToBB.forEach([&](Square To) {
@@ -1419,7 +1419,7 @@ inline Move32* generateDroppingStepCheckMovesImpl(const StateImpl& S,
                 });
             } else {
                 const Bitboard ToBB =
-                    TargetBB & ((FurthermostBB[Black].andNot(
+                    TargetBB & ((Bitboard::FurthermostBB<Black>().andNot(
                                      SquareBB[S.getKingSquare<~C>()]))
                                     .template getLeftShiftEpi64<1>());
                 ToBB.forEach([&](Square To) {
@@ -1536,7 +1536,7 @@ inline Move32* generateOnBoardOneStepNoPromoteCheckMovesImpl(
                     if constexpr (WilyPromote) {
                         TargetBB2 = PromotableBB[C].andNot(TargetBB2);
                     } else {
-                        TargetBB2 = FurthermostBB[C].andNot(TargetBB2);
+                        TargetBB2 = Bitboard::FurthermostBB<C>().andNot(TargetBB2);
                     }
                 }
 
@@ -1566,7 +1566,7 @@ inline Move32* generateOnBoardOneStepNoPromoteCheckMovesImpl(
                 if constexpr (WilyPromote) {
                     TargetBB2 = PromotableBB[C].andNot(TargetBB2);
                 } else {
-                    TargetBB2 = FurthermostBB[C].andNot(TargetBB2);
+                    TargetBB2 = Bitboard::FurthermostBB<C>().andNot(TargetBB2);
                 }
             }
 
@@ -1669,7 +1669,7 @@ inline Move32* generateOnBoardLanceNoPromoteCheckMovesImpl(
         if constexpr (WilyPromote) {
             TargetBB2 = FirstAndSecondFurthestBB[C].andNot(TargetBB2);
         } else {
-            TargetBB2 = FurthermostBB[C].andNot(TargetBB2);
+            TargetBB2 = Bitboard::FurthermostBB<C>().andNot(TargetBB2);
         }
 
         TargetBB2 &= getLanceAttackBB<C>(From, OccupiedBB) & TargetBB;
@@ -1696,7 +1696,7 @@ inline Move32* generateOnBoardLanceNoPromoteCheckMovesImpl(
             if constexpr (WilyPromote) {
                 TargetBB2 = FirstAndSecondFurthestBB[C].andNot(TargetBB2);
             } else {
-                TargetBB2 = FurthermostBB[C].andNot(TargetBB2);
+                TargetBB2 = Bitboard::FurthermostBB<C>().andNot(TargetBB2);
             }
 
             TargetBB2 &= getLanceAttackBB<C>(From, OccupiedBB) & TargetBB;

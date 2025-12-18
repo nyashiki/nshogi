@@ -65,8 +65,6 @@ extern Bitboard CrossStepAttackBB[NumSquares];
 
 //  Useful bitboards.
 extern const Bitboard FirstAndSecondFurthestBB[NumColors];
-extern const Bitboard FurthermostBB[NumColors];
-extern const Bitboard SecondFurthestBB[NumColors];
 extern const Bitboard PromotableBB[NumColors];
 
 extern Bitboard LineBB[NumSquares][NumSquares];
