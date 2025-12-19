@@ -309,7 +309,7 @@ struct alignas(16) Bitboard {
 #if defined(USE_SSE41)
         return _mm_srli_epi64(Bitboard_, Shift);
 #elif defined(USE_NEON)
-        uint64x2_t ShiftVector = vdupq_n_s64(-Shift);
+        const int64x2_t ShiftVector = vdupq_n_s64(-Shift);
         return vshlq_u64(Bitboard_, ShiftVector);
 #else
         return Bitboard(Primitive[1] >> Shift, Primitive[0] >> Shift);
@@ -370,7 +370,7 @@ struct alignas(16) Bitboard {
 #if defined(USE_SSE41)
         return _mm_slli_epi64(Bitboard_, Shift);
 #elif defined(USE_NEON)
-        uint64x2_t ShiftVector = vdupq_n_s64(Shift);
+        const int64x2_t ShiftVector = vdupq_n_s64(Shift);
         return vshlq_u64(Bitboard_, ShiftVector);
 #else
         return Bitboard(Primitive[1] << Shift, Primitive[0] << Shift);
@@ -412,8 +412,8 @@ struct alignas(16) Bitboard {
         __m128i Result = _mm_cmpeq_epi8(Bitboard_, BB.Bitboard_); // Compare
         return _mm_movemask_epi8(Result) == 0xFFFF;
 #elif defined(USE_NEON)
-        uint8x16_t Compare = vceqq_u8(Bitboard_, BB.Bitboard_);
-        return vminvq_u8(Compare) == 0xFF;
+        const uint64x2_t Compare = vceqq_u64(Bitboard_, BB.Bitboard_);
+        return (vgetq_lane_u64(Compare, 0) & vgetq_lane_u64(Compare, 1)) == ~0ULL;
 #else
         return Primitive[0] == BB.Primitive[0] &&
                Primitive[1] == BB.Primitive[1];
@@ -425,8 +425,8 @@ struct alignas(16) Bitboard {
         __m128i Result = _mm_cmpeq_epi8(Bitboard_, BB.Bitboard_); // Compare
         return _mm_movemask_epi8(Result) != 0xFFFF;
 #elif defined(USE_NEON)
-        uint8x16_t Compare = vceqq_u8(Bitboard_, BB.Bitboard_);
-        return vminvq_u8(Compare) != 0xFF;
+        const uint64x2_t Compare = vceqq_u64(Bitboard_, BB.Bitboard_);
+        return (vgetq_lane_u64(Compare, 0) & vgetq_lane_u64(Compare, 1)) != ~0ULL;
 #else
         return (Primitive[0] != BB.Primitive[0]) ||
                (Primitive[1] != BB.Primitive[1]);
