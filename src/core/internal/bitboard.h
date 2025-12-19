@@ -18,14 +18,9 @@
 #include <cstdint>
 #include <functional>
 
-#if defined(USE_SSE2)
-
-#include <emmintrin.h>
-
-#endif
-
 #if defined(USE_SSE41)
 
+#include <emmintrin.h>
 #include <smmintrin.h>
 
 #endif
@@ -77,7 +72,7 @@ extern Bitboard BackwardBB[NumSquares];
 struct alignas(16) Bitboard {
     Bitboard() noexcept = default;
 
-#if defined(USE_SSE2)
+#if defined(USE_SSE41)
     Bitboard(uint64_t High, uint64_t Low) noexcept
         : Bitboard_{_mm_set_epi64x((long long)High, (long long)Low)} {
     }
@@ -92,7 +87,7 @@ struct alignas(16) Bitboard {
 #endif
 
     static Bitboard ZeroBB() noexcept {
-#if defined(USE_SSE2)
+#if defined(USE_SSE41)
         return _mm_setzero_si128();
 #elif defined(USE_NEON)
         return vdupq_n_u64(0);
@@ -102,7 +97,7 @@ struct alignas(16) Bitboard {
     }
 
     static Bitboard AllBB() noexcept {
-#if defined(USE_SSE2)
+#if defined(USE_SSE41)
         return _mm_set_epi64x(0x3ffff, 0x7fffffffffffffff);
 #elif defined(USE_NEON)
         return vcombine_u64(vcreate_u64(0x7fffffffffffffff),
@@ -130,7 +125,7 @@ struct alignas(16) Bitboard {
         }
     }
 
-#if defined(USE_SSE2)
+#if defined(USE_SSE41)
     Bitboard(const __m128i& BB)
         : Bitboard_(BB) {
     }
@@ -140,7 +135,7 @@ struct alignas(16) Bitboard {
     }
 #endif
 
-#if defined(USE_SSE2) || defined(USE_NEON)
+#if defined(USE_SSE41) || defined(USE_NEON)
     Bitboard(const Bitboard& BB) noexcept
         : Bitboard_(BB.Bitboard_) {
     }
@@ -151,7 +146,7 @@ struct alignas(16) Bitboard {
 #endif
 
     Bitboard& operator=(Bitboard&& BB) noexcept {
-#if defined(USE_SSE2) || defined(USE_NEON)
+#if defined(USE_SSE41) || defined(USE_NEON)
         Bitboard_ = BB.Bitboard_;
 #else
         Primitive[0] = BB.Primitive[0];
@@ -161,7 +156,7 @@ struct alignas(16) Bitboard {
     }
 
     Bitboard& operator=(const Bitboard& BB) noexcept {
-#if defined(USE_SSE2) || defined(USE_NEON)
+#if defined(USE_SSE41) || defined(USE_NEON)
         Bitboard_ = BB.Bitboard_;
 #else
         Primitive[0] = BB.Primitive[0];
@@ -171,7 +166,7 @@ struct alignas(16) Bitboard {
     }
 
     void copyFrom(const Bitboard& BB) noexcept {
-#if defined(USE_SSE2) || defined(USE_NEON)
+#if defined(USE_SSE41) || defined(USE_NEON)
         Bitboard_ = BB.Bitboard_;
 #else
         Primitive[0] = BB.getPrimitive<false>();
@@ -206,7 +201,7 @@ struct alignas(16) Bitboard {
 
     // Setters.
     inline __attribute__((always_inline)) void clear() noexcept {
-#if defined(USE_SSE2)
+#if defined(USE_SSE41)
         Bitboard_ = _mm_setzero_si128();
 #elif defined(USE_NEON)
         Bitboard_ = vdupq_n_u64(0);
@@ -223,7 +218,7 @@ struct alignas(16) Bitboard {
     // Bit operations.
     inline __attribute__((always_inline)) Bitboard&
     operator|=(const Bitboard& BB) noexcept {
-#if defined(USE_SSE2)
+#if defined(USE_SSE41)
         Bitboard_ = _mm_or_si128(Bitboard_, BB.Bitboard_);
 #elif defined(USE_NEON)
         Bitboard_ = vorrq_u64(Bitboard_, BB.Bitboard_);
@@ -243,7 +238,7 @@ struct alignas(16) Bitboard {
 
     inline __attribute__((always_inline)) Bitboard&
     operator&=(const Bitboard& BB) noexcept {
-#if defined(USE_SSE2)
+#if defined(USE_SSE41)
         Bitboard_ = _mm_and_si128(Bitboard_, BB.Bitboard_);
 #elif defined(USE_NEON)
         Bitboard_ = vandq_u64(Bitboard_, BB.Bitboard_);
@@ -263,7 +258,7 @@ struct alignas(16) Bitboard {
 
     inline __attribute__((always_inline)) Bitboard&
     operator^=(const Bitboard& BB) noexcept {
-#if defined(USE_SSE2)
+#if defined(USE_SSE41)
         Bitboard_ = _mm_xor_si128(Bitboard_, BB.Bitboard_);
 #elif defined(USE_NEON)
         Bitboard_ = veorq_u64(Bitboard_, BB.Bitboard_);
@@ -283,7 +278,7 @@ struct alignas(16) Bitboard {
 
     inline __attribute__((always_inline)) Bitboard
     andNot(const Bitboard& BB) const noexcept {
-#if defined(USE_SSE2)
+#if defined(USE_SSE41)
         return _mm_andnot_si128(Bitboard_, BB.Bitboard_);
 #elif defined(USE_NEON)
         return vbicq_u64(BB.Bitboard_, Bitboard_);
@@ -300,7 +295,7 @@ struct alignas(16) Bitboard {
     template <int Shift>
     inline __attribute__((always_inline)) Bitboard
     getRightShiftEpi64() const noexcept {
-#if defined(USE_SSE2)
+#if defined(USE_SSE41)
         return _mm_srli_epi64(Bitboard_, Shift);
 #elif defined(USE_NEON)
         return vshrq_n_u64(Bitboard_, Shift);
@@ -311,7 +306,7 @@ struct alignas(16) Bitboard {
 
     inline __attribute__((always_inline)) Bitboard
     getRightShiftEpi64(int Shift) const noexcept {
-#if defined(USE_SSE2)
+#if defined(USE_SSE41)
         return _mm_srli_epi64(Bitboard_, Shift);
 #elif defined(USE_NEON)
         uint64x2_t ShiftVector = vdupq_n_s64(-Shift);
@@ -338,7 +333,7 @@ struct alignas(16) Bitboard {
             return *this;
         }
 
-#if defined(USE_SSE2)
+#if defined(USE_SSE41)
         const __m128i Shifted = _mm_srli_epi64(Bitboard_, Shift);
         const __m128i HiToLo = _mm_srli_si128(Bitboard_, 8);
         const __m128i Carry = _mm_slli_epi64(HiToLo, 63 - Shift);
@@ -361,7 +356,7 @@ struct alignas(16) Bitboard {
     template <int Shift>
     inline __attribute__((always_inline)) Bitboard
     getLeftShiftEpi64() const noexcept {
-#if defined(USE_SSE2)
+#if defined(USE_SSE41)
         return _mm_slli_epi64(Bitboard_, Shift);
 #elif defined(USE_NEON)
         return vshlq_n_u64(Bitboard_, Shift);
@@ -372,7 +367,7 @@ struct alignas(16) Bitboard {
 
     inline __attribute__((always_inline)) Bitboard
     getLeftShiftEpi64(int Shift) const noexcept {
-#if defined(USE_SSE2)
+#if defined(USE_SSE41)
         return _mm_slli_epi64(Bitboard_, Shift);
 #elif defined(USE_NEON)
         uint64x2_t ShiftVector = vdupq_n_s64(Shift);
@@ -392,7 +387,7 @@ struct alignas(16) Bitboard {
         }
 
         // See the comment in getRightShiftSi128().
-#if defined(USE_SSE2)
+#if defined(USE_SSE41)
         const __m128i Shifted = _mm_slli_epi64(Bitboard_, Shift);
         const __m128i LoToHi = _mm_slli_si128(Bitboard_, 8);
         const __m128i Carry = _mm_srli_epi64(LoToHi, 63 - Shift);
@@ -413,7 +408,7 @@ struct alignas(16) Bitboard {
     }
 
     bool operator==(const Bitboard& BB) const noexcept {
-#if defined(USE_SSE2)
+#if defined(USE_SSE41)
         __m128i Result = _mm_cmpeq_epi8(Bitboard_, BB.Bitboard_); // Compare
         return _mm_movemask_epi8(Result) == 0xFFFF;
 #elif defined(USE_NEON)
@@ -426,7 +421,7 @@ struct alignas(16) Bitboard {
     }
 
     bool operator!=(const Bitboard& BB) const noexcept {
-#if defined(USE_SSE2)
+#if defined(USE_SSE41)
         __m128i Result = _mm_cmpeq_epi8(Bitboard_, BB.Bitboard_); // Compare
         return _mm_movemask_epi8(Result) != 0xFFFF;
 #elif defined(USE_NEON)
@@ -441,7 +436,7 @@ struct alignas(16) Bitboard {
     [[maybe_unused]] [[nodiscard]] inline
         __attribute__((always_inline)) Bitboard
         subtract(const Bitboard& BB) const noexcept {
-#if defined(USE_SSE2)
+#if defined(USE_SSE41)
         return _mm_sub_epi64(Bitboard_, BB.Bitboard_);
 #elif defined(USE_NEON)
         return vsubq_u64(Bitboard_, BB.Bitboard_);
@@ -504,7 +499,7 @@ struct alignas(16) Bitboard {
         if (Low > 0) {
             Square Sq = static_cast<Square>(countTrailingZero(Low));
 
-#if defined(USE_SSE2)
+#if defined(USE_SSE41)
             Bitboard_ = _mm_and_si128(
                 Bitboard_, _mm_sub_epi64(Bitboard_, _mm_set_epi64x(0, 1)));
 #elif defined(USE_NEON)
@@ -520,7 +515,7 @@ struct alignas(16) Bitboard {
         const uint64_t High = getPrimitive<true>();
         Square Sq = static_cast<Square>(63 + countTrailingZero(High));
 
-#if defined(USE_SSE2)
+#if defined(USE_SSE41)
         Bitboard_ = _mm_and_si128(
             Bitboard_, _mm_sub_epi64(Bitboard_, _mm_set_epi64x(1, 0)));
 #elif defined(USE_NEON)
@@ -608,7 +603,7 @@ struct alignas(16) Bitboard {
         return (uint8_t)(Count1 + Count2);
     }
 
-#if defined(USE_SSE2)
+#if defined(USE_SSE41)
     __m128i getRaw() const noexcept {
         return Bitboard_;
     }
@@ -619,7 +614,7 @@ struct alignas(16) Bitboard {
 #endif
 
  private:
-#if defined(USE_SSE2)
+#if defined(USE_SSE41)
     __m128i Bitboard_;
 #elif defined(USE_NEON)
     uint64x2_t Bitboard_;
