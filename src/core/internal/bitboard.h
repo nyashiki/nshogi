@@ -343,6 +343,14 @@ struct alignas(16) Bitboard {
         const __m128i HiToLo = _mm_srli_si128(Bitboard_, 8);
         const __m128i Carry = _mm_slli_epi64(HiToLo, 63 - Shift);
         return _mm_or_si128(Shifted, Carry);
+#elif defined(USE_NEON)
+        const uint64x2_t Shifted = vshlq_u64(Bitboard_, vdupq_n_s64(-Shift));
+        const uint8x16_t Bytes = vreinterpretq_u8_u64(Bitboard_);
+        const uint8x16_t Zero = vdupq_n_u8(0);
+        const uint8x16_t HiToLoBytes = vextq_u8(Bytes, Zero, 8);
+        const uint64x2_t HiToLo = vreinterpretq_u64_u8(HiToLoBytes);
+        const uint64x2_t Carry = vshlq_u64(HiToLo, vdupq_n_s64(63 - Shift));
+        return vorrq_u64(Shifted, Carry);
 #else
         return Bitboard(Primitive[1] >> Shift,
                         (Primitive[0] >> Shift) |
@@ -389,6 +397,14 @@ struct alignas(16) Bitboard {
         const __m128i LoToHi = _mm_slli_si128(Bitboard_, 8);
         const __m128i Carry = _mm_srli_epi64(LoToHi, 63 - Shift);
         return _mm_or_si128(Shifted, Carry);
+#elif defined(USE_NEON)
+        const uint64x2_t Shifted = vshlq_n_u64(Bitboard_, Shift);
+        const uint8x16_t Bytes = vreinterpretq_u8_u64(Bitboard_);
+        const uint8x16_t Zero  = vdupq_n_u8(0);
+        const uint8x16_t LoToHiBytes = vextq_u8(Zero, Bytes, 8);
+        const uint64x2_t LoToHi = vreinterpretq_u64_u8(LoToHiBytes);
+        const uint64x2_t Carry = vshrq_n_u64(LoToHi, 63 - Shift);
+        return vorrq_u64(Shifted, Carry);
 #else
         return Bitboard((Primitive[1] << Shift) |
                             (Primitive[0] >> (63 - Shift)),
