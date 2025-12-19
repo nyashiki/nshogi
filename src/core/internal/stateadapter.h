@@ -19,7 +19,7 @@ namespace internal {
 
 class ImmutableStateAdapter {
  public:
-    ImmutableStateAdapter(const State& S)
+    ImmutableStateAdapter(const State& S) noexcept
         : Impl(S.Impl) {
     }
 
@@ -37,7 +37,7 @@ class ImmutableStateAdapter {
 
 class MutableStateAdapter {
  public:
-    MutableStateAdapter(State& S)
+    MutableStateAdapter(State& S) noexcept
         : Impl(S.Impl) {
     }
 
