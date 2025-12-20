@@ -226,7 +226,10 @@ core::Move32 SolverImpl::search(core::internal::StateImpl* S, uint64_t Depth,
             uint32_t MinProof2 = DfPnValue::Infinity;
             uint32_t SumDisproof = 0;
             DfPnValue BestChildValue;
-            core::Move32 BestMove;
+
+            // TODO(nyashiki): [[indeterminate]] could be used in C++26.
+            core::Move32 BestMove = core::Move32::MoveNone();
+
             for (const core::Move32 Move : Moves) {
                 S->doMove<C>(Move);
                 bool IsFound;
@@ -310,7 +313,9 @@ core::Move32 SolverImpl::search(core::internal::StateImpl* S, uint64_t Depth,
             uint32_t MinDisproof = DfPnValue::Infinity;
             uint32_t MinDisproof2 = DfPnValue::Infinity;
             DfPnValue BestChildValue;
-            core::Move32 BestMove;
+
+            // TODO(nyashiki): [[indeterminate]] could be used in C++26.
+            core::Move32 BestMove = core::Move32::MoveNone();
 
             for (const core::Move32 Move : Moves) {
                 S->doMove<C>(Move);

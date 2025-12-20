@@ -123,25 +123,21 @@ ARCH_FLAGS :=
 ifeq ($(TUNENATIVE),1)
 	ARCH_FLAGS += -march=native -mtune=native
 else
-	ifeq ($(SSE2), 1)
-		ARCH_FLAGS += -msse2
-		CXX_FLAGS += -DUSE_SSE2
-	endif
 	ifeq ($(SSE41),1)
 		ARCH_FLAGS += -msse2 -msse4.1
-		CXX_FLAGS += -DUSE_SSE2 -DUSE_SSE41
+		CXX_FLAGS += -DUSE_SSE41
 	endif
 	ifeq ($(SSE42),1)
 		ARCH_FLAGS += -msse2 -msse4.1 -msse4.2
-		CXX_FLAGS += -DUSE_SSE2 -DUSE_SSE41 -DUSE_SSE42
+		CXX_FLAGS += -DUSE_SSE41 -DUSE_SSE42
 	endif
 	ifeq ($(AVX),1)
 		ARCH_FLAGS += -msse2 -msse4.1 -msse4.2 -mbmi -mbmi2 -mavx
-		CXX_FLAGS += -DUSE_SSE2 -DUSE_SSE41 -DUSE_SSE42 -DUSE_AVX
+		CXX_FLAGS += -DUSE_SSE41 -DUSE_SSE42 -DUSE_AVX
 	endif
 	ifeq ($(AVX2),1)
 		ARCH_FLAGS += -msse2 -msse4.1 -msse4.2 -mbmi -mbmi2 -mavx -mavx2 -mlzcnt
-		CXX_FLAGS += -DUSE_SSE2 -DUSE_SSE41 -DUSE_SSE42 -DUSE_BMI1 -DUSE_BMI2 -DUSE_AVX -DUSE_AVX2 -DUSE_LZCNT
+		CXX_FLAGS += -DUSE_SSE41 -DUSE_SSE42 -DUSE_BMI1 -DUSE_BMI2 -DUSE_AVX -DUSE_AVX2 -DUSE_LZCNT
 	endif
 	ifeq ($(NEON),1)
 		ARCH_FLAGS += -march=armv8

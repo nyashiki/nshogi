@@ -63,7 +63,8 @@ core::Move32 checkmateByDrop(
     } else if constexpr (Type == core::PTK_Rook) {
         ToBB &= core::internal::bitboard::CrossStepAttackBB[OpKingSq];
     } else if constexpr (Type == core::PTK_Lance) {
-        ToBB = core::internal::bitboard::Bitboard::FurthermostBB<C>().andNot(ToBB);
+        ToBB =
+            core::internal::bitboard::Bitboard::FurthermostBB<C>().andNot(ToBB);
         ToBB &= (C == core::Black) ? (S.getBitboard<~C, core::PTK_King>()
                                           .template getRightShiftEpi64<1>())
                                    : (S.getBitboard<~C, core::PTK_King>()

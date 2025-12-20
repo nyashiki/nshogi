@@ -17,25 +17,25 @@ namespace core {
 using namespace internal;
 
 template <Color C, bool WilyPromote>
-MoveList MoveGenerator::generateLegalMoves(const State& S)  noexcept {
+MoveList MoveGenerator::generateLegalMoves(const State& S) noexcept {
     return MoveGeneratorInternal::generateLegalMoves<C, WilyPromote>(
         *ImmutableStateAdapter(S).get());
 }
 
 template <bool WilyPromote>
-MoveList MoveGenerator::generateLegalMoves(const State& S)  noexcept {
+MoveList MoveGenerator::generateLegalMoves(const State& S) noexcept {
     return MoveGeneratorInternal::generateLegalMoves<WilyPromote>(
         *ImmutableStateAdapter(S).get());
 }
 
 template <Color C, bool WilyPromote>
-MoveList MoveGenerator::generateLegalCheckMoves(const State& S)  noexcept {
+MoveList MoveGenerator::generateLegalCheckMoves(const State& S) noexcept {
     return MoveGeneratorInternal::generateLegalCheckMoves<C, WilyPromote>(
         *ImmutableStateAdapter(S).get());
 }
 
 template <bool WilyPromote>
-MoveList MoveGenerator::generateLegalCheckMoves(const State& S)  noexcept {
+MoveList MoveGenerator::generateLegalCheckMoves(const State& S) noexcept {
     return MoveGeneratorInternal::generateLegalCheckMoves<WilyPromote>(
         *ImmutableStateAdapter(S).get());
 }
@@ -58,11 +58,15 @@ MoveGenerator::generateLegalCheckMoves<White, false>(const State& S) noexcept;
 template MoveList
 MoveGenerator::generateLegalCheckMoves<White, true>(const State& S) noexcept;
 
-template MoveList MoveGenerator::generateLegalMoves<false>(const State& S) noexcept;
-template MoveList MoveGenerator::generateLegalMoves<true>(const State& S) noexcept;
+template MoveList
+MoveGenerator::generateLegalMoves<false>(const State& S) noexcept;
+template MoveList
+MoveGenerator::generateLegalMoves<true>(const State& S) noexcept;
 
-template MoveList MoveGenerator::generateLegalCheckMoves<false>(const State& S) noexcept;
-template MoveList MoveGenerator::generateLegalCheckMoves<true>(const State& S) noexcept;
+template MoveList
+MoveGenerator::generateLegalCheckMoves<false>(const State& S) noexcept;
+template MoveList
+MoveGenerator::generateLegalCheckMoves<true>(const State& S) noexcept;
 
 } // namespace core
 } // namespace nshogi
