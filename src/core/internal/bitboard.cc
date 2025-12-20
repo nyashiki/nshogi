@@ -21,7 +21,8 @@ namespace bitboard {
 using BB = Bitboard;
 
 // clang-format off
-constexpr Bitboard SquareBB[NumSquares] = {
+
+const Bitboard SquareBB[NumSquares] = {
     BB(0x00000ULL, 0x00000000000001ULL), BB(0x00000ULL, 0x00000000000002ULL), BB(0x000000ULL, 0x000000000000004ULL), BB(0x000000ULL, 0x000000000000008ULL), BB(0x000000ULL, 0x000000000000010ULL), BB(0x000000ULL, 0x000000000000020ULL), BB(0x0000000ULL, 0x0000000000000040ULL), BB(0x0000000ULL, 0x0000000000000080ULL), BB(0x0000000ULL, 0x0000000000000100ULL),
     BB(0x00000ULL, 0x00000000000200ULL), BB(0x00000ULL, 0x00000000000400ULL), BB(0x000000ULL, 0x000000000000800ULL), BB(0x000000ULL, 0x000000000001000ULL), BB(0x000000ULL, 0x000000000002000ULL), BB(0x000000ULL, 0x000000000004000ULL), BB(0x0000000ULL, 0x0000000000008000ULL), BB(0x0000000ULL, 0x0000000000010000ULL), BB(0x0000000ULL, 0x0000000000020000ULL),
     BB(0x00000ULL, 0x00000000040000ULL), BB(0x00000ULL, 0x00000000080000ULL), BB(0x000000ULL, 0x000000000100000ULL), BB(0x000000ULL, 0x000000000200000ULL), BB(0x000000ULL, 0x000000000400000ULL), BB(0x000000ULL, 0x000000000800000ULL), BB(0x0000000ULL, 0x0000000001000000ULL), BB(0x0000000ULL, 0x0000000002000000ULL), BB(0x0000000ULL, 0x0000000004000000ULL),
@@ -33,7 +34,7 @@ constexpr Bitboard SquareBB[NumSquares] = {
     BB(0x00200ULL, 0x00000000000000ULL), BB(0x00400ULL, 0x00000000000000ULL), BB(0x000800ULL, 0x000000000000000ULL), BB(0x001000ULL, 0x000000000000000ULL), BB(0x002000ULL, 0x000000000000000ULL), BB(0x004000ULL, 0x000000000000000ULL), BB(0x0008000ULL, 0x0000000000000000ULL), BB(0x0010000ULL, 0x0000000000000000ULL), BB(0x0020000ULL, 0x0000000000000000ULL),
 };
 
-constexpr Bitboard FileBB[NumFiles] = {
+const Bitboard FileBB[NumFiles] = {
     SquareBB[Sq1A] | SquareBB[Sq1B] | SquareBB[Sq1C] | SquareBB[Sq1D] | SquareBB[Sq1E] | SquareBB[Sq1F] | SquareBB[Sq1G] | SquareBB[Sq1H] | SquareBB[Sq1I],
     SquareBB[Sq2A] | SquareBB[Sq2B] | SquareBB[Sq2C] | SquareBB[Sq2D] | SquareBB[Sq2E] | SquareBB[Sq2F] | SquareBB[Sq2G] | SquareBB[Sq2H] | SquareBB[Sq2I],
     SquareBB[Sq3A] | SquareBB[Sq3B] | SquareBB[Sq3C] | SquareBB[Sq3D] | SquareBB[Sq3E] | SquareBB[Sq3F] | SquareBB[Sq3G] | SquareBB[Sq3H] | SquareBB[Sq3I],
@@ -45,7 +46,7 @@ constexpr Bitboard FileBB[NumFiles] = {
     SquareBB[Sq9A] | SquareBB[Sq9B] | SquareBB[Sq9C] | SquareBB[Sq9D] | SquareBB[Sq9E] | SquareBB[Sq9F] | SquareBB[Sq9G] | SquareBB[Sq9H] | SquareBB[Sq9I],
 };
 
-constexpr Bitboard RankBB[NumRanks] = {
+const Bitboard RankBB[NumRanks] = {
     SquareBB[Sq9I] | SquareBB[Sq8I] | SquareBB[Sq7I] | SquareBB[Sq6I] | SquareBB[Sq5I] | SquareBB[Sq4I] | SquareBB[Sq3I] | SquareBB[Sq2I] | SquareBB[Sq1I],
     SquareBB[Sq9H] | SquareBB[Sq8H] | SquareBB[Sq7H] | SquareBB[Sq6H] | SquareBB[Sq5H] | SquareBB[Sq4H] | SquareBB[Sq3H] | SquareBB[Sq2H] | SquareBB[Sq1H],
     SquareBB[Sq9G] | SquareBB[Sq8G] | SquareBB[Sq7G] | SquareBB[Sq6G] | SquareBB[Sq5G] | SquareBB[Sq4G] | SquareBB[Sq3G] | SquareBB[Sq2G] | SquareBB[Sq1G],
@@ -57,16 +58,15 @@ constexpr Bitboard RankBB[NumRanks] = {
     SquareBB[Sq9A] | SquareBB[Sq8A] | SquareBB[Sq7A] | SquareBB[Sq6A] | SquareBB[Sq5A] | SquareBB[Sq4A] | SquareBB[Sq3A] | SquareBB[Sq2A] | SquareBB[Sq1A],
 };
 
-// constexpr Bitboard AllBB =
-//     SquareBB[Sq9A] | SquareBB[Sq8A] | SquareBB[Sq7A] | SquareBB[Sq6A] | SquareBB[Sq5A] | SquareBB[Sq4A] | SquareBB[Sq3A] | SquareBB[Sq2A] | SquareBB[Sq1A] |
-//     SquareBB[Sq9B] | SquareBB[Sq8B] | SquareBB[Sq7B] | SquareBB[Sq6B] | SquareBB[Sq5B] | SquareBB[Sq4B] | SquareBB[Sq3B] | SquareBB[Sq2B] | SquareBB[Sq1B] |
-//     SquareBB[Sq9C] | SquareBB[Sq8C] | SquareBB[Sq7C] | SquareBB[Sq6C] | SquareBB[Sq5C] | SquareBB[Sq4C] | SquareBB[Sq3C] | SquareBB[Sq2C] | SquareBB[Sq1C] |
-//     SquareBB[Sq9D] | SquareBB[Sq8D] | SquareBB[Sq7D] | SquareBB[Sq6D] | SquareBB[Sq5D] | SquareBB[Sq4D] | SquareBB[Sq3D] | SquareBB[Sq2D] | SquareBB[Sq1D] |
-//     SquareBB[Sq9E] | SquareBB[Sq8E] | SquareBB[Sq7E] | SquareBB[Sq6E] | SquareBB[Sq5E] | SquareBB[Sq4E] | SquareBB[Sq3E] | SquareBB[Sq2E] | SquareBB[Sq1E] |
-//     SquareBB[Sq9F] | SquareBB[Sq8F] | SquareBB[Sq7F] | SquareBB[Sq6F] | SquareBB[Sq5F] | SquareBB[Sq4F] | SquareBB[Sq3F] | SquareBB[Sq2F] | SquareBB[Sq1F] |
-//     SquareBB[Sq9G] | SquareBB[Sq8G] | SquareBB[Sq7G] | SquareBB[Sq6G] | SquareBB[Sq5G] | SquareBB[Sq4G] | SquareBB[Sq3G] | SquareBB[Sq2G] | SquareBB[Sq1G] |
-//     SquareBB[Sq9H] | SquareBB[Sq8H] | SquareBB[Sq7H] | SquareBB[Sq6H] | SquareBB[Sq5H] | SquareBB[Sq4H] | SquareBB[Sq3H] | SquareBB[Sq2H] | SquareBB[Sq1H] |
-//     SquareBB[Sq9I] | SquareBB[Sq8I] | SquareBB[Sq7I] | SquareBB[Sq6I] | SquareBB[Sq5I] | SquareBB[Sq4I] | SquareBB[Sq3I] | SquareBB[Sq2I] | SquareBB[Sq1I];
+const Bitboard FirstAndSecondFurthestBB[NumColors] = {
+    RankBB[RankA] | RankBB[RankB],
+    RankBB[RankH] | RankBB[RankI],
+};
+
+const Bitboard PromotableBB[NumColors] = {
+    RankBB[RankA] | RankBB[RankB] | RankBB[RankC],
+    RankBB[RankG] | RankBB[RankH] | RankBB[RankI],
+};
 
 Bitboard KnightAttackBB[NumColors][NumSquares];
 Bitboard SilverAttackBB[NumColors][NumSquares];
@@ -75,33 +75,6 @@ Bitboard KingAttackBB[NumSquares];
 Bitboard DiagStepAttackBB[NumSquares];
 Bitboard CrossStepAttackBB[NumSquares];
 
-Bitboard BishopMagicMaster[BishopMagicMasterCountMax];
-MagicBitboard<DiagMagicBits> BishopMagicBB[NumSquares];
-Bitboard RookMagicMaster[RookMagicMasterCountMax];
-MagicBitboard<CrossMagicBits> RookMagicBB[NumSquares];
-
-constexpr Bitboard FirstAndSecondFurthestBB[NumColors] = {
-    RankBB[RankA] | RankBB[RankB],
-    RankBB[RankH] | RankBB[RankI],
-};
-
-constexpr Bitboard FurthermostBB[NumColors] = {
-    RankBB[RankA] | Bitboard(0, 0),  // small hack for compiletime initialization of array.
-    RankBB[RankI] | Bitboard(0, 0),
-};
-
-constexpr Bitboard SecondFurthestBB[NumColors] = {
-    RankBB[RankB] | Bitboard(0, 0),  // small hack for compiletime initialization of array.
-    RankBB[RankH] | Bitboard(0, 0),
-};
-
-constexpr Bitboard PromotableBB[NumColors] = {
-    RankBB[RankA] | RankBB[RankB] | RankBB[RankC],
-    RankBB[RankG] | RankBB[RankH] | RankBB[RankI],
-};
-
-// clang-format on
-
 Bitboard LineBB[NumSquares][NumSquares];
 Bitboard DirectionBB[11 + NorthNorthWest + 1][NumSquares];
 Bitboard BetweenBB[NumSquares][NumSquares];
@@ -109,6 +82,13 @@ Bitboard DiagBB[NumSquares];
 Bitboard CrossBB[NumSquares];
 Bitboard ForwardBB[NumSquares];
 Bitboard BackwardBB[NumSquares];
+
+Bitboard BishopMagicMaster[BishopMagicMasterCountMax];
+MagicBitboard<DiagMagicBits> BishopMagicBB[NumSquares];
+Bitboard RookMagicMaster[RookMagicMasterCountMax];
+MagicBitboard<CrossMagicBits> RookMagicBB[NumSquares];
+
+// clang-format on
 
 namespace {
 
@@ -359,46 +339,46 @@ Bitboard getCrossStepAttack(Square Sq) {
 }
 
 void initializeKnightAttacks() {
-    for (Square sq : Squares) {
-        KnightAttackBB[Black][sq] = getBlackKnightAttack(sq);
-        KnightAttackBB[White][sq] = getWhiteKnightAttack(sq);
+    for (Square Sq : Squares) {
+        KnightAttackBB[Black][Sq] = getBlackKnightAttack(Sq);
+        KnightAttackBB[White][Sq] = getWhiteKnightAttack(Sq);
     }
 }
 
 void initializeSilverAttacks() {
-    for (Square sq : Squares) {
-        SilverAttackBB[Black][sq] = getBlackSilverAttack(sq);
-        SilverAttackBB[White][sq] = getWhiteSilverAttack(sq);
+    for (Square Sq : Squares) {
+        SilverAttackBB[Black][Sq] = getBlackSilverAttack(Sq);
+        SilverAttackBB[White][Sq] = getWhiteSilverAttack(Sq);
     }
 }
 
 void initializeGoldAttacks() {
-    for (Square sq : Squares) {
-        GoldAttackBB[Black][sq] = getBlackGoldAttack(sq);
-        GoldAttackBB[White][sq] = getWhiteGoldAttack(sq);
+    for (Square Sq : Squares) {
+        GoldAttackBB[Black][Sq] = getBlackGoldAttack(Sq);
+        GoldAttackBB[White][Sq] = getWhiteGoldAttack(Sq);
     }
 }
 
 void initializeKingAttacks() {
-    for (Square sq : Squares) {
-        KingAttackBB[sq] = getKingAttack(sq);
+    for (Square Sq : Squares) {
+        KingAttackBB[Sq] = getKingAttack(Sq);
     }
 }
 
 void initializeDiagStepAttacks() {
-    for (Square sq : Squares) {
-        DiagStepAttackBB[sq] = getDiagStepAttack(sq);
+    for (Square Sq : Squares) {
+        DiagStepAttackBB[Sq] = getDiagStepAttack(Sq);
     }
 }
 
 void initializeCrossStepAttacks() {
-    for (Square sq : Squares) {
-        CrossStepAttackBB[sq] = getCrossStepAttack(sq);
+    for (Square Sq : Squares) {
+        CrossStepAttackBB[Sq] = getCrossStepAttack(Sq);
     }
 }
 
 template <Direction Dir>
-constexpr bool isBorder(Square Sq) {
+bool isBorder(Square Sq) {
     const Rank R = squareToRank(Sq);
     const File F = squareToFile(Sq);
     return ((Dir == North || Dir == NorthEast || Dir == NorthWest) &&
@@ -707,7 +687,7 @@ uint64_t generateMagicNumberCandidate() {
 
 void setBishopMagicNumbers() {
     // clang-format off
-    constexpr uint64_t BishopMagicNumbers[NumSquares] = {
+    const uint64_t BishopMagicNumbers[NumSquares] = {
         0x400c024100082012ULL, 0x0400502040880514ULL, 0x121a100820820300ULL, 0x0019010020038000ULL, 0x0000410801002410ULL, 0x044184014100020eULL, 0x4008c02380090000ULL, 0x008004d080082120ULL, 0x0800800804400220ULL,
         0x8011004088101010ULL, 0x002060802c042214ULL, 0x040a105100040201ULL, 0xc30391a080088908ULL, 0xc108082042208004ULL, 0x0900027020420000ULL, 0x00004014300984d2ULL, 0x4001000250102804ULL, 0x2020000408012010ULL,
         0x9024140100600a10ULL, 0x0852100042041002ULL, 0x3048844100280808ULL, 0x00101c0c04c2090aULL, 0x082620048cc80a20ULL, 0x5810a04ca4288011ULL, 0x40014042a4100288ULL, 0x0800c0540c024408ULL, 0x0a2880002020a104ULL,
@@ -731,7 +711,7 @@ void setBishopMagicNumbers() {
 
 void setRookMagicNumbers() {
     // clang-format off
-    constexpr uint64_t RookMagicNumbers[NumSquares] = {
+    const uint64_t RookMagicNumbers[NumSquares] = {
         0x4c08021004220280ULL, 0x0810010029020428ULL, 0x4a04080a80100440ULL, 0x0188020420043010ULL, 0x8100270100880108ULL, 0xa810208020922410ULL, 0x0100488010421055ULL, 0x010c804c21280501ULL, 0x1020282200840072ULL,
         0x800a220808210014ULL, 0x0210204144008180ULL, 0x0211412301003811ULL, 0xac08804102198801ULL, 0x20604042840c0c20ULL, 0x1040800422882110ULL, 0x0088c04014081009ULL, 0x208870130a100103ULL, 0x0060803002008022ULL,
         0x04040c0808208210ULL, 0x400a0040c4102080ULL, 0x84008c90424048a2ULL, 0x0101214081001026ULL, 0x0310204020524002ULL, 0x04202440801022d8ULL, 0x0200440801428204ULL, 0x0010040805480024ULL, 0x0248102001004232ULL,
@@ -792,7 +772,7 @@ void computeBishopMagicBitboard() {
     }
 
     if (!IsPrecomputed) {
-        std::printf("constexpr uint64_t BishopMagicNumbers[NumSquares] = {\n");
+        std::printf("const uint64_t BishopMagicNumbers[NumSquares] = {\n");
         for (Square Sq : Squares) {
             std::printf("0x%016" PRIx64 "ULL, ", BishopMagicBB[Sq].MagicNumber);
 
@@ -867,7 +847,7 @@ void setBishopPextTable() {
                         ++BishopMasterCount;
                     }
 
-                    uint64_t Index =
+                    const uint64_t Index =
                         (I == 0)
                             ? _pext_u64(Base, BishopMagicBB[Sq].MagicNumber[0])
                             : _pext_u64(Base, BishopMagicBB[Sq].MagicNumber[1]);
@@ -1045,7 +1025,7 @@ void computeRookMagicBitboard() {
     }
 
     if (!IsPrecomputed) {
-        std::printf("constexpr uint64_t RookMagicNumbers[NumSquares] = {\n");
+        std::printf("const uint64_t RookMagicNumbers[NumSquares] = {\n");
         for (Square Sq : Squares) {
             std::printf("0x%016" PRIx64 "ULL, ", RookMagicBB[Sq].MagicNumber);
 
@@ -1118,7 +1098,7 @@ void setRookPextTable() {
                         ++RookMasterCount;
                     }
 
-                    uint64_t Index =
+                    const uint64_t Index =
                         (I == 0)
                             ? _pext_u64(Base, RookMagicBB[Sq].MagicNumber[0])
                             : _pext_u64(Base, RookMagicBB[Sq].MagicNumber[1]);

@@ -13,13 +13,6 @@ namespace nshogi {
 namespace build_info {
 namespace capability {
 
-bool sse2Available() {
-#if defined(USE_SSE2)
-    return true;
-#endif
-    return false;
-}
-
 bool sse41Available() {
 #if defined(USE_SSE41)
     return true;

@@ -36,66 +36,67 @@ class StateImpl {
     StateImpl clone() const;
 
     // Getters.
-    inline constexpr const Position& getPosition() const {
+    inline constexpr const Position& getPosition() const noexcept {
         return Pos;
     }
 
     template <Color C>
-    inline constexpr const bitboard::Bitboard getBitboard() const {
+    inline constexpr const bitboard::Bitboard getBitboard() const noexcept {
         return Helper.ColorBB[C];
     }
 
     template <PieceTypeKind Type>
-    inline constexpr const bitboard::Bitboard getBitboard() const {
+    inline constexpr const bitboard::Bitboard getBitboard() const noexcept {
         return Helper.TypeBB[Type];
     }
 
     template <Color C, PieceTypeKind Type>
-    inline constexpr bitboard::Bitboard getBitboard() const {
+    inline constexpr bitboard::Bitboard getBitboard() const noexcept {
         return Helper.ColorBB[C] & Helper.TypeBB[Type];
     }
 
-    inline const bitboard::Bitboard getBitboard(Color C) const {
+    inline const bitboard::Bitboard getBitboard(Color C) const noexcept {
         return Helper.ColorBB[C];
     }
 
-    inline bitboard::Bitboard getBitboard(Color C, PieceTypeKind Type) const {
+    inline bitboard::Bitboard getBitboard(Color C,
+                                          PieceTypeKind Type) const noexcept {
         return Helper.ColorBB[C] & Helper.TypeBB[Type];
     }
 
     template <PieceTypeKind Type>
-    inline bitboard::Bitboard getBitboard(Color C) const {
+    inline bitboard::Bitboard getBitboard(Color C) const noexcept {
         return Helper.ColorBB[C] & Helper.TypeBB[Type];
     }
 
     template <Color C>
-    inline bitboard::Bitboard getBitboard(PieceTypeKind Type) const {
+    inline bitboard::Bitboard getBitboard(PieceTypeKind Type) const noexcept {
         return Helper.ColorBB[C] & Helper.TypeBB[Type];
     }
 
-    inline bitboard::Bitboard getBitboard(PieceTypeKind Type) const {
+    inline bitboard::Bitboard getBitboard(PieceTypeKind Type) const noexcept {
         return Helper.TypeBB[Type];
     }
 
-    inline const bitboard::Bitboard getCheckerBB() const {
+    inline const bitboard::Bitboard getCheckerBB() const noexcept {
         return Helper.getCurrentStepHelper().CheckerBB;
     }
 
-    inline uint64_t getBoardHash() const {
+    inline uint64_t getBoardHash() const noexcept {
         return HashValue.getValue();
     }
 
-    inline uint64_t getHash() const {
+    inline uint64_t getHash() const noexcept {
         return HashValue.getValue() ^
                ((uint64_t)(getPosition().getStand<Black>()) << 33) ^
                ((uint64_t)(getPosition().getStand<White>()) << 1);
     }
 
-    const Position& getInitialPosition() const {
+    const Position& getInitialPosition() const noexcept {
         return Helper.getInitialPosition();
     }
 
-    uint16_t getPly(bool IncludeOffset = true) const {
+    uint16_t getPly(bool IncludeOffset = true) const noexcept {
         return Helper.getPly(IncludeOffset);
     }
 
@@ -109,8 +110,8 @@ class StateImpl {
 
     // Manipulations.
     template <Color C>
-    void doMove(Move32 Move);
-    void doMove(Move32 Move);
+    void doMove(Move32 Move) noexcept;
+    void doMove(Move32 Move) noexcept;
 
     template <Color C>
     void undoMove();
@@ -119,12 +120,12 @@ class StateImpl {
     // Re-compute "second" variables, where "second" means
     // any variables that can be computed by "first" variables
     // that are neccesary to stand for the game representation.
-    void refresh();
+    void refresh() noexcept;
 
     // Helper functions.
 
     template <bool Strict = false>
-    inline RepetitionStatus getRepetitionStatus() const {
+    inline RepetitionStatus getRepetitionStatus() const noexcept {
         const Color SideToMove = getPosition().sideToMove();
         const StepHelper& CurrentStepHelper = Helper.getCurrentStepHelper();
 
@@ -199,34 +200,34 @@ class StateImpl {
         return RepetitionStatus::NoRepetition;
     }
 
-    inline constexpr Color getSideToMove() const {
+    inline constexpr Color getSideToMove() const noexcept {
         return getPosition().sideToMove();
     }
 
     template <Color C, PieceTypeKind Type>
-    uint8_t getStandCount() const {
+    uint8_t getStandCount() const noexcept {
         return getPosition().getStandCount<C, Type>();
     }
 
     template <Color C>
-    uint8_t getStandCount(PieceTypeKind Type) const {
+    uint8_t getStandCount(PieceTypeKind Type) const noexcept {
         return getPosition().getStandCount<C>(Type);
     }
 
-    uint8_t getStandCount(Color C, PieceTypeKind Type) const {
+    uint8_t getStandCount(Color C, PieceTypeKind Type) const noexcept {
         return getPosition().getStandCount(C, Type);
     }
 
     template <Color C>
-    inline constexpr Square getKingSquare() const {
+    inline constexpr Square getKingSquare() const noexcept {
         return Helper.KingSquare[C];
     }
 
-    inline constexpr Square getKingSquare(Color C) const {
+    inline constexpr Square getKingSquare(Color C) const noexcept {
         return Helper.KingSquare[C];
     }
 
-    Move32 getMove32FromMove16(Move16 M16) const {
+    Move32 getMove32FromMove16(Move16 M16) const noexcept {
         if (M16.drop()) {
             const PieceTypeKind Type =
                 (PieceTypeKind)(M16.from() - NumSquares + 1);
@@ -248,7 +249,7 @@ class StateImpl {
 
     template <Color C>
     uint8_t computePieceScore(uint8_t SliderScoreUnit, uint8_t StepScoreUnit,
-                              bool OnlyInPromotableZone) const {
+                              bool OnlyInPromotableZone) const noexcept {
         uint8_t SliderScore = 0;
         uint8_t StepScore = 0;
 
@@ -285,21 +286,21 @@ class StateImpl {
     template <Color C>
     inline constexpr uint8_t
     computeDeclarationScore(uint8_t SliderScoreUnit = 5,
-                            uint8_t StepScoreUnit = 1) const {
+                            uint8_t StepScoreUnit = 1) const noexcept {
         return computePieceScore<C>(SliderScoreUnit, StepScoreUnit, true);
     }
 
-    bool canDeclare() const;
+    bool canDeclare() const noexcept;
 
     template <Color C>
     inline constexpr const bitboard::Bitboard
-    getDefendingOpponentSliderBB() const {
+    getDefendingOpponentSliderBB() const noexcept {
         return Helper.getCurrentStepHelper().DefendingOpponentSliderBB[C];
     }
 
     template <Color C>
     inline bitboard::Bitboard
-    getStepAttackBB(Square ExcludeSq = SqInvalid) const {
+    getStepAttackBB(Square ExcludeSq = SqInvalid) const noexcept {
         bitboard::Bitboard StepAttackBB = bitboard::Bitboard::ZeroBB();
 
         // North attacks.
@@ -466,8 +467,9 @@ class StateImpl {
 
     /// Compute Sliders' attacks by Dumb7fill algorithm.
     template <Color C>
-    bitboard::Bitboard getSliderAttackBB(Square ExcludeSq = SqInvalid,
-                                         Square VirtualSq = SqInvalid) const {
+    bitboard::Bitboard
+    getSliderAttackBB(Square ExcludeSq = SqInvalid,
+                      Square VirtualSq = SqInvalid) const noexcept {
         const bitboard::Bitboard OccupiedBB =
             (VirtualSq == SqInvalid)
                 ? (getBitboard<Black>() | getBitboard<White>())
@@ -645,19 +647,22 @@ class StateImpl {
     }
 
     template <Color C>
-    inline bitboard::Bitboard getAttackBB(Square ExcludeSq = SqInvalid) const {
+    inline bitboard::Bitboard
+    getAttackBB(Square ExcludeSq = SqInvalid) const noexcept {
         return getStepAttackBB<C>(ExcludeSq) | getSliderAttackBB<C>(ExcludeSq);
     }
 
     template <Color C>
-    inline bool isAttackedByOneStep(Square Sq) const {
+    inline bool isAttackedByOneStep(Square Sq) const noexcept {
         const bitboard::Bitboard UnderAttackedBB =
             (bitboard::getAttackBB<C, PTK_Pawn>(Sq) & getBitboard<PTK_Pawn>()) |
             (bitboard::getAttackBB<C, PTK_Knight>(Sq) &
              getBitboard<PTK_Knight>()) |
             (bitboard::getAttackBB<C, PTK_Silver>(Sq) &
              getBitboard<PTK_Silver>()) |
-            (bitboard::getAttackBB<C, PTK_King>(Sq) & getBitboard<PTK_King>()) |
+            (bitboard::getAttackBB<C, PTK_King>(Sq) &
+             (getBitboard<PTK_King>() | getBitboard<PTK_ProBishop>() |
+              getBitboard<PTK_ProRook>())) |
             (bitboard::getAttackBB<C, PTK_Gold>(Sq) &
              (getBitboard<PTK_Gold>() | getBitboard<PTK_ProPawn>() |
               getBitboard<PTK_ProLance>() | getBitboard<PTK_ProKnight>() |
@@ -667,9 +672,9 @@ class StateImpl {
     }
 
     template <Color C, PieceTypeKind Type>
-    inline bool isAttackedBySlider(Square Sq,
-                                   const bitboard::Bitboard& OccupiedBB,
-                                   Square VirtualSq = SqInvalid) const {
+    inline bool
+    isAttackedBySlider(Square Sq, const bitboard::Bitboard& OccupiedBB,
+                       Square VirtualSq = SqInvalid) const noexcept {
         static_assert(Type == PTK_Lance || Type == PTK_Bishop ||
                           Type == PTK_ProBishop || Type == PTK_Rook ||
                           Type == PTK_ProRook,
@@ -704,8 +709,7 @@ class StateImpl {
                 return true;
             }
 
-            return bitboard::isAttacked(bitboard::KingAttackBB[Sq],
-                                        getBitboard<~C, PTK_ProBishop>());
+            return false;
         } else if constexpr (Type == PTK_Rook || Type == PTK_ProRook) {
             if (((getBitboard<PTK_Rook>() | getBitboard<PTK_ProRook>()) &
                  getBitboard<~C>() & bitboard::CrossBB[Sq])
@@ -721,8 +725,7 @@ class StateImpl {
                 return true;
             }
 
-            return bitboard::isAttacked(bitboard::KingAttackBB[Sq],
-                                        getBitboard<~C, PTK_ProRook>());
+            return false;
         } else {
             // Should not be reached.
             []<bool Flag = false>() {
@@ -733,10 +736,10 @@ class StateImpl {
     }
 
     template <Color C>
-    inline bool isAttackedBySlider(Square Sq,
-                                   const bitboard::Bitboard& OccupiedBB,
-                                   Square ExcludeSq = SqInvalid,
-                                   Square VirtualSq = SqInvalid) const {
+    inline bool
+    isAttackedBySlider(Square Sq, const bitboard::Bitboard& OccupiedBB,
+                       Square ExcludeSq = SqInvalid,
+                       Square VirtualSq = SqInvalid) const noexcept {
         bitboard::Bitboard OccupiedBB2 = OccupiedBB;
         if (ExcludeSq != SqInvalid) {
             assert(OccupiedBB.isSet(ExcludeSq));
@@ -752,7 +755,7 @@ class StateImpl {
 
     template <Color C>
     inline bool isAttacked(Square Sq, Square ExcludeSq = SqInvalid,
-                           Square VirtualSq = SqInvalid) const {
+                           Square VirtualSq = SqInvalid) const noexcept {
         if (isAttackedByOneStep<C>(Sq)) {
             return true;
         }
@@ -768,11 +771,12 @@ class StateImpl {
     Hash<uint64_t> HashValue;
 
     template <Color C, bool UpdateCheckerBySliders>
-    void setDefendingOpponentSliderBB(StepHelper* SHelper,
-                                      const bitboard::Bitboard& OccupiedBB);
+    void
+    setDefendingOpponentSliderBB(StepHelper* SHelper,
+                                 const bitboard::Bitboard& OccupiedBB) noexcept;
 
     template <Color C>
-    void setCheckerBB(StepHelper* SHelper);
+    void setCheckerBB(StepHelper* SHelper) noexcept;
 };
 
 } // namespace internal

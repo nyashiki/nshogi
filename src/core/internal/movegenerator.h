@@ -22,19 +22,22 @@ class MoveGeneratorInternal {
     MoveGeneratorInternal() = delete;
 
     template <Color C, bool WilyPromote = true>
-    static MoveList generateLegalMoves(const internal::StateImpl& S);
+    static MoveList generateLegalMoves(const internal::StateImpl& S) noexcept;
 
     template <Color C, bool WilyPromote = true>
-    static MoveList generateLegalCheckMoves(const internal::StateImpl& S);
+    static MoveList
+    generateLegalCheckMoves(const internal::StateImpl& S) noexcept;
 
     template <Color C, bool WilyPromote = true>
-    static MoveList generateLegalEvasionMoves(const internal::StateImpl& S);
+    static MoveList
+    generateLegalEvasionMoves(const internal::StateImpl& S) noexcept;
 
     template <bool WilyPromote = true>
-    static MoveList generateLegalMoves(const internal::StateImpl& S);
+    static MoveList generateLegalMoves(const internal::StateImpl& S) noexcept;
 
     template <bool WilyPromote = true>
-    static MoveList generateLegalCheckMoves(const internal::StateImpl& S);
+    static MoveList
+    generateLegalCheckMoves(const internal::StateImpl& S) noexcept;
 };
 
 } // namespace internal

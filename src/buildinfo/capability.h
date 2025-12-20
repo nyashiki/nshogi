@@ -14,7 +14,6 @@ namespace nshogi {
 namespace build_info {
 namespace capability {
 
-bool sse2Available();
 bool sse41Available();
 bool avxAvailable();
 bool avx2Available();

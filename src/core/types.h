@@ -27,7 +27,7 @@ enum Color : uint8_t {
 
 constexpr Color Colors[NumColors] = {Black, White};
 
-inline constexpr Color operator~(Color C) {
+inline constexpr Color operator~(Color C) noexcept {
     return (Color)(C ^ White);
 }
 
@@ -67,11 +67,11 @@ static constexpr PieceTypeKind PieceTypes[] = {
     PTK_ProKnight, PTK_ProSilver, PTK_ProBishop, PTK_ProRook,
 };
 
-inline constexpr PieceTypeKind promotePieceType(PieceTypeKind Pt) {
+inline constexpr PieceTypeKind promotePieceType(PieceTypeKind Pt) noexcept {
     return (PieceTypeKind)(Pt ^ 0b1000);
 }
 
-inline constexpr PieceTypeKind demotePieceType(PieceTypeKind Pt) {
+inline constexpr PieceTypeKind demotePieceType(PieceTypeKind Pt) noexcept {
     return (PieceTypeKind)(Pt & 0b111);
 }
 
@@ -85,36 +85,36 @@ enum PieceKind : uint8_t {
 };
 // clang-format on
 
-inline constexpr PieceTypeKind getPieceType(PieceKind P) {
+inline constexpr PieceTypeKind getPieceType(PieceKind P) noexcept {
     return (PieceTypeKind)((uint8_t)P & 0b1111);
 }
 
-inline constexpr Color getColor(PieceKind P) {
+inline constexpr Color getColor(PieceKind P) noexcept {
     return (Color)((0b10000 & P) >> 4);
 }
 
-inline constexpr PieceKind promotePiece(PieceKind P) {
+inline constexpr PieceKind promotePiece(PieceKind P) noexcept {
     return (PieceKind)(0b1000 | P);
 }
 
-inline constexpr bool isPromoted(PieceTypeKind Type) {
+inline constexpr bool isPromoted(PieceTypeKind Type) noexcept {
     return (Type != PTK_King) && ((Type & 0b1000) != 0);
 };
 
 template <Color C>
-inline constexpr PieceKind makePiece(PieceTypeKind Pt);
+inline constexpr PieceKind makePiece(PieceTypeKind Pt) noexcept;
 
 template <>
-inline constexpr PieceKind makePiece<Black>(PieceTypeKind Pt) {
+inline constexpr PieceKind makePiece<Black>(PieceTypeKind Pt) noexcept {
     return (PieceKind)(Pt);
 }
 
 template <>
-inline constexpr PieceKind makePiece<White>(PieceTypeKind Pt) {
+inline constexpr PieceKind makePiece<White>(PieceTypeKind Pt) noexcept {
     return (PieceKind)(0b10000 | Pt);
 }
 
-inline PieceKind makePiece(Color C, PieceTypeKind Pt) {
+inline PieceKind makePiece(Color C, PieceTypeKind Pt) noexcept {
     if (C == Color::Black) {
         return makePiece<Color::Black>(Pt);
     }
@@ -153,15 +153,15 @@ static constexpr Square Squares[81] = {
 };
 // clang-format on
 
-inline Square& operator++(Square& Sq) {
+inline Square& operator++(Square& Sq) noexcept {
     return Sq = (Square)((int)Sq + 1);
 }
 
-inline constexpr Square getInversed(Square Sq) {
+inline constexpr Square getInversed(Square Sq) noexcept {
     return (Square)((int16_t)NumSquares - 1 - (int16_t)Sq);
 }
 
-inline constexpr bool checkRange(Square Sq) {
+inline constexpr bool checkRange(Square Sq) noexcept {
     return (Sq >= Square::Sq1I) && (Sq <= Square::Sq9A);
 }
 
@@ -179,7 +179,7 @@ static constexpr Direction Directions[] = {
     SouthSouthEast, SouthEast, East, NorthEast, NorthNorthEast, South, North,
     SouthSouthWest, SouthWest, West, NorthWest, NorthNorthWest};
 
-inline constexpr Square operator+(Square Sq, Direction Dir) {
+inline constexpr Square operator+(Square Sq, Direction Dir) noexcept {
     return (Square)((int16_t)Sq + (int16_t)Dir);
 }
 
@@ -211,11 +211,11 @@ enum Rank : uint8_t {
     NumRanks = 9,
 };
 
-inline constexpr bool checkRange(File F) {
+inline constexpr bool checkRange(File F) noexcept {
     return F >= File1 && F <= File9;
 }
 
-inline constexpr bool checkRange(Rank R) {
+inline constexpr bool checkRange(Rank R) noexcept {
     return R >= RankI && R <= RankA;
 }
 
@@ -227,14 +227,14 @@ static constexpr Rank Ranks[NumRanks] = {
     RankI, RankH, RankG, RankF, RankE, RankD, RankC, RankB, RankA,
 };
 
-inline constexpr Square makeSquare(Rank R, File F) {
+inline constexpr Square makeSquare(Rank R, File F) noexcept {
     assert(checkRange(R) && checkRange(F));
 
     return (Square)((uint8_t)R + 9 * (uint8_t)F);
 }
 
 // clang-format off
-inline constexpr File squareToFile(Square Sq) {
+inline constexpr File squareToFile(Square Sq) noexcept {
     constexpr File Table[NumSquares] = {
         File1, File1, File1, File1, File1, File1, File1, File1, File1,
         File2, File2, File2, File2, File2, File2, File2, File2, File2,
@@ -252,7 +252,7 @@ inline constexpr File squareToFile(Square Sq) {
 // clang-format on
 
 // clang-format off
-inline constexpr Rank squareToRank(Square Sq) {
+inline constexpr Rank squareToRank(Square Sq) noexcept {
     constexpr Rank Table[NumSquares] = {
         RankI, RankH, RankG, RankF, RankE, RankD, RankC, RankB, RankA,
         RankI, RankH, RankG, RankF, RankE, RankD, RankC, RankB, RankA,
@@ -374,21 +374,21 @@ static constexpr uint32_t StandMasks[NumStandKinds] = {
 // clang-format on
 
 template <PieceTypeKind Pt>
-inline constexpr uint8_t getStandCount(Stands St) {
+inline constexpr uint8_t getStandCount(Stands St) noexcept {
     return (uint8_t)((St & StandMasks[Pt]) >> StandShifts[Pt]);
 }
 
-inline constexpr uint8_t getStandCount(Stands St, PieceTypeKind Pt) {
+inline constexpr uint8_t getStandCount(Stands St, PieceTypeKind Pt) noexcept {
     return (uint8_t)((St & StandMasks[Pt]) >> StandShifts[Pt]);
 }
 
 /// Increment the number of a `Pt` piece on `St`.
-inline constexpr Stands incrementStand(Stands St, PieceTypeKind Pt) {
+inline constexpr Stands incrementStand(Stands St, PieceTypeKind Pt) noexcept {
     return (Stands)(St + StandBits[Pt]);
 }
 
 /// Decrement the number of a `Pt` piece on `St`.
-inline constexpr Stands decrementStand(Stands St, PieceTypeKind Pt) {
+inline constexpr Stands decrementStand(Stands St, PieceTypeKind Pt) noexcept {
     assert(getStandCount(St, Pt) > 0);
     return (Stands)(St - StandBits[Pt]);
 }
@@ -397,7 +397,7 @@ inline constexpr Stands decrementStand(Stands St, PieceTypeKind Pt) {
 inline constexpr Stands constructStand(uint8_t PawnCount, uint8_t LanceCount,
                                        uint8_t KnightCount, uint8_t SilverCount,
                                        uint8_t GoldCount, uint8_t BishopCount,
-                                       uint8_t RookCount) {
+                                       uint8_t RookCount) noexcept {
     return (Stands)((uint32_t)PawnCount * StandBits[PTK_Pawn] +
                     (uint32_t)LanceCount * StandBits[PTK_Lance] +
                     (uint32_t)KnightCount * StandBits[PTK_Knight] +
@@ -420,7 +420,7 @@ inline constexpr Stands constructStand(uint8_t PawnCount, uint8_t LanceCount,
 /// @param St1 The first standing pieces representation.
 /// @param St2 The second standing pieces representation.
 /// @return `true` if `St1` is superior or equal to `St2`.
-inline constexpr bool isSuperiorOrEqual(Stands St1, Stands St2) {
+inline constexpr bool isSuperiorOrEqual(Stands St1, Stands St2) noexcept {
     constexpr uint32_t Mask =
         1U << (StandShifts[PTK_Pawn] + 5) | 1U << (StandShifts[PTK_Lance] + 3) |
         1U << (StandShifts[PTK_Knight] + 3) |
@@ -443,76 +443,75 @@ struct Move16;
 ///
 struct Move32 {
  public:
-    explicit constexpr Move32() {
-    }
+    constexpr Move32() noexcept = default;
+    constexpr Move32(const Move32& M) noexcept = default;
+    constexpr Move32(Move32&& M) noexcept = default;
+    constexpr Move32& operator=(const Move32& M) noexcept = default;
 
-    constexpr Move32(const Move32& M) = default;
-    constexpr Move32& operator=(const Move32& M) = default;
+    explicit constexpr Move32(Move16 M16) noexcept;
 
-    explicit constexpr Move32(Move16 M16);
-
-    constexpr bool operator<(Move32 M) const {
+    constexpr bool operator<(Move32 M) const noexcept {
         return C_ < M.C_;
     }
 
-    constexpr bool operator==(Move32 M) const {
+    constexpr bool operator==(Move32 M) const noexcept {
         return C_ == M.C_;
     }
 
-    constexpr bool operator!=(Move32 M) const {
+    constexpr bool operator!=(Move32 M) const noexcept {
         return C_ != M.C_;
     }
 
-    static constexpr Move32 MoveNone() {
+    static constexpr Move32 MoveNone() noexcept {
         return Move32(0);
     }
 
-    static constexpr Move32 MoveInvalid() {
+    static constexpr Move32 MoveInvalid() noexcept {
         return Move32((81 << FromShift) | (81 << ToShift));
     }
 
-    constexpr bool isNone() const {
+    constexpr bool isNone() const noexcept {
         return C_ == 0;
     }
 
-    constexpr bool isWin() const {
+    constexpr bool isWin() const noexcept {
         return C_ == MoveWin().value();
     }
 
-    constexpr bool isInvalid() const {
+    constexpr bool isInvalid() const noexcept {
         return C_ == MoveInvalid().value();
     }
 
-    constexpr uint32_t value() const {
+    constexpr uint32_t value() const noexcept {
         return C_;
     }
 
-    static constexpr Move32 fromValue(uint32_t Value) {
+    static constexpr Move32 fromValue(uint32_t Value) noexcept {
         return Move32(Value);
     }
 
     ///
     /// @brief This move is used for the declaration win.
     ///
-    static constexpr Move32 MoveWin() {
+    static constexpr Move32 MoveWin() noexcept {
         return Move32((1 << FromShift) | (1 << ToShift));
     }
 
     static constexpr Move32 boardMove(Square From, Square To,
-                                      PieceTypeKind Pt) {
+                                      PieceTypeKind Pt) noexcept {
         return Move32(((uint32_t)Pt << PieceTypeShift) |
                       ((uint32_t)From << FromShift) | ((uint32_t)To));
     }
 
     static constexpr Move32 boardMove(Square From, Square To, PieceTypeKind Pt,
-                                      PieceTypeKind Capture) {
+                                      PieceTypeKind Capture) noexcept {
         return Move32(((uint32_t)Capture << CaptureTypeShift) |
                       ((uint32_t)Pt << PieceTypeShift) |
                       ((uint32_t)From << FromShift) | ((uint32_t)To));
     }
 
     static constexpr Move32 boardPromotingMove(Square From, Square To,
-                                               PieceTypeKind Pt) {
+                                               PieceTypeKind Pt) noexcept {
         return Move32(((uint32_t)1 << PromoteShift) |
                       ((uint32_t)Pt << PieceTypeShift) |
                       ((uint32_t)From << FromShift) | ((uint32_t)To));
@@ -520,14 +519,14 @@ struct Move32 {
 
     static constexpr Move32 boardPromotingMove(Square From, Square To,
                                                PieceTypeKind Pt,
-                                               PieceTypeKind Capture) {
+                                               PieceTypeKind Capture) noexcept {
         return Move32(((uint32_t)Capture << CaptureTypeShift) |
                       ((uint32_t)1 << PromoteShift) |
                       ((uint32_t)Pt << PieceTypeShift) |
                       ((uint32_t)From << FromShift) | ((uint32_t)To));
     }
 
-    static constexpr Move32 droppingMove(Square To, PieceTypeKind Pt) {
+    static constexpr Move32 droppingMove(Square To, PieceTypeKind Pt) noexcept {
         return Move32((uint32_t)Pt << PieceTypeShift |
                       ((uint32_t)Pt + (uint32_t)NumSquares - 1) << FromShift |
                       ((uint32_t)To));
@@ -536,35 +535,35 @@ struct Move32 {
     ///
     /// @brief Get the destination square.
     ///
-    constexpr Square to() const {
+    constexpr Square to() const noexcept {
         return (Square)(C_ & ToBits);
     }
 
     ///
     /// @brief Get the source square.
     ///
-    constexpr Square from() const {
+    constexpr Square from() const noexcept {
         return (Square)((C_ & FromBits) >> FromShift);
     }
 
     ///
     /// @brief Get whether it is a dropping move.
     ///
-    constexpr bool drop() const {
+    constexpr bool drop() const noexcept {
         return from() >= NumSquares;
     }
 
     ///
     /// @brief Get whether it is a promoting move.
     ///
-    constexpr bool promote() const {
+    constexpr bool promote() const noexcept {
         return (bool)((C_ & PromoteBit) >> PromoteShift);
     }
 
     ///
     /// @brief Get the piece type of the move.
     ///
-    constexpr PieceTypeKind pieceType() const {
+    constexpr PieceTypeKind pieceType() const noexcept {
         return (PieceTypeKind)((C_ & PieceTypeBits) >> PieceTypeShift);
     }
 
@@ -572,12 +571,12 @@ struct Move32 {
     /// @brief Get the piece type of the opponent's piece if capturing.
     /// If it is not a capturing move, this method returns PTK_Empty.
     ///
-    constexpr PieceTypeKind capturePieceType() const {
+    constexpr PieceTypeKind capturePieceType() const noexcept {
         return (PieceTypeKind)((C_ & CaptureTypeBits) >> CaptureTypeShift);
     }
 
  private:
-    constexpr Move32(uint32_t Val)
+    constexpr Move32(uint32_t Val) noexcept
         : C_(Val) {
     }
 
@@ -614,63 +613,62 @@ struct Move32 {
 ///
 struct Move16 {
  public:
-    constexpr Move16() {
-    }
+    constexpr Move16() noexcept = default;
 
-    explicit constexpr Move16(Move32 M)
+    explicit constexpr Move16(Move32 M) noexcept
         : C_(M.C_ & 0xffff) {
     }
 
-    constexpr Move16(const Move16& M) = default;
-    constexpr Move16& operator=(const Move16& M) = default;
+    constexpr Move16(const Move16& M) noexcept = default;
+    constexpr Move16& operator=(const Move16& M) noexcept = default;
 
-    static constexpr Move16 MoveWin() {
+    static constexpr Move16 MoveWin() noexcept {
         return Move16(Move32::MoveWin());
     }
 
-    constexpr bool operator<(Move16 M) const {
+    constexpr bool operator<(Move16 M) const noexcept {
         return C_ < M.C_;
     }
 
-    constexpr bool operator==(Move16 M) const {
+    constexpr bool operator==(Move16 M) const noexcept {
         return C_ == M.C_;
     }
 
-    constexpr bool operator!=(Move16 M) const {
+    constexpr bool operator!=(Move16 M) const noexcept {
         return C_ != M.C_;
     }
 
-    static constexpr Move16 MoveNone() {
+    static constexpr Move16 MoveNone() noexcept {
         return Move16(0);
     }
 
-    static constexpr Move16 MoveInvalid() {
+    static constexpr Move16 MoveInvalid() noexcept {
         return Move16(Move32::MoveInvalid());
     }
 
-    constexpr bool isNone() const {
+    constexpr bool isNone() const noexcept {
         return C_ == 0;
     }
 
-    constexpr bool isWin() const {
+    constexpr bool isWin() const noexcept {
         return C_ == MoveWin().value();
     }
 
-    constexpr bool isInvalid() const {
+    constexpr bool isInvalid() const noexcept {
         return C_ == MoveInvalid().value();
     }
 
     ///
     /// @brief Get the destination square.
     ///
-    constexpr Square to() const {
+    constexpr Square to() const noexcept {
         return (Square)(C_ & (uint16_t)Move32::ToBits);
     }
 
     ///
     /// @brief Get the source square.
     ///
-    constexpr Square from() const {
+    constexpr Square from() const noexcept {
         return (Square)((C_ & (uint16_t)Move32::FromBits) >>
                         (uint16_t)Move32::FromShift);
     }
@@ -678,28 +676,28 @@ struct Move16 {
     ///
     /// @brief Get whether it is a dropping move.
     ///
-    constexpr bool drop() const {
+    constexpr bool drop() const noexcept {
         return from() >= NumSquares;
     }
 
     ///
     /// @brief Get whether it is a promoting move.
     ///
-    constexpr bool promote() const {
+    constexpr bool promote() const noexcept {
         return (bool)((C_ & (uint16_t)Move32::PromoteBit) >>
                       (uint16_t)Move32::PromoteShift);
     }
 
-    constexpr uint16_t value() const {
+    constexpr uint16_t value() const noexcept {
         return C_;
     }
 
-    static constexpr Move16 fromValue(uint16_t Value) {
+    static constexpr Move16 fromValue(uint16_t Value) noexcept {
         return Move16(Value);
     }
 
  private:
-    constexpr Move16(uint16_t C)
+    constexpr Move16(uint16_t C) noexcept
         : C_(C) {
     }
 
@@ -708,7 +706,7 @@ struct Move16 {
     friend struct Move32;
 };
 
-inline constexpr Move32::Move32(Move16 M16)
+inline constexpr Move32::Move32(Move16 M16) noexcept
     : C_(M16.C_) {
 }
 
