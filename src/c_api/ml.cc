@@ -21,10 +21,9 @@ using namespace nshogi;
 namespace {
 
 void mlApiMakeFeatureVectorWithOption(float* Dest, const nshogi_state_t* CState,
-                            const nshogi_state_config_t* CStateConfig,
-                            const nshogi_feature_type_t* FeatureTypes,
-                            int NumFeatures,
-                            int ChannelsFirst) {
+                                      const nshogi_state_config_t* CStateConfig,
+                                      const nshogi_feature_type_t* FeatureTypes,
+                                      int NumFeatures, int ChannelsFirst) {
     std::vector<ml::FeatureType> Types((std::size_t)NumFeatures);
     for (int I = 0; I < NumFeatures; ++I) {
         Types[(std::size_t)I] = static_cast<ml::FeatureType>(FeatureTypes[I]);
@@ -47,25 +46,27 @@ void mlApiMakeFeatureVector(float* Dest, const nshogi_state_t* CState,
                             const nshogi_state_config_t* CStateConfig,
                             const nshogi_feature_type_t* FeatureTypes,
                             int NumFeatures) {
-    return mlApiMakeFeatureVectorWithOption(
-        Dest, CState, CStateConfig, FeatureTypes, NumFeatures, 1);
+    return mlApiMakeFeatureVectorWithOption(Dest, CState, CStateConfig,
+                                            FeatureTypes, NumFeatures, 1);
 }
 
-int mlApiMoveToIndexWithOption(const nshogi_state_t* CState, nshogi_move_t CMove, int ChannelsFirst) {
+int mlApiMoveToIndexWithOption(const nshogi_state_t* CState,
+                               nshogi_move_t CMove, int ChannelsFirst) {
     const core::State* State = reinterpret_cast<const core::State*>(CState);
     core::Move32 Move = core::Move32::fromValue(CMove);
 
     if (ChannelsFirst == 0) {
-        return static_cast<int>(ml::getMoveIndex<false>(State->getSideToMove(), Move));
+        return static_cast<int>(
+            ml::getMoveIndex<false>(State->getSideToMove(), Move));
     } else {
-        return static_cast<int>(ml::getMoveIndex<true>(State->getSideToMove(), Move));
+        return static_cast<int>(
+            ml::getMoveIndex<true>(State->getSideToMove(), Move));
     }
 }
 
 int mlApiMoveToIndex(const nshogi_state_t* CState, nshogi_move_t CMove) {
     return mlApiMoveToIndexWithOption(CState, CMove, 1);
 }
-
 
 } // namespace
 
