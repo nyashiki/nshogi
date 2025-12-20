@@ -13,6 +13,6 @@ var searchData=
   ['featurestackruntime_10',['FeatureStackRuntime',['../structnshogi_1_1ml_1_1FeatureStackRuntime.html#a4763756e36230563b34ff28822a4da61',1,'nshogi::ml::FeatureStackRuntime']]],
   ['filetochar_11',['fileToChar',['../namespacenshogi_1_1io_1_1sfen.html#a57e388d25b3541a79dab09294c0728bb',1,'nshogi::io::sfen::fileToChar()'],['../namespacenshogi_1_1io_1_1csa.html#a3da725a1fdbfd7a65c15f9b86497a268',1,'nshogi::io::csa::fileToChar()']]],
   ['find_12',['find',['../structnshogi_1_1core_1_1MoveList.html#a89fa1cf55fab07b4641b20a60e88f2b4',1,'nshogi::core::MoveList']]],
-  ['from_13',['from',['../structnshogi_1_1core_1_1Move16.html#aab13dcf9b13dc1f8120e3a6ff67504d8',1,'nshogi::core::Move16::from()'],['../structnshogi_1_1core_1_1Move32.html#a34c268fd82adcd40667cf1f034c97a78',1,'nshogi::core::Move32::from()']]],
-  ['fromvalue_14',['fromValue',['../structnshogi_1_1core_1_1Move16.html#ac24dfe382c1e750a91121c2c08d144f0',1,'nshogi::core::Move16::fromValue()'],['../structnshogi_1_1core_1_1Move32.html#a7e30158f692ca3445ebadbbc1007d0aa',1,'nshogi::core::Move32::fromValue()']]]
+  ['from_13',['from',['../structnshogi_1_1core_1_1Move16.html#a422cc6a63734d4464af18e94828129b9',1,'nshogi::core::Move16::from()'],['../structnshogi_1_1core_1_1Move32.html#ad0dfe4a17ecc43670ba367c21775c198',1,'nshogi::core::Move32::from()']]],
+  ['fromvalue_14',['fromValue',['../structnshogi_1_1core_1_1Move16.html#a415355b973bc58c379804ee933f692ef',1,'nshogi::core::Move16::fromValue()'],['../structnshogi_1_1core_1_1Move32.html#a0ee5433dbaea0deaf6fff663861d7a56',1,'nshogi::core::Move32::fromValue()']]]
 ];

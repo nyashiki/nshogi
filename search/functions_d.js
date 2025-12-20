@@ -1,10 +1,10 @@
 var searchData=
 [
   ['permutationgenerator_0',['PermutationGenerator',['../classnshogi_1_1ml_1_1utils_1_1PermutationGenerator.html#ae3400aefc65156a05af63884349c24aa',1,'nshogi::ml::utils::PermutationGenerator']]],
-  ['pieceon_1',['pieceOn',['../structnshogi_1_1core_1_1Position.html#aed8658c98031befeb56bf1ae1daaf870',1,'nshogi::core::Position']]],
+  ['pieceon_1',['pieceOn',['../structnshogi_1_1core_1_1Position.html#a6d65e46e94699da58c329d80bfb6e434',1,'nshogi::core::Position']]],
   ['piecetocsa_2',['pieceToCSA',['../namespacenshogi_1_1io_1_1csa.html#ad4fc5b3de8a1f136879d823ae8238f88',1,'nshogi::io::csa']]],
   ['piecetosfen_3',['pieceToSfen',['../namespacenshogi_1_1io_1_1sfen.html#a489c65666ca45b4e73f7cd4443dd16e3',1,'nshogi::io::sfen']]],
-  ['piecetype_4',['pieceType',['../structnshogi_1_1core_1_1Move32.html#a757621f0a67583b848e618c35226fd4b',1,'nshogi::core::Move32']]],
+  ['piecetype_4',['pieceType',['../structnshogi_1_1core_1_1Move32.html#a981141464b46c3b07641871540ac84a1',1,'nshogi::core::Move32']]],
   ['piecetypetocsa_5',['pieceTypeToCSA',['../namespacenshogi_1_1io_1_1csa.html#afd44cb9a2ead15e23a800eddb9b87bd1',1,'nshogi::io::csa']]],
   ['position_6',['Position',['../structnshogi_1_1core_1_1Position.html#ab80bb712368fbc623b45ebcf9df2283d',1,'nshogi::core::Position::Position()'],['../structnshogi_1_1core_1_1Position.html#a74710e8a48f5aca7e4dcd53fd1b3ed3b',1,'nshogi::core::Position::Position(const Position &amp;)'],['../structnshogi_1_1core_1_1Position.html#a6355a1e806397591e5f9fce86db7ccae',1,'nshogi::core::Position::Position(const Position &amp;, uint16_t Offset)']]],
   ['positionbuilder_7',['PositionBuilder',['../classnshogi_1_1core_1_1PositionBuilder.html#ab0b2878dcf5653cfed84044e562d25e0',1,'nshogi::core::PositionBuilder::PositionBuilder()=default'],['../classnshogi_1_1core_1_1PositionBuilder.html#a55bee8672e7c751a0abeda642add78f5',1,'nshogi::core::PositionBuilder::PositionBuilder(const Position &amp;)']]],
@@ -55,7 +55,7 @@ var searchData=
   ['processstand_52',['processStand',['../namespacenshogi_1_1ml.html#a8580aea1a8550c2ce49ca61549ed8187',1,'nshogi::ml']]],
   ['processstand_3c_20core_3a_3ablack_20_3e_53',['processStand&lt; core::Black &gt;',['../namespacenshogi_1_1ml.html#a6ad437c8a01aca82dad93ec837b3ccba',1,'nshogi::ml']]],
   ['processstand_3c_20core_3a_3awhite_20_3e_54',['processStand&lt; core::White &gt;',['../namespacenshogi_1_1ml.html#a192bb46ad8c0cdf5dc4f4bee3b6f5a77',1,'nshogi::ml']]],
-  ['promote_55',['promote',['../structnshogi_1_1core_1_1Move32.html#ada581d5697ff8b2ba1b7d1fc42451430',1,'nshogi::core::Move32::promote()'],['../structnshogi_1_1core_1_1Move16.html#a178ae9416f3761e5d08329253aaf99c3',1,'nshogi::core::Move16::promote()']]],
-  ['promotepiece_56',['promotePiece',['../namespacenshogi_1_1core.html#aa8c54fe5247e7811e42a6e9df8de27d1',1,'nshogi::core']]],
-  ['promotepiecetype_57',['promotePieceType',['../namespacenshogi_1_1core.html#a0c47e4cc8a71b7baebc9496060c123fa',1,'nshogi::core']]]
+  ['promote_55',['promote',['../structnshogi_1_1core_1_1Move32.html#aeb29facfe0b00c89c8760ce35fd5873e',1,'nshogi::core::Move32::promote()'],['../structnshogi_1_1core_1_1Move16.html#ab2a59efcc0f4c09712ea01d662a22c2d',1,'nshogi::core::Move16::promote()']]],
+  ['promotepiece_56',['promotePiece',['../namespacenshogi_1_1core.html#a4fe3bfff8617686381a4fe10a0ce4096',1,'nshogi::core']]],
+  ['promotepiecetype_57',['promotePieceType',['../namespacenshogi_1_1core.html#a85f025b777ec3482680033df7e0cc189',1,'nshogi::core']]]
 ];
