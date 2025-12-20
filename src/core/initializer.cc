@@ -9,6 +9,7 @@
 
 #include "initializer.h"
 #include "internal/bitboard.h"
+#include "types.h"
 
 #include <mutex>
 
@@ -17,6 +18,9 @@ namespace core {
 namespace initializer {
 
 void initializeAll() {
+    static_assert(std::is_trivially_copyable_v<Move32>,
+                  "Move32 must be trivially copyable.");
+
     static std::mutex Mutex;
     // Enter the critical section here to ensure that multiple threads
     // cannot call initializeAll() concurrently.

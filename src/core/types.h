@@ -445,13 +445,8 @@ struct Move32 {
  public:
     constexpr Move32() noexcept = default;
     constexpr Move32(const Move32& M) noexcept = default;
-    constexpr Move32(Move32&& M) noexcept
-        : C_(M.C_) {
-    }
-    constexpr Move32& operator=(const Move32& M) noexcept {
-        C_ = M.C_;
-        return *this;
-    }
+    constexpr Move32(Move32&& M) noexcept = default;
+    constexpr Move32& operator=(const Move32& M) noexcept = default;
 
     explicit constexpr Move32(Move16 M16) noexcept;
 
