@@ -661,7 +661,8 @@ class StateImpl {
             (bitboard::getAttackBB<C, PTK_Silver>(Sq) &
              getBitboard<PTK_Silver>()) |
             (bitboard::getAttackBB<C, PTK_King>(Sq) &
-             (getBitboard<PTK_King>() | getBitboard<PTK_ProBishop>() | getBitboard<PTK_ProRook>())) |
+             (getBitboard<PTK_King>() | getBitboard<PTK_ProBishop>() |
+              getBitboard<PTK_ProRook>())) |
             (bitboard::getAttackBB<C, PTK_Gold>(Sq) &
              (getBitboard<PTK_Gold>() | getBitboard<PTK_ProPawn>() |
               getBitboard<PTK_ProLance>() | getBitboard<PTK_ProKnight>() |

@@ -900,33 +900,27 @@ generateDroppingMovesImplNeon(const StateImpl& S, Move32* __restrict List,
     int MoveCount = 0;
 
     if (SilverExists) {
-        Pack32[MoveCount] =
-            Move32::droppingMove((Square)0, PTK_Silver).value();
+        Pack32[MoveCount] = Move32::droppingMove((Square)0, PTK_Silver).value();
         ++MoveCount;
     }
     if (GoldExists) {
-        Pack32[MoveCount] =
-            Move32::droppingMove((Square)0, PTK_Gold).value();
+        Pack32[MoveCount] = Move32::droppingMove((Square)0, PTK_Gold).value();
         ++MoveCount;
     }
     if (BishopExists) {
-        Pack32[MoveCount] =
-            Move32::droppingMove((Square)0, PTK_Bishop).value();
+        Pack32[MoveCount] = Move32::droppingMove((Square)0, PTK_Bishop).value();
         ++MoveCount;
     }
     if (RookExists) {
-        Pack32[MoveCount] =
-            Move32::droppingMove((Square)0, PTK_Rook).value();
+        Pack32[MoveCount] = Move32::droppingMove((Square)0, PTK_Rook).value();
         ++MoveCount;
     }
     if (LanceExists) {
-        Pack32[MoveCount] =
-            Move32::droppingMove((Square)0, PTK_Lance).value();
+        Pack32[MoveCount] = Move32::droppingMove((Square)0, PTK_Lance).value();
         ++MoveCount;
     }
     if (KnightExists) {
-        Pack32[MoveCount] =
-            Move32::droppingMove((Square)0, PTK_Knight).value();
+        Pack32[MoveCount] = Move32::droppingMove((Square)0, PTK_Knight).value();
         ++MoveCount;
     }
 
