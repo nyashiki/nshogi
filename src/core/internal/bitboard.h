@@ -770,11 +770,6 @@ inline Bitboard getRookAttackBB(Square Sq,
     return AttackBB;
 }
 
-inline bool isAttacked(const Bitboard& AttackBB,
-                       const Bitboard& ExistBB) noexcept {
-    return !(AttackBB & ExistBB).isZero();
-}
-
 inline Bitboard getBetweenBB(Square Sq1, Square Sq2) noexcept {
     return BetweenBB[Sq1][Sq2];
 }
