@@ -22,7 +22,7 @@ namespace internal {
 namespace {
 
 template <Color C>
-bool canDeclareImpl(const StateImpl& S) {
+bool canDeclareImpl(const StateImpl& S) noexcept {
     if (!bitboard::PromotableBB[C].isSet(S.getKingSquare<C>())) {
         return false;
     }
@@ -100,7 +100,7 @@ StateImpl StateImpl::clone() const {
 }
 
 template <Color C>
-inline void StateImpl::doMove(Move32 Move) {
+inline void StateImpl::doMove(Move32 Move) noexcept {
     Helper.proceedOneStep(Move, HashValue.getValue(),
                           getPosition().getStand<Black>(),
                           getPosition().getStand<White>());
@@ -192,7 +192,7 @@ inline void StateImpl::doMove(Move32 Move) {
     Pos.changeSideToMove();
 }
 
-void StateImpl::doMove(Move32 Move) {
+void StateImpl::doMove(Move32 Move) noexcept {
     if (getPosition().sideToMove() == Black) {
         doMove<Black>(Move);
     } else {
@@ -269,7 +269,7 @@ void StateImpl::undoMove() {
     }
 }
 
-void StateImpl::refresh() {
+void StateImpl::refresh() noexcept {
     Helper.Ply = 0;
     std::memset(static_cast<void*>(Helper.ColorBB), 0,
                 NumColors * sizeof(bitboard::Bitboard));
@@ -332,9 +332,8 @@ void StateImpl::refresh() {
 }
 
 template <Color C, bool UpdateCheckerBySliders>
-inline void
-StateImpl::setDefendingOpponentSliderBB(StepHelper* SHelper,
-                                        const bitboard::Bitboard& OccupiedBB) {
+inline void StateImpl::setDefendingOpponentSliderBB(
+    StepHelper* SHelper, const bitboard::Bitboard& OccupiedBB) noexcept {
     SHelper->DefendingOpponentSliderBB[C].clear();
 
     const bitboard::Bitboard Candidates =
@@ -361,7 +360,7 @@ StateImpl::setDefendingOpponentSliderBB(StepHelper* SHelper,
 }
 
 template <Color C>
-inline void StateImpl::setCheckerBB(StepHelper* SHelper) {
+inline void StateImpl::setCheckerBB(StepHelper* SHelper) noexcept {
     const Square KingSq = getKingSquare<C>();
     assert(checkRange(KingSq));
 
@@ -385,7 +384,7 @@ inline void StateImpl::setCheckerBB(StepHelper* SHelper) {
     SHelper->CheckerBB &= getBitboard<~C>();
 }
 
-bool StateImpl::canDeclare() const {
+bool StateImpl::canDeclare() const noexcept {
     if (getSideToMove() == Black) {
         return canDeclareImpl<Black>(*this);
     } else {
@@ -393,8 +392,8 @@ bool StateImpl::canDeclare() const {
     }
 }
 
-template void StateImpl::doMove<Black>(Move32 Move);
-template void StateImpl::doMove<White>(Move32 Move);
+template void StateImpl::doMove<Black>(Move32 Move) noexcept;
+template void StateImpl::doMove<White>(Move32 Move) noexcept;
 template void StateImpl::undoMove<Black>();
 template void StateImpl::undoMove<White>();
 

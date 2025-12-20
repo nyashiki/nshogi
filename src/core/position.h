@@ -40,7 +40,7 @@ struct Position {
     ///
     /// @brief Get the current color to play.
     ///
-    constexpr Color sideToMove() const {
+    constexpr Color sideToMove() const noexcept {
         return SideToMove;
     }
 
@@ -48,7 +48,7 @@ struct Position {
     /// @brief Get the pieces on the specified square.
     /// @param Sq The square to check.
     ///
-    constexpr PieceKind pieceOn(Square Sq) const {
+    constexpr PieceKind pieceOn(Square Sq) const noexcept {
         return OnBoard[Sq];
     }
 
@@ -57,7 +57,7 @@ struct Position {
     /// @tparam C The color of the player whose stands to get.
     ///
     template <Color C>
-    constexpr Stands getStand() const {
+    constexpr Stands getStand() const noexcept {
         return EachStands[C];
     }
 
@@ -65,14 +65,14 @@ struct Position {
     /// @brief Get the stands of the specified player.
     /// @param C The color of the player whose stands to get.
     ///
-    constexpr Stands getStand(Color C) const {
+    constexpr Stands getStand(Color C) const noexcept {
         return EachStands[C];
     }
 
     ///
     /// @brief Get the ply at the initial position.
     ///
-    constexpr uint16_t getPlyOffset() const {
+    constexpr uint16_t getPlyOffset() const noexcept {
         return PlyOffset;
     }
 
@@ -82,7 +82,7 @@ struct Position {
     /// @tparam Type The piece type to get.
     ///
     template <Color C, PieceTypeKind Type>
-    constexpr uint8_t getStandCount() const {
+    constexpr uint8_t getStandCount() const noexcept {
         return core::getStandCount<Type>(getStand<C>());
     }
 
@@ -92,7 +92,7 @@ struct Position {
     /// @param Type The piece type to get.
     ///
     template <Color C>
-    uint8_t getStandCount(PieceTypeKind Type) const {
+    uint8_t getStandCount(PieceTypeKind Type) const noexcept {
         return core::getStandCount(getStand<C>(), Type);
     }
 
@@ -101,7 +101,7 @@ struct Position {
     /// @param C The color of the player whose stands to get.
     /// @param Type The piece type to get.
     ///
-    uint8_t getStandCount(Color C, PieceTypeKind Type) const {
+    uint8_t getStandCount(Color C, PieceTypeKind Type) const noexcept {
         return core::getStandCount(getStand(C), Type);
     }
 
@@ -114,15 +114,15 @@ struct Position {
     bool equals(const Position& Pos, bool IgnorePlyOffset = false) const;
 
  private:
-    void changeSideToMove() {
+    void changeSideToMove() noexcept {
         SideToMove = ~SideToMove;
     }
 
-    void putPiece(Square Sq, PieceKind Piece) {
+    void putPiece(Square Sq, PieceKind Piece) noexcept {
         OnBoard[Sq] = Piece;
     }
 
-    PieceKind removePiece(Square Sq) {
+    PieceKind removePiece(Square Sq) noexcept {
         assert(OnBoard[Sq] != PK_Empty);
 
         PieceKind Piece = OnBoard[Sq];
@@ -130,11 +130,11 @@ struct Position {
         return Piece;
     }
 
-    void incrementStand(Color C, PieceTypeKind Type) {
+    void incrementStand(Color C, PieceTypeKind Type) noexcept {
         EachStands[C] = nshogi::core::incrementStand(EachStands[C], Type);
     }
 
-    void decrementStand(Color C, PieceTypeKind Type) {
+    void decrementStand(Color C, PieceTypeKind Type) noexcept {
         EachStands[C] = nshogi::core::decrementStand(EachStands[C], Type);
     }
 

@@ -22,7 +22,7 @@ template <Color C, bool Capture, bool WilyPromote = true>
 inline Move32*
 generateOnBoardOneStepPawnMovesImpl(const StateImpl& S,
                                     Move32* __restrict Moves,
-                                    const Bitboard& TargetSquares) {
+                                    const Bitboard& TargetSquares) noexcept {
     Bitboard ToBB = S.getBitboard<C, PTK_Pawn>();
 
     if constexpr (C == Black) {
@@ -61,7 +61,7 @@ generateOnBoardOneStepPawnMovesImpl(const StateImpl& S,
         }
 
         if constexpr (!WilyPromote) {
-            if (!FurthermostBB[C].isSet(To)) {
+            if (!Bitboard::FurthermostBB<C>().isSet(To)) {
                 if constexpr (Capture) {
                     const PieceTypeKind CaptureType =
                         getPieceType(S.getPosition().pieceOn(To));
@@ -115,10 +115,9 @@ generateOnBoardOneStepPawnMovesImpl(const StateImpl& S,
 }
 
 template <Color C, bool Capture>
-inline Move32*
-generateOnBoardOneStepGoldKindsMovesImpl(const StateImpl& S,
-                                         Move32* __restrict Moves,
-                                         const Bitboard& TargetSquares) {
+inline Move32* generateOnBoardOneStepGoldKindsMovesImpl(
+    const StateImpl& S, Move32* __restrict Moves,
+    const Bitboard& TargetSquares) noexcept {
     const Bitboard FromBB =
         (S.getBitboard<PTK_Gold>() | S.getBitboard<PTK_ProPawn>() |
          S.getBitboard<PTK_ProLance>() | S.getBitboard<PTK_ProKnight>() |
@@ -166,9 +165,9 @@ generateOnBoardOneStepGoldKindsMovesImpl(const StateImpl& S,
 }
 
 template <Color C, PieceTypeKind Type, bool Capture>
-inline Move32* generateOnBoardOneStepMovesImpl(const StateImpl& S,
-                                               Move32* __restrict Moves,
-                                               const Bitboard& TargetSquares) {
+inline Move32*
+generateOnBoardOneStepMovesImpl(const StateImpl& S, Move32* __restrict Moves,
+                                const Bitboard& TargetSquares) noexcept {
     static_assert(Type != PTK_Pawn,
                   "Pawn moves are handled in another function. "
                   "Do not use this function for pawns.");
@@ -334,10 +333,10 @@ inline Move32* generateOnBoardOneStepMovesImpl(const StateImpl& S,
 }
 
 template <Color C, bool Capture, bool WilyPromote = true>
-inline Move32* generateOnBoardLanceMovesImpl(const StateImpl& S,
-                                             Move32* __restrict Moves,
-                                             const Bitboard& TargetSquares,
-                                             const Bitboard& OccupiedBB) {
+inline Move32*
+generateOnBoardLanceMovesImpl(const StateImpl& S, Move32* __restrict Moves,
+                              const Bitboard& TargetSquares,
+                              const Bitboard& OccupiedBB) noexcept {
     // Note: using bitboard `and` operations that divide into cases
     // of promotion and non-promotion is slower, so here we do not
     // do that and check if the destination square is promotable
@@ -400,7 +399,7 @@ inline Move32* generateOnBoardLanceMovesImpl(const StateImpl& S,
                 }
 
                 // Add a non-promoting move.
-                if (!FurthermostBB[C].isSet(To)) {
+                if (!Bitboard::FurthermostBB<C>().isSet(To)) {
                     // Filter out going the furthermost squares without
                     // promotion, because it violates the No-Unmovable-Pieces
                     // rule.
@@ -472,7 +471,7 @@ inline Move32* generateOnBoardLanceMovesImpl(const StateImpl& S,
                     }
 
                     // Add a non-promoting move.
-                    if (!FurthermostBB[C].isSet(To)) {
+                    if (!Bitboard::FurthermostBB<C>().isSet(To)) {
                         // Filter out going the furthermost squares without
                         // promotion, because it violates the
                         // No-Unmovable-Pieces rule.
@@ -493,10 +492,10 @@ inline Move32* generateOnBoardLanceMovesImpl(const StateImpl& S,
 }
 
 template <Color C, PieceTypeKind Type, bool Capture, bool WilyPromote = true>
-inline Move32* generateOnBoardBishopMovesImpl(const StateImpl& S,
-                                              Move32* __restrict Moves,
-                                              const Bitboard& TargetSquares,
-                                              const Bitboard& OccupiedBB) {
+inline Move32*
+generateOnBoardBishopMovesImpl(const StateImpl& S, Move32* __restrict Moves,
+                               const Bitboard& TargetSquares,
+                               const Bitboard& OccupiedBB) noexcept {
     static_assert(Type == PTK_Bishop || Type == PTK_ProBishop,
                   "Type should be PTK_Bishop or PTK_ProBishop.");
 
@@ -619,10 +618,10 @@ inline Move32* generateOnBoardBishopMovesImpl(const StateImpl& S,
 }
 
 template <Color C, PieceTypeKind Type, bool Capture, bool WilyPromote = true>
-inline Move32* generateOnBoardRookMovesImpl(const StateImpl& S,
-                                            Move32* __restrict Moves,
-                                            const Bitboard& TargetSquares,
-                                            const Bitboard& OccupiedBB) {
+inline Move32*
+generateOnBoardRookMovesImpl(const StateImpl& S, Move32* __restrict Moves,
+                             const Bitboard& TargetSquares,
+                             const Bitboard& OccupiedBB) noexcept {
     static_assert(Type == PTK_Rook || Type == PTK_ProRook,
                   "Type should be PTK_Rook or PTK_ProRook.");
 
@@ -748,9 +747,9 @@ inline Move32* generateOnBoardRookMovesImpl(const StateImpl& S,
 #if defined(USE_AVX2)
 
 template <Color C>
-inline Move32* generateDroppingMovesImplAVX2(const StateImpl& S,
-                                             Move32* __restrict List,
-                                             const Bitboard& TargetSquares) {
+inline Move32*
+generateDroppingMovesImplAVX2(const StateImpl& S, Move32* __restrict List,
+                              const Bitboard& TargetSquares) noexcept {
     const Stands St = S.getPosition().getStand<C>();
 
     if (St == 0) {
@@ -783,38 +782,32 @@ inline Move32* generateDroppingMovesImplAVX2(const StateImpl& S,
     const bool BishopExists = getStandCount<PTK_Bishop>(St) > 0;
     const bool RookExists = getStandCount<PTK_Rook>(St) > 0;
 
-    alignas(32) uint32_t Pack32[8] = { };
+    alignas(32) uint32_t Pack32[8] = {};
 
     int MoveCount = 0;
 
     if (SilverExists) {
-        Pack32[MoveCount] =
-            Move32::droppingMove((Square)0, PTK_Silver).value();
+        Pack32[MoveCount] = Move32::droppingMove((Square)0, PTK_Silver).value();
         ++MoveCount;
     }
     if (GoldExists) {
-        Pack32[MoveCount] =
-            Move32::droppingMove((Square)0, PTK_Gold).value();
+        Pack32[MoveCount] = Move32::droppingMove((Square)0, PTK_Gold).value();
         ++MoveCount;
     }
     if (BishopExists) {
-        Pack32[MoveCount] =
-            Move32::droppingMove((Square)0, PTK_Bishop).value();
+        Pack32[MoveCount] = Move32::droppingMove((Square)0, PTK_Bishop).value();
         ++MoveCount;
     }
     if (RookExists) {
-        Pack32[MoveCount] =
-            Move32::droppingMove((Square)0, PTK_Rook).value();
+        Pack32[MoveCount] = Move32::droppingMove((Square)0, PTK_Rook).value();
         ++MoveCount;
     }
     if (LanceExists) {
-        Pack32[MoveCount] =
-            Move32::droppingMove((Square)0, PTK_Lance).value();
+        Pack32[MoveCount] = Move32::droppingMove((Square)0, PTK_Lance).value();
         ++MoveCount;
     }
     if (KnightExists) {
-        Pack32[MoveCount] =
-            Move32::droppingMove((Square)0, PTK_Knight).value();
+        Pack32[MoveCount] = Move32::droppingMove((Square)0, PTK_Knight).value();
         ++MoveCount;
     }
 
@@ -867,9 +860,9 @@ inline Move32* generateDroppingMovesImplAVX2(const StateImpl& S,
 #elif defined(USE_NEON)
 
 template <Color C>
-inline Move32* generateDroppingMovesImplNeon(const StateImpl& S,
-                                             Move32* __restrict List,
-                                             const Bitboard& TargetSquares) {
+inline Move32*
+generateDroppingMovesImplNeon(const StateImpl& S, Move32* __restrict List,
+                              const Bitboard& TargetSquares) noexcept {
     const Stands St = S.getPosition().getStand<C>();
 
     if (St == 0) {
@@ -1021,7 +1014,7 @@ inline Move32* generateDroppingMovesImplNeon(const StateImpl& S,
             --MoveCount;
         }
 
-        const Bitboard ToBB = TargetSquares & SecondFurthestBB[C];
+        const Bitboard ToBB = TargetSquares & Bitboard::SecondFurthestBB<C>();
         switch (MoveCount) {
         case 1: {
             ToBB.forEach([&](Square To) {
@@ -1084,7 +1077,7 @@ inline Move32* generateDroppingMovesImplNeon(const StateImpl& S,
             --MoveCount;
         }
 
-        const Bitboard ToBB = TargetSquares & FurthermostBB[C];
+        const Bitboard ToBB = TargetSquares & Bitboard::FurthermostBB<C>();
 
         switch (MoveCount) {
         case 1: {
@@ -1135,9 +1128,9 @@ inline Move32* generateDroppingMovesImplNeon(const StateImpl& S,
 #endif
 
 template <Color C>
-inline Move32* generateDroppingMovesImpl(const StateImpl& S,
-                                         Move32* __restrict List,
-                                         const Bitboard& TargetSquares) {
+inline Move32*
+generateDroppingMovesImpl(const StateImpl& S, Move32* __restrict List,
+                          const Bitboard& TargetSquares) noexcept {
 
 #if defined(USE_AVX2)
     return generateDroppingMovesImplAVX2<C>(S, List, TargetSquares);
@@ -1294,7 +1287,7 @@ inline Move32* generateDroppingMovesImpl(const StateImpl& S,
             --MoveCount;
         }
 
-        const Bitboard ToBB = TargetSquares & SecondFurthestBB[C];
+        const Bitboard ToBB = TargetSquares & Bitboard::SecondFurthestBB<C>();
         switch (MoveCount) {
         case 1:
             ToBB.forEach([&](Square To) {
@@ -1354,7 +1347,7 @@ inline Move32* generateDroppingMovesImpl(const StateImpl& S,
             --MoveCount;
         }
 
-        const Bitboard ToBB = TargetSquares & FurthermostBB[C];
+        const Bitboard ToBB = TargetSquares & Bitboard::FurthermostBB<C>();
         switch (MoveCount) {
         case 1:
             ToBB.forEach([&](Square To) {
@@ -1399,9 +1392,9 @@ inline Move32* generateDroppingMovesImpl(const StateImpl& S,
 }
 
 template <Color C>
-inline Move32* generateDroppingStepCheckMovesImpl(const StateImpl& S,
-                                                  Move32* __restrict List,
-                                                  const Bitboard& TargetBB) {
+inline Move32*
+generateDroppingStepCheckMovesImpl(const StateImpl& S, Move32* __restrict List,
+                                   const Bitboard& TargetBB) noexcept {
     const Stands St = S.getPosition().getStand<C>();
 
     if (getStandCount<PTK_Pawn>(St) > 0) {
@@ -1410,7 +1403,7 @@ inline Move32* generateDroppingStepCheckMovesImpl(const StateImpl& S,
         if ((PawnBB & FileBB[squareToFile(S.getKingSquare<~C>())]).isZero()) {
             if constexpr (C == Black) {
                 const Bitboard ToBB =
-                    TargetBB & ((FurthermostBB[White].andNot(
+                    TargetBB & ((Bitboard::FurthermostBB<White>().andNot(
                                      SquareBB[S.getKingSquare<~C>()]))
                                     .template getRightShiftEpi64<1>());
                 ToBB.forEach([&](Square To) {
@@ -1419,7 +1412,7 @@ inline Move32* generateDroppingStepCheckMovesImpl(const StateImpl& S,
                 });
             } else {
                 const Bitboard ToBB =
-                    TargetBB & ((FurthermostBB[Black].andNot(
+                    TargetBB & ((Bitboard::FurthermostBB<Black>().andNot(
                                      SquareBB[S.getKingSquare<~C>()]))
                                     .template getLeftShiftEpi64<1>());
                 ToBB.forEach([&](Square To) {
@@ -1463,7 +1456,7 @@ inline Move32* generateDroppingStepCheckMovesImpl(const StateImpl& S,
 template <Color C>
 inline Move32* generateDroppingSliderCheckMovesImpl(
     const StateImpl& S, Move32* __restrict List, const Bitboard& TargetBB,
-    const Bitboard& OccupiedBB) {
+    const Bitboard& OccupiedBB) noexcept {
     const Stands St = S.getPosition().getStand<C>();
 
     if (getStandCount<PTK_Lance>(St) > 0) {
@@ -1502,7 +1495,7 @@ template <Color C, PieceTypeKind Type, bool Capture, bool Pinned,
           bool WilyPromote>
 inline Move32* generateOnBoardOneStepNoPromoteCheckMovesImpl(
     const StateImpl& S, Move32* __restrict Moves, const Bitboard& TargetBB,
-    const Bitboard& SourceFilter) {
+    const Bitboard& SourceFilter) noexcept {
     static_assert(
         Type != PTK_Lance,
         "PTK_Lance must not be passed as `Type` in generateCheckStepMoves().");
@@ -1536,7 +1529,8 @@ inline Move32* generateOnBoardOneStepNoPromoteCheckMovesImpl(
                     if constexpr (WilyPromote) {
                         TargetBB2 = PromotableBB[C].andNot(TargetBB2);
                     } else {
-                        TargetBB2 = FurthermostBB[C].andNot(TargetBB2);
+                        TargetBB2 =
+                            Bitboard::FurthermostBB<C>().andNot(TargetBB2);
                     }
                 }
 
@@ -1566,7 +1560,7 @@ inline Move32* generateOnBoardOneStepNoPromoteCheckMovesImpl(
                 if constexpr (WilyPromote) {
                     TargetBB2 = PromotableBB[C].andNot(TargetBB2);
                 } else {
-                    TargetBB2 = FurthermostBB[C].andNot(TargetBB2);
+                    TargetBB2 = Bitboard::FurthermostBB<C>().andNot(TargetBB2);
                 }
             }
 
@@ -1597,7 +1591,7 @@ inline Move32* generateOnBoardOneStepNoPromoteCheckMovesImpl(
 template <Color C, bool Capture, bool Pinned>
 inline Move32* generateOnBoardOneStepNoPromoteCheckGoldKindsMovesImpl(
     const StateImpl& S, Move32* __restrict Moves, const Bitboard& TargetBB,
-    const Bitboard& SourceFilter) {
+    const Bitboard& SourceFilter) noexcept {
     const Bitboard FromBB =
         S.getBitboard<C>() & SourceFilter &
         (S.getBitboard<PTK_Gold>() | S.getBitboard<PTK_ProPawn>() |
@@ -1653,7 +1647,7 @@ inline Move32* generateOnBoardOneStepNoPromoteCheckGoldKindsMovesImpl(
 template <Color C, bool Capture, bool WilyPromote, bool Pinned>
 inline Move32* generateOnBoardLanceNoPromoteCheckMovesImpl(
     const StateImpl& S, Move32* __restrict Moves, const Bitboard& TargetBB,
-    const Bitboard& OccupiedBB, const Bitboard& SourceFilter) {
+    const Bitboard& OccupiedBB, const Bitboard& SourceFilter) noexcept {
     constexpr PieceTypeKind Type = PTK_Lance;
 
     if ((S.getBitboard<C, Type>() & SourceFilter).isZero()) {
@@ -1669,7 +1663,7 @@ inline Move32* generateOnBoardLanceNoPromoteCheckMovesImpl(
         if constexpr (WilyPromote) {
             TargetBB2 = FirstAndSecondFurthestBB[C].andNot(TargetBB2);
         } else {
-            TargetBB2 = FurthermostBB[C].andNot(TargetBB2);
+            TargetBB2 = Bitboard::FurthermostBB<C>().andNot(TargetBB2);
         }
 
         TargetBB2 &= getLanceAttackBB<C>(From, OccupiedBB) & TargetBB;
@@ -1696,7 +1690,7 @@ inline Move32* generateOnBoardLanceNoPromoteCheckMovesImpl(
             if constexpr (WilyPromote) {
                 TargetBB2 = FirstAndSecondFurthestBB[C].andNot(TargetBB2);
             } else {
-                TargetBB2 = FurthermostBB[C].andNot(TargetBB2);
+                TargetBB2 = Bitboard::FurthermostBB<C>().andNot(TargetBB2);
             }
 
             TargetBB2 &= getLanceAttackBB<C>(From, OccupiedBB) & TargetBB;
@@ -1719,7 +1713,7 @@ template <Color C, PieceTypeKind Type, bool Capture, bool Pinned,
           bool WilyPromote>
 inline Move32* generateOnBoardBishopNoPromoteCheckMovesImpl(
     const StateImpl& S, Move32* __restrict Moves, const Bitboard& TargetBB,
-    const Bitboard& OccupiedBB, const Bitboard& SourceFilter) {
+    const Bitboard& OccupiedBB, const Bitboard& SourceFilter) noexcept {
     static_assert(
         Type == PTK_Bishop || Type == PTK_ProBishop,
         "Only PTK_Bishop or PTK_ProBishop can be processed in this function.");
@@ -1808,7 +1802,7 @@ template <Color C, PieceTypeKind Type, bool Capture, bool Pinned,
           bool WilyPromote>
 inline Move32* generateOnBoardRookNoPromoteCheckMovesImpl(
     const StateImpl& S, Move32* __restrict Moves, const Bitboard& TargetBB,
-    const Bitboard& OccupiedBB, const Bitboard& SourceFilter) {
+    const Bitboard& OccupiedBB, const Bitboard& SourceFilter) noexcept {
     static_assert(
         Type == PTK_Rook || Type == PTK_ProRook,
         "Only PTK_Rook or PTK_ProRook can be processed in this function.");
@@ -1896,7 +1890,7 @@ inline Move32* generateOnBoardRookNoPromoteCheckMovesImpl(
 template <Color C, PieceTypeKind Type, bool Capture, bool Pinned>
 inline Move32* generateOnBoardOneStepPromoteCheckMovesImpl(
     const StateImpl& S, Move32* __restrict Moves, const Bitboard& TargetBB,
-    const Bitboard& SourceFilter) {
+    const Bitboard& SourceFilter) noexcept {
     static_assert(
         Type != PTK_King,
         "PTK_King must not be passed as `Type` in generateCheckStepMoves().");
@@ -1970,7 +1964,7 @@ inline Move32* generateOnBoardOneStepPromoteCheckMovesImpl(
 template <Color C, bool Capture, bool Pinned>
 inline Move32* generateOnBoardLancePromoteCheckMovesImpl(
     const StateImpl& S, Move32* __restrict Moves, const Bitboard& TargetBB,
-    const Bitboard& OccupiedBB, const Bitboard& SourceFilter) {
+    const Bitboard& OccupiedBB, const Bitboard& SourceFilter) noexcept {
     constexpr PieceTypeKind Type = PTK_Lance;
 
     if ((S.getBitboard<C, Type>() & SourceFilter).isZero()) {
@@ -2025,7 +2019,7 @@ inline Move32* generateOnBoardLancePromoteCheckMovesImpl(
 template <Color C, bool Capture, bool Pinned>
 inline Move32* generateOnBoardBishopPromoteCheckMovesImpl(
     const StateImpl& S, Move32* __restrict Moves, const Bitboard& TargetBB,
-    const Bitboard& OccupiedBB, const Bitboard& SourceFilter) {
+    const Bitboard& OccupiedBB, const Bitboard& SourceFilter) noexcept {
     constexpr PieceTypeKind Type = PTK_Bishop;
 
     if ((S.getBitboard<C, Type>() & SourceFilter).isZero()) {
@@ -2094,7 +2088,7 @@ inline Move32* generateOnBoardBishopPromoteCheckMovesImpl(
 template <Color C, bool Capture, bool Pinned>
 inline Move32* generateOnBoardRookPromoteCheckMovesImpl(
     const StateImpl& S, Move32* __restrict Moves, const Bitboard& TargetBB,
-    const Bitboard& OccupiedBB, const Bitboard& SourceFilter) {
+    const Bitboard& OccupiedBB, const Bitboard& SourceFilter) noexcept {
     constexpr PieceTypeKind Type = PTK_Rook;
 
     if ((S.getBitboard<C, Type>() & SourceFilter).isZero()) {
@@ -2161,9 +2155,9 @@ inline Move32* generateOnBoardRookPromoteCheckMovesImpl(
 }
 
 template <Color C, bool Capture, bool WilyPromote = true>
-inline Move32* generateOnBoardOneStepMovesImpl(const StateImpl& S,
-                                               Move32* __restrict Moves,
-                                               const Bitboard& TargetSquares) {
+inline Move32*
+generateOnBoardOneStepMovesImpl(const StateImpl& S, Move32* __restrict Moves,
+                                const Bitboard& TargetSquares) noexcept {
     Moves = generateOnBoardOneStepPawnMovesImpl<C, Capture, WilyPromote>(
         S, Moves, TargetSquares);
     Moves = generateOnBoardOneStepMovesImpl<C, PTK_Knight, Capture>(
@@ -2180,10 +2174,9 @@ inline Move32* generateOnBoardOneStepMovesImpl(const StateImpl& S,
 
 template <Color C, bool Capture, bool Pinned, bool WilyPromote,
           bool SkipKing = false>
-inline Move32* generateOnBoardOneStepCheckMovesImpl(const StateImpl& S,
-                                                    Move32* __restrict Moves,
-                                                    const Bitboard& TargetBB,
-                                                    const Bitboard& FromMask) {
+inline Move32* generateOnBoardOneStepCheckMovesImpl(
+    const StateImpl& S, Move32* __restrict Moves, const Bitboard& TargetBB,
+    const Bitboard& FromMask) noexcept {
     if constexpr (!SkipKing) {
         Moves =
             generateOnBoardOneStepNoPromoteCheckMovesImpl<C, PTK_King, Capture,
@@ -2220,11 +2213,9 @@ inline Move32* generateOnBoardOneStepCheckMovesImpl(const StateImpl& S,
 }
 
 template <Color C, bool Capture, bool Pinned, bool WilyPromote>
-inline Move32* generateOnBoardSliderCheckMovesImpl(const StateImpl& S,
-                                                   Move32* __restrict Moves,
-                                                   const Bitboard& TargetBB,
-                                                   const Bitboard& OccupiedBB,
-                                                   const Bitboard& FromMask) {
+inline Move32* generateOnBoardSliderCheckMovesImpl(
+    const StateImpl& S, Move32* __restrict Moves, const Bitboard& TargetBB,
+    const Bitboard& OccupiedBB, const Bitboard& FromMask) noexcept {
     Moves = generateOnBoardLanceNoPromoteCheckMovesImpl<C, Capture, WilyPromote,
                                                         Pinned>(
         S, Moves, TargetBB, OccupiedBB, FromMask);
@@ -2253,10 +2244,10 @@ inline Move32* generateOnBoardSliderCheckMovesImpl(const StateImpl& S,
 }
 
 template <Color C, bool Capture, bool WilyPromote = true>
-inline Move32* generateOnBoardSliderMovesImpl(const StateImpl& S,
-                                              Move32* __restrict Moves,
-                                              const Bitboard& TargetSquares,
-                                              const Bitboard& OccupiedBB) {
+inline Move32*
+generateOnBoardSliderMovesImpl(const StateImpl& S, Move32* __restrict Moves,
+                               const Bitboard& TargetSquares,
+                               const Bitboard& OccupiedBB) noexcept {
     Moves = generateOnBoardLanceMovesImpl<C, Capture, WilyPromote>(
         S, Moves, TargetSquares, OccupiedBB);
     Moves =
@@ -2273,11 +2264,9 @@ inline Move32* generateOnBoardSliderMovesImpl(const StateImpl& S,
 }
 
 template <Color C, bool WilyPromote = true>
-inline Move32* generateLegalEvasionMovesImpl(const StateImpl& S,
-                                             Move32* __restrict Moves,
-                                             const Bitboard& CheckerBB,
-                                             const Bitboard& OpponentBB,
-                                             const Bitboard& OccupiedBB) {
+inline Move32* generateLegalEvasionMovesImpl(
+    const StateImpl& S, Move32* __restrict Moves, const Bitboard& CheckerBB,
+    const Bitboard& OpponentBB, const Bitboard& OccupiedBB) noexcept {
     // Moving the king.
     Moves = generateOnBoardOneStepMovesImpl<C, PTK_King, true>(S, Moves,
                                                                OpponentBB);
@@ -2323,9 +2312,10 @@ inline Move32* generateLegalEvasionMovesImpl(const StateImpl& S,
 }
 
 template <Color C, bool WilyPromote>
-inline Move32*
-generateLegalMovesImpl(const StateImpl& S, Move32* __restrict Moves,
-                       const Bitboard& OpponentBB, const Bitboard& OccupiedBB) {
+inline Move32* generateLegalMovesImpl(const StateImpl& S,
+                                      Move32* __restrict Moves,
+                                      const Bitboard& OpponentBB,
+                                      const Bitboard& OccupiedBB) noexcept {
     // Captures.
     Moves = generateOnBoardOneStepMovesImpl<C, true, WilyPromote>(S, Moves,
                                                                   OpponentBB);
@@ -2346,7 +2336,8 @@ generateLegalMovesImpl(const StateImpl& S, Move32* __restrict Moves,
 }
 
 template <Color C, bool WilyPromote>
-inline Move32* generateLegalMovesImpl(const StateImpl& S, Move32* Moves) {
+inline Move32* generateLegalMovesImpl(const StateImpl& S,
+                                      Move32* Moves) noexcept {
     const Bitboard CheckerBB = S.getCheckerBB();
     const Bitboard BlackBB = S.getBitboard<Black>();
     const Bitboard WhiteBB = S.getBitboard<White>();
@@ -2374,7 +2365,8 @@ inline Move32* generateLegalMovesImpl(const StateImpl& S, Move32* Moves) {
 }
 
 template <Color C, bool WilyPromote>
-inline Move32* generateLegalCheckMovesImpl(const StateImpl& S, Move32* Moves) {
+inline Move32* generateLegalCheckMovesImpl(const StateImpl& S,
+                                           Move32* Moves) noexcept {
     const Bitboard BlackBB = S.getBitboard<Black>();
     const Bitboard WhiteBB = S.getBitboard<White>();
     const Bitboard OccupiedBB = BlackBB | WhiteBB;
@@ -2507,28 +2499,32 @@ inline Move32* generateLegalCheckMovesImpl(const StateImpl& S, Move32* Moves) {
 } // namespace
 
 template <Color C, bool WilyPromote>
-MoveList MoveGeneratorInternal::generateLegalMoves(const StateImpl& S) {
+MoveList
+MoveGeneratorInternal::generateLegalMoves(const StateImpl& S) noexcept {
     MoveList List;
     List.Tail = generateLegalMovesImpl<C, WilyPromote>(S, List.Tail);
     return List;
 }
 
 template <bool WilyPromote>
-MoveList MoveGeneratorInternal::generateLegalMoves(const StateImpl& S) {
+MoveList
+MoveGeneratorInternal::generateLegalMoves(const StateImpl& S) noexcept {
     return (S.getPosition().sideToMove() == Black)
                ? generateLegalMoves<Black, WilyPromote>(S)
                : generateLegalMoves<White, WilyPromote>(S);
 }
 
 template <Color C, bool WilyPromote>
-MoveList MoveGeneratorInternal::generateLegalCheckMoves(const StateImpl& S) {
+MoveList
+MoveGeneratorInternal::generateLegalCheckMoves(const StateImpl& S) noexcept {
     MoveList List;
     List.Tail = generateLegalCheckMovesImpl<C, WilyPromote>(S, List.Tail);
     return List;
 }
 
 template <Color C, bool WilyPromote>
-MoveList MoveGeneratorInternal::generateLegalEvasionMoves(const StateImpl& S) {
+MoveList
+MoveGeneratorInternal::generateLegalEvasionMoves(const StateImpl& S) noexcept {
     const Bitboard CheckerBB = S.getCheckerBB();
     const Bitboard MyBB = S.getBitboard<C>();
     const Bitboard OpBB = S.getBitboard<~C>();
@@ -2544,50 +2540,51 @@ MoveList MoveGeneratorInternal::generateLegalEvasionMoves(const StateImpl& S) {
 }
 
 template <bool WilyPromote>
-MoveList MoveGeneratorInternal::generateLegalCheckMoves(const StateImpl& S) {
+MoveList
+MoveGeneratorInternal::generateLegalCheckMoves(const StateImpl& S) noexcept {
     return (S.getPosition().sideToMove() == Black)
                ? generateLegalCheckMoves<Black, WilyPromote>(S)
                : generateLegalCheckMoves<White, WilyPromote>(S);
 }
 
-template MoveList
-MoveGeneratorInternal::generateLegalMoves<Black, false>(const StateImpl& S);
-template MoveList
-MoveGeneratorInternal::generateLegalMoves<Black, true>(const StateImpl& S);
-template MoveList
-MoveGeneratorInternal::generateLegalMoves<White, false>(const StateImpl& S);
-template MoveList
-MoveGeneratorInternal::generateLegalMoves<White, true>(const StateImpl& S);
+template MoveList MoveGeneratorInternal::generateLegalMoves<Black, false>(
+    const StateImpl& S) noexcept;
+template MoveList MoveGeneratorInternal::generateLegalMoves<Black, true>(
+    const StateImpl& S) noexcept;
+template MoveList MoveGeneratorInternal::generateLegalMoves<White, false>(
+    const StateImpl& S) noexcept;
+template MoveList MoveGeneratorInternal::generateLegalMoves<White, true>(
+    const StateImpl& S) noexcept;
 
 template MoveList MoveGeneratorInternal::generateLegalCheckMoves<Black, false>(
-    const StateImpl& S);
-template MoveList
-MoveGeneratorInternal::generateLegalCheckMoves<Black, true>(const StateImpl& S);
+    const StateImpl& S) noexcept;
+template MoveList MoveGeneratorInternal::generateLegalCheckMoves<Black, true>(
+    const StateImpl& S) noexcept;
 template MoveList MoveGeneratorInternal::generateLegalCheckMoves<White, false>(
-    const StateImpl& S);
-template MoveList
-MoveGeneratorInternal::generateLegalCheckMoves<White, true>(const StateImpl& S);
+    const StateImpl& S) noexcept;
+template MoveList MoveGeneratorInternal::generateLegalCheckMoves<White, true>(
+    const StateImpl& S) noexcept;
 
 template MoveList
 MoveGeneratorInternal::generateLegalEvasionMoves<Black, false>(
-    const StateImpl& S);
+    const StateImpl& S) noexcept;
 template MoveList MoveGeneratorInternal::generateLegalEvasionMoves<Black, true>(
-    const StateImpl& S);
+    const StateImpl& S) noexcept;
 template MoveList
 MoveGeneratorInternal::generateLegalEvasionMoves<White, false>(
-    const StateImpl& S);
+    const StateImpl& S) noexcept;
 template MoveList MoveGeneratorInternal::generateLegalEvasionMoves<White, true>(
-    const StateImpl& S);
+    const StateImpl& S) noexcept;
 
 template MoveList
-MoveGeneratorInternal::generateLegalMoves<false>(const StateImpl& S);
+MoveGeneratorInternal::generateLegalMoves<false>(const StateImpl& S) noexcept;
 template MoveList
-MoveGeneratorInternal::generateLegalMoves<true>(const StateImpl& S);
+MoveGeneratorInternal::generateLegalMoves<true>(const StateImpl& S) noexcept;
 
-template MoveList
-MoveGeneratorInternal::generateLegalCheckMoves<false>(const StateImpl& S);
-template MoveList
-MoveGeneratorInternal::generateLegalCheckMoves<true>(const StateImpl& S);
+template MoveList MoveGeneratorInternal::generateLegalCheckMoves<false>(
+    const StateImpl& S) noexcept;
+template MoveList MoveGeneratorInternal::generateLegalCheckMoves<true>(
+    const StateImpl& S) noexcept;
 
 } // namespace internal
 } // namespace core

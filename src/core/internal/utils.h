@@ -21,11 +21,11 @@ namespace core {
 namespace internal {
 namespace utils {
 
-inline bool isSameLine(Square Sq1, Square Sq2) {
+inline bool isSameLine(Square Sq1, Square Sq2) noexcept {
     return !bitboard::LineBB[Sq1][Sq2].isZero();
 }
 
-inline bool isSameLine(Square Sq1, Square Sq2, Square Sq3) {
+inline bool isSameLine(Square Sq1, Square Sq2, Square Sq3) noexcept {
     return bitboard::LineBB[Sq1][Sq2].isSet(Sq3);
 }
 
