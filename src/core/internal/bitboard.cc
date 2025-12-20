@@ -339,41 +339,41 @@ Bitboard getCrossStepAttack(Square Sq) {
 }
 
 void initializeKnightAttacks() {
-    for (Square sq : Squares) {
-        KnightAttackBB[Black][sq] = getBlackKnightAttack(sq);
-        KnightAttackBB[White][sq] = getWhiteKnightAttack(sq);
+    for (Square Sq : Squares) {
+        KnightAttackBB[Black][Sq] = getBlackKnightAttack(Sq);
+        KnightAttackBB[White][Sq] = getWhiteKnightAttack(Sq);
     }
 }
 
 void initializeSilverAttacks() {
-    for (Square sq : Squares) {
-        SilverAttackBB[Black][sq] = getBlackSilverAttack(sq);
-        SilverAttackBB[White][sq] = getWhiteSilverAttack(sq);
+    for (Square Sq : Squares) {
+        SilverAttackBB[Black][Sq] = getBlackSilverAttack(Sq);
+        SilverAttackBB[White][Sq] = getWhiteSilverAttack(Sq);
     }
 }
 
 void initializeGoldAttacks() {
-    for (Square sq : Squares) {
-        GoldAttackBB[Black][sq] = getBlackGoldAttack(sq);
-        GoldAttackBB[White][sq] = getWhiteGoldAttack(sq);
+    for (Square Sq : Squares) {
+        GoldAttackBB[Black][Sq] = getBlackGoldAttack(Sq);
+        GoldAttackBB[White][Sq] = getWhiteGoldAttack(Sq);
     }
 }
 
 void initializeKingAttacks() {
-    for (Square sq : Squares) {
-        KingAttackBB[sq] = getKingAttack(sq);
+    for (Square Sq : Squares) {
+        KingAttackBB[Sq] = getKingAttack(Sq);
     }
 }
 
 void initializeDiagStepAttacks() {
-    for (Square sq : Squares) {
-        DiagStepAttackBB[sq] = getDiagStepAttack(sq);
+    for (Square Sq : Squares) {
+        DiagStepAttackBB[Sq] = getDiagStepAttack(Sq);
     }
 }
 
 void initializeCrossStepAttacks() {
-    for (Square sq : Squares) {
-        CrossStepAttackBB[sq] = getCrossStepAttack(sq);
+    for (Square Sq : Squares) {
+        CrossStepAttackBB[Sq] = getCrossStepAttack(Sq);
     }
 }
 
