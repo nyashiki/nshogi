@@ -707,7 +707,9 @@ class StateImpl {
                 return true;
             }
 
-            return !(bitboard::KingAttackBB[Sq] & getBitboard<~C, PTK_ProBishop>()).isZero();
+            return !(bitboard::KingAttackBB[Sq] &
+                     getBitboard<~C, PTK_ProBishop>())
+                        .isZero();
         } else if constexpr (Type == PTK_Rook || Type == PTK_ProRook) {
             if (((getBitboard<PTK_Rook>() | getBitboard<PTK_ProRook>()) &
                  getBitboard<~C>() & bitboard::CrossBB[Sq])
@@ -723,7 +725,9 @@ class StateImpl {
                 return true;
             }
 
-            return !(bitboard::KingAttackBB[Sq] & getBitboard<~C, PTK_ProRook>()).isZero();
+            return !(bitboard::KingAttackBB[Sq] &
+                     getBitboard<~C, PTK_ProRook>())
+                        .isZero();
         } else {
             // Should not be reached.
             []<bool Flag = false>() {
