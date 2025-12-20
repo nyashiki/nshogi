@@ -59,7 +59,8 @@ class StateImpl {
         return Helper.ColorBB[C];
     }
 
-    inline bitboard::Bitboard getBitboard(Color C, PieceTypeKind Type) const noexcept {
+    inline bitboard::Bitboard getBitboard(Color C,
+                                          PieceTypeKind Type) const noexcept {
         return Helper.ColorBB[C] & Helper.TypeBB[Type];
     }
 
@@ -466,8 +467,9 @@ class StateImpl {
 
     /// Compute Sliders' attacks by Dumb7fill algorithm.
     template <Color C>
-    bitboard::Bitboard getSliderAttackBB(Square ExcludeSq = SqInvalid,
-                                         Square VirtualSq = SqInvalid) const noexcept {
+    bitboard::Bitboard
+    getSliderAttackBB(Square ExcludeSq = SqInvalid,
+                      Square VirtualSq = SqInvalid) const noexcept {
         const bitboard::Bitboard OccupiedBB =
             (VirtualSq == SqInvalid)
                 ? (getBitboard<Black>() | getBitboard<White>())
@@ -645,7 +647,8 @@ class StateImpl {
     }
 
     template <Color C>
-    inline bitboard::Bitboard getAttackBB(Square ExcludeSq = SqInvalid) const noexcept {
+    inline bitboard::Bitboard
+    getAttackBB(Square ExcludeSq = SqInvalid) const noexcept {
         return getStepAttackBB<C>(ExcludeSq) | getSliderAttackBB<C>(ExcludeSq);
     }
 
@@ -667,9 +670,9 @@ class StateImpl {
     }
 
     template <Color C, PieceTypeKind Type>
-    inline bool isAttackedBySlider(Square Sq,
-                                   const bitboard::Bitboard& OccupiedBB,
-                                   Square VirtualSq = SqInvalid) const noexcept {
+    inline bool
+    isAttackedBySlider(Square Sq, const bitboard::Bitboard& OccupiedBB,
+                       Square VirtualSq = SqInvalid) const noexcept {
         static_assert(Type == PTK_Lance || Type == PTK_Bishop ||
                           Type == PTK_ProBishop || Type == PTK_Rook ||
                           Type == PTK_ProRook,
@@ -733,10 +736,10 @@ class StateImpl {
     }
 
     template <Color C>
-    inline bool isAttackedBySlider(Square Sq,
-                                   const bitboard::Bitboard& OccupiedBB,
-                                   Square ExcludeSq = SqInvalid,
-                                   Square VirtualSq = SqInvalid) const noexcept {
+    inline bool
+    isAttackedBySlider(Square Sq, const bitboard::Bitboard& OccupiedBB,
+                       Square ExcludeSq = SqInvalid,
+                       Square VirtualSq = SqInvalid) const noexcept {
         bitboard::Bitboard OccupiedBB2 = OccupiedBB;
         if (ExcludeSq != SqInvalid) {
             assert(OccupiedBB.isSet(ExcludeSq));
@@ -768,8 +771,9 @@ class StateImpl {
     Hash<uint64_t> HashValue;
 
     template <Color C, bool UpdateCheckerBySliders>
-    void setDefendingOpponentSliderBB(StepHelper* SHelper,
-                                      const bitboard::Bitboard& OccupiedBB) noexcept;
+    void
+    setDefendingOpponentSliderBB(StepHelper* SHelper,
+                                 const bitboard::Bitboard& OccupiedBB) noexcept;
 
     template <Color C>
     void setCheckerBB(StepHelper* SHelper) noexcept;

@@ -332,9 +332,8 @@ void StateImpl::refresh() noexcept {
 }
 
 template <Color C, bool UpdateCheckerBySliders>
-inline void
-StateImpl::setDefendingOpponentSliderBB(StepHelper* SHelper,
-                                        const bitboard::Bitboard& OccupiedBB) noexcept {
+inline void StateImpl::setDefendingOpponentSliderBB(
+    StepHelper* SHelper, const bitboard::Bitboard& OccupiedBB) noexcept {
     SHelper->DefendingOpponentSliderBB[C].clear();
 
     const bitboard::Bitboard Candidates =

@@ -180,21 +180,18 @@ struct alignas(16) Bitboard {
         return _mm_testz_si128(Bitboard_, Bitboard_);
 #elif defined(USE_NEON)
         uint64x2_t Temp = vandq_u64(Bitboard_, Bitboard_);
-        return (vgetq_lane_u64(Temp, 0) == 0) &&
-               (vgetq_lane_u64(Temp, 1) == 0);
+        return (vgetq_lane_u64(Temp, 0) == 0) && (vgetq_lane_u64(Temp, 1) == 0);
 #else
         return Primitive[0] == 0 && Primitive[1] == 0;
 #endif
     }
 
-    inline __attribute__((always_inline)) bool
-    isSet(Square Sq) const noexcept {
+    inline __attribute__((always_inline)) bool isSet(Square Sq) const noexcept {
 #if defined(USE_SSE41)
         return !_mm_testz_si128(Bitboard_, SquareBB[Sq].Bitboard_);
 #elif defined(USE_NEON)
         uint64x2_t Temp = vandq_u64(Bitboard_, SquareBB[Sq].Bitboard_);
-        return (vgetq_lane_u64(Temp, 0) != 0) ||
-               (vgetq_lane_u64(Temp, 1) != 0);
+        return (vgetq_lane_u64(Temp, 0) != 0) || (vgetq_lane_u64(Temp, 1) != 0);
 #endif
         return !(*this & SquareBB[Sq]).isZero();
     }
@@ -319,13 +316,13 @@ struct alignas(16) Bitboard {
     template <int Shift>
     inline __attribute__((always_inline)) Bitboard
     getRightShiftSi128() const noexcept {
-        // We can't use _mm_slli_si128 here even when Shift % 8 == 0 holds because
-        // the bitboard is composed of two 64-bit variables.
-        // One of them uses 63 bits to represent the first 7 files (7 files * 9
-        // squares = 63), and the other one uses 18 bits for the remaining 2
-        // files (2 files * 9 squares = 18). Therefore, we must pay attention to
-        // the 1 bit of the former one. Using _mm_slli_si128 directly collapses
-        // this configuration.
+        // We can't use _mm_slli_si128 here even when Shift % 8 == 0 holds
+        // because the bitboard is composed of two 64-bit variables. One of them
+        // uses 63 bits to represent the first 7 files (7 files * 9 squares =
+        // 63), and the other one uses 18 bits for the remaining 2 files (2
+        // files * 9 squares = 18). Therefore, we must pay attention to the 1
+        // bit of the former one. Using _mm_slli_si128 directly collapses this
+        // configuration.
 
         static_assert(0 <= Shift && Shift <= 63, "Shift must be in [0, 63]");
 
@@ -395,7 +392,7 @@ struct alignas(16) Bitboard {
 #elif defined(USE_NEON)
         const uint64x2_t Shifted = vshlq_n_u64(Bitboard_, Shift);
         const uint8x16_t Bytes = vreinterpretq_u8_u64(Bitboard_);
-        const uint8x16_t Zero  = vdupq_n_u8(0);
+        const uint8x16_t Zero = vdupq_n_u8(0);
         const uint8x16_t LoToHiBytes = vextq_u8(Zero, Bytes, 8);
         const uint64x2_t LoToHi = vreinterpretq_u64_u8(LoToHiBytes);
         const uint64x2_t Carry = vshrq_n_u64(LoToHi, 63 - Shift);
@@ -413,7 +410,8 @@ struct alignas(16) Bitboard {
         return _mm_movemask_epi8(Result) == 0xFFFF;
 #elif defined(USE_NEON)
         const uint64x2_t Compare = vceqq_u64(Bitboard_, BB.Bitboard_);
-        return (vgetq_lane_u64(Compare, 0) & vgetq_lane_u64(Compare, 1)) == ~0ULL;
+        return (vgetq_lane_u64(Compare, 0) & vgetq_lane_u64(Compare, 1)) ==
+               ~0ULL;
 #else
         return Primitive[0] == BB.Primitive[0] &&
                Primitive[1] == BB.Primitive[1];
@@ -426,7 +424,8 @@ struct alignas(16) Bitboard {
         return _mm_movemask_epi8(Result) != 0xFFFF;
 #elif defined(USE_NEON)
         const uint64x2_t Compare = vceqq_u64(Bitboard_, BB.Bitboard_);
-        return (vgetq_lane_u64(Compare, 0) & vgetq_lane_u64(Compare, 1)) != ~0ULL;
+        return (vgetq_lane_u64(Compare, 0) & vgetq_lane_u64(Compare, 1)) !=
+               ~0ULL;
 #else
         return (Primitive[0] != BB.Primitive[0]) ||
                (Primitive[1] != BB.Primitive[1]);
@@ -533,7 +532,8 @@ struct alignas(16) Bitboard {
     // std::function<void(Square)> can have overhead.
     template <typename FuncType>
         requires std::is_invocable_v<FuncType, Square>
-    inline __attribute__((always_inline)) void forEach(FuncType Func) const noexcept {
+    inline __attribute__((always_inline)) void
+    forEach(FuncType Func) const noexcept {
         uint64_t B = getPrimitive<false>();
 
         while (B != 0) {
@@ -552,7 +552,8 @@ struct alignas(16) Bitboard {
 
     template <typename FuncType>
         requires std::is_invocable_r_v<bool, FuncType, Square>
-    inline __attribute__((always_inline)) bool any(FuncType Func) const noexcept {
+    inline __attribute__((always_inline)) bool
+    any(FuncType Func) const noexcept {
         uint64_t B = getPrimitive<false>();
 
         while (B != 0) {
@@ -685,7 +686,8 @@ inline Bitboard getAttackBB(Square From) noexcept {
 }
 
 template <Color C>
-inline Bitboard getLanceAttackBB(Square Sq, const Bitboard& OccupiedBB) noexcept {
+inline Bitboard getLanceAttackBB(Square Sq,
+                                 const Bitboard& OccupiedBB) noexcept {
     if (Bitboard::FurthermostBB<C>().isSet(Sq)) {
         return bitboard::Bitboard::ZeroBB();
     }
@@ -701,7 +703,8 @@ inline Bitboard getLanceAttackBB(Square Sq, const Bitboard& OccupiedBB) noexcept
 }
 
 template <PieceTypeKind Type>
-inline Bitboard getBishopAttackBB(Square Sq, const Bitboard& OccupiedBB) noexcept {
+inline Bitboard getBishopAttackBB(Square Sq,
+                                  const Bitboard& OccupiedBB) noexcept {
     static_assert(
         Type == PTK_Bishop || Type == PTK_ProBishop,
         "the template parameter `Type` must be PTK_Bishop or PTK_ProBishop.");
@@ -734,7 +737,8 @@ inline Bitboard getBishopAttackBB(Square Sq, const Bitboard& OccupiedBB) noexcep
 }
 
 template <PieceTypeKind Type>
-inline Bitboard getRookAttackBB(Square Sq, const Bitboard& OccupiedBB) noexcept {
+inline Bitboard getRookAttackBB(Square Sq,
+                                const Bitboard& OccupiedBB) noexcept {
     static_assert(
         Type == PTK_Rook || Type == PTK_ProRook,
         "the template parameter `Type` must be PTK_Rook or PTK_ProRook.");
@@ -766,7 +770,8 @@ inline Bitboard getRookAttackBB(Square Sq, const Bitboard& OccupiedBB) noexcept 
     return AttackBB;
 }
 
-inline bool isAttacked(const Bitboard& AttackBB, const Bitboard& ExistBB) noexcept {
+inline bool isAttacked(const Bitboard& AttackBB,
+                       const Bitboard& ExistBB) noexcept {
     return !(AttackBB & ExistBB).isZero();
 }
 
