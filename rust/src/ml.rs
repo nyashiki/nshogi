@@ -474,11 +474,42 @@ pub fn make_feature_vector(
     state_config: &StateConfig,
     feature_types: &[FeatureType],
 ) -> Vec<f32> {
-    NSHOGI_ML_API.make_feature_vector(
+    make_feature_vector_with_option(
+        state,
+        state_config,
+        feature_types,
+        true,
+    )
+}
+
+/// Same as `make_feature_vector`, but with an additional option
+/// `channels_first`.
+///
+/// If `channels_first` is `true`, the output vector is
+/// [C, H, W] shaped (C: number of channels, H: height, W: width).
+/// If `channels_first` is `false`, the output vector is
+/// [H, W, C] shaped.
+///
+/// # Parameters
+///
+/// * `state` - current game position to encode.
+/// * `state_config` - configs about `state`.
+/// * `feature_types` - ordered list of planes to extract.
+/// * `channels_first` - whether the output vector is channels-first or not.
+///
+#[inline]
+pub fn make_feature_vector_with_option(
+    state: &State,
+    state_config: &StateConfig,
+    feature_types: &[FeatureType],
+    channels_first: bool,
+) -> Vec<f32> {
+    NSHOGI_ML_API.make_feature_vector_with_option(
         state.handle.as_ptr(),
         state_config.handle.as_ptr(),
         feature_types.as_ptr() as *const i32,
         feature_types.len(),
+        channels_first,
     )
 }
 
@@ -489,9 +520,32 @@ pub fn make_feature_vector(
 /// * Within one state every legal move has a unique index.
 /// * Across different positions the *same* numerical index may refer
 ///   to completely different moves.
+///
+/// # Parameters
+/// * `state` - current game position.
+/// * `m` - move to be converted.
+///
 #[inline]
 pub fn move_to_index(state: &State, m: &Move) -> usize {
-    NSHOGI_ML_API.move_to_index(state.handle.as_ptr(), m.value())
+    move_to_index_with_option(state, m, true)
+}
+
+/// Same as `move_to_index`, but with an additional option
+/// `channels_first`.
+///
+/// If `channels_first` is `true`, the move indexing
+/// is done in channels-first order.
+/// If `channels_first` is `false`, the move indexing
+/// is done in channels-last order.
+///
+/// # Parameters
+/// * `state` - current game position.
+/// * `m` - move to be converted.
+/// * `channels_first` - whether the indexing is channels-first or not.
+///
+#[inline]
+pub fn move_to_index_with_option(state: &State, m: &Move, channels_first: bool) -> usize {
+    NSHOGI_ML_API.move_to_index_with_option(state.handle.as_ptr(), m.value(), channels_first)
 }
 
 #[test]
