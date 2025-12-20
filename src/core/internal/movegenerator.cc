@@ -811,14 +811,14 @@ generateDroppingMovesImplAVX2(const StateImpl& S, Move32* __restrict List,
         ++MoveCount;
     }
 
-    __m256i Pack256 = _mm256_load_si256((const __m256i*)Pack32);
+    const __m256i Pack256 = _mm256_load_si256((const __m256i*)Pack32);
 
     /* if (Stands exist) */ {
         const Bitboard ToBB = FirstAndSecondFurthestBB[C].andNot(TargetSquares);
 
         ToBB.forEach([&](Square To) {
-            __m256i Tos = _mm256_set1_epi32((int)To);
-            __m256i V = _mm256_or_si256(Pack256, Tos);
+            const __m256i Tos = _mm256_set1_epi32((int)To);
+            const __m256i V = _mm256_or_si256(Pack256, Tos);
             _mm256_storeu_si256(reinterpret_cast<__m256i*>(List), V);
             List += MoveCount;
         });
@@ -831,8 +831,8 @@ generateDroppingMovesImplAVX2(const StateImpl& S, Move32* __restrict List,
 
         const Bitboard ToBB = TargetSquares & Bitboard::SecondFurthestBB<C>();
         ToBB.forEach([&](Square To) {
-            __m256i Tos = _mm256_set1_epi32((int)To);
-            __m256i V = _mm256_or_si256(Pack256, Tos);
+            const __m256i Tos = _mm256_set1_epi32((int)To);
+            const __m256i V = _mm256_or_si256(Pack256, Tos);
             _mm256_storeu_si256(reinterpret_cast<__m256i*>(List), V);
             List += MoveCount;
         });
@@ -843,12 +843,12 @@ generateDroppingMovesImplAVX2(const StateImpl& S, Move32* __restrict List,
             --MoveCount;
         }
 
-        __m128i Pack128 = _mm256_castsi256_si128(Pack256);
+        const __m128i Pack128 = _mm256_castsi256_si128(Pack256);
 
         const Bitboard ToBB = TargetSquares & Bitboard::FurthermostBB<C>();
         ToBB.forEach([&](Square To) {
-            __m128i Tos = _mm_set1_epi32((int)To);
-            __m128i V = _mm_or_si128(Pack128, Tos);
+            const __m128i Tos = _mm_set1_epi32((int)To);
+            const __m128i V = _mm_or_si128(Pack128, Tos);
             _mm_storeu_si128(reinterpret_cast<__m128i*>(List), V);
             List += MoveCount;
         });
