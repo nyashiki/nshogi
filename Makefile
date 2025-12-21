@@ -24,7 +24,6 @@ else
 endif
 SHARED_TARGET := $(OBJDIR)/lib/$(SHARED_TARGET_NAME)
 STATIC_TARGET := $(OBJDIR)/lib/libnshogi_static.a
-PYTHON_TARGET := $(OBJDIR)/lib/nshogi$(shell python3-config --extension-suffix)
 TEST_STATIC_TARGET := $(OBJDIR)/bin/libnshogi_test_static
 TEST_SHARED_TARGET := $(OBJDIR)/bin/libnshogi_test_shared
 BENCH_TARGET := $(OBJDIR)/bin/nshogi_bench
@@ -32,8 +31,11 @@ BENCH_TARGET := $(OBJDIR)/bin/nshogi_bench
 INCLUDES :=
 LINKS :=
 
-PYTHON_INCLUDES := $(shell python3-config --includes) $(shell python3 -m pybind11 --includes)
-PYTHON_LINKS := $(shell python3-config --ldflags) -Wl,-undefined,dynamic_lookup
+PYTHON ?= python3
+PYTHON_CONFIG ?= python3-config
+PYTHON_INCLUDES := $(shell $(PYTHON_CONFIG) --includes) $(shell $(PYTHON) -m pybind11 --includes)
+PYTHON_LINKS := $(shell $(PYTHON_CONFIG) --ldflags) -Wl,-undefined,dynamic_lookup
+PYTHON_TARGET := $(OBJDIR)/lib/nshogi$(shell $(PYTHON_CONFIG) --extension-suffix)
 
 ifeq ($(BUILD), debug)
 	# CXX_FLAGS = -std=c++2b -Wall -Wextra -Wconversion -Wpedantic -Wshadow -fno-omit-frame-pointer -fsanitize=address -pipe
@@ -118,31 +120,36 @@ PYTHON_OBJECTS = $(patsubst %.cc,$(OBJDIR)/%.o,$(PYTHON_SOURCES))
 
 DEPENDINGS = $(patsubst %.cc,$(OBJDIR)/%.d,$(SOURCES))
 
+GENERIC ?= 0
 ARCH_FLAGS :=
 
-ifeq ($(TUNENATIVE),1)
-	ARCH_FLAGS += -march=native -mtune=native
+ifeq ($(GENERIC),1)
+    ARCH_FLAGS := -march=x86-64 -mtune=generic
 else
-	ifeq ($(SSE41),1)
-		ARCH_FLAGS += -msse2 -msse4.1
-		CXX_FLAGS += -DUSE_SSE41
-	endif
-	ifeq ($(SSE42),1)
-		ARCH_FLAGS += -msse2 -msse4.1 -msse4.2
-		CXX_FLAGS += -DUSE_SSE41 -DUSE_SSE42
-	endif
-	ifeq ($(AVX),1)
-		ARCH_FLAGS += -msse2 -msse4.1 -msse4.2 -mbmi -mbmi2 -mavx
-		CXX_FLAGS += -DUSE_SSE41 -DUSE_SSE42 -DUSE_AVX
-	endif
-	ifeq ($(AVX2),1)
-		ARCH_FLAGS += -msse2 -msse4.1 -msse4.2 -mbmi -mbmi2 -mavx -mavx2 -mlzcnt
-		CXX_FLAGS += -DUSE_SSE41 -DUSE_SSE42 -DUSE_BMI1 -DUSE_BMI2 -DUSE_AVX -DUSE_AVX2 -DUSE_LZCNT
-	endif
-	ifeq ($(NEON),1)
-		ARCH_FLAGS += -march=armv8
-		CXX_FLAGS += -DUSE_NEON
-	endif
+    ifeq ($(TUNENATIVE),1)
+        ARCH_FLAGS += -march=native -mtune=native
+    else
+        ifeq ($(SSE41),1)
+            ARCH_FLAGS += -msse2 -msse4.1
+            CXX_FLAGS += -DUSE_SSE41
+        endif
+        ifeq ($(SSE42),1)
+            ARCH_FLAGS += -msse2 -msse4.1 -msse4.2
+            CXX_FLAGS += -DUSE_SSE41 -DUSE_SSE42
+        endif
+        ifeq ($(AVX),1)
+            ARCH_FLAGS += -msse2 -msse4.1 -msse4.2 -mbmi -mbmi2 -mavx
+            CXX_FLAGS += -DUSE_SSE41 -DUSE_SSE42 -DUSE_AVX
+        endif
+        ifeq ($(AVX2),1)
+            ARCH_FLAGS += -msse2 -msse4.1 -msse4.2 -mbmi -mbmi2 -mavx -mavx2 -mlzcnt
+            CXX_FLAGS += -DUSE_SSE41 -DUSE_SSE42 -DUSE_BMI1 -DUSE_BMI2 -DUSE_AVX -DUSE_AVX2 -DUSE_LZCNT
+        endif
+        ifeq ($(NEON),1)
+            ARCH_FLAGS += -march=armv8
+            CXX_FLAGS += -DUSE_NEON
+        endif
+    endif
 endif
 
 PEXT ?= 1
