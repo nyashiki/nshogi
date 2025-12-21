@@ -14,6 +14,10 @@ ROOT = pathlib.Path(__file__).parent.resolve()
 class MakefileBuildExt(build_ext):
     def run(self):
         env = os.environ.copy()
+
+        python_exe = sys.executable
+        env["PYTHON"] = python_exe
+
         subprocess.check_call(["make", "GENERIC=1", "python"], cwd=str(ROOT), env=env)
 
         ext_suffix = sysconfig.get_config_var("EXT_SUFFIX") or ".so"

@@ -24,7 +24,6 @@ else
 endif
 SHARED_TARGET := $(OBJDIR)/lib/$(SHARED_TARGET_NAME)
 STATIC_TARGET := $(OBJDIR)/lib/libnshogi_static.a
-PYTHON_TARGET := $(OBJDIR)/lib/nshogi$(shell python3-config --extension-suffix)
 TEST_STATIC_TARGET := $(OBJDIR)/bin/libnshogi_test_static
 TEST_SHARED_TARGET := $(OBJDIR)/bin/libnshogi_test_shared
 BENCH_TARGET := $(OBJDIR)/bin/nshogi_bench
@@ -32,8 +31,10 @@ BENCH_TARGET := $(OBJDIR)/bin/nshogi_bench
 INCLUDES :=
 LINKS :=
 
-PYTHON_INCLUDES := $(shell python3-config --includes) $(shell python3 -m pybind11 --includes)
-PYTHON_LINKS := $(shell python3-config --ldflags) -Wl,-undefined,dynamic_lookup
+PYTHON ?= python3
+PYTHON_INCLUDES := $(shell $(PYTHON)-config --includes) $(shell $(PYTHON) -m pybind11 --includes)
+PYTHON_LINKS := $(shell $(PYTHON)-config --ldflags) -Wl,-undefined,dynamic_lookup
+PYTHON_TARGET := $(OBJDIR)/lib/nshogi$(shell $(PYTHON)-config --extension-suffix)
 
 ifeq ($(BUILD), debug)
 	# CXX_FLAGS = -std=c++2b -Wall -Wextra -Wconversion -Wpedantic -Wshadow -fno-omit-frame-pointer -fsanitize=address -pipe
