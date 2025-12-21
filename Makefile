@@ -32,9 +32,10 @@ INCLUDES :=
 LINKS :=
 
 PYTHON ?= python3
-PYTHON_INCLUDES := $(shell $(PYTHON)-config --includes) $(shell $(PYTHON) -m pybind11 --includes)
-PYTHON_LINKS := $(shell $(PYTHON)-config --ldflags) -Wl,-undefined,dynamic_lookup
-PYTHON_TARGET := $(OBJDIR)/lib/nshogi$(shell $(PYTHON)-config --extension-suffix)
+PYTHON_CONFIG ?= python3-config
+PYTHON_INCLUDES := $(shell $(PYTHON_CONFIG) --includes) $(shell $(PYTHON) -m pybind11 --includes)
+PYTHON_LINKS := $(shell $(PYTHON_CONFIG) --ldflags) -Wl,-undefined,dynamic_lookup
+PYTHON_TARGET := $(OBJDIR)/lib/nshogi$(shell $(PYTHON_CONFIG) --extension-suffix)
 
 ifeq ($(BUILD), debug)
 	# CXX_FLAGS = -std=c++2b -Wall -Wextra -Wconversion -Wpedantic -Wshadow -fno-omit-frame-pointer -fsanitize=address -pipe

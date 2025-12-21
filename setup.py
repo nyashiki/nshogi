@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import os
 import pathlib
+from pathlib import Path
 import shutil
 import subprocess
 import sys
@@ -12,12 +13,29 @@ from setuptools.command.build_ext import build_ext
 
 ROOT = pathlib.Path(__file__).parent.resolve()
 
+def find_python_config() -> str | None:
+    major, minor = sys.version_info[:2]
+    base_bin = Path(sys.base_exec_prefix) / "bin"
+
+    candidates = [
+        base_bin / f"python{major}.{minor}-config",
+        base_bin / f"python{major}-config",
+        base_bin / "python3-config",
+        base_bin / "python-config",
+    ]
+    for p in candidates:
+        if p.exists():
+            return str(p)
+    return None
+
 class MakefileBuildExt(build_ext):
     def run(self):
         env = os.environ.copy()
+        env["PYTHON"] = sys.executable
 
-        python_exe = sys.executable
-        env["PYTHON"] = python_exe
+        pcfg = find_python_config()
+        if pcfg is not None:
+            env["PYTHON_CONFIG"] = pcfg
 
         subprocess.check_call(["make", "GENERIC=1", "python"], cwd=str(ROOT), env=env)
 
