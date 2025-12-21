@@ -31,13 +31,18 @@ def find_python_config() -> str | None:
 class MakefileBuildExt(build_ext):
     def run(self):
         env = os.environ.copy()
-        env["PYTHON"] = sys.executable
 
+        base_build = env.get("BUILD", "release")
+        py_tag = f"py{sys.version_info[0]}{sys.version_info[1]}"
+        env["BUILD"] = f"{base_build}_{py_tag}"
+
+        make_cmd = ["make", "GENERIC=1", "python"]
+        make_cmd.insert(1, f"PYTHON={sys.executable}")
         pcfg = find_python_config()
         if pcfg is not None:
-            env["PYTHON_CONFIG"] = pcfg
+            make_cmd.insert(1, f"PYTHON_CONFIG={pcfg}")
 
-        subprocess.check_call(["make", "GENERIC=1", "python"], cwd=str(ROOT), env=env)
+        subprocess.check_call(make_cmd, cwd=str(ROOT), env=env)
 
         ext_suffix = sysconfig.get_config_var("EXT_SUFFIX") or ".so"
 
