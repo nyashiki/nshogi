@@ -67,6 +67,7 @@ class MakefileBuildExt(build_ext):
 def read_version() -> str:
     return (ROOT / "NSHOGI_VERSION").read_text(encoding="utf-8").strip()
 
+
 setup(
     name="nshogi",
     version=read_version(),
