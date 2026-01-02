@@ -297,7 +297,8 @@ core::Move32 SolverImpl::search(core::internal::StateImpl* S, uint64_t Depth,
 
             S->doMove<C>(BestMove);
             search<~C, !Attacking, WilyPromote>(S, Depth + 1, &BestChildValue,
-                                   &ChildThreshold, MaxNodeCount, MaxDepth);
+                                                &ChildThreshold, MaxNodeCount,
+                                                MaxDepth);
             S->undoMove<~C>();
 
             if (BestChildValue.ProofNumber == 0) {
@@ -358,7 +359,8 @@ core::Move32 SolverImpl::search(core::internal::StateImpl* S, uint64_t Depth,
 
             S->doMove<C>(BestMove);
             search<~C, !Attacking, WilyPromote>(S, Depth + 1, &BestChildValue,
-                                   &ChildThreshold, MaxNodeCount, MaxDepth);
+                                                &ChildThreshold, MaxNodeCount,
+                                                MaxDepth);
             S->undoMove<~C>();
 
             if (BestChildValue.DisproofNumber == 0) {
@@ -414,8 +416,8 @@ std::vector<core::Move32> SolverImpl::findPV(core::internal::StateImpl* S,
     return BestPV;
 }
 
-std::vector<core::Move32>
-SolverImpl::findPV(core::internal::StateImpl* S, bool Strict) const {
+std::vector<core::Move32> SolverImpl::findPV(core::internal::StateImpl* S,
+                                             bool Strict) const {
     if (Strict) {
         return (S->getSideToMove() == core::Black)
                    ? findPV<core::Black, true, false>(S, 0)
@@ -434,21 +436,26 @@ core::Move32 SolverImpl::solve(core::State* S, uint64_t MaxNodeCount,
 
     if (Strict) {
         if (SideToMove == core::Black) {
-            return solve<core::Black, false>(Adapter.get(), MaxNodeCount, MaxDepth);
+            return solve<core::Black, false>(Adapter.get(), MaxNodeCount,
+                                             MaxDepth);
         } else {
-            return solve<core::White, false>(Adapter.get(), MaxNodeCount, MaxDepth);
+            return solve<core::White, false>(Adapter.get(), MaxNodeCount,
+                                             MaxDepth);
         }
     } else {
         if (SideToMove == core::Black) {
-            return solve<core::Black, true>(Adapter.get(), MaxNodeCount, MaxDepth);
+            return solve<core::Black, true>(Adapter.get(), MaxNodeCount,
+                                            MaxDepth);
         } else {
-            return solve<core::White, true>(Adapter.get(), MaxNodeCount, MaxDepth);
+            return solve<core::White, true>(Adapter.get(), MaxNodeCount,
+                                            MaxDepth);
         }
     }
 }
 
 template <core::Color C, bool WilyPromote>
-core::Move32 SolverImpl::solve(core::internal::StateImpl* S, uint64_t MaxNodeCount, uint64_t MaxDepth) {
+core::Move32 SolverImpl::solve(core::internal::StateImpl* S,
+                               uint64_t MaxNodeCount, uint64_t MaxDepth) {
     ++Generation;
     SearchedNodeCount = 0;
 
@@ -456,8 +463,8 @@ core::Move32 SolverImpl::solve(core::internal::StateImpl* S, uint64_t MaxNodeCou
     DfPnValue Threshold(DfPnValue::Infinity, DfPnValue::Infinity);
 
     while (true) {
-        const core::Move32 BestMove = search<C, true, WilyPromote>(S, 0, &RootValue,
-                                            &Threshold, MaxNodeCount, MaxDepth);
+        const core::Move32 BestMove = search<C, true, WilyPromote>(
+            S, 0, &RootValue, &Threshold, MaxNodeCount, MaxDepth);
 
         if (RootValue.ProofNumber == 0) {
             // Proven.

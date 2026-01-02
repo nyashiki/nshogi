@@ -26,8 +26,9 @@ core::Move32 Solver::solve(core::State* S, uint64_t MaxNodeCount,
     return Impl->solve(S, MaxNodeCount, MaxDepth, Strict);
 }
 
-std::vector<core::Move32>
-Solver::solveWithPV(core::State* S, uint64_t MaxNodeCount, uint64_t MaxDepth, bool Strict) {
+std::vector<core::Move32> Solver::solveWithPV(core::State* S,
+                                              uint64_t MaxNodeCount,
+                                              uint64_t MaxDepth, bool Strict) {
     return Impl->solveWithPV(S, MaxNodeCount, MaxDepth, Strict);
 }
 

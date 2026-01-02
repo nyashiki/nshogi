@@ -133,8 +133,8 @@ class SolverImpl {
     SolverImpl(std::size_t MemoryMB);
     ~SolverImpl();
 
-    core::Move32 solve(core::State* S, uint64_t MaxDepth,
-                       uint64_t MaxNodeCount, bool Strict);
+    core::Move32 solve(core::State* S, uint64_t MaxDepth, uint64_t MaxNodeCount,
+                       bool Strict);
     std::vector<core::Move32> solveWithPV(core::State* S, uint64_t MaxDepth,
                                           uint64_t MaxNodeCount, bool Strict);
 
@@ -175,7 +175,8 @@ class SolverImpl {
                          bool* IsFound) const;
 
     template <core::Color C, bool WilyPromote>
-    core::Move32 solve(core::internal::StateImpl* S, uint64_t MaxNodeCount, uint64_t MaxDepth);
+    core::Move32 solve(core::internal::StateImpl* S, uint64_t MaxNodeCount,
+                       uint64_t MaxDepth);
 
     template <core::Color C, bool Attacking, bool WilyPromote>
     core::Move32 search(core::internal::StateImpl* S, uint64_t Depth,
@@ -185,7 +186,8 @@ class SolverImpl {
     template <core::Color C, bool Attacking, bool WilyPromote>
     std::vector<core::Move32> findPV(core::internal::StateImpl* S,
                                      uint64_t Depth) const;
-    std::vector<core::Move32> findPV(core::internal::StateImpl* S, bool Strict) const;
+    std::vector<core::Move32> findPV(core::internal::StateImpl* S,
+                                     bool Strict) const;
 
     std::size_t TTSize;
     std::unique_ptr<DfPnTTBundle[]> TT;
