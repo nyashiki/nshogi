@@ -35,10 +35,11 @@ class Solver {
     ~Solver();
 
     core::Move32 solve(core::State* S, uint64_t MaxNodeCount = 1000000,
-                       uint64_t MaxDepth = 64);
+                       uint64_t MaxDepth = 64, bool Strict = false);
     std::vector<core::Move32> solveWithPV(core::State* S,
                                           uint64_t MaxNodeCount = 1000000,
-                                          uint64_t MaxDepth = 64);
+                                          uint64_t MaxDepth = 64,
+                                          bool Strict = false);
 
     uint64_t searchedNodeCount() const;
 

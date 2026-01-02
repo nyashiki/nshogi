@@ -34,12 +34,35 @@ void solverApiDestroyDfPnSolver(nshogi_solver_dfpn_t* CSolver) {
 
 nshogi_move_t solverApiSolveByDfPn(nshogi_state_t* CState,
                                    nshogi_solver_dfpn_t* CSolver,
-                                   uint64_t MaxNodeCount, int MaxDepth) {
+                                   uint64_t MaxNodeCount, int MaxDepth, int Strict) {
     core::State* State = reinterpret_cast<core::State*>(CState);
     auto Solver = reinterpret_cast<solver::dfpn::Solver*>(CSolver);
 
-    auto CheckmateMove = Solver->solve(State, MaxNodeCount, (uint64_t)MaxDepth);
+    auto CheckmateMove = Solver->solve(State, MaxNodeCount, (uint64_t)MaxDepth, (bool)Strict);
     return CheckmateMove.value();
+}
+
+int solverApiSolveWithPVByDfPn(nshogi_state_t* CState,
+                               nshogi_solver_dfpn_t* CSolver,
+                               uint64_t MaxNodeCount, int MaxDepth,
+                               int Strict, nshogi_move_t* Buffer, int BufferSize) {
+    core::State* State = reinterpret_cast<core::State*>(CState);
+    auto Solver = reinterpret_cast<solver::dfpn::Solver*>(CSolver);
+
+    auto CheckmateSequence = Solver->solveWithPV(State, MaxNodeCount, (uint64_t)MaxDepth, (bool)Strict);
+
+    int WriteCount = 0;
+
+    for (const auto Move : CheckmateSequence) {
+        if (WriteCount >= BufferSize) {
+            break;
+        }
+
+        Buffer[WriteCount] = Move.value();
+        ++WriteCount;
+    }
+
+    return WriteCount;
 }
 
 } // namespace
@@ -53,6 +76,7 @@ nshogi_solver_api_t* c_api::solver::getApi() {
         Api.createDfPnSolver = solverApiCreateDfPnSolver;
         Api.destroyDfPnSolver = solverApiDestroyDfPnSolver;
         Api.solveByDfPn = solverApiSolveByDfPn;
+        Api.solveWithPVByDfPn = solverApiSolveWithPVByDfPn;
 
         Initialized = true;
     }
