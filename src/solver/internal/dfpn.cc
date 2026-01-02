@@ -175,7 +175,7 @@ DfPnValue SolverImpl::loadFromTT(core::internal::StateImpl* S, uint64_t Depth,
     return DfPnValue(1, 1);
 }
 
-template <core::Color C, bool Attacking>
+template <core::Color C, bool Attacking, bool WilyPromote>
 core::Move32 SolverImpl::search(core::internal::StateImpl* S, uint64_t Depth,
                                 DfPnValue* ThisValue, DfPnValue* Threshold,
                                 uint64_t MaxNodeCount, uint64_t MaxDepth) {
@@ -202,9 +202,9 @@ core::Move32 SolverImpl::search(core::internal::StateImpl* S, uint64_t Depth,
     const auto Moves =
         Attacking
             ? core::internal::MoveGeneratorInternal::generateLegalCheckMoves<
-                  C, true>(*S)
+                  C, WilyPromote>(*S)
             : core::internal::MoveGeneratorInternal::generateLegalEvasionMoves<
-                  C, true>(*S);
+                  C, WilyPromote>(*S);
 
     if constexpr (Attacking) {
         if (Moves.size() == 0) {
@@ -244,7 +244,7 @@ core::Move32 SolverImpl::search(core::internal::StateImpl* S, uint64_t Depth,
                     } else {
                         const auto NextMoves =
                             core::internal::MoveGeneratorInternal::
-                                generateLegalEvasionMoves<~C, true>(*S);
+                                generateLegalEvasionMoves<~C, WilyPromote>(*S);
                         if (NextMoves.size() == 0) {
                             const core::Move32 LastMove = S->getLastMove();
                             if (LastMove.drop() &&
@@ -296,8 +296,9 @@ core::Move32 SolverImpl::search(core::internal::StateImpl* S, uint64_t Depth,
                                DfPnValue::Infinity));
 
             S->doMove<C>(BestMove);
-            search<~C, !Attacking>(S, Depth + 1, &BestChildValue,
-                                   &ChildThreshold, MaxNodeCount, MaxDepth);
+            search<~C, !Attacking, WilyPromote>(S, Depth + 1, &BestChildValue,
+                                                &ChildThreshold, MaxNodeCount,
+                                                MaxDepth);
             S->undoMove<~C>();
 
             if (BestChildValue.ProofNumber == 0) {
@@ -357,8 +358,9 @@ core::Move32 SolverImpl::search(core::internal::StateImpl* S, uint64_t Depth,
                           DfPnValue::Infinity}));
 
             S->doMove<C>(BestMove);
-            search<~C, !Attacking>(S, Depth + 1, &BestChildValue,
-                                   &ChildThreshold, MaxNodeCount, MaxDepth);
+            search<~C, !Attacking, WilyPromote>(S, Depth + 1, &BestChildValue,
+                                                &ChildThreshold, MaxNodeCount,
+                                                MaxDepth);
             S->undoMove<~C>();
 
             if (BestChildValue.DisproofNumber == 0) {
@@ -371,15 +373,15 @@ core::Move32 SolverImpl::search(core::internal::StateImpl* S, uint64_t Depth,
     }
 }
 
-template <core::Color C, bool Attacking>
+template <core::Color C, bool Attacking, bool WilyPromote>
 std::vector<core::Move32> SolverImpl::findPV(core::internal::StateImpl* S,
                                              uint64_t Depth) const {
     const auto Moves =
         Attacking
             ? core::internal::MoveGeneratorInternal::generateLegalCheckMoves<
-                  C, true>(*S)
+                  C, WilyPromote>(*S)
             : core::internal::MoveGeneratorInternal::generateLegalEvasionMoves<
-                  C, true>(*S);
+                  C, WilyPromote>(*S);
 
     if (Moves.size() == 0) {
         return {};
@@ -393,7 +395,7 @@ std::vector<core::Move32> SolverImpl::findPV(core::internal::StateImpl* S,
             loadFromTT<~C, !Attacking>(S, Depth + 1, &IsFound);
         std::vector<core::Move32> SubPV{};
         if (ChildValue.ProofNumber == 0) {
-            SubPV = findPV<~C, !Attacking>(S, Depth + 1);
+            SubPV = findPV<~C, !Attacking, WilyPromote>(S, Depth + 1);
         }
 
         S->undoMove<~C>();
@@ -414,32 +416,55 @@ std::vector<core::Move32> SolverImpl::findPV(core::internal::StateImpl* S,
     return BestPV;
 }
 
-std::vector<core::Move32>
-SolverImpl::findPV(core::internal::StateImpl* S) const {
-    return (S->getSideToMove() == core::Black)
-               ? findPV<core::Black, true>(S, 0)
-               : findPV<core::White, true>(S, 0);
+std::vector<core::Move32> SolverImpl::findPV(core::internal::StateImpl* S,
+                                             bool Strict) const {
+    if (Strict) {
+        return (S->getSideToMove() == core::Black)
+                   ? findPV<core::Black, true, false>(S, 0)
+                   : findPV<core::White, true, false>(S, 0);
+    } else {
+        return (S->getSideToMove() == core::Black)
+                   ? findPV<core::Black, true, true>(S, 0)
+                   : findPV<core::White, true, true>(S, 0);
+    }
 }
 
 core::Move32 SolverImpl::solve(core::State* S, uint64_t MaxNodeCount,
-                               uint64_t MaxDepth) {
-    ++Generation;
-    SearchedNodeCount = 0;
-
+                               uint64_t MaxDepth, bool Strict) {
+    const auto SideToMove = S->getSideToMove();
     core::internal::MutableStateAdapter Adapter(*S);
 
-    const auto SideToMove = S->getSideToMove();
+    if (Strict) {
+        if (SideToMove == core::Black) {
+            return solve<core::Black, false>(Adapter.get(), MaxNodeCount,
+                                             MaxDepth);
+        } else {
+            return solve<core::White, false>(Adapter.get(), MaxNodeCount,
+                                             MaxDepth);
+        }
+    } else {
+        if (SideToMove == core::Black) {
+            return solve<core::Black, true>(Adapter.get(), MaxNodeCount,
+                                            MaxDepth);
+        } else {
+            return solve<core::White, true>(Adapter.get(), MaxNodeCount,
+                                            MaxDepth);
+        }
+    }
+}
+
+template <core::Color C, bool WilyPromote>
+core::Move32 SolverImpl::solve(core::internal::StateImpl* S,
+                               uint64_t MaxNodeCount, uint64_t MaxDepth) {
+    ++Generation;
+    SearchedNodeCount = 0;
 
     DfPnValue RootValue(1, 1);
     DfPnValue Threshold(DfPnValue::Infinity, DfPnValue::Infinity);
 
     while (true) {
-        const core::Move32 BestMove =
-            (SideToMove == core::Black)
-                ? search<core::Black, true>(Adapter.get(), 0, &RootValue,
-                                            &Threshold, MaxNodeCount, MaxDepth)
-                : search<core::White, true>(Adapter.get(), 0, &RootValue,
-                                            &Threshold, MaxNodeCount, MaxDepth);
+        const core::Move32 BestMove = search<C, true, WilyPromote>(
+            S, 0, &RootValue, &Threshold, MaxNodeCount, MaxDepth);
 
         if (RootValue.ProofNumber == 0) {
             // Proven.
@@ -459,18 +484,19 @@ core::Move32 SolverImpl::solve(core::State* S, uint64_t MaxNodeCount,
 
 std::vector<core::Move32> SolverImpl::solveWithPV(core::State* S,
                                                   uint64_t MaxNodeCount,
-                                                  uint64_t MaxDepth) {
+                                                  uint64_t MaxDepth,
+                                                  bool Strict) {
     // First, just solve the problem.
-    core::Move32 SolvedMove = solve(S, MaxNodeCount, MaxDepth);
+    core::Move32 SolvedMove = solve(S, MaxNodeCount, MaxDepth, Strict);
 
     if (SolvedMove.isNone()) {
         return {};
     }
 
-    // Then, traverse the tree through a terminal node with the longest move
-    // sequence.
+    // Then, traverse the tree through a terminal node with
+    // a shortest-win longest-loss move sequence.
     core::internal::MutableStateAdapter Adapter(*S);
-    return findPV(Adapter.get());
+    return findPV(Adapter.get(), Strict);
 }
 
 uint64_t SolverImpl::searchedNodeCount() const {

@@ -249,7 +249,17 @@ pub struct NShogiSolverCApi {
         solver: *mut c_void,
         max_node_count: u64,
         max_depth: i32,
+        strict: i32,
     ) -> u32,
+    solve_with_pv_by_dfpn: unsafe extern "C" fn(
+        state: *mut c_void,
+        solver: *mut c_void,
+        max_node_count: u64,
+        max_depth: i32,
+        strict: i32,
+        pv_buffer: *mut u32,
+        pv_buffer_size: u32,
+    ) -> i32,
 }
 
 impl NShogiSolverCApi {
@@ -271,6 +281,7 @@ impl NShogiSolverCApi {
         state: *mut c_void,
         max_node_count: u64,
         max_depth: i32,
+        strict: bool,
     ) -> Move {
         unsafe {
             Move::new((self.solve_by_dfpn)(
@@ -278,8 +289,38 @@ impl NShogiSolverCApi {
                 handle,
                 max_node_count,
                 max_depth,
+                strict as i32,
             ))
         }
+    }
+
+    pub fn solve_with_pv_by_dfpn(
+        &self,
+        handle: *mut c_void,
+        state: *mut c_void,
+        max_node_count: u64,
+        max_depth: i32,
+        strict: bool,
+    ) -> Vec<Move> {
+        let mut pv_buffer = [0u32; 1024];
+
+        let pv_length = unsafe {
+            (self.solve_with_pv_by_dfpn)(
+                state,
+                handle,
+                max_node_count,
+                max_depth,
+                strict as i32,
+                pv_buffer.as_mut_ptr(),
+                pv_buffer.len() as u32,
+            )
+        } as usize;
+
+        pv_buffer[..pv_length]
+            .iter()
+            .copied()
+            .map(|value| Move::new(value))
+            .collect()
     }
 }
 

@@ -357,7 +357,11 @@ typedef struct nshogi_solver_api {
     nshogi_solver_dfpn_t* (*createDfPnSolver)(uint64_t memory_mb);
     void (*destroyDfPnSolver)(nshogi_solver_dfpn_t*);
     nshogi_move_t (*solveByDfPn)(nshogi_state_t*, nshogi_solver_dfpn_t*,
-                                 uint64_t max_node_count, int max_depth);
+                                 uint64_t max_node_count, int max_depth,
+                                 int strict);
+    int (*solveWithPVByDfPn)(nshogi_state_t*, nshogi_solver_dfpn_t*,
+                             uint64_t max_node_count, int max_depth, int Strict,
+                             nshogi_move_t* buffer, int buffer_size);
 } nshogi_solver_api_t;
 
 typedef struct nshogi_ml_api {
