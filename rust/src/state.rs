@@ -535,17 +535,21 @@ fn perft() {
         if limit == 0 {
             1
         } else {
-            let mut sum = 0u64;
-
             let moves = state.generate_legal_moves_nowily();
 
-            for m in moves {
-                state.do_move(m);
-                sum += brute_force(state, limit - 1);
-                state.undo_move();
-            }
+            if limit == 1 {
+                moves.len() as u64
+            } else {
+                let mut sum = 0u64;
 
-            sum
+                for m in moves {
+                    state.do_move(m);
+                    sum += brute_force(state, limit - 1);
+                    state.undo_move();
+                }
+
+                sum
+            }
         }
     }
 
