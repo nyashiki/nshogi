@@ -110,10 +110,10 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a916fb10f6f3a9ab395c94fc02dbbfe2e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:afb34b49293b59b420fea82cd83261009"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classnshogi_1_1solver_1_1dfpn_1_1Solver.html#afb34b49293b59b420fea82cd83261009">~Solver</a> ()</td></tr>
 <tr class="separator:afb34b49293b59b420fea82cd83261009"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a3a853ed2a6ac8675318b2986e8afe092"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structnshogi_1_1core_1_1Move32.html">core::Move32</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classnshogi_1_1solver_1_1dfpn_1_1Solver.html#a3a853ed2a6ac8675318b2986e8afe092">solve</a> (<a class="el" href="classnshogi_1_1core_1_1State.html">core::State</a> *S, uint64_t MaxNodeCount=1000000, uint64_t MaxDepth=64)</td></tr>
-<tr class="separator:a3a853ed2a6ac8675318b2986e8afe092"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa6e048e815fafa990287987b18e33628"><td class="memItemLeft" align="right" valign="top">std::vector&lt; <a class="el" href="structnshogi_1_1core_1_1Move32.html">core::Move32</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classnshogi_1_1solver_1_1dfpn_1_1Solver.html#aa6e048e815fafa990287987b18e33628">solveWithPV</a> (<a class="el" href="classnshogi_1_1core_1_1State.html">core::State</a> *S, uint64_t MaxNodeCount=1000000, uint64_t MaxDepth=64)</td></tr>
-<tr class="separator:aa6e048e815fafa990287987b18e33628"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3473347771d3c521e49ebe3cacd1d63e"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structnshogi_1_1core_1_1Move32.html">core::Move32</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classnshogi_1_1solver_1_1dfpn_1_1Solver.html#a3473347771d3c521e49ebe3cacd1d63e">solve</a> (<a class="el" href="classnshogi_1_1core_1_1State.html">core::State</a> *S, uint64_t MaxNodeCount=1000000, uint64_t MaxDepth=64, bool Strict=false)</td></tr>
+<tr class="separator:a3473347771d3c521e49ebe3cacd1d63e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae00798c6ccfcd3111c68ea38f1c6d0b5"><td class="memItemLeft" align="right" valign="top">std::vector&lt; <a class="el" href="structnshogi_1_1core_1_1Move32.html">core::Move32</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classnshogi_1_1solver_1_1dfpn_1_1Solver.html#ae00798c6ccfcd3111c68ea38f1c6d0b5">solveWithPV</a> (<a class="el" href="classnshogi_1_1core_1_1State.html">core::State</a> *S, uint64_t MaxNodeCount=1000000, uint64_t MaxDepth=64, bool Strict=false)</td></tr>
+<tr class="separator:ae00798c6ccfcd3111c68ea38f1c6d0b5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9fbe162b5e47e08d6214b194533184bd"><td class="memItemLeft" align="right" valign="top">uint64_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classnshogi_1_1solver_1_1dfpn_1_1Solver.html#a9fbe162b5e47e08d6214b194533184bd">searchedNodeCount</a> () const</td></tr>
 <tr class="separator:a9fbe162b5e47e08d6214b194533184bd"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
@@ -171,8 +171,8 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
-<a id="a3a853ed2a6ac8675318b2986e8afe092" name="a3a853ed2a6ac8675318b2986e8afe092"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a3a853ed2a6ac8675318b2986e8afe092">&#9670;&#160;</a></span>solve()</h2>
+<a id="a3473347771d3c521e49ebe3cacd1d63e" name="a3473347771d3c521e49ebe3cacd1d63e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3473347771d3c521e49ebe3cacd1d63e">&#9670;&#160;</a></span>solve()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -193,7 +193,13 @@ Public Member Functions</h2></td></tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">uint64_t&#160;</td>
-          <td class="paramname"><em>MaxDepth</em> = <code>64</code>&#160;</td>
+          <td class="paramname"><em>MaxDepth</em> = <code>64</code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>Strict</em> = <code>false</code>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -205,8 +211,8 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
-<a id="aa6e048e815fafa990287987b18e33628" name="aa6e048e815fafa990287987b18e33628"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aa6e048e815fafa990287987b18e33628">&#9670;&#160;</a></span>solveWithPV()</h2>
+<a id="ae00798c6ccfcd3111c68ea38f1c6d0b5" name="ae00798c6ccfcd3111c68ea38f1c6d0b5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae00798c6ccfcd3111c68ea38f1c6d0b5">&#9670;&#160;</a></span>solveWithPV()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -227,7 +233,13 @@ Public Member Functions</h2></td></tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">uint64_t&#160;</td>
-          <td class="paramname"><em>MaxDepth</em> = <code>64</code>&#160;</td>
+          <td class="paramname"><em>MaxDepth</em> = <code>64</code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>Strict</em> = <code>false</code>&#160;</td>
         </tr>
         <tr>
           <td></td>
