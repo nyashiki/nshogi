@@ -722,7 +722,7 @@ TEST(CAPI, DfPn) {
             nshogiApi()->ioApi()->createStateFromSfen(Line.c_str());
 
         nshogi_move_t CheckmateMove =
-            nshogiApi()->solverApi()->solveByDfPn(State, Solver, 0, 0);
+            nshogiApi()->solverApi()->solveByDfPn(State, Solver, 0, 0, 0);
 
         TEST_ASSERT_FALSE(nshogiApi()->moveApi()->isNone(CheckmateMove));
     }
