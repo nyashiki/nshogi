@@ -93,7 +93,7 @@ core::PieceTypeKind CSAToPieceType(const std::string& CSA) noexcept {
         {"RY", PTK_ProRook},
     });
 
-    const auto& It = Table.find(CSA);
+    const auto& It = Table.find(CSA.substr(0, 2));
 
     if (It == Table.end()) {
         return PTK_Empty;
@@ -169,7 +169,7 @@ core::Move32 CSAToMove32(const core::Position& Pos, const std::string& CSA) {
 
     const core::PieceTypeKind Type = CSAToPieceType(CSA.substr(5));
 
-    if (pieceTypeToCSA(Type) != CSA.substr(5)) {
+    if (pieceTypeToCSA(Type) != CSA.substr(5, 2)) {
         throw std::runtime_error("invalid CSA string (type check error).\n" +
                                  ("    CSA: " + CSA));
     }
@@ -257,6 +257,10 @@ std::string stateToCSA(const core::State& State) {
     return SStream.str();
 }
 
+PositionBuilder::PositionBuilder(const core::Position& Position)
+    : core::PositionBuilder(Position) {
+}
+
 core::Position PositionBuilder::newPosition(const std::string& CSA) {
     using namespace core;
 
@@ -280,7 +284,16 @@ core::Position PositionBuilder::newPosition(const std::string& CSA) {
         core::File F = core::File9;
         core::Rank R = core::RankA;
 
-        if (Token == "P1") {
+        if (Token == "PI") {
+            Builder = PositionBuilder(core::PositionBuilder::getInitialPosition());
+            for (std::size_t I = 2; I < CSALine.size(); I += 4) {
+                File DropF = charToFile(CSALine[I]);
+                Rank DropR = charToRank(CSALine[I + 1]);
+                Builder.setPiece(makeSquare(DropR, DropF), PK_Empty);
+            }
+            InputRowCount = 9;
+            continue;
+        } else if (Token == "P1") {
             R = RankA;
             ++InputRowCount;
         } else if (Token == "P2") {

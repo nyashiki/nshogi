@@ -79,3 +79,35 @@ TEST(CSA, Handmade1) {
         "-3122GI\n");
     // clang-format on
 }
+
+TEST(CSA, Handmade2) {
+    // clang-format off
+    const std::string CSA =
+        "PI\n"
+        "+\n";
+    // clang-format on
+
+    nshogi::core::State State = nshogi::io::csa::StateBuilder::newState(CSA);
+    const std::string Sfen = nshogi::io::sfen::stateToSfen(State);
+
+    TEST_ASSERT_STREQ(
+        "lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL b - 1",
+        Sfen.c_str()
+    );
+}
+
+TEST(CSA, Handmade3) {
+    // clang-format off
+    const std::string CSA =
+        "PI82HI22KA\n"
+        "-\n";
+    // clang-format on
+
+    nshogi::core::State State = nshogi::io::csa::StateBuilder::newState(CSA);
+    const std::string Sfen = nshogi::io::sfen::stateToSfen(State);
+
+    TEST_ASSERT_STREQ(
+        "lnsgkgsnl/9/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL w - 1",
+        Sfen.c_str()
+    );
+}
