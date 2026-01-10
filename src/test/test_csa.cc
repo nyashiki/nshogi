@@ -92,8 +92,7 @@ TEST(CSA, Handmade2) {
 
     TEST_ASSERT_STREQ(
         "lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL b - 1",
-        Sfen.c_str()
-    );
+        Sfen.c_str());
 }
 
 TEST(CSA, Handmade3) {
@@ -108,6 +107,5 @@ TEST(CSA, Handmade3) {
 
     TEST_ASSERT_STREQ(
         "lnsgkgsnl/9/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL w - 1",
-        Sfen.c_str()
-    );
+        Sfen.c_str());
 }

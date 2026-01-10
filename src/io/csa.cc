@@ -285,7 +285,8 @@ core::Position PositionBuilder::newPosition(const std::string& CSA) {
         core::Rank R = core::RankA;
 
         if (Token == "PI") {
-            Builder = PositionBuilder(core::PositionBuilder::getInitialPosition());
+            Builder =
+                PositionBuilder(core::PositionBuilder::getInitialPosition());
             for (std::size_t I = 2; I < CSALine.size(); I += 4) {
                 File DropF = charToFile(CSALine[I]);
                 Rank DropR = charToRank(CSALine[I + 1]);
