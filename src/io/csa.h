@@ -41,6 +41,10 @@ std::string stateToCSA(const core::State& State);
 class PositionBuilder : public core::PositionBuilder {
  public:
     static core::Position newPosition(const std::string& CSA);
+
+ private:
+    PositionBuilder() = default;
+    PositionBuilder(const core::Position& Position);
 };
 
 class StateBuilder : public core::StateBuilder {
