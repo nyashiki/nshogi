@@ -111,35 +111,28 @@ $(document).ready(function(){initNavTree('utils_8h_source.html',''); initResizab
 <div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="preprocessor">#define NSHOGI_ML_UTILS_H</span></div>
 <div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span> </div>
 <div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="preprocessor">#include &lt;cinttypes&gt;</span></div>
-<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span> </div>
-<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="keyword">namespace </span><a class="code hl_namespace" href="namespacenshogi.html">nshogi</a> {</div>
-<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span><span class="keyword">namespace </span>ml {</div>
-<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span><span class="keyword">namespace </span>utils {</div>
-<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span> </div>
-<div class="line"><a id="l00019" name="l00019"></a><span class="lineno"><a class="line" href="classnshogi_1_1ml_1_1utils_1_1PermutationGenerator.html">   19</a></span><span class="keyword">class </span><a class="code hl_class" href="classnshogi_1_1ml_1_1utils_1_1PermutationGenerator.html">PermutationGenerator</a> {</div>
-<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span> <span class="keyword">public</span>:</div>
-<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span>    <a class="code hl_class" href="classnshogi_1_1ml_1_1utils_1_1PermutationGenerator.html">PermutationGenerator</a>(uint64_t Seed, uint64_t MaxValue);</div>
-<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span> </div>
-<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span>    uint64_t <a class="code hl_function" href="classnshogi_1_1ml_1_1utils_1_1PermutationGenerator.html#a57065b7c409faee0b35649573315707a">generate</a>(uint64_t X) <span class="keyword">const</span>;</div>
-<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span>    uint64_t <a class="code hl_function" href="classnshogi_1_1ml_1_1utils_1_1PermutationGenerator.html#a34df4a333374e1b4b0c21aa508d080ef">operator()</a>(uint64_t X) <span class="keyword">const</span>;</div>
-<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span> </div>
-<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span> <span class="keyword">private</span>:</div>
-<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span>    <span class="keyword">const</span> uint64_t Seed_;</div>
-<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span>    <span class="keyword">const</span> uint64_t MaxValue_;</div>
-<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span>    <span class="keyword">const</span> uint64_t Multiplier_;</div>
-<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span> </div>
-<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span>    <span class="keywordtype">bool</span> isPrime(uint64_t N) <span class="keyword">const</span>;</div>
-<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span>    uint64_t findPrimeNumber() <span class="keyword">const</span>;</div>
-<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span>};</div>
-<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span> </div>
-<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span>} <span class="comment">// namespace utils</span></div>
-<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span>} <span class="comment">// namespace ml</span></div>
-<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span>} <span class="comment">// namespace nshogi</span></div>
-<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span> </div>
-<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span><span class="preprocessor">#endif </span><span class="comment">// #ifndef NSHOGI_ML_UTILS_H</span></div>
-<div class="ttc" id="aclassnshogi_1_1ml_1_1utils_1_1PermutationGenerator_html"><div class="ttname"><a href="classnshogi_1_1ml_1_1utils_1_1PermutationGenerator.html">nshogi::ml::utils::PermutationGenerator</a></div><div class="ttdef"><b>Definition:</b> utils.h:19</div></div>
-<div class="ttc" id="aclassnshogi_1_1ml_1_1utils_1_1PermutationGenerator_html_a34df4a333374e1b4b0c21aa508d080ef"><div class="ttname"><a href="classnshogi_1_1ml_1_1utils_1_1PermutationGenerator.html#a34df4a333374e1b4b0c21aa508d080ef">nshogi::ml::utils::PermutationGenerator::operator()</a></div><div class="ttdeci">uint64_t operator()(uint64_t X) const</div><div class="ttdef"><b>Definition:</b> utils.cc:34</div></div>
-<div class="ttc" id="aclassnshogi_1_1ml_1_1utils_1_1PermutationGenerator_html_a57065b7c409faee0b35649573315707a"><div class="ttname"><a href="classnshogi_1_1ml_1_1utils_1_1PermutationGenerator.html#a57065b7c409faee0b35649573315707a">nshogi::ml::utils::PermutationGenerator::generate</a></div><div class="ttdeci">uint64_t generate(uint64_t X) const</div><div class="ttdef"><b>Definition:</b> utils.cc:30</div></div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="preprocessor">#include &lt;vector&gt;</span></div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span> </div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span><span class="keyword">namespace </span><a class="code hl_namespace" href="namespacenshogi.html">nshogi</a> {</div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span><span class="keyword">namespace </span>ml {</div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span><span class="keyword">namespace </span>utils {</div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span> </div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno"><a class="line" href="classnshogi_1_1ml_1_1utils_1_1PermutationGenerator.html">   20</a></span><span class="keyword">class </span><a class="code hl_class" href="classnshogi_1_1ml_1_1utils_1_1PermutationGenerator.html">PermutationGenerator</a> {</div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span> <span class="keyword">public</span>:</div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span>    <a class="code hl_class" href="classnshogi_1_1ml_1_1utils_1_1PermutationGenerator.html">PermutationGenerator</a>(uint64_t Seed, std::size_t Size);</div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span>    std::size_t <a class="code hl_function" href="classnshogi_1_1ml_1_1utils_1_1PermutationGenerator.html#a41ff946a4e0b17fdd48406f688497201">operator()</a>(std::size_t X) <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span> </div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span> <span class="keyword">private</span>:</div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span>    std::vector&lt;std::size_t&gt; Indices;</div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span>};</div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span> </div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span>} <span class="comment">// namespace utils</span></div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span>} <span class="comment">// namespace ml</span></div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span>} <span class="comment">// namespace nshogi</span></div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span> </div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span><span class="preprocessor">#endif </span><span class="comment">// #ifndef NSHOGI_ML_UTILS_H</span></div>
+<div class="ttc" id="aclassnshogi_1_1ml_1_1utils_1_1PermutationGenerator_html"><div class="ttname"><a href="classnshogi_1_1ml_1_1utils_1_1PermutationGenerator.html">nshogi::ml::utils::PermutationGenerator</a></div><div class="ttdef"><b>Definition:</b> utils.h:20</div></div>
+<div class="ttc" id="aclassnshogi_1_1ml_1_1utils_1_1PermutationGenerator_html_a41ff946a4e0b17fdd48406f688497201"><div class="ttname"><a href="classnshogi_1_1ml_1_1utils_1_1PermutationGenerator.html#a41ff946a4e0b17fdd48406f688497201">nshogi::ml::utils::PermutationGenerator::operator()</a></div><div class="ttdeci">std::size_t operator()(std::size_t X) const</div><div class="ttdef"><b>Definition:</b> utils.cc:28</div></div>
 <div class="ttc" id="anamespacenshogi_html"><div class="ttname"><a href="namespacenshogi.html">nshogi</a></div><div class="ttdef"><b>Definition:</b> capability.cc:12</div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->

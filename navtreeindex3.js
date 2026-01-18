@@ -1,7 +1,5 @@
 var NAVTREEINDEX3 =
 {
-"namespacenshogi_1_1ml.html":[0,0,0,3],
-"namespacenshogi_1_1ml.html#a01059e03fbf952269430a6a81bb5866c":[0,0,0,3,61],
 "namespacenshogi_1_1ml.html#a064b6a3f879a6cc3f8124f0b7657a0b8":[0,0,0,3,32],
 "namespacenshogi_1_1ml.html#a070e5c188f67114aafbb21ba94af44f1":[0,0,0,3,29],
 "namespacenshogi_1_1ml.html#a0a6da0b2626a34d2b46992e6543fe303":[0,0,0,3,48],
@@ -249,5 +247,7 @@ var NAVTREEINDEX3 =
 "structnshogi_1_1core_1_1HuffmanCode.html#a0f115166bfecc8299d633a9593c2fa80":[0,0,0,1,2,8],
 "structnshogi_1_1core_1_1HuffmanCode.html#a2b6bbcb5c254cd550a4be062250441cd":[0,0,0,1,2,6],
 "structnshogi_1_1core_1_1HuffmanCode.html#a2b6bbcb5c254cd550a4be062250441cd":[1,0,0,0,0,6],
-"structnshogi_1_1core_1_1HuffmanCode.html#a65171a42818eab3dd327bddc8dfc9a5e":[0,0,0,1,2,7]
+"structnshogi_1_1core_1_1HuffmanCode.html#a65171a42818eab3dd327bddc8dfc9a5e":[0,0,0,1,2,7],
+"structnshogi_1_1core_1_1HuffmanCode.html#a65171a42818eab3dd327bddc8dfc9a5e":[1,0,0,0,0,7],
+"structnshogi_1_1core_1_1HuffmanCode.html#ad43205a9a7615b2150fd8bfcd4f2b907":[0,0,0,1,2,3]
 };

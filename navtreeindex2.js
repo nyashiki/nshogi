@@ -1,7 +1,5 @@
 var NAVTREEINDEX2 =
 {
-"namespacenshogi_1_1core.html#a45140d529f684dbeade9152df24d176a":[0,0,0,1,15],
-"namespacenshogi_1_1core.html#a45140d529f684dbeade9152df24d176aa22558995b6488213220bc5352e652b41":[0,0,0,1,15,1],
 "namespacenshogi_1_1core.html#a45140d529f684dbeade9152df24d176aa27769e6c945aba60dd0bd548088418d0":[0,0,0,1,15,3],
 "namespacenshogi_1_1core.html#a45140d529f684dbeade9152df24d176aa8134f6fb7e786d2daf0d0dbf45e9c789":[0,0,0,1,15,0],
 "namespacenshogi_1_1core.html#a45140d529f684dbeade9152df24d176aaa3b6c84423a5dbdaf821c76ff292a02f":[0,0,0,1,15,2],
@@ -249,5 +247,7 @@ var NAVTREEINDEX2 =
 "namespacenshogi_1_1io_1_1sfen.html#a63655da3572dc8be8a4eabd21530c2e9":[0,0,0,2,3,7],
 "namespacenshogi_1_1io_1_1sfen.html#a9c3f6fb141ced1f38c50721782f1ceef":[0,0,0,2,3,11],
 "namespacenshogi_1_1io_1_1sfen.html#a9ed07205b76f9ebb235c16185e2de89c":[0,0,0,2,3,9],
-"namespacenshogi_1_1io_1_1sfen.html#ade579c02fec19a075671d2f5dd1a9a08":[0,0,0,2,3,2]
+"namespacenshogi_1_1io_1_1sfen.html#ade579c02fec19a075671d2f5dd1a9a08":[0,0,0,2,3,2],
+"namespacenshogi_1_1ml.html":[0,0,0,3],
+"namespacenshogi_1_1ml.html#a01059e03fbf952269430a6a81bb5866c":[0,0,0,3,61]
 };
