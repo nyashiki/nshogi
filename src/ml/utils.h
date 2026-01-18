@@ -11,6 +11,7 @@
 #define NSHOGI_ML_UTILS_H
 
 #include <cinttypes>
+#include <vector>
 
 namespace nshogi {
 namespace ml {
@@ -18,18 +19,11 @@ namespace utils {
 
 class PermutationGenerator {
  public:
-    PermutationGenerator(uint64_t Seed, uint64_t MaxValue);
-
-    uint64_t generate(uint64_t X) const;
+    PermutationGenerator(uint64_t Seed, std::size_t Size);
     uint64_t operator()(uint64_t X) const;
 
  private:
-    const uint64_t Seed_;
-    const uint64_t MaxValue_;
-    const uint64_t Multiplier_;
-
-    bool isPrime(uint64_t N) const;
-    uint64_t findPrimeNumber() const;
+    std::vector<uint64_t> Indices;
 };
 
 } // namespace utils
