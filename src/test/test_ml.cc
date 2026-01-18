@@ -1293,7 +1293,8 @@ TEST(ML, PermutationGeneratorSmalls) {
 }
 
 TEST(ML, PermutationGeneratorLarge1) {
-    const std::size_t N = 1000000000;
+    const std::size_t N = (std::size_t)(
+            std::min((uint64_t)1000000000ULL, (uint64_t)std::numeric_limits<std::size_t>::max()));
     const uint64_t Seed = 20260114;
 
     std::vector<bool> Filled(N, false);

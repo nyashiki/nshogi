@@ -20,10 +20,10 @@ namespace utils {
 class PermutationGenerator {
  public:
     PermutationGenerator(uint64_t Seed, std::size_t Size);
-    uint64_t operator()(uint64_t X) const;
+    std::size_t operator()(std::size_t X) const;
 
  private:
-    std::vector<uint64_t> Indices;
+    std::vector<std::size_t> Indices;
 };
 
 } // namespace utils
