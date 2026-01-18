@@ -239,12 +239,7 @@ PYBIND11_MODULE(nshogi, Module) {
                 return std::vector<nshogi::core::Move32>(Moves.begin(),
                                                          Moves.end());
             })
-        .def_property_readonly(
-            "is_in_check",
-            [](const nshogi::core::State& S) {
-                nshogi::core::internal::ImmutableStateAdapter Adapter(S);
-                return !Adapter->getCheckerBB().isZero();
-            })
+        .def_property_readonly("is_in_check", &nshogi::core::State::isInCheck)
         .def_property_readonly(
             "ply", [](const nshogi::core::State& S) { return S.getPly(true); })
         .def_property_readonly("last_move", &nshogi::core::State::getLastMove)
@@ -695,12 +690,6 @@ PYBIND11_MODULE(nshogi, Module) {
         .def("draw",
              [](const nshogi::ml::SimpleTeacher& T) {
                  return (T.getWinner() == nshogi::core::NoColor) ? 1.0f : 0.0f;
-             })
-        .def("check",
-             [](const nshogi::ml::SimpleTeacher& T) {
-                 const auto State = T.getState();
-                 nshogi::core::internal::ImmutableStateAdapter Adapter(State);
-                 return Adapter->getCheckerBB().isZero() ? 0.0f : 1.0f;
              })
         .def("declaration_score", [](const nshogi::ml::SimpleTeacher& T) {
             const auto State = T.getState();
