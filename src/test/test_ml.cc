@@ -1276,10 +1276,10 @@ TEST(ML, SimpleTeacherSaveAndLoad) {
     }
 }
 
-TEST(ML, PermutationGenerator) {
-    for (std::size_t N = 1; N < 1000; ++N) {
+TEST(ML, PermutationGeneratorSmalls) {
+    for (std::size_t N = 1; N < 10000; ++N) {
         std::vector<bool> Filled(N, false);
-        for (uint64_t Seed = 0; Seed < 10; ++Seed) {
+        for (uint64_t Seed = 0; Seed < 20; ++Seed) {
             nshogi::ml::utils::PermutationGenerator PG(Seed, N);
             for (uint64_t I = 0; I < (uint64_t)N; ++I) {
                 Filled[PG(I)] = true;
@@ -1289,6 +1289,21 @@ TEST(ML, PermutationGenerator) {
                 TEST_ASSERT_TRUE(Filled[I]);
             }
         }
+    }
+}
+
+TEST(ML, PermutationGeneratorLarge1) {
+    const std::size_t N = 100000000;
+    const uint64_t Seed = 20260114;
+
+    std::vector<bool> Filled(N, false);
+    nshogi::ml::utils::PermutationGenerator PG(Seed, N);
+    for (uint64_t I = 0; I < (uint64_t)N; ++I) {
+        Filled[PG(I)] = true;
+    }
+
+    for (uint64_t I = 0; I < (uint64_t)N; ++I) {
+        TEST_ASSERT_TRUE(Filled[I]);
     }
 }
 

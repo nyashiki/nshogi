@@ -68,7 +68,7 @@ template <typename TeacherType>
 TeacherType TeacherLoaderForFixedSizeTeacher<TeacherType>::operator[](
     std::size_t Index) const {
     if (ShuffleEnabled) {
-        Index = PG->generate(Index);
+        Index = (*PG)(Index);
     }
 
     assert(Index < NumTeachers);
