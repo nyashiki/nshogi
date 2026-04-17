@@ -39,7 +39,7 @@ jobs:
     - name: install pybind11
       if: runner.os == 'macOS'
       run: brew install pybind11
-    - name: make pythoon module
+    - name: make python module
       working-directory: ${{ env.working-directory }}
       run: make ${{ matrix.sse_flags }} python
 
