@@ -1,6 +1,6 @@
 [package]
 name = "nshogi"
-version = "0.1.2"
+version = "0.2.3"
 edition = "2024"
 
 [build-dependencies]
