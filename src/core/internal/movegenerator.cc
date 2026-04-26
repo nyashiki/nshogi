@@ -2392,14 +2392,6 @@ MoveGeneratorInternal::generateLegalMoves(const StateImpl& S) noexcept {
     return List;
 }
 
-template <bool WilyPromote>
-MoveList
-MoveGeneratorInternal::generateLegalMoves(const StateImpl& S) noexcept {
-    return (S.getPosition().sideToMove() == Black)
-               ? generateLegalMoves<Black, WilyPromote>(S)
-               : generateLegalMoves<White, WilyPromote>(S);
-}
-
 template <Color C, bool WilyPromote>
 MoveList
 MoveGeneratorInternal::generateLegalCheckMoves(const StateImpl& S) noexcept {
@@ -2408,28 +2400,12 @@ MoveGeneratorInternal::generateLegalCheckMoves(const StateImpl& S) noexcept {
     return List;
 }
 
-template <bool WilyPromote>
-MoveList
-MoveGeneratorInternal::generateLegalCheckMoves(const StateImpl& S) noexcept {
-    return (S.getPosition().sideToMove() == Black)
-               ? generateLegalCheckMoves<Black, WilyPromote>(S)
-               : generateLegalCheckMoves<White, WilyPromote>(S);
-}
-
 template <Color C, bool WilyPromote>
 MoveList
 MoveGeneratorInternal::generateLegalCaptureMoves(const StateImpl& S) noexcept {
     MoveList List;
     List.Tail = generateLegalMovesImpl<C, true, WilyPromote>(S, List.Tail);
     return List;
-}
-
-template <bool WilyPromote>
-MoveList
-MoveGeneratorInternal::generateLegalCaptureMoves(const StateImpl& S) noexcept {
-    return (S.getPosition().sideToMove() == Black)
-               ? generateLegalCaptureMoves<Black, WilyPromote>(S)
-               : generateLegalCaptureMoves<White, WilyPromote>(S);
 }
 
 template <Color C, bool WilyPromote>
@@ -2485,22 +2461,6 @@ template MoveList
 MoveGeneratorInternal::generateLegalEvasionMoves<White, false>(
     const StateImpl& S) noexcept;
 template MoveList MoveGeneratorInternal::generateLegalEvasionMoves<White, true>(
-    const StateImpl& S) noexcept;
-
-template MoveList
-MoveGeneratorInternal::generateLegalMoves<false>(const StateImpl& S) noexcept;
-template MoveList
-MoveGeneratorInternal::generateLegalMoves<true>(const StateImpl& S) noexcept;
-
-template MoveList MoveGeneratorInternal::generateLegalCheckMoves<false>(
-    const StateImpl& S) noexcept;
-template MoveList MoveGeneratorInternal::generateLegalCheckMoves<true>(
-    const StateImpl& S) noexcept;
-
-template MoveList MoveGeneratorInternal::generateLegalCaptureMoves<false>(
-    const StateImpl& S) noexcept;
-
-template MoveList MoveGeneratorInternal::generateLegalCaptureMoves<true>(
     const StateImpl& S) noexcept;
 
 } // namespace internal

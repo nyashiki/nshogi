@@ -24,8 +24,11 @@ MoveList MoveGenerator::generateLegalMoves(const State& S) noexcept {
 
 template <bool WilyPromote>
 MoveList MoveGenerator::generateLegalMoves(const State& S) noexcept {
-    return MoveGeneratorInternal::generateLegalMoves<WilyPromote>(
-        *ImmutableStateAdapter(S).get());
+    if (S.getSideToMove() == Black) {
+        return generateLegalMoves<Black, WilyPromote>(S);
+    } else {
+        return generateLegalMoves<White, WilyPromote>(S);
+    }
 }
 
 template <Color C, bool WilyPromote>
@@ -36,7 +39,16 @@ MoveList MoveGenerator::generateLegalCheckMoves(const State& S) noexcept {
 
 template <bool WilyPromote>
 MoveList MoveGenerator::generateLegalCheckMoves(const State& S) noexcept {
-    return MoveGeneratorInternal::generateLegalCheckMoves<WilyPromote>(
+    if (S.getSideToMove() == Black) {
+        return generateLegalCheckMoves<Black, WilyPromote>(S);
+    } else {
+        return generateLegalCheckMoves<White, WilyPromote>(S);
+    }
+}
+
+template <Color C, bool WilyPromote>
+MoveList MoveGenerator::generateLegalCaptureMoves(const State& S) noexcept {
+    return MoveGeneratorInternal::generateLegalCaptureMoves<C, WilyPromote>(
         *ImmutableStateAdapter(S).get());
 }
 
