@@ -2149,8 +2149,8 @@ inline Move32* generateLegalEvasionMovesImpl(
     Moves = generateOnBoardOneStepMovesImpl<C, PTK_King, true>(S, Moves,
                                                                OpponentBB);
     if constexpr (!CaptureOnly) {
-        Moves = generateOnBoardOneStepMovesImpl<C, PTK_King, false>(S, Moves,
-                                                                    ~OccupiedBB);
+        Moves = generateOnBoardOneStepMovesImpl<C, PTK_King, false>(
+            S, Moves, ~OccupiedBB);
     }
 
     // If there are more than one checkers,
@@ -2181,8 +2181,8 @@ inline Move32* generateLegalEvasionMovesImpl(
 
     // Moving a piece.
     if constexpr (!CaptureOnly) {
-        Moves = generateOnBoardOneStepMovesImpl<C, false, WilyPromote>(S, Moves,
-                                                                   BetweenBB);
+        Moves = generateOnBoardOneStepMovesImpl<C, false, WilyPromote>(
+            S, Moves, BetweenBB);
         Moves = generateOnBoardSliderMovesImpl<C, false, WilyPromote>(
             S, Moves, BetweenBB, OccupiedBB);
     }
@@ -2231,16 +2231,18 @@ inline Move32* generateLegalMovesImpl(const StateImpl& S,
 
     if constexpr (C == Black) {
         if (!CheckerBB.isZero()) {
-            Moves = generateLegalEvasionMovesImpl<Black, CaptureOnly, WilyPromote>(
-                S, Moves, CheckerBB, WhiteBB, OccupiedBB);
+            Moves =
+                generateLegalEvasionMovesImpl<Black, CaptureOnly, WilyPromote>(
+                    S, Moves, CheckerBB, WhiteBB, OccupiedBB);
         } else {
             Moves = generateLegalMovesImpl<Black, CaptureOnly, WilyPromote>(
                 S, Moves, WhiteBB, OccupiedBB);
         }
     } else {
         if (!CheckerBB.isZero()) {
-            Moves = generateLegalEvasionMovesImpl<White, CaptureOnly, WilyPromote>(
-                S, Moves, CheckerBB, BlackBB, OccupiedBB);
+            Moves =
+                generateLegalEvasionMovesImpl<White, CaptureOnly, WilyPromote>(
+                    S, Moves, CheckerBB, BlackBB, OccupiedBB);
         } else {
             Moves = generateLegalMovesImpl<White, CaptureOnly, WilyPromote>(
                 S, Moves, BlackBB, OccupiedBB);
@@ -2443,11 +2445,13 @@ template MoveList MoveGeneratorInternal::generateLegalCheckMoves<White, false>(
 template MoveList MoveGeneratorInternal::generateLegalCheckMoves<White, true>(
     const StateImpl& S) noexcept;
 
-template MoveList MoveGeneratorInternal::generateLegalCaptureMoves<Black, false>(
+template MoveList
+MoveGeneratorInternal::generateLegalCaptureMoves<Black, false>(
     const StateImpl& S) noexcept;
 template MoveList MoveGeneratorInternal::generateLegalCaptureMoves<Black, true>(
     const StateImpl& S) noexcept;
-template MoveList MoveGeneratorInternal::generateLegalCaptureMoves<White, false>(
+template MoveList
+MoveGeneratorInternal::generateLegalCaptureMoves<White, false>(
     const StateImpl& S) noexcept;
 template MoveList MoveGeneratorInternal::generateLegalCaptureMoves<White, true>(
     const StateImpl& S) noexcept;
