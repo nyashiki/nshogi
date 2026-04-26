@@ -18,7 +18,7 @@ namespace {
 
 using namespace internal::bitboard;
 
-template <Color C, bool Capture, bool WilyPromote = true>
+template <Color C, bool Capture, bool WilyPromote>
 inline Move32*
 generateOnBoardOneStepPawnMovesImpl(const StateImpl& S,
                                     Move32* __restrict Moves,
@@ -332,7 +332,7 @@ generateOnBoardOneStepMovesImpl(const StateImpl& S, Move32* __restrict Moves,
     return Moves;
 }
 
-template <Color C, bool Capture, bool WilyPromote = true>
+template <Color C, bool Capture, bool WilyPromote>
 inline Move32*
 generateOnBoardLanceMovesImpl(const StateImpl& S, Move32* __restrict Moves,
                               const Bitboard& TargetSquares,
@@ -491,7 +491,7 @@ generateOnBoardLanceMovesImpl(const StateImpl& S, Move32* __restrict Moves,
     return Moves;
 }
 
-template <Color C, PieceTypeKind Type, bool Capture, bool WilyPromote = true>
+template <Color C, PieceTypeKind Type, bool Capture, bool WilyPromote>
 inline Move32*
 generateOnBoardBishopMovesImpl(const StateImpl& S, Move32* __restrict Moves,
                                const Bitboard& TargetSquares,
@@ -617,7 +617,7 @@ generateOnBoardBishopMovesImpl(const StateImpl& S, Move32* __restrict Moves,
     return Moves;
 }
 
-template <Color C, PieceTypeKind Type, bool Capture, bool WilyPromote = true>
+template <Color C, PieceTypeKind Type, bool Capture, bool WilyPromote>
 inline Move32*
 generateOnBoardRookMovesImpl(const StateImpl& S, Move32* __restrict Moves,
                              const Bitboard& TargetSquares,
@@ -2032,7 +2032,7 @@ inline Move32* generateOnBoardRookPromoteCheckMovesImpl(
     return Moves;
 }
 
-template <Color C, bool Capture, bool WilyPromote = true>
+template <Color C, bool Capture, bool WilyPromote>
 inline Move32*
 generateOnBoardOneStepMovesImpl(const StateImpl& S, Move32* __restrict Moves,
                                 const Bitboard& TargetSquares) noexcept {
@@ -2121,7 +2121,7 @@ inline Move32* generateOnBoardSliderCheckMovesImpl(
     return Moves;
 }
 
-template <Color C, bool Capture, bool WilyPromote = true>
+template <Color C, bool Capture, bool WilyPromote>
 inline Move32*
 generateOnBoardSliderMovesImpl(const StateImpl& S, Move32* __restrict Moves,
                                const Bitboard& TargetSquares,
@@ -2141,15 +2141,17 @@ generateOnBoardSliderMovesImpl(const StateImpl& S, Move32* __restrict Moves,
     return Moves;
 }
 
-template <Color C, bool WilyPromote = true>
+template <Color C, bool CaptureOnly, bool WilyPromote>
 inline Move32* generateLegalEvasionMovesImpl(
     const StateImpl& S, Move32* __restrict Moves, const Bitboard& CheckerBB,
     const Bitboard& OpponentBB, const Bitboard& OccupiedBB) noexcept {
     // Moving the king.
     Moves = generateOnBoardOneStepMovesImpl<C, PTK_King, true>(S, Moves,
                                                                OpponentBB);
-    Moves = generateOnBoardOneStepMovesImpl<C, PTK_King, false>(S, Moves,
-                                                                ~OccupiedBB);
+    if constexpr (!CaptureOnly) {
+        Moves = generateOnBoardOneStepMovesImpl<C, PTK_King, false>(S, Moves,
+                                                                    ~OccupiedBB);
+    }
 
     // If there are more than one checkers,
     // no moves available but moving the king.
@@ -2178,18 +2180,22 @@ inline Move32* generateLegalEvasionMovesImpl(
     }
 
     // Moving a piece.
-    Moves = generateOnBoardOneStepMovesImpl<C, false, WilyPromote>(S, Moves,
+    if constexpr (!CaptureOnly) {
+        Moves = generateOnBoardOneStepMovesImpl<C, false, WilyPromote>(S, Moves,
                                                                    BetweenBB);
-    Moves = generateOnBoardSliderMovesImpl<C, false, WilyPromote>(
-        S, Moves, BetweenBB, OccupiedBB);
+        Moves = generateOnBoardSliderMovesImpl<C, false, WilyPromote>(
+            S, Moves, BetweenBB, OccupiedBB);
+    }
 
     // Dropping a piece (a.k.a. aigoma).
-    Moves = generateDroppingMovesImpl<C>(S, Moves, BetweenBB);
+    if constexpr (!CaptureOnly) {
+        Moves = generateDroppingMovesImpl<C>(S, Moves, BetweenBB);
+    }
 
     return Moves;
 }
 
-template <Color C, bool WilyPromote>
+template <Color C, bool CaptureOnly, bool WilyPromote>
 inline Move32* generateLegalMovesImpl(const StateImpl& S,
                                       Move32* __restrict Moves,
                                       const Bitboard& OpponentBB,
@@ -2200,20 +2206,22 @@ inline Move32* generateLegalMovesImpl(const StateImpl& S,
     Moves = generateOnBoardSliderMovesImpl<C, true, WilyPromote>(
         S, Moves, OpponentBB, OccupiedBB);
 
-    const Bitboard EmptyBB = ~OccupiedBB;
-    // Droppings.
-    Moves = generateDroppingMovesImpl<C>(S, Moves, EmptyBB);
+    if constexpr (!CaptureOnly) {
+        const Bitboard EmptyBB = ~OccupiedBB;
+        // Droppings.
+        Moves = generateDroppingMovesImpl<C>(S, Moves, EmptyBB);
 
-    // No captures.
-    Moves = generateOnBoardOneStepMovesImpl<C, false, WilyPromote>(S, Moves,
-                                                                   EmptyBB);
-    Moves = generateOnBoardSliderMovesImpl<C, false, WilyPromote>(
-        S, Moves, EmptyBB, OccupiedBB);
+        // No captures.
+        Moves = generateOnBoardOneStepMovesImpl<C, false, WilyPromote>(S, Moves,
+                                                                       EmptyBB);
+        Moves = generateOnBoardSliderMovesImpl<C, false, WilyPromote>(
+            S, Moves, EmptyBB, OccupiedBB);
+    }
 
     return Moves;
 }
 
-template <Color C, bool WilyPromote>
+template <Color C, bool CaptureOnly, bool WilyPromote>
 inline Move32* generateLegalMovesImpl(const StateImpl& S,
                                       Move32* Moves) noexcept {
     const Bitboard CheckerBB = S.getCheckerBB();
@@ -2223,18 +2231,18 @@ inline Move32* generateLegalMovesImpl(const StateImpl& S,
 
     if constexpr (C == Black) {
         if (!CheckerBB.isZero()) {
-            Moves = generateLegalEvasionMovesImpl<Black, WilyPromote>(
+            Moves = generateLegalEvasionMovesImpl<Black, CaptureOnly, WilyPromote>(
                 S, Moves, CheckerBB, WhiteBB, OccupiedBB);
         } else {
-            Moves = generateLegalMovesImpl<Black, WilyPromote>(
+            Moves = generateLegalMovesImpl<Black, CaptureOnly, WilyPromote>(
                 S, Moves, WhiteBB, OccupiedBB);
         }
     } else {
         if (!CheckerBB.isZero()) {
-            Moves = generateLegalEvasionMovesImpl<White, WilyPromote>(
+            Moves = generateLegalEvasionMovesImpl<White, CaptureOnly, WilyPromote>(
                 S, Moves, CheckerBB, BlackBB, OccupiedBB);
         } else {
-            Moves = generateLegalMovesImpl<White, WilyPromote>(
+            Moves = generateLegalMovesImpl<White, CaptureOnly, WilyPromote>(
                 S, Moves, BlackBB, OccupiedBB);
         }
     }
@@ -2244,7 +2252,7 @@ inline Move32* generateLegalMovesImpl(const StateImpl& S,
 
 template <Color C, bool WilyPromote>
 inline Move32* generateLegalCheckMovesImpl(const StateImpl& S,
-                                           Move32* Moves) noexcept {
+                                           Move32* __restrict Moves) noexcept {
     const Bitboard BlackBB = S.getBitboard<Black>();
     const Bitboard WhiteBB = S.getBitboard<White>();
     const Bitboard OccupiedBB = BlackBB | WhiteBB;
@@ -2380,7 +2388,7 @@ template <Color C, bool WilyPromote>
 MoveList
 MoveGeneratorInternal::generateLegalMoves(const StateImpl& S) noexcept {
     MoveList List;
-    List.Tail = generateLegalMovesImpl<C, WilyPromote>(S, List.Tail);
+    List.Tail = generateLegalMovesImpl<C, false, WilyPromote>(S, List.Tail);
     return List;
 }
 
@@ -2400,6 +2408,30 @@ MoveGeneratorInternal::generateLegalCheckMoves(const StateImpl& S) noexcept {
     return List;
 }
 
+template <bool WilyPromote>
+MoveList
+MoveGeneratorInternal::generateLegalCheckMoves(const StateImpl& S) noexcept {
+    return (S.getPosition().sideToMove() == Black)
+               ? generateLegalCheckMoves<Black, WilyPromote>(S)
+               : generateLegalCheckMoves<White, WilyPromote>(S);
+}
+
+template <Color C, bool WilyPromote>
+MoveList
+MoveGeneratorInternal::generateLegalCaptureMoves(const StateImpl& S) noexcept {
+    MoveList List;
+    List.Tail = generateLegalMovesImpl<C, true, WilyPromote>(S, List.Tail);
+    return List;
+}
+
+template <bool WilyPromote>
+MoveList
+MoveGeneratorInternal::generateLegalCaptureMoves(const StateImpl& S) noexcept {
+    return (S.getPosition().sideToMove() == Black)
+               ? generateLegalCaptureMoves<Black, WilyPromote>(S)
+               : generateLegalCaptureMoves<White, WilyPromote>(S);
+}
+
 template <Color C, bool WilyPromote>
 MoveList
 MoveGeneratorInternal::generateLegalEvasionMoves(const StateImpl& S) noexcept {
@@ -2411,18 +2443,10 @@ MoveGeneratorInternal::generateLegalEvasionMoves(const StateImpl& S) noexcept {
     assert(!CheckerBB.isZero());
 
     MoveList List;
-    List.Tail = generateLegalEvasionMovesImpl<C, WilyPromote>(
+    List.Tail = generateLegalEvasionMovesImpl<C, false, WilyPromote>(
         S, List.Tail, CheckerBB, OpBB, OccupiedBB);
 
     return List;
-}
-
-template <bool WilyPromote>
-MoveList
-MoveGeneratorInternal::generateLegalCheckMoves(const StateImpl& S) noexcept {
-    return (S.getPosition().sideToMove() == Black)
-               ? generateLegalCheckMoves<Black, WilyPromote>(S)
-               : generateLegalCheckMoves<White, WilyPromote>(S);
 }
 
 template MoveList MoveGeneratorInternal::generateLegalMoves<Black, false>(
@@ -2441,6 +2465,15 @@ template MoveList MoveGeneratorInternal::generateLegalCheckMoves<Black, true>(
 template MoveList MoveGeneratorInternal::generateLegalCheckMoves<White, false>(
     const StateImpl& S) noexcept;
 template MoveList MoveGeneratorInternal::generateLegalCheckMoves<White, true>(
+    const StateImpl& S) noexcept;
+
+template MoveList MoveGeneratorInternal::generateLegalCaptureMoves<Black, false>(
+    const StateImpl& S) noexcept;
+template MoveList MoveGeneratorInternal::generateLegalCaptureMoves<Black, true>(
+    const StateImpl& S) noexcept;
+template MoveList MoveGeneratorInternal::generateLegalCaptureMoves<White, false>(
+    const StateImpl& S) noexcept;
+template MoveList MoveGeneratorInternal::generateLegalCaptureMoves<White, true>(
     const StateImpl& S) noexcept;
 
 template MoveList
@@ -2462,6 +2495,12 @@ MoveGeneratorInternal::generateLegalMoves<true>(const StateImpl& S) noexcept;
 template MoveList MoveGeneratorInternal::generateLegalCheckMoves<false>(
     const StateImpl& S) noexcept;
 template MoveList MoveGeneratorInternal::generateLegalCheckMoves<true>(
+    const StateImpl& S) noexcept;
+
+template MoveList MoveGeneratorInternal::generateLegalCaptureMoves<false>(
+    const StateImpl& S) noexcept;
+
+template MoveList MoveGeneratorInternal::generateLegalCaptureMoves<true>(
     const StateImpl& S) noexcept;
 
 } // namespace internal
