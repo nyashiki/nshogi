@@ -52,6 +52,15 @@ MoveList MoveGenerator::generateLegalCaptureMoves(const State& S) noexcept {
         *ImmutableStateAdapter(S).get());
 }
 
+template <bool WilyPromote>
+MoveList MoveGenerator::generateLegalCaptureMoves(const State& S) noexcept {
+    if (S.getSideToMove() == Black) {
+        return generateLegalCaptureMoves<Black, WilyPromote>(S);
+    } else {
+        return generateLegalCaptureMoves<White, WilyPromote>(S);
+    }
+}
+
 template MoveList
 MoveGenerator::generateLegalMoves<Black, false>(const State& S) noexcept;
 template MoveList
@@ -71,6 +80,15 @@ template MoveList
 MoveGenerator::generateLegalCheckMoves<White, true>(const State& S) noexcept;
 
 template MoveList
+MoveGenerator::generateLegalCaptureMoves<Black, false>(const State& S) noexcept;
+template MoveList
+MoveGenerator::generateLegalCaptureMoves<Black, true>(const State& S) noexcept;
+template MoveList
+MoveGenerator::generateLegalCaptureMoves<White, false>(const State& S) noexcept;
+template MoveList
+MoveGenerator::generateLegalCaptureMoves<White, true>(const State& S) noexcept;
+
+template MoveList
 MoveGenerator::generateLegalMoves<false>(const State& S) noexcept;
 template MoveList
 MoveGenerator::generateLegalMoves<true>(const State& S) noexcept;
@@ -79,6 +97,11 @@ template MoveList
 MoveGenerator::generateLegalCheckMoves<false>(const State& S) noexcept;
 template MoveList
 MoveGenerator::generateLegalCheckMoves<true>(const State& S) noexcept;
+
+template MoveList
+MoveGenerator::generateLegalCaptureMoves<false>(const State& S) noexcept;
+template MoveList
+MoveGenerator::generateLegalCaptureMoves<true>(const State& S) noexcept;
 
 } // namespace core
 } // namespace nshogi
