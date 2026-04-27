@@ -14,6 +14,7 @@
 #include "../core/movegenerator.h"
 #include "../core/positionbuilder.h"
 #include "../core/statebuilder.h"
+#include "../core/extendedstate.h"
 #include "../io/sfen.h"
 
 #include <cstddef>
@@ -114,13 +115,29 @@ void testRecomputeHelper(const nshogi::core::State& State) {
                    DummyAdapter->getBitboard<nshogi::core::PTK_ProRook>());
 }
 
-void testDoMoveAndUndoMove(nshogi::core::State& State,
+template <typename StateType>
+void testDoMoveAndUndoMove(StateType& State,
                            nshogi::core::Move32 Move) {
     const std::string OriginalSfen =
         nshogi::io::sfen::positionToSfen(State.getPosition());
 
-    State.doMove(Move);
-    State.undoMove();
+    bool IsNullMove = false;
+    if (Move.isNone()) {
+        if constexpr (std::is_same_v<StateType, nshogi::core::ExtendedState>) {
+            IsNullMove = true;
+            State.doNullMove();
+            State.undoNullMove();
+        } else {
+            throw std::invalid_argument(
+                "testDoMoveAndUndoMove() is called with a null move, but the "
+                "StateType does not support null moves.");
+        }
+    }
+
+    if (!IsNullMove) {
+        State.doMove(Move);
+        State.undoMove();
+    }
 
     const std::string DoMoveAndUndoMoveSfen =
         nshogi::io::sfen::positionToSfen(State.getPosition());
@@ -903,5 +920,29 @@ TEST(State, DeclarationExamplePositions) {
     for (const auto& [K, V] : TestCases) {
         auto State = nshogi::io::sfen::StateBuilder::newState(K);
         TEST_ASSERT_EQ(State.canDeclare(), V);
+    }
+}
+
+TEST(ExtendedState, DoAndUndoRandom) {
+    const int N = 1000;
+    std::mt19937_64 mt(20260427);
+
+    for (int I = 0; I < N; ++I) {
+        nshogi::core::ExtendedState State =
+            nshogi::core::StateBuilder::getInitialState();
+
+        for (uint16_t Ply = 0; Ply < 512; ++Ply) {
+            const auto Moves =
+                nshogi::core::MoveGenerator::generateLegalMoves(State);
+
+            if (Moves.size() == 0) {
+                break;
+            }
+
+            testDoMoveAndUndoMove(State, nshogi::core::Move32::MoveNone());
+
+            const auto RandomMove = Moves[mt() % Moves.size()];
+            State.doMove(RandomMove);
+        }
     }
 }

@@ -55,6 +55,7 @@ SOURCES :=                                 \
 	src/core/position.cc               \
 	src/core/positionbuilder.cc        \
 	src/core/state.cc                  \
+    src/core/extendedstate.cc          \
 	src/core/statebuilder.cc           \
 	src/core/movegenerator.cc          \
 	src/core/huffman.cc                \

@@ -331,6 +331,32 @@ void StateImpl::refresh() noexcept {
     }
 }
 
+void StateImpl::doNullMove() noexcept {
+    // This function must not be called when the king is in check.
+    assert(getCheckerBB().isZero());
+
+    Helper.proceedOneStep(Move32::MoveNone(), HashValue.getValue(),
+                            getPosition().getStand<Black>(),
+                            getPosition().getStand<White>());
+
+    // Reset continuous check counts as the null move is not a checking move.
+    StepHelper* CurrentStepHelper = &Helper.SHelper[0];
+    CurrentStepHelper->ContinuousCheckCounts[Black] = 0;
+    CurrentStepHelper->ContinuousCheckCounts[White] = 0;
+
+    Pos.changeSideToMove();
+    HashValue.updateColor();
+}
+
+void StateImpl::undoNullMove() {
+    assert(getPly(false) > 0);
+    assert(getLastMove().isNone());
+
+    Helper.goBackOneStep();
+    Pos.changeSideToMove();
+    HashValue.updateColor();
+}
+
 template <Color C, bool UpdateCheckerBySliders>
 inline void StateImpl::setDefendingOpponentSliderBB(
     StepHelper* SHelper, const bitboard::Bitboard& OccupiedBB) noexcept {
