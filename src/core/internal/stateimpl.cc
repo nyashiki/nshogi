@@ -340,7 +340,7 @@ void StateImpl::doNullMove() noexcept {
                             getPosition().getStand<White>());
 
     // Reset continuous check counts as the null move is not a checking move.
-    StepHelper* CurrentStepHelper = &Helper.SHelper[0];
+    StepHelper* CurrentStepHelper = &Helper.SHelper[Helper.Ply];
     CurrentStepHelper->ContinuousCheckCounts[Black] = 0;
     CurrentStepHelper->ContinuousCheckCounts[White] = 0;
 
