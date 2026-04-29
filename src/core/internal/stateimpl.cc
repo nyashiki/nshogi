@@ -334,16 +334,19 @@ void StateImpl::refresh() noexcept {
 void StateImpl::doNullMove() noexcept {
     // This function must not be called when the king is in check.
     assert(getCheckerBB().isZero());
-
     Helper.proceedOneStep(Move32::MoveNone(), HashValue.getValue(),
                             getPosition().getStand<Black>(),
                             getPosition().getStand<White>());
 
     // Reset continuous check counts as the null move is not a checking move.
     StepHelper* CurrentStepHelper = &Helper.SHelper[Helper.Ply];
+    const StepHelper& PrevStepHelper = Helper.getStepHelper(Helper.Ply - 1);
+
     CurrentStepHelper->ContinuousCheckCounts[Black] = 0;
     CurrentStepHelper->ContinuousCheckCounts[White] = 0;
 
+    CurrentStepHelper->DefendingOpponentSliderBB[Black] = PrevStepHelper.DefendingOpponentSliderBB[Black];
+    CurrentStepHelper->DefendingOpponentSliderBB[White] = PrevStepHelper.DefendingOpponentSliderBB[White];
     Pos.changeSideToMove();
     HashValue.updateColor();
 }
