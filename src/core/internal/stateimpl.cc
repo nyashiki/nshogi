@@ -335,7 +335,7 @@ void StateImpl::doNullMove() noexcept {
     // This function must not be called when the king is in check.
     assert(getCheckerBB().isZero());
 
-    Helper.proceedOneStep(Move32::MoveNone(), HashValue.getValue(),
+    Helper.proceedOneStep(Move32::MoveNull(), HashValue.getValue(),
                             getPosition().getStand<Black>(),
                             getPosition().getStand<White>());
 
