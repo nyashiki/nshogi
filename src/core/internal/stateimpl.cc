@@ -345,6 +345,7 @@ void StateImpl::doNullMove() noexcept {
 
     CurrentStepHelper->ContinuousCheckCounts[Black] = 0;
     CurrentStepHelper->ContinuousCheckCounts[White] = 0;
+    CurrentStepHelper->CheckerBB.clear();
 
     CurrentStepHelper->DefendingOpponentSliderBB[Black] = PrevStepHelper.DefendingOpponentSliderBB[Black];
     CurrentStepHelper->DefendingOpponentSliderBB[White] = PrevStepHelper.DefendingOpponentSliderBB[White];
