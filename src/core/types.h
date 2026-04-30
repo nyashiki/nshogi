@@ -470,12 +470,27 @@ struct Move32 {
         return Move32((81 << FromShift) | (81 << ToShift));
     }
 
+    ///
+    /// @brief This move is used for the declaration win.
+    ///
+    static constexpr Move32 MoveWin() noexcept {
+        return Move32((1 << FromShift) | (1 << ToShift));
+    }
+
+    static constexpr Move32 MoveNull() noexcept {
+        return Move32((2 << FromShift) | (2 << ToShift));
+    }
+
     constexpr bool isNone() const noexcept {
         return C_ == 0;
     }
 
     constexpr bool isWin() const noexcept {
         return C_ == MoveWin().value();
+    }
+
+    constexpr bool isNull() const noexcept {
+        return C_ == MoveNull().value();
     }
 
     constexpr bool isInvalid() const noexcept {
@@ -488,13 +503,6 @@ struct Move32 {
 
     static constexpr Move32 fromValue(uint32_t Value) noexcept {
         return Move32(Value);
-    }
-
-    ///
-    /// @brief This move is used for the declaration win.
-    ///
-    static constexpr Move32 MoveWin() noexcept {
-        return Move32((1 << FromShift) | (1 << ToShift));
     }
 
     static constexpr Move32 boardMove(Square From, Square To,
