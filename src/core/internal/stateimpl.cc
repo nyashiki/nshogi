@@ -355,7 +355,7 @@ void StateImpl::doNullMove() noexcept {
 
 void StateImpl::undoNullMove() {
     assert(getPly(false) > 0);
-    assert(getLastMove().isNone());
+    assert(getLastMove().isNull());
 
     Helper.goBackOneStep();
     Pos.changeSideToMove();

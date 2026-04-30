@@ -300,20 +300,22 @@ TEST(MoveGeneration, ExtendedStateSameAfterDoNullAndUndoNull) {
                 break;
             }
 
-            State.doNullMove();
-            State.undoNullMove();
+            if (!State.isInCheck()) {
+                State.doNullMove();
+                State.undoNullMove();
 
-            const auto MovesAfterDoNullAndUndoNull =
-                nshogi::core::MoveGenerator::generateLegalMoves(State);
+                const auto MovesAfterDoNullAndUndoNull =
+                    nshogi::core::MoveGenerator::generateLegalMoves(State);
 
-            TEST_ASSERT_EQ(Moves.size(), MovesAfterDoNullAndUndoNull.size());
-            for (const auto& MoveAfterDoNullAndUndoNull : MovesAfterDoNullAndUndoNull) {
-                TEST_ASSERT_TRUE(Moves.find(MoveAfterDoNullAndUndoNull) !=
-                                 Moves.end());
-            }
-            for (const auto& Move : Moves) {
-                TEST_ASSERT_TRUE(MovesAfterDoNullAndUndoNull.find(Move) !=
-                                 MovesAfterDoNullAndUndoNull.end());
+                TEST_ASSERT_EQ(Moves.size(), MovesAfterDoNullAndUndoNull.size());
+                for (const auto& MoveAfterDoNullAndUndoNull : MovesAfterDoNullAndUndoNull) {
+                    TEST_ASSERT_TRUE(Moves.find(MoveAfterDoNullAndUndoNull) !=
+                                     Moves.end());
+                }
+                for (const auto& Move : Moves) {
+                    TEST_ASSERT_TRUE(MovesAfterDoNullAndUndoNull.find(Move) !=
+                                     MovesAfterDoNullAndUndoNull.end());
+                }
             }
 
             const auto RandomMove = Moves[mt() % Moves.size()];

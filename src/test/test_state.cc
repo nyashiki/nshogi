@@ -122,7 +122,7 @@ void testDoMoveAndUndoMove(StateType& State,
         nshogi::io::sfen::positionToSfen(State.getPosition());
 
     bool IsNullMove = false;
-    if (Move.isNone()) {
+    if (Move.isNull()) {
         if constexpr (std::is_same_v<StateType, nshogi::core::ExtendedState>) {
             IsNullMove = true;
             State.doNullMove();
@@ -939,7 +939,9 @@ TEST(ExtendedState, DoAndUndoRandom) {
                 break;
             }
 
-            testDoMoveAndUndoMove(State, nshogi::core::Move32::MoveNone());
+            if (!State.isInCheck()) {
+                testDoMoveAndUndoMove(State, nshogi::core::Move32::MoveNull());
+            }
 
             const auto RandomMove = Moves[mt() % Moves.size()];
             State.doMove(RandomMove);
