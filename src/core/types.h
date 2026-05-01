@@ -630,10 +630,6 @@ struct Move16 {
     constexpr Move16(const Move16& M) noexcept = default;
     constexpr Move16& operator=(const Move16& M) noexcept = default;
 
-    static constexpr Move16 MoveWin() noexcept {
-        return Move16(Move32::MoveWin());
-    }
-
     constexpr bool operator<(Move16 M) const noexcept {
         return C_ < M.C_;
     }
@@ -654,8 +650,20 @@ struct Move16 {
         return Move16(Move32::MoveInvalid());
     }
 
+    static constexpr Move16 MoveWin() noexcept {
+        return Move16(Move32::MoveWin());
+    }
+
+    static constexpr Move16 MoveNull() noexcept {
+        return Move16(Move32::MoveNull());
+    }
+
     constexpr bool isNone() const noexcept {
         return C_ == 0;
+    }
+
+    constexpr bool isNull() const noexcept {
+        return C_ == MoveNull().value();
     }
 
     constexpr bool isWin() const noexcept {
