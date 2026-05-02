@@ -446,6 +446,10 @@ core::Position PositionBuilder::newPosition(const std::string& Sfen) {
             break;
         }
 
+        if (Sfen[Cursor] == '\n' || Sfen[Cursor] == '\r') {
+            break;
+        }
+
         if (Sfen[Cursor] < '0' || Sfen[Cursor] > '9') {
             throw std::runtime_error(
                 "invalid sfen string (ply not a number error).\n" +
