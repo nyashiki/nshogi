@@ -11,7 +11,8 @@ var searchData=
   ['dfs_2eh_8',['dfs.h',['../dfs_8h.html',1,'']]],
   ['direction_9',['Direction',['../namespacenshogi_1_1core.html#adc1de9799c7b2e61418437a1e35a1a18',1,'nshogi::core']]],
   ['domove_10',['doMove',['../classnshogi_1_1core_1_1State.html#ac1602275a38ffa04dc953ad3585fa225',1,'nshogi::core::State']]],
-  ['drawvalues_11',['DrawValues',['../structnshogi_1_1ml_1_1SimpleTeacher.html#a574a587174a17e76876db3c4dbf71312',1,'nshogi::ml::SimpleTeacher']]],
-  ['drop_12',['drop',['../structnshogi_1_1core_1_1Move32.html#abfa0c31b9812508b654c72331d7285e1',1,'nshogi::core::Move32::drop()'],['../structnshogi_1_1core_1_1Move16.html#a46a98193f990f8335fd0e491d1db9462',1,'nshogi::core::Move16::drop()']]],
-  ['droppingmove_13',['droppingMove',['../structnshogi_1_1core_1_1Move32.html#a6e36dfe3aefe2a0bc460954af4f0962a',1,'nshogi::core::Move32']]]
+  ['donullmove_11',['doNullMove',['../classnshogi_1_1core_1_1ExtendedState.html#a027154b513e5ddbe88b868b5b8cf646b',1,'nshogi::core::ExtendedState']]],
+  ['drawvalues_12',['DrawValues',['../structnshogi_1_1ml_1_1SimpleTeacher.html#a574a587174a17e76876db3c4dbf71312',1,'nshogi::ml::SimpleTeacher']]],
+  ['drop_13',['drop',['../structnshogi_1_1core_1_1Move32.html#abfa0c31b9812508b654c72331d7285e1',1,'nshogi::core::Move32::drop()'],['../structnshogi_1_1core_1_1Move16.html#a46a98193f990f8335fd0e491d1db9462',1,'nshogi::core::Move16::drop()']]],
+  ['droppingmove_14',['droppingMove',['../structnshogi_1_1core_1_1Move32.html#a6e36dfe3aefe2a0bc460954af4f0962a',1,'nshogi::core::Move32']]]
 ];

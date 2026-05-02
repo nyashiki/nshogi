@@ -7,6 +7,7 @@ var structnshogi_1_1core_1_1Move16 =
     [ "from", "structnshogi_1_1core_1_1Move16.html#a422cc6a63734d4464af18e94828129b9", null ],
     [ "isInvalid", "structnshogi_1_1core_1_1Move16.html#a7ff5de6c20cc553170a141f58a73cc07", null ],
     [ "isNone", "structnshogi_1_1core_1_1Move16.html#a418330c29faafa2a845bc6feae5860e3", null ],
+    [ "isNull", "structnshogi_1_1core_1_1Move16.html#a2135e778e4f3d6f53f478d726369249d", null ],
     [ "isWin", "structnshogi_1_1core_1_1Move16.html#a4a704dc576b8a2577f0ee5a8fc9efe15", null ],
     [ "operator!=", "structnshogi_1_1core_1_1Move16.html#ac9808692357cf0c273bc526d32027447", null ],
     [ "operator<", "structnshogi_1_1core_1_1Move16.html#a8e4eb22942a503b183433babdeaeb162", null ],

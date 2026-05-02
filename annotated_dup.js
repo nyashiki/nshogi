@@ -2,6 +2,7 @@ var annotated_dup =
 [
     [ "nshogi", "namespacenshogi.html", [
       [ "core", "namespacenshogi_1_1core.html", [
+        [ "ExtendedState", "classnshogi_1_1core_1_1ExtendedState.html", "classnshogi_1_1core_1_1ExtendedState" ],
         [ "HuffmanCode", "structnshogi_1_1core_1_1HuffmanCode.html", "structnshogi_1_1core_1_1HuffmanCode" ],
         [ "Move16", "structnshogi_1_1core_1_1Move16.html", "structnshogi_1_1core_1_1Move16" ],
         [ "Move32", "structnshogi_1_1core_1_1Move32.html", "structnshogi_1_1core_1_1Move32" ],

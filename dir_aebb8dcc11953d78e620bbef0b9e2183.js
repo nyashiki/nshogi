@@ -1,5 +1,7 @@
 var dir_aebb8dcc11953d78e620bbef0b9e2183 =
 [
+    [ "extendedstate.cc", "extendedstate_8cc.html", null ],
+    [ "extendedstate.h", "extendedstate_8h.html", "extendedstate_8h" ],
     [ "huffman.cc", "core_2huffman_8cc.html", null ],
     [ "huffman.h", "core_2huffman_8h.html", "core_2huffman_8h" ],
     [ "initializer.cc", "initializer_8cc.html", "initializer_8cc" ],

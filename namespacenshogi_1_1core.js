@@ -4,6 +4,7 @@ var namespacenshogi_1_1core =
       [ "initializeAll", "namespacenshogi_1_1core_1_1initializer.html#ac5d62a872569f26e424a4000f21d6180", null ]
     ] ],
     [ "internal", "namespacenshogi_1_1core_1_1internal.html", null ],
+    [ "ExtendedState", "classnshogi_1_1core_1_1ExtendedState.html", "classnshogi_1_1core_1_1ExtendedState" ],
     [ "HuffmanCode", "structnshogi_1_1core_1_1HuffmanCode.html", "structnshogi_1_1core_1_1HuffmanCode" ],
     [ "Move16", "structnshogi_1_1core_1_1Move16.html", "structnshogi_1_1core_1_1Move16" ],
     [ "Move32", "structnshogi_1_1core_1_1Move32.html", "structnshogi_1_1core_1_1Move32" ],

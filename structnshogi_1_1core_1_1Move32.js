@@ -9,6 +9,7 @@ var structnshogi_1_1core_1_1Move32 =
     [ "from", "structnshogi_1_1core_1_1Move32.html#ad0dfe4a17ecc43670ba367c21775c198", null ],
     [ "isInvalid", "structnshogi_1_1core_1_1Move32.html#a10bd416fa091d7cba292cb6d02ff85f2", null ],
     [ "isNone", "structnshogi_1_1core_1_1Move32.html#a0092913c56c3180adcd642f20f25d01a", null ],
+    [ "isNull", "structnshogi_1_1core_1_1Move32.html#ab6b9aee7a646385a7dc42e5719346751", null ],
     [ "isWin", "structnshogi_1_1core_1_1Move32.html#a9e510e08578447399b77bb4cf60fd8d6", null ],
     [ "operator!=", "structnshogi_1_1core_1_1Move32.html#ae8c344045e4bce26b5c52b8647539506", null ],
     [ "operator<", "structnshogi_1_1core_1_1Move32.html#a25a0cbbfe3ac1398654b33e1baf556d5", null ],

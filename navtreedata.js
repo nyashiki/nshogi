@@ -41,7 +41,7 @@ var NAVTREE =
       [ "Class Hierarchy", "hierarchy.html", "hierarchy" ],
       [ "Class Members", "functions.html", [
         [ "All", "functions.html", "functions_dup" ],
-        [ "Functions", "functions_func.html", null ],
+        [ "Functions", "functions_func.html", "functions_func" ],
         [ "Variables", "functions_vars.html", null ],
         [ "Related Functions", "functions_rela.html", null ]
       ] ]
@@ -55,12 +55,12 @@ var NAVTREE =
 var NAVTREEINDEX =
 [
 "annotated.html",
-"featurestack_8h.html#a0a6da0b2626a34d2b46992e6543fe303",
-"namespacenshogi_1_1core.html#a45140d529f684dbeade9152df24d176aa27769e6c945aba60dd0bd548088418d0",
-"namespacenshogi_1_1ml.html#a064b6a3f879a6cc3f8124f0b7657a0b8",
-"structnshogi_1_1core_1_1HuffmanCode.html#ad43205a9a7615b2150fd8bfcd4f2b907",
-"structnshogi_1_1ml_1_1FeatureStackComptime.html#af4966794aaf87808069c01ecd3e7da6a",
-"types_8h.html#adc49f924850845e9563ab7338d6f375fa560b5130478c8857cd72cfc56345681e"
+"featurestack_8cc.html#adc133cbb7607504649be75003a7801e0",
+"namespacemembers_p.html",
+"namespacenshogi_1_1io_1_1csa.html#ad4b3120e13451fff114639531e11a940",
+"sfen_8h.html#a9c3f6fb141ced1f38c50721782f1ceef",
+"structnshogi_1_1ml_1_1FeatureBitboard.html#a6bc558d6c2d9cd6bba5c1e5ac2696740",
+"types_8h.html#aa62bacdfc45216d950de328340b07be7"
 ];
 
 var SYNCONMSG = 'click to disable panel synchronisation';

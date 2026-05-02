@@ -23,5 +23,6 @@ var classnshogi_1_1core_1_1State =
     [ "undoMove", "classnshogi_1_1core_1_1State.html#a8c19fb89d3f8f2337ace2be35be1b53a", null ],
     [ "internal::ImmutableStateAdapter", "classnshogi_1_1core_1_1State.html#a3f9dce124b0a5ee0b5344c6c4853ed44", null ],
     [ "internal::MutableStateAdapter", "classnshogi_1_1core_1_1State.html#aaf3b674303632679e3e9fcc868b49ee3", null ],
-    [ "StateBuilder", "classnshogi_1_1core_1_1State.html#a351fbb0ba2579b6a81c1653b460b7658", null ]
+    [ "StateBuilder", "classnshogi_1_1core_1_1State.html#a351fbb0ba2579b6a81c1653b460b7658", null ],
+    [ "Impl", "classnshogi_1_1core_1_1State.html#a79ce131c45e14bb4c8e26059552cdc23", null ]
 ];
