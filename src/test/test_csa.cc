@@ -130,7 +130,7 @@ TEST(CSA, Handmade4) {
     nshogi::core::State State = nshogi::io::csa::StateBuilder::newState(CSA);
     const std::string Sfen = nshogi::io::sfen::stateToSfen(State);
 
-    TEST_ASSERT_STREQ(
-        "lr5nl/3g1kg2/2n1ppsp1/p1pps1p1p/1p5P1/P1PPSPP1P/1PS1P1N2/1KG2G3/LN5RL b Bb 1",
-        Sfen.c_str());
+    TEST_ASSERT_STREQ("lr5nl/3g1kg2/2n1ppsp1/p1pps1p1p/1p5P1/P1PPSPP1P/"
+                      "1PS1P1N2/1KG2G3/LN5RL b Bb 1",
+                      Sfen.c_str());
 }
