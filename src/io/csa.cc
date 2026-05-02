@@ -345,6 +345,7 @@ core::Position PositionBuilder::newPosition(const std::string& CSA) {
             for (const auto Type : StandPieceTypes) {
                 Builder.setStand(Black, Type, StandCounts[Type]);
             }
+            continue;
         } else if (Token == "P-") {
             std::size_t Cursor = 2;
             uint32_t StandCounts[16] = {};
@@ -365,6 +366,7 @@ core::Position PositionBuilder::newPosition(const std::string& CSA) {
             for (const auto Type : StandPieceTypes) {
                 Builder.setStand(White, Type, StandCounts[Type]);
             }
+            continue;
         } else {
             continue;
         }
