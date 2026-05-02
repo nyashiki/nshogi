@@ -109,3 +109,28 @@ TEST(CSA, Handmade3) {
         "lnsgkgsnl/9/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL w - 1",
         Sfen.c_str());
 }
+
+TEST(CSA, Handmade4) {
+    // clang-format off
+    const std::string CSA =
+        "P1-KY-HI *  *  *  *  * -KE-KY\n"
+        "P2 *  *  * -KI * -OU-KI *  * \n"
+        "P3 *  * -KE * -FU-FU-GI-FU * \n"
+        "P4-FU * -FU-FU-GI * -FU * -FU\n"
+        "P5 * -FU *  *  *  *  * +FU * \n"
+        "P6+FU * +FU+FU+GI+FU+FU * +FU\n"
+        "P7 * +FU+GI * +FU * +KE *  * \n"
+        "P8 * +OU+KI *  * +KI *  *  * \n"
+        "P9+KY+KE *  *  *  *  * +HI+KY\n"
+        "P+00KA\n"
+        "P-00KA\n"
+        "+\n";
+    // clang-format on
+
+    nshogi::core::State State = nshogi::io::csa::StateBuilder::newState(CSA);
+    const std::string Sfen = nshogi::io::sfen::stateToSfen(State);
+
+    TEST_ASSERT_STREQ(
+        "lr5nl/3g1kg2/2n1ppsp1/p1pps1p1p/1p5P1/P1PPSPP1P/1PS1P1N2/1KG2G3/LN5RL b Bb 1",
+        Sfen.c_str());
+}
