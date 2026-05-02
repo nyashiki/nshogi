@@ -13,8 +13,8 @@ namespace nshogi {
 namespace core {
 
 ///
-//// @class ExtendedState
-//// @brief An extended version of the `State` class with additional
+/// @class ExtendedState
+/// @brief An extended version of the `State` class with additional
 /// functionalities.
 ///
 /// This class is an extended version of the `State` class,
