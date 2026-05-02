@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2025 @nyashiki
+// Copyright (c) 2025-2026 @nyashiki
 //
 // This software is licensed under the MIT license.
 // For details, see the LICENSE file in the root of this repository.
@@ -470,12 +470,27 @@ struct Move32 {
         return Move32((81 << FromShift) | (81 << ToShift));
     }
 
+    ///
+    /// @brief This move is used for the declaration win.
+    ///
+    static constexpr Move32 MoveWin() noexcept {
+        return Move32((1 << FromShift) | (1 << ToShift));
+    }
+
+    static constexpr Move32 MoveNull() noexcept {
+        return Move32((2 << FromShift) | (2 << ToShift));
+    }
+
     constexpr bool isNone() const noexcept {
         return C_ == 0;
     }
 
     constexpr bool isWin() const noexcept {
         return C_ == MoveWin().value();
+    }
+
+    constexpr bool isNull() const noexcept {
+        return C_ == MoveNull().value();
     }
 
     constexpr bool isInvalid() const noexcept {
@@ -488,13 +503,6 @@ struct Move32 {
 
     static constexpr Move32 fromValue(uint32_t Value) noexcept {
         return Move32(Value);
-    }
-
-    ///
-    /// @brief This move is used for the declaration win.
-    ///
-    static constexpr Move32 MoveWin() noexcept {
-        return Move32((1 << FromShift) | (1 << ToShift));
     }
 
     static constexpr Move32 boardMove(Square From, Square To,
@@ -622,10 +630,6 @@ struct Move16 {
     constexpr Move16(const Move16& M) noexcept = default;
     constexpr Move16& operator=(const Move16& M) noexcept = default;
 
-    static constexpr Move16 MoveWin() noexcept {
-        return Move16(Move32::MoveWin());
-    }
-
     constexpr bool operator<(Move16 M) const noexcept {
         return C_ < M.C_;
     }
@@ -646,8 +650,20 @@ struct Move16 {
         return Move16(Move32::MoveInvalid());
     }
 
+    static constexpr Move16 MoveWin() noexcept {
+        return Move16(Move32::MoveWin());
+    }
+
+    static constexpr Move16 MoveNull() noexcept {
+        return Move16(Move32::MoveNull());
+    }
+
     constexpr bool isNone() const noexcept {
         return C_ == 0;
+    }
+
+    constexpr bool isNull() const noexcept {
+        return C_ == MoveNull().value();
     }
 
     constexpr bool isWin() const noexcept {

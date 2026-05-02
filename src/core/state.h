@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2025 @nyashiki
+// Copyright (c) 2025-2026 @nyashiki
 //
 // This software is licensed under the MIT license.
 // For details, see the LICENSE file in the root of this repository.
@@ -143,6 +143,9 @@ class State {
     ///
     bool canDeclare() const noexcept;
 
+ protected:
+    internal::StateImpl* Impl;
+
  private:
     State() = delete;
     State(const Position& P);
@@ -151,7 +154,6 @@ class State {
 
     State(internal::StateImpl* SI);
 
-    internal::StateImpl* Impl;
     friend class StateBuilder;
     friend class internal::ImmutableStateAdapter;
     friend class internal::MutableStateAdapter;

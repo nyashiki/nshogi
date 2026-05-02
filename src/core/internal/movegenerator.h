@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2025 @nyashiki
+// Copyright (c) 2025-2026 @nyashiki
 //
 // This software is licensed under the MIT license.
 // For details, see the LICENSE file in the root of this repository.
@@ -32,12 +32,9 @@ class MoveGeneratorInternal {
     static MoveList
     generateLegalEvasionMoves(const internal::StateImpl& S) noexcept;
 
-    template <bool WilyPromote = true>
-    static MoveList generateLegalMoves(const internal::StateImpl& S) noexcept;
-
-    template <bool WilyPromote = true>
+    template <Color C, bool WilyPromote = true>
     static MoveList
-    generateLegalCheckMoves(const internal::StateImpl& S) noexcept;
+    generateLegalCaptureMoves(const internal::StateImpl& S) noexcept;
 };
 
 } // namespace internal

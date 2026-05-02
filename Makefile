@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2025 @nyashiki
+# Copyright (c) 2025-2026 @nyashiki
 #
 # This software is licensed under the MIT license.
 # For details, see the LICENSE file in the root of this repository.
@@ -55,6 +55,7 @@ SOURCES :=                                 \
 	src/core/position.cc               \
 	src/core/positionbuilder.cc        \
 	src/core/state.cc                  \
+    src/core/extendedstate.cc          \
 	src/core/statebuilder.cc           \
 	src/core/movegenerator.cc          \
 	src/core/huffman.cc                \

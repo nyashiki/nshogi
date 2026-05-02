@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2025 @nyashiki
+// Copyright (c) 2025-2026 @nyashiki
 //
 // This software is licensed under the MIT license.
 // For details, see the LICENSE file in the root of this repository.
@@ -329,6 +329,39 @@ void StateImpl::refresh() noexcept {
         CurrentStepHelper->ContinuousCheckCounts[getPosition().sideToMove()] =
             1;
     }
+}
+
+void StateImpl::doNullMove() noexcept {
+    // This function must not be called when the king is in check.
+    assert(getCheckerBB().isZero());
+
+    Helper.proceedOneStep(Move32::MoveNull(), HashValue.getValue(),
+                          getPosition().getStand<Black>(),
+                          getPosition().getStand<White>());
+
+    // Reset continuous check counts as the null move is not a checking move.
+    StepHelper* CurrentStepHelper = &Helper.SHelper[Helper.Ply];
+    const StepHelper& PrevStepHelper = Helper.getStepHelper(Helper.Ply - 1);
+
+    CurrentStepHelper->ContinuousCheckCounts[Black] = 0;
+    CurrentStepHelper->ContinuousCheckCounts[White] = 0;
+    CurrentStepHelper->CheckerBB.clear();
+
+    CurrentStepHelper->DefendingOpponentSliderBB[Black] =
+        PrevStepHelper.DefendingOpponentSliderBB[Black];
+    CurrentStepHelper->DefendingOpponentSliderBB[White] =
+        PrevStepHelper.DefendingOpponentSliderBB[White];
+    Pos.changeSideToMove();
+    HashValue.updateColor();
+}
+
+void StateImpl::undoNullMove() {
+    assert(getPly(false) > 0);
+    assert(getLastMove().isNull());
+
+    Helper.goBackOneStep();
+    Pos.changeSideToMove();
+    HashValue.updateColor();
 }
 
 template <Color C, bool UpdateCheckerBySliders>

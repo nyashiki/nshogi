@@ -1,4 +1,5 @@
 use std::env;
+use std::path::Path;
 
 fn has_feature(name: &str) -> bool {
     let key = format!("CARGO_FEATURE_{}",
@@ -6,7 +7,25 @@ fn has_feature(name: &str) -> bool {
     env::var_os(key).is_some()
 }
 
+fn verify_version() {
+    let version_path = Path::new("../NSHOGI_VERSION");
+    let nshogi_version = std::fs::read_to_string(version_path)
+        .expect("failed to read ../NSHOGI_VERSION")
+        .trim()
+        .to_string();
+    let cargo_version = env!("CARGO_PKG_VERSION");
+
+    assert_eq!(
+        cargo_version, nshogi_version,
+        "version mismatch: Cargo.toml has {cargo_version}, \
+         but NSHOGI_VERSION has {nshogi_version}. \
+         Please update the version in rust/Cargo.toml."
+    );
+}
+
 fn main() {
+    verify_version();
+
     let mut build = cc::Build::new();
 
     build.cpp(true).files([
@@ -45,7 +64,6 @@ fn main() {
         "../src/solver/dfpn.cc",
         "../src/solver/dfs.cc",
         "../src/solver/mate1ply.cc",
-        "../src/solver/dfpn.cc",
     ]);
 
     build.flag("-std=c++20");

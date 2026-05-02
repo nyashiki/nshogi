@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2025 @nyashiki
+// Copyright (c) 2025-2026 @nyashiki
 //
 // This software is licensed under the MIT license.
 // For details, see the LICENSE file in the root of this repository.
@@ -765,11 +765,20 @@ class StateImpl {
         return isAttackedBySlider<C>(Sq, OccupiedBB, ExcludeSq, VirtualSq);
     }
 
- private:
+    //  The functions below are for `ExtendedState` class,
+    //  which means that they are not necessary for the game representation but
+    //  are possibly useful.
+
+    void doNullMove() noexcept;
+
+    void undoNullMove();
+
+ protected:
     Position Pos;
     StateHelper Helper;
     Hash<uint64_t> HashValue;
 
+ private:
     template <Color C, bool UpdateCheckerBySliders>
     void
     setDefendingOpponentSliderBB(StepHelper* SHelper,
