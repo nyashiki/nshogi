@@ -143,6 +143,9 @@ class State {
     ///
     bool canDeclare() const noexcept;
 
+ protected:
+    internal::StateImpl* Impl;
+
  private:
     State() = delete;
     State(const Position& P);
@@ -151,7 +154,6 @@ class State {
 
     State(internal::StateImpl* SI);
 
-    internal::StateImpl* Impl;
     friend class StateBuilder;
     friend class internal::ImmutableStateAdapter;
     friend class internal::MutableStateAdapter;

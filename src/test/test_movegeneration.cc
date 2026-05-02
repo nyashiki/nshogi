@@ -19,8 +19,10 @@
 #include <string>
 #include <vector>
 
+#include "../core/extendedstate.h"
 #include "../core/internal/bitboard.h"
 #include "../core/movegenerator.h"
+#include "../core/state.h"
 #include "../io/sfen.h"
 
 namespace {
@@ -233,6 +235,89 @@ TEST(MoveGeneration, CaptureMoves) {
             for (const auto& CaptureMove : CaptureMoveSet2) {
                 TEST_ASSERT_TRUE(CaptureMoveSet.find(CaptureMove) !=
                                  CaptureMoveSet.end());
+            }
+
+            const auto RandomMove = Moves[mt() % Moves.size()];
+            State.doMove(RandomMove);
+        }
+    }
+}
+
+TEST(MoveGeneration, SameAfterDoAndUndo) {
+    const int N = 100;
+    std::mt19937_64 mt(20260428);
+
+    for (int I = 0; I < N; ++I) {
+        nshogi::core::State State =
+            nshogi::core::StateBuilder::getInitialState();
+
+        for (uint16_t Ply = 0; Ply < 512; ++Ply) {
+            const auto Moves =
+                nshogi::core::MoveGenerator::generateLegalMoves(State);
+
+            if (Moves.size() == 0) {
+                break;
+            }
+
+            for (const auto& Move : Moves) {
+                State.doMove(Move);
+                State.undoMove();
+
+                const auto MovesAfterDoAndUndo =
+                    nshogi::core::MoveGenerator::generateLegalMoves(State);
+
+                TEST_ASSERT_EQ(Moves.size(), MovesAfterDoAndUndo.size());
+
+                for (const auto& MoveAfterDoAndUndo : MovesAfterDoAndUndo) {
+                    TEST_ASSERT_TRUE(Moves.find(MoveAfterDoAndUndo) !=
+                                     Moves.end());
+                }
+                for (const auto& MoveOrg : Moves) {
+                    TEST_ASSERT_TRUE(MovesAfterDoAndUndo.find(MoveOrg) !=
+                                     MovesAfterDoAndUndo.end());
+                }
+            }
+
+            const auto RandomMove = Moves[mt() % Moves.size()];
+            State.doMove(RandomMove);
+        }
+    }
+}
+
+TEST(MoveGeneration, ExtendedStateSameAfterDoNullAndUndoNull) {
+    const int N = 1000;
+    std::mt19937_64 mt(20260427);
+
+    for (int I = 0; I < N; ++I) {
+        nshogi::core::ExtendedState State =
+            nshogi::core::StateBuilder::getInitialState();
+
+        for (uint16_t Ply = 0; Ply < 512; ++Ply) {
+            const auto Moves =
+                nshogi::core::MoveGenerator::generateLegalMoves(State);
+
+            if (Moves.size() == 0) {
+                break;
+            }
+
+            if (!State.isInCheck()) {
+                State.doNullMove();
+                State.undoNullMove();
+
+                const auto MovesAfterDoNullAndUndoNull =
+                    nshogi::core::MoveGenerator::generateLegalMoves(State);
+
+                TEST_ASSERT_EQ(Moves.size(),
+                               MovesAfterDoNullAndUndoNull.size());
+                for (const auto& MoveAfterDoNullAndUndoNull :
+                     MovesAfterDoNullAndUndoNull) {
+                    TEST_ASSERT_TRUE(Moves.find(MoveAfterDoNullAndUndoNull) !=
+                                     Moves.end());
+                }
+                for (const auto& Move : Moves) {
+                    TEST_ASSERT_TRUE(MovesAfterDoNullAndUndoNull.find(Move) !=
+                                     MovesAfterDoNullAndUndoNull.end());
+                }
             }
 
             const auto RandomMove = Moves[mt() % Moves.size()];
