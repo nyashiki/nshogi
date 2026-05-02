@@ -336,8 +336,8 @@ void StateImpl::doNullMove() noexcept {
     assert(getCheckerBB().isZero());
 
     Helper.proceedOneStep(Move32::MoveNull(), HashValue.getValue(),
-                            getPosition().getStand<Black>(),
-                            getPosition().getStand<White>());
+                          getPosition().getStand<Black>(),
+                          getPosition().getStand<White>());
 
     // Reset continuous check counts as the null move is not a checking move.
     StepHelper* CurrentStepHelper = &Helper.SHelper[Helper.Ply];
@@ -347,8 +347,10 @@ void StateImpl::doNullMove() noexcept {
     CurrentStepHelper->ContinuousCheckCounts[White] = 0;
     CurrentStepHelper->CheckerBB.clear();
 
-    CurrentStepHelper->DefendingOpponentSliderBB[Black] = PrevStepHelper.DefendingOpponentSliderBB[Black];
-    CurrentStepHelper->DefendingOpponentSliderBB[White] = PrevStepHelper.DefendingOpponentSliderBB[White];
+    CurrentStepHelper->DefendingOpponentSliderBB[Black] =
+        PrevStepHelper.DefendingOpponentSliderBB[Black];
+    CurrentStepHelper->DefendingOpponentSliderBB[White] =
+        PrevStepHelper.DefendingOpponentSliderBB[White];
     Pos.changeSideToMove();
     HashValue.updateColor();
 }

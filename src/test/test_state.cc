@@ -9,12 +9,12 @@
 
 #include "common.h"
 
+#include "../core/extendedstate.h"
 #include "../core/internal/hash.h"
 #include "../core/internal/stateadapter.h"
 #include "../core/movegenerator.h"
 #include "../core/positionbuilder.h"
 #include "../core/statebuilder.h"
-#include "../core/extendedstate.h"
 #include "../io/sfen.h"
 
 #include <cstddef>
@@ -116,8 +116,7 @@ void testRecomputeHelper(const nshogi::core::State& State) {
 }
 
 template <typename StateType>
-void testDoMoveAndUndoMove(StateType& State,
-                           nshogi::core::Move32 Move) {
+void testDoMoveAndUndoMove(StateType& State, nshogi::core::Move32 Move) {
     const std::string OriginalSfen =
         nshogi::io::sfen::positionToSfen(State.getPosition());
 

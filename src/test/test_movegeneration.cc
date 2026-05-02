@@ -19,10 +19,10 @@
 #include <string>
 #include <vector>
 
+#include "../core/extendedstate.h"
 #include "../core/internal/bitboard.h"
 #include "../core/movegenerator.h"
 #include "../core/state.h"
-#include "../core/extendedstate.h"
 #include "../io/sfen.h"
 
 namespace {
@@ -307,8 +307,10 @@ TEST(MoveGeneration, ExtendedStateSameAfterDoNullAndUndoNull) {
                 const auto MovesAfterDoNullAndUndoNull =
                     nshogi::core::MoveGenerator::generateLegalMoves(State);
 
-                TEST_ASSERT_EQ(Moves.size(), MovesAfterDoNullAndUndoNull.size());
-                for (const auto& MoveAfterDoNullAndUndoNull : MovesAfterDoNullAndUndoNull) {
+                TEST_ASSERT_EQ(Moves.size(),
+                               MovesAfterDoNullAndUndoNull.size());
+                for (const auto& MoveAfterDoNullAndUndoNull :
+                     MovesAfterDoNullAndUndoNull) {
                     TEST_ASSERT_TRUE(Moves.find(MoveAfterDoNullAndUndoNull) !=
                                      Moves.end());
                 }

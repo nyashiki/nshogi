@@ -14,13 +14,14 @@ namespace core {
 
 ///
 //// @class ExtendedState
-//// @brief An extended version of the `State` class with additional functionalities.
+//// @brief An extended version of the `State` class with additional
+///functionalities.
 ///
 /// This class is an extended version of the `State` class,
-/// providing additional functionalities that are not essential for representing the game state
-/// but may be useful in certain contexts.
-/// For example, it includes methods for performing and undoing null moves,
-/// which can be beneficial for search algorithms in game engines.
+/// providing additional functionalities that are not essential for representing
+/// the game state but may be useful in certain contexts. For example, it
+/// includes methods for performing and undoing null moves, which can be
+/// beneficial for search algorithms in game engines.
 ///
 class ExtendedState : public State {
  public:
