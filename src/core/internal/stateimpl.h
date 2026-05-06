@@ -781,11 +781,11 @@ class StateImpl {
  private:
     template <Color C, bool UpdateCheckerBySliders>
     void
-    setDefendingOpponentSliderBB(StepHelper* SHelper,
+    setDefendingOpponentSliderBBAndSliderCheckerBB(StepHelper* SHelper,
                                  const bitboard::Bitboard& OccupiedBB) noexcept;
 
     template <Color C>
-    void setCheckerBB(StepHelper* SHelper) noexcept;
+    void setStepCheckerBB(StepHelper* SHelper) noexcept;
 };
 
 } // namespace internal

@@ -104,14 +104,15 @@ inline void StateImpl::doMove(Move32 Move) noexcept {
     Helper.proceedOneStep(Move, HashValue.getValue(),
                           getPosition().getStand<Black>(),
                           getPosition().getStand<White>());
+
+    const StepHelper* PrevStepHelper = &Helper.getStepHelper(Helper.Ply - 1);
     StepHelper* CurrentStepHelper = &Helper.SHelper[Helper.Ply];
 
     const Square To = Move.to();
     const Square From = Move.from();
+    const PieceTypeKind Type = Move.pieceType();
 
     if (Move.drop()) { // When the move is dropping.
-        PieceTypeKind Type = Move.pieceType();
-
         // Decrement the number of the standing piece one has.
         Pos.decrementStand(C, Type);
 
@@ -123,7 +124,6 @@ inline void StateImpl::doMove(Move32 Move) noexcept {
 
         HashValue.update<C>(Type, To);
     } else { // Move a piece on the board, which means not a dropping move.
-        const PieceTypeKind Type = Move.pieceType();
         const PieceTypeKind CaptureType = Move.capturePieceType();
 
         if (CaptureType != PTK_Empty) {
@@ -149,7 +149,7 @@ inline void StateImpl::doMove(Move32 Move) noexcept {
 
         if (Move.promote()) {
             const PieceKind PromotedPiece = promotePiece(Piece);
-            const PieceTypeKind PromotedType = getPieceType(PromotedPiece);
+            const PieceTypeKind PromotedType = promotePieceType(Type);
 
             Pos.putPiece(To, PromotedPiece);
 
@@ -174,19 +174,29 @@ inline void StateImpl::doMove(Move32 Move) noexcept {
         getBitboard<Black>() | getBitboard<White>();
 
     // Update opponent's CheckerBB as it will be the opponent's turn next.
-    setCheckerBB<~C>(CurrentStepHelper);
-    setDefendingOpponentSliderBB<C, false>(CurrentStepHelper, OccupiedBB);
-    setDefendingOpponentSliderBB<~C, true>(CurrentStepHelper, OccupiedBB);
+    // Instead of calling `setStepCheckerBB<~C>()`,
+    // we can update CheckerBB by only considering the move just made,
+    // which is more efficient.
+    if (Move.promote()) {
+        CurrentStepHelper->CheckerBB =
+            bitboard::getAttackBB<~C>(promotePieceType(Type), getKingSquare<~C>())
+            & bitboard::SquareBB[To];
+    } else {
+        CurrentStepHelper->CheckerBB =
+            bitboard::getAttackBB<~C>(Type, getKingSquare<~C>())
+            & bitboard::SquareBB[To];
+    }
+    setDefendingOpponentSliderBBAndSliderCheckerBB<C, false>(CurrentStepHelper, OccupiedBB);
+    setDefendingOpponentSliderBBAndSliderCheckerBB<~C, true>(CurrentStepHelper, OccupiedBB);
 
-    const StepHelper& PrevStepHelper = Helper.getStepHelper(Helper.Ply - 1);
     if (!CurrentStepHelper->CheckerBB.isZero()) {
         CurrentStepHelper->ContinuousCheckCounts[C] =
-            PrevStepHelper.ContinuousCheckCounts[C] + 1;
+            PrevStepHelper->ContinuousCheckCounts[C] + 1;
     } else {
         CurrentStepHelper->ContinuousCheckCounts[C] = 0;
     }
     CurrentStepHelper->ContinuousCheckCounts[~C] =
-        PrevStepHelper.ContinuousCheckCounts[~C];
+        PrevStepHelper->ContinuousCheckCounts[~C];
 
     // And now it is opponent's turn.
     Pos.changeSideToMove();
@@ -305,16 +315,16 @@ void StateImpl::refresh() noexcept {
         getBitboard<Black>() | getBitboard<White>();
 
     if (getPosition().sideToMove() == Black) {
-        setCheckerBB<Black>(CurrentStepHelper);
-        setDefendingOpponentSliderBB<Black, true>(CurrentStepHelper,
+        setStepCheckerBB<Black>(CurrentStepHelper);
+        setDefendingOpponentSliderBBAndSliderCheckerBB<Black, true>(CurrentStepHelper,
                                                   OccupiedBB);
-        setDefendingOpponentSliderBB<White, false>(CurrentStepHelper,
+        setDefendingOpponentSliderBBAndSliderCheckerBB<White, false>(CurrentStepHelper,
                                                    OccupiedBB);
     } else {
-        setCheckerBB<White>(CurrentStepHelper);
-        setDefendingOpponentSliderBB<Black, false>(CurrentStepHelper,
+        setStepCheckerBB<White>(CurrentStepHelper);
+        setDefendingOpponentSliderBBAndSliderCheckerBB<Black, false>(CurrentStepHelper,
                                                    OccupiedBB);
-        setDefendingOpponentSliderBB<White, true>(CurrentStepHelper,
+        setDefendingOpponentSliderBBAndSliderCheckerBB<White, true>(CurrentStepHelper,
                                                   OccupiedBB);
     }
 
@@ -340,17 +350,17 @@ void StateImpl::doNullMove() noexcept {
                           getPosition().getStand<White>());
 
     // Reset continuous check counts as the null move is not a checking move.
+    const StepHelper* PrevStepHelper = &Helper.getStepHelper(Helper.Ply - 1);
     StepHelper* CurrentStepHelper = &Helper.SHelper[Helper.Ply];
-    const StepHelper& PrevStepHelper = Helper.getStepHelper(Helper.Ply - 1);
 
     CurrentStepHelper->ContinuousCheckCounts[Black] = 0;
     CurrentStepHelper->ContinuousCheckCounts[White] = 0;
     CurrentStepHelper->CheckerBB.clear();
 
     CurrentStepHelper->DefendingOpponentSliderBB[Black] =
-        PrevStepHelper.DefendingOpponentSliderBB[Black];
+        PrevStepHelper->DefendingOpponentSliderBB[Black];
     CurrentStepHelper->DefendingOpponentSliderBB[White] =
-        PrevStepHelper.DefendingOpponentSliderBB[White];
+        PrevStepHelper->DefendingOpponentSliderBB[White];
     Pos.changeSideToMove();
     HashValue.updateColor();
 }
@@ -365,7 +375,7 @@ void StateImpl::undoNullMove() {
 }
 
 template <Color C, bool UpdateCheckerBySliders>
-inline void StateImpl::setDefendingOpponentSliderBB(
+inline void StateImpl::setDefendingOpponentSliderBBAndSliderCheckerBB(
     StepHelper* SHelper, const bitboard::Bitboard& OccupiedBB) noexcept {
     SHelper->DefendingOpponentSliderBB[C].clear();
 
@@ -382,18 +392,19 @@ inline void StateImpl::setDefendingOpponentSliderBB(
         const bitboard::Bitboard BetweenOccupiedBB =
             bitboard::getBetweenBB(Sq, getKingSquare<C>()) & OccupiedBB;
 
-        if (BetweenOccupiedBB.isZero()) {
+        const uint8_t PopCount = BetweenOccupiedBB.popCount();
+        if (PopCount == 0) {
             if constexpr (UpdateCheckerBySliders) {
                 SHelper->CheckerBB |= bitboard::SquareBB[Sq];
             }
-        } else if (BetweenOccupiedBB.popCount() == 1) {
+        } else if (PopCount == 1) {
             SHelper->DefendingOpponentSliderBB[C] |= BetweenOccupiedBB;
         }
     });
 }
 
 template <Color C>
-inline void StateImpl::setCheckerBB(StepHelper* SHelper) noexcept {
+inline void StateImpl::setStepCheckerBB(StepHelper* SHelper) noexcept {
     const Square KingSq = getKingSquare<C>();
     assert(checkRange(KingSq));
 
