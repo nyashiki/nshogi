@@ -80,12 +80,8 @@ core::Move32 checkmateByDrop(
                                           /* VirtualSq = */ ToSq))
                 : StepOrSliderAttackBB;
 
-        if constexpr (Type == core::PTK_Gold) {
-            NewAttackBB |= core::internal::bitboard::GoldAttackBB[C][ToSq];
-        } else if constexpr (Type == core::PTK_Silver) {
-            NewAttackBB |= core::internal::bitboard::SilverAttackBB[C][ToSq];
-        } else if constexpr (Type == core::PTK_Knight) {
-            NewAttackBB |= core::internal::bitboard::KnightAttackBB[C][ToSq];
+        if constexpr (Type == core::PTK_Gold || Type == core::PTK_Silver || Type == core::PTK_Knight) {
+            NewAttackBB |= core::internal::bitboard::getAttackBB<C, Type>(ToSq);
         } else if constexpr (Type == core::PTK_Bishop) {
             const core::internal::bitboard::Bitboard NewOccupiedBB =
                 (S.getBitboard<core::Black>() | S.getBitboard<core::White>() |
@@ -515,7 +511,7 @@ checkmateBySliderMove(const core::internal::StateImpl& S,
 
     if constexpr (Type == core::PTK_Lance && Promote) {
         PossiblyCheckmateToBB &=
-            core::internal::bitboard::GoldAttackBB[~C][OpKingSq];
+            core::internal::bitboard::getAttackBB<~C, core::PTK_Gold>(OpKingSq);
     } else if constexpr (Promote || core::isPromoted(Type)) {
         PossiblyCheckmateToBB &=
             core::internal::bitboard::KingAttackBB[OpKingSq];
@@ -657,8 +653,8 @@ checkmateBySliderMove(const core::internal::StateImpl& S,
 
             if constexpr (Promote) {
                 if constexpr (Type == core::PTK_Lance) {
-                    NewAttackedBB |= core::internal::bitboard::GoldAttackBB
-                        [C][PossiblyCheckmateToSq];
+                    NewAttackedBB |= core::internal::bitboard::getAttackBB<C, core::PTK_Gold>(
+                        PossiblyCheckmateToSq);
                 } else if constexpr (Type == core::PTK_Bishop) {
                     NewAttackedBB |=
                         core::internal::bitboard::getBishopAttackBB<

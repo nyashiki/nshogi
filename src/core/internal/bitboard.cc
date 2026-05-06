@@ -68,10 +68,9 @@ const Bitboard PromotableBB[NumColors] = {
     RankBB[RankG] | RankBB[RankH] | RankBB[RankI],
 };
 
-Bitboard KnightAttackBB[NumColors][NumSquares];
-Bitboard SilverAttackBB[NumColors][NumSquares];
-Bitboard GoldAttackBB[NumColors][NumSquares];
 Bitboard KingAttackBB[NumSquares];
+Bitboard StepPieceAttackBB[NumColors][3][NumSquares];
+
 Bitboard DiagStepAttackBB[NumSquares];
 Bitboard CrossStepAttackBB[NumSquares];
 
@@ -340,22 +339,22 @@ Bitboard getCrossStepAttack(Square Sq) {
 
 void initializeKnightAttacks() {
     for (Square Sq : Squares) {
-        KnightAttackBB[Black][Sq] = getBlackKnightAttack(Sq);
-        KnightAttackBB[White][Sq] = getWhiteKnightAttack(Sq);
+        StepPieceAttackBB[Black][0][Sq] = getBlackKnightAttack(Sq);
+        StepPieceAttackBB[White][0][Sq] = getWhiteKnightAttack(Sq);
     }
 }
 
 void initializeSilverAttacks() {
     for (Square Sq : Squares) {
-        SilverAttackBB[Black][Sq] = getBlackSilverAttack(Sq);
-        SilverAttackBB[White][Sq] = getWhiteSilverAttack(Sq);
+        StepPieceAttackBB[Black][1][Sq] = getBlackSilverAttack(Sq);
+        StepPieceAttackBB[White][1][Sq] = getWhiteSilverAttack(Sq);
     }
 }
 
 void initializeGoldAttacks() {
     for (Square Sq : Squares) {
-        GoldAttackBB[Black][Sq] = getBlackGoldAttack(Sq);
-        GoldAttackBB[White][Sq] = getWhiteGoldAttack(Sq);
+        StepPieceAttackBB[Black][2][Sq] = getBlackGoldAttack(Sq);
+        StepPieceAttackBB[White][2][Sq] = getWhiteGoldAttack(Sq);
     }
 }
 
