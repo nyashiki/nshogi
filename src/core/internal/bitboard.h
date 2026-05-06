@@ -50,10 +50,20 @@ extern const Bitboard SquareBB[NumSquares];
 extern const Bitboard FileBB[NumFiles];
 extern const Bitboard RankBB[NumRanks];
 
-extern Bitboard KnightAttackBB[NumColors][NumSquares];
-extern Bitboard SilverAttackBB[NumColors][NumSquares];
-extern Bitboard GoldAttackBB[NumColors][NumSquares];
+// `StepPieceAttackBB` holds the attack bitboard of each color, piece type, and
+// square. Slider attacks (bishop, rook, and lance) are not included.
+// `PTK_Empty`, of course, does not have any attack,
+// `PTK_Pawn`'s attack can be computed by bit operation,
+// and `PTK_King`'s attack is stored in `KingAttackBB` for memory efficiency.
+// As a result, only 3 piece types (knight, silver, and gold) are
+// included in `StepPieceAttackBB`.
+// Therefore, the second dimension of `StepPieceAttackBB` is 3.
+extern Bitboard StepPieceAttackBB[NumColors][3][NumSquares];
+// King attacks are irrelavant to its color.
+// Therefore, `KingAttackBB` holds the attack bitboard of king for each square
+// without color distinction for memory efficiency.
 extern Bitboard KingAttackBB[NumSquares];
+
 extern Bitboard DiagStepAttackBB[NumSquares];
 extern Bitboard CrossStepAttackBB[NumSquares];
 
@@ -658,12 +668,6 @@ inline Bitboard getAttackBB(Square From) noexcept {
                   "getAttackBB() is not implemented for PieceType::PTK_Bishop");
     static_assert(Type != PTK_Rook,
                   "getAttackBB() is not implemented for PieceType::PTK_Rook");
-    static_assert(
-        Type != PTK_ProBishop,
-        "getAttackBB() is not implemented for PieceType::PTK_ProBishop");
-    static_assert(
-        Type != PTK_ProRook,
-        "getAttackBB() is not implemented for PieceType::PTK_ProRook");
 
     if constexpr (Type == PTK_Pawn) {
         if constexpr (C == Black) {
@@ -673,16 +677,44 @@ inline Bitboard getAttackBB(Square From) noexcept {
         }
     }
     if constexpr (Type == PTK_Knight) {
-        return KnightAttackBB[C][From];
+        return StepPieceAttackBB[C][0][From];
     } else if constexpr (Type == PTK_Silver) {
-        return SilverAttackBB[C][From];
+        return StepPieceAttackBB[C][1][From];
     } else if constexpr (Type == PTK_Gold || Type == PTK_ProPawn ||
                          Type == PTK_ProLance || Type == PTK_ProKnight ||
                          Type == PTK_ProSilver) {
-        return GoldAttackBB[C][From];
+        return StepPieceAttackBB[C][2][From];
+    } else if constexpr (Type == PTK_King || Type == PTK_ProBishop ||
+                         Type == PTK_ProRook) {
+        return KingAttackBB[From];
+    } else {
+        assert(false);
+        return Bitboard::ZeroBB();
     }
+}
 
-    return KingAttackBB[From];
+template <Color C>
+inline Bitboard getStepAttackBB(PieceTypeKind Type, Square From) noexcept {
+    switch (Type) {
+    case PTK_Pawn:
+        return getAttackBB<C, PTK_Pawn>(From);
+    case PTK_Knight:
+        return getAttackBB<C, PTK_Knight>(From);
+    case PTK_Silver:
+        return getAttackBB<C, PTK_Silver>(From);
+    case PTK_Gold:
+    case PTK_ProPawn:
+    case PTK_ProLance:
+    case PTK_ProKnight:
+    case PTK_ProSilver:
+        return getAttackBB<C, PTK_Gold>(From);
+    case PTK_King:
+    case PTK_ProBishop:
+    case PTK_ProRook:
+        return getAttackBB<C, PTK_King>(From);
+    default:
+        return Bitboard::ZeroBB();
+    }
 }
 
 template <Color C>

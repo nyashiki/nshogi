@@ -1303,7 +1303,7 @@ generateDroppingStepCheckMovesImpl(const StateImpl& S, Move32* __restrict List,
 
     if (getStandCount<PTK_Knight>(St) > 0) {
         const Bitboard ToBB =
-            TargetBB & KnightAttackBB[~C][S.getKingSquare<~C>()];
+            TargetBB & getAttackBB<~C, PTK_Knight>(S.getKingSquare<~C>());
         ToBB.forEach([&](Square To) {
             assert(checkRange(To));
             *List++ = Move32::droppingMove(To, PTK_Knight);
@@ -1312,7 +1312,7 @@ generateDroppingStepCheckMovesImpl(const StateImpl& S, Move32* __restrict List,
 
     if (getStandCount<PTK_Silver>(St) > 0) {
         const Bitboard ToBB =
-            TargetBB & SilverAttackBB[~C][S.getKingSquare<~C>()];
+            TargetBB & getAttackBB<~C, PTK_Silver>(S.getKingSquare<~C>());
         ToBB.forEach([&](Square To) {
             assert(checkRange(To));
             *List++ = Move32::droppingMove(To, PTK_Silver);
@@ -1321,7 +1321,7 @@ generateDroppingStepCheckMovesImpl(const StateImpl& S, Move32* __restrict List,
 
     if (getStandCount<PTK_Gold>(St) > 0) {
         const Bitboard ToBB =
-            TargetBB & GoldAttackBB[~C][S.getKingSquare<~C>()];
+            TargetBB & getAttackBB<~C, PTK_Gold>(S.getKingSquare<~C>());
         ToBB.forEach([&](Square To) {
             assert(checkRange(To));
             *List++ = Move32::droppingMove(To, PTK_Gold);
