@@ -668,12 +668,6 @@ inline Bitboard getAttackBB(Square From) noexcept {
                   "getAttackBB() is not implemented for PieceType::PTK_Bishop");
     static_assert(Type != PTK_Rook,
                   "getAttackBB() is not implemented for PieceType::PTK_Rook");
-    static_assert(
-        Type != PTK_ProBishop,
-        "getAttackBB() is not implemented for PieceType::PTK_ProBishop");
-    static_assert(
-        Type != PTK_ProRook,
-        "getAttackBB() is not implemented for PieceType::PTK_ProRook");
 
     if constexpr (Type == PTK_Pawn) {
         if constexpr (C == Black) {
@@ -690,9 +684,37 @@ inline Bitboard getAttackBB(Square From) noexcept {
                          Type == PTK_ProLance || Type == PTK_ProKnight ||
                          Type == PTK_ProSilver) {
         return StepPieceAttackBB[C][2][From];
+    } else if constexpr (Type == PTK_King || Type == PTK_ProBishop || Type == PTK_ProRook) {
+        return KingAttackBB[From];
+    } else {
+        assert(false);
+        return Bitboard::ZeroBB();
     }
+}
 
-    return KingAttackBB[From];
+template <Color C>
+inline Bitboard getAttackBB(PieceTypeKind Type, Square From) noexcept {
+    switch (Type) {
+        case PTK_Pawn:
+            return getAttackBB<C, PTK_Pawn>(From);
+        case PTK_Knight:
+            return getAttackBB<C, PTK_Knight>(From);
+        case PTK_Silver:
+            return getAttackBB<C, PTK_Silver>(From);
+        case PTK_Gold:
+        case PTK_ProPawn:
+        case PTK_ProLance:
+        case PTK_ProKnight:
+        case PTK_ProSilver:
+            return getAttackBB<C, PTK_Gold>(From);
+        case PTK_King:
+        case PTK_ProBishop:
+        case PTK_ProRook:
+            return getAttackBB<C, PTK_King>(From);
+        default:
+            assert(false);
+            return Bitboard::ZeroBB();
+    }
 }
 
 template <Color C>
