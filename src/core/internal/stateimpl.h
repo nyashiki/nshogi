@@ -780,9 +780,8 @@ class StateImpl {
 
  private:
     template <Color C, bool UpdateCheckerBySliders>
-    void
-    setDefendingOpponentSliderBBAndSliderCheckerBB(StepHelper* SHelper,
-                                 const bitboard::Bitboard& OccupiedBB) noexcept;
+    void setDefendingOpponentSliderBBAndSliderCheckerBB(
+        StepHelper* SHelper, const bitboard::Bitboard& OccupiedBB) noexcept;
 
     template <Color C>
     void setStepCheckerBB(StepHelper* SHelper) noexcept;

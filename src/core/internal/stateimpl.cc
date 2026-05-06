@@ -179,15 +179,18 @@ inline void StateImpl::doMove(Move32 Move) noexcept {
     // which is more efficient.
     if (Move.promote()) {
         CurrentStepHelper->CheckerBB =
-            bitboard::getStepAttackBB<~C>(promotePieceType(Type), getKingSquare<~C>())
-            & bitboard::SquareBB[To];
+            bitboard::getStepAttackBB<~C>(promotePieceType(Type),
+                                          getKingSquare<~C>()) &
+            bitboard::SquareBB[To];
     } else {
         CurrentStepHelper->CheckerBB =
-            bitboard::getStepAttackBB<~C>(Type, getKingSquare<~C>())
-            & bitboard::SquareBB[To];
+            bitboard::getStepAttackBB<~C>(Type, getKingSquare<~C>()) &
+            bitboard::SquareBB[To];
     }
-    setDefendingOpponentSliderBBAndSliderCheckerBB<C, false>(CurrentStepHelper, OccupiedBB);
-    setDefendingOpponentSliderBBAndSliderCheckerBB<~C, true>(CurrentStepHelper, OccupiedBB);
+    setDefendingOpponentSliderBBAndSliderCheckerBB<C, false>(CurrentStepHelper,
+                                                             OccupiedBB);
+    setDefendingOpponentSliderBBAndSliderCheckerBB<~C, true>(CurrentStepHelper,
+                                                             OccupiedBB);
 
     if (!CurrentStepHelper->CheckerBB.isZero()) {
         CurrentStepHelper->ContinuousCheckCounts[C] =
@@ -316,16 +319,16 @@ void StateImpl::refresh() noexcept {
 
     if (getPosition().sideToMove() == Black) {
         setStepCheckerBB<Black>(CurrentStepHelper);
-        setDefendingOpponentSliderBBAndSliderCheckerBB<Black, true>(CurrentStepHelper,
-                                                  OccupiedBB);
-        setDefendingOpponentSliderBBAndSliderCheckerBB<White, false>(CurrentStepHelper,
-                                                   OccupiedBB);
+        setDefendingOpponentSliderBBAndSliderCheckerBB<Black, true>(
+            CurrentStepHelper, OccupiedBB);
+        setDefendingOpponentSliderBBAndSliderCheckerBB<White, false>(
+            CurrentStepHelper, OccupiedBB);
     } else {
         setStepCheckerBB<White>(CurrentStepHelper);
-        setDefendingOpponentSliderBBAndSliderCheckerBB<Black, false>(CurrentStepHelper,
-                                                   OccupiedBB);
-        setDefendingOpponentSliderBBAndSliderCheckerBB<White, true>(CurrentStepHelper,
-                                                  OccupiedBB);
+        setDefendingOpponentSliderBBAndSliderCheckerBB<Black, false>(
+            CurrentStepHelper, OccupiedBB);
+        setDefendingOpponentSliderBBAndSliderCheckerBB<White, true>(
+            CurrentStepHelper, OccupiedBB);
     }
 
     HashValue.refresh(getPosition());

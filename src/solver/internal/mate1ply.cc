@@ -80,7 +80,8 @@ core::Move32 checkmateByDrop(
                                           /* VirtualSq = */ ToSq))
                 : StepOrSliderAttackBB;
 
-        if constexpr (Type == core::PTK_Gold || Type == core::PTK_Silver || Type == core::PTK_Knight) {
+        if constexpr (Type == core::PTK_Gold || Type == core::PTK_Silver ||
+                      Type == core::PTK_Knight) {
             NewAttackBB |= core::internal::bitboard::getAttackBB<C, Type>(ToSq);
         } else if constexpr (Type == core::PTK_Bishop) {
             const core::internal::bitboard::Bitboard NewOccupiedBB =
@@ -653,8 +654,8 @@ checkmateBySliderMove(const core::internal::StateImpl& S,
 
             if constexpr (Promote) {
                 if constexpr (Type == core::PTK_Lance) {
-                    NewAttackedBB |= core::internal::bitboard::getAttackBB<C, core::PTK_Gold>(
-                        PossiblyCheckmateToSq);
+                    NewAttackedBB |= core::internal::bitboard::getAttackBB<
+                        C, core::PTK_Gold>(PossiblyCheckmateToSq);
                 } else if constexpr (Type == core::PTK_Bishop) {
                     NewAttackedBB |=
                         core::internal::bitboard::getBishopAttackBB<
