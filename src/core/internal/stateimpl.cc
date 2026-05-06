@@ -179,11 +179,11 @@ inline void StateImpl::doMove(Move32 Move) noexcept {
     // which is more efficient.
     if (Move.promote()) {
         CurrentStepHelper->CheckerBB =
-            bitboard::getAttackBB<~C>(promotePieceType(Type), getKingSquare<~C>())
+            bitboard::getStepAttackBB<~C>(promotePieceType(Type), getKingSquare<~C>())
             & bitboard::SquareBB[To];
     } else {
         CurrentStepHelper->CheckerBB =
-            bitboard::getAttackBB<~C>(Type, getKingSquare<~C>())
+            bitboard::getStepAttackBB<~C>(Type, getKingSquare<~C>())
             & bitboard::SquareBB[To];
     }
     setDefendingOpponentSliderBBAndSliderCheckerBB<C, false>(CurrentStepHelper, OccupiedBB);

@@ -693,7 +693,7 @@ inline Bitboard getAttackBB(Square From) noexcept {
 }
 
 template <Color C>
-inline Bitboard getAttackBB(PieceTypeKind Type, Square From) noexcept {
+inline Bitboard getStepAttackBB(PieceTypeKind Type, Square From) noexcept {
     switch (Type) {
         case PTK_Pawn:
             return getAttackBB<C, PTK_Pawn>(From);
@@ -712,7 +712,6 @@ inline Bitboard getAttackBB(PieceTypeKind Type, Square From) noexcept {
         case PTK_ProRook:
             return getAttackBB<C, PTK_King>(From);
         default:
-            assert(false);
             return Bitboard::ZeroBB();
     }
 }
