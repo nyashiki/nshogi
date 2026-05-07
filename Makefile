@@ -49,7 +49,7 @@ else
 	OPTIM = -O3 -ffast-math
 endif
 
-SOURCES :=                                 \
+SOURCES :=                             \
 	src/buildinfo/capability.cc        \
 	src/core/initializer.cc            \
 	src/core/position.cc               \
@@ -74,6 +74,7 @@ SOURCES :=                                 \
 	src/ml/featurebitboard.cc          \
 	src/ml/featurestack.cc             \
     src/ml/kp.cc                       \
+    src/ml/p.cc                        \
 	src/ml/simpleteacher.cc            \
 	src/ml/teacherloader.cc            \
 	src/ml/teacherwriter.cc            \
@@ -90,23 +91,23 @@ SOURCES :=                                 \
     src/c_api/ml.cc                    \
     src/c_api/io.cc
 
-TEST_SOURCES :=                         \
+TEST_SOURCES :=                     \
 	src/test/test_main.cc           \
-	src/test/test_types.cc 		\
+	src/test/test_types.cc 	      	\
 	src/test/test_bitboard.cc       \
 	src/test/test_position.cc       \
 	src/test/test_state.cc          \
 	src/test/test_movegeneration.cc \
 	src/test/test_squareiterator.cc \
 	src/test/test_utils.cc          \
-	src/test/test_csa.cc		\
+	src/test/test_csa.cc	    	\
 	src/test/test_sfen.cc           \
 	src/test/test_huffman.cc     	\
-	src/test/test_solver.cc		\
+	src/test/test_solver.cc	    	\
 	src/test/test_ml.cc             \
     src/test/test_capi.cc
 
-BENCH_SOURCES :=                          \
+BENCH_SOURCES :=                      \
 	src/bench/bench_main.cc           \
 	src/bench/bench_movegeneration.cc \
 	src/bench/bench_mate1ply.cc       \
