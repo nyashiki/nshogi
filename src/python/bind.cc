@@ -30,6 +30,7 @@
 #include "../ml/common.h"
 #include "../ml/featurestack.h"
 #include "../ml/internal/featurebitboardutil.h"
+#include "../ml/kp.h"
 #include "../ml/teacherloader.h"
 #include "../ml/teacherwriter.h"
 #include "../ml/utils.h"
@@ -458,6 +459,42 @@ PYBIND11_MODULE(nshogi, Module) {
                             const nshogi::core::StateConfig&>())
         .def("to_numpy", &PyFeatureStack::to_numpy,
              pybind11::arg("channels_first") = true);
+
+    pybind11::class_<nshogi::ml::KPFeatureExtractor>(MLModule, "KPFeatureExtractor")
+        .def(pybind11::init<>())
+        .def("ids",
+             [](const nshogi::ml::KPFeatureExtractor& Extractor, const nshogi::core::State& State) {
+                const auto& [Ids1, Ids2] = Extractor.ids(State);
+
+                auto NpArray1 = pybind11::array_t<pybind11::ssize_t>((pybind11::ssize_t)(Ids1.size()));
+                auto Data1 = reinterpret_cast<pybind11::ssize_t*>(NpArray1.request().ptr);
+
+                auto NpArray2 = pybind11::array_t<pybind11::ssize_t>((pybind11::ssize_t)(Ids2.size()));
+                auto Data2 = reinterpret_cast<pybind11::ssize_t*>(NpArray2.request().ptr);
+
+                for (std::size_t I = 0; I < Ids1.size(); ++I) {
+                    Data1[I] = (pybind11::ssize_t)Ids1[I];
+                }
+                for (std::size_t I = 0; I < Ids2.size(); ++I) {
+                    Data2[I] = (pybind11::ssize_t)Ids2[I];
+                }
+
+                return pybind11::make_tuple(NpArray1, NpArray2);
+             })
+        .def("extract",
+             [](const nshogi::ml::KPFeatureExtractor& Extractor, const nshogi::core::State& State) {
+                const std::vector<int8_t> Extracted = Extractor.extract(State);
+
+                auto NpArray = pybind11::array_t<int8_t>((pybind11::ssize_t)Extracted.size());
+                auto Data = reinterpret_cast<int8_t*>(NpArray.request().ptr);
+                std::memcpy(reinterpret_cast<char*>(Data), Extracted.data(),
+                            Extracted.size() * sizeof(int8_t));
+
+                assert(Extracted.size() % 2 == 0);
+                NpArray.resize({(pybind11::ssize_t)2 , (pybind11::ssize_t)(Extracted.size() / 2)});
+
+                return NpArray;
+             });
 
     pybind11::class_<nshogi::ml::AZTeacher>(MLModule, "AZTeacher")
         .def("state",
