@@ -259,6 +259,13 @@ PYBIND11_MODULE(nshogi, Module) {
             }
 
             return Moves;
+        })
+        .def_property_readonly("is_stable", [](const nshogi::core::State& S) {
+            if (S.isInCheck()) {
+                return false;
+            }
+
+            return nshogi::core::MoveGenerator::generateLegalCaptureMoves(S).size() == 0;
         });
 
     pybind11::class_<nshogi::core::StateConfig>(Module, "StateConfig")
@@ -669,6 +676,11 @@ PYBIND11_MODULE(nshogi, Module) {
              [](const nshogi::ml::SimpleTeacher& T) {
                  return nshogi::io::sfen::stateToSfen(T.getState());
              })
+        .def("move",
+            [](const nshogi::ml::SimpleTeacher& T) {
+                const auto State = T.getState();
+                return State.getMove32FromMove16(T.getNextMove());
+            })
         .def(
             "policy",
             [](const nshogi::ml::SimpleTeacher& T, bool ChannelsFirst) {
