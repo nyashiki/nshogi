@@ -17,6 +17,17 @@
 #include "../core/types.h"
 
 namespace nshogi {
+
+namespace io {
+namespace file {
+namespace simple_teacher {
+
+class SimpleTeacherIO;
+
+} // namespace simple_teacher
+} // namespace file
+} // namespace io
+
 namespace ml {
 
 struct SimpleTeacher {
@@ -42,7 +53,7 @@ struct SimpleTeacher {
     [[maybe_unused]]
     void corruptMyself();
 
- protected:
+ private:
     // State.
     core::HuffmanCode HuffmanCode;
     uint16_t Ply;
@@ -54,6 +65,8 @@ struct SimpleTeacher {
     // Result.
     core::Move16 NextMove;
     core::Color Winner;
+
+ friend class io::file::simple_teacher::SimpleTeacherIO;
 };
 
 } // namespace ml

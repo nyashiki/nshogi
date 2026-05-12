@@ -29,6 +29,8 @@ void save(std::ofstream&, const ml::AZTeacher&);
 namespace simple_teacher {
 
 ml::SimpleTeacher load(std::ifstream&);
+void loadAt(ml::SimpleTeacher* Dest, std::ifstream&);
+
 void save(std::ofstream&, const ml::SimpleTeacher&);
 
 } // namespace simple_teacher
@@ -38,6 +40,8 @@ T load(std::ifstream&);
 
 template <typename T>
 void save(std::ofstream&, const T&);
+
+void loadAt(ml::SimpleTeacher* Dest, std::ifstream&);
 
 } // namespace file
 } // namespace io

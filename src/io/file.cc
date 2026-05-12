@@ -125,8 +125,6 @@ void save(std::ofstream& Ofs, const ml::AZTeacher& AT) {
 
 namespace simple_teacher {
 
-namespace {
-
 class SimpleTeacherIO : public ml::SimpleTeacher {
  public:
     SimpleTeacherIO() = default;
@@ -135,20 +133,23 @@ class SimpleTeacherIO : public ml::SimpleTeacher {
         : ml::SimpleTeacher(ST) {
     }
 
-    ml::SimpleTeacher load(std::ifstream& Ifs) {
+    static void loadAt(ml::SimpleTeacher* Dest, std::ifstream& Ifs) {
         uint64_t Codes[4];
         uint16_t Move16;
 
         Ifs.read(reinterpret_cast<char*>(Codes), 4 * sizeof(uint64_t));
-        Ifs.read(reinterpret_cast<char*>(&Ply), sizeof(Ply));
-        Ifs.read(reinterpret_cast<char*>(&MaxPly), sizeof(MaxPly));
-        Ifs.read(reinterpret_cast<char*>(DrawValues), sizeof(DrawValues));
+        Ifs.read(reinterpret_cast<char*>(&Dest->Ply), sizeof(Ply));
+        Ifs.read(reinterpret_cast<char*>(&Dest->MaxPly), sizeof(MaxPly));
+        Ifs.read(reinterpret_cast<char*>(Dest->DrawValues), sizeof(DrawValues));
         Ifs.read(reinterpret_cast<char*>(&Move16), sizeof(uint16_t));
-        Ifs.read(reinterpret_cast<char*>(&Winner), sizeof(Winner));
+        Ifs.read(reinterpret_cast<char*>(&Dest->Winner), sizeof(Winner));
 
-        HuffmanCode = core::HuffmanCode(Codes[3], Codes[2], Codes[1], Codes[0]);
-        NextMove = core::Move16::fromValue(Move16);
+        Dest->HuffmanCode = core::HuffmanCode(Codes[3], Codes[2], Codes[1], Codes[0]);
+        Dest->NextMove = core::Move16::fromValue(Move16);
+    }
 
+    ml::SimpleTeacher load(std::ifstream& Ifs) {
+        loadAt(this, Ifs);
         return *this;
     }
 
@@ -164,8 +165,6 @@ class SimpleTeacherIO : public ml::SimpleTeacher {
     }
 };
 
-} // namespace
-
 ml::SimpleTeacher load(std::ifstream& Ifs) {
     SimpleTeacherIO IO;
     return IO.load(Ifs);
@@ -174,6 +173,10 @@ ml::SimpleTeacher load(std::ifstream& Ifs) {
 void save(std::ofstream& Ofs, const ml::SimpleTeacher& SimpleTeacher) {
     SimpleTeacherIO IO(SimpleTeacher);
     IO.save(Ofs);
+}
+
+void loadAt(ml::SimpleTeacher* Dest, std::ifstream& Ifs) {
+    SimpleTeacherIO::loadAt(Dest, Ifs);
 }
 
 } // namespace simple_teacher
@@ -196,6 +199,10 @@ ml::SimpleTeacher load<ml::SimpleTeacher>(std::ifstream& Ifs) {
 template <>
 void save<ml::SimpleTeacher>(std::ofstream& Ofs, const ml::SimpleTeacher& ST) {
     simple_teacher::save(Ofs, ST);
+}
+
+void loadAt(ml::SimpleTeacher* Dest, std::ifstream& Ifs) {
+    simple_teacher::loadAt(Dest, Ifs);
 }
 
 } // namespace file

@@ -25,6 +25,7 @@ class TeacherLoaderForFixedSizeTeacher {
                                      bool Shuffle);
 
     TeacherType operator[](std::size_t Index) const;
+    void loadAt(TeacherType* Dest, std::size_t Index) const;
 
     std::size_t size() const;
 

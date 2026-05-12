@@ -82,6 +82,21 @@ TeacherType TeacherLoaderForFixedSizeTeacher<TeacherType>::operator[](
     return T;
 }
 
+template <>
+void TeacherLoaderForFixedSizeTeacher<SimpleTeacher>::loadAt(
+    SimpleTeacher* Dest,
+    std::size_t Index
+) const {
+    if (ShuffleEnabled) {
+        Index = (*PG)(Index);
+    }
+
+    assert(Index < NumTeachers);
+
+    std::ifstream Ifs(Path, std::ios::in | std::ios::binary);
+    io::file::simple_teacher::loadAt(Dest, Ifs);
+};
+
 template class TeacherLoaderForFixedSizeTeacher<AZTeacher>;
 
 template class TeacherLoaderForFixedSizeTeacher<SimpleTeacher>;
