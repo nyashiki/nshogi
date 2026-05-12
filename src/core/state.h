@@ -143,6 +143,14 @@ class State {
     ///
     bool canDeclare() const noexcept;
 
+    ///
+    /// @brief Return true if the last move was a pawn drop.
+    ///
+    /// Note: Return false when called at the intiial position
+    /// (i.e., getPly() == 0).
+    ///
+    bool isLastMoveDroppingAPawn() const noexcept;
+
  protected:
     internal::StateImpl* Impl;
 

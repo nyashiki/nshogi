@@ -117,12 +117,16 @@ inline void StateImpl::doMove(Move32 Move) noexcept {
         Pos.decrementStand(C, Type);
 
         // And put the piece on the board.
-        Pos.putPiece(To, makePiece(C, Type));
+        Pos.putPiece(To, makePiece<C>(Type));
 
         Helper.ColorBB[C].toggleBit(To);
         Helper.TypeBB[Type].toggleBit(To);
 
         HashValue.update<C>(Type, To);
+
+        if (Type == PTK_Pawn) {
+            CurrentStepHelper->IsLastMoveDroppingAPawn = true;
+        }
     } else { // Move a piece on the board, which means not a dropping move.
         const PieceTypeKind CaptureType = Move.capturePieceType();
 
@@ -239,7 +243,7 @@ inline void StateImpl::undoMove() {
         if (CaptureType != PTK_Empty) {
             // Capturing occurs.
             Pos.decrementStand(~C, demotePieceType(CaptureType));
-            Pos.putPiece(To, makePiece(C, CaptureType));
+            Pos.putPiece(To, makePiece<C>(CaptureType));
 
             Helper.ColorBB[C].toggleBit(To);
             Helper.TypeBB[CaptureType].toggleBit(To);
@@ -258,7 +262,7 @@ inline void StateImpl::undoMove() {
             HashValue.update<~C>(Type, To);
         }
 
-        Pos.putPiece(From, makePiece(~C, Type));
+        Pos.putPiece(From, makePiece<~C>(Type));
         Helper.TypeBB[Type].toggleBit(From);
         Helper.ColorBB[~C].toggleBit(From);
 

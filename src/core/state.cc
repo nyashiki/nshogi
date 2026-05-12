@@ -122,5 +122,9 @@ bool State::canDeclare() const noexcept {
     return Impl->canDeclare();
 }
 
+bool State::isLastMoveDroppingAPawn() const noexcept {
+    return Impl->isLastMoveDroppingAPawn();
+}
+
 } // namespace core
 } // namespace nshogi
