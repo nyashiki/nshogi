@@ -25,7 +25,7 @@ class ThreadsafeTeacherWriter {
 
     void write(const TeacherType& Teacher);
     static void
-    shuffle(const TeacherLoaderForFixedSizeTeacher<TeacherType>& Loader,
+    shuffle(TeacherLoaderForFixedSizeTeacher<TeacherType>& Loader,
             const std::string& OutputPath, uint64_t Seed);
 
  private:

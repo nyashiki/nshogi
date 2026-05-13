@@ -38,7 +38,7 @@ void ThreadsafeTeacherWriter<TeacherType>::write(const TeacherType& Teacher) {
 
 template <typename TeacherType>
 void ThreadsafeTeacherWriter<TeacherType>::shuffle(
-    const TeacherLoaderForFixedSizeTeacher<TeacherType>& Loader,
+    TeacherLoaderForFixedSizeTeacher<TeacherType>& Loader,
     const std::string& OutputPath, uint64_t Seed) {
     std::ofstream Ofs(OutputPath, std::ios::out | std::ios::app);
 

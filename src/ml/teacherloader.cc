@@ -13,7 +13,6 @@
 #include "simpleteacher.h"
 
 #include <cstdint>
-#include <fstream>
 #include <iostream>
 #include <random>
 
@@ -25,7 +24,8 @@ TeacherLoaderForFixedSizeTeacher<TeacherType>::TeacherLoaderForFixedSizeTeacher(
     const std::string& TeacherPath, bool Shuffle)
     : Path(TeacherPath)
     , ShuffleEnabled(Shuffle) {
-    std::ifstream Ifs(Path, std::ios::in | std::ios::binary);
+
+    ensureOpen();
 
     if (!Ifs) {
         throw std::runtime_error("File not found.");
@@ -65,16 +65,37 @@ std::size_t TeacherLoaderForFixedSizeTeacher<TeacherType>::size() const {
 }
 
 template <typename TeacherType>
+void TeacherLoaderForFixedSizeTeacher<TeacherType>::ensureOpen() {
+    const pid_t CurrentPid = getpid();
+
+    if (Ifs.is_open() && CurrentPid == OpenPid) {
+        return;
+    }
+
+    if (Ifs.is_open()) {
+        Ifs.close();
+    }
+
+    Ifs.clear();
+    Ifs.open(Path, std::ios::in | std::ios::binary);
+    if (!Ifs) {
+        throw std::runtime_error("File not found.");
+    }
+
+    OpenPid = CurrentPid;
+}
+
+template <typename TeacherType>
 TeacherType TeacherLoaderForFixedSizeTeacher<TeacherType>::operator[](
-    std::size_t Index) const {
+    std::size_t Index) {
     if (ShuffleEnabled) {
         Index = (*PG)(Index);
     }
 
     assert(Index < NumTeachers);
 
-    std::ifstream Ifs(Path, std::ios::in | std::ios::binary);
-
+    ensureOpen();
+    Ifs.clear();
     Ifs.seekg((long)(Index * TeacherSizeUnit), std::ios_base::beg);
 
     TeacherType T = io::file::load<TeacherType>(Ifs);
@@ -86,14 +107,17 @@ template <>
 void TeacherLoaderForFixedSizeTeacher<SimpleTeacher>::loadAt(
     SimpleTeacher* Dest,
     std::size_t Index
-) const {
+) {
     if (ShuffleEnabled) {
         Index = (*PG)(Index);
     }
 
     assert(Index < NumTeachers);
 
-    std::ifstream Ifs(Path, std::ios::in | std::ios::binary);
+    ensureOpen();
+    Ifs.clear();
+    Ifs.seekg((long)(Index * TeacherSizeUnit), std::ios_base::beg);
+
     io::file::simple_teacher::loadAt(Dest, Ifs);
 };
 

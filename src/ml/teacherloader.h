@@ -12,6 +12,7 @@
 
 #include "utils.h"
 
+#include <fstream>
 #include <memory>
 #include <string>
 
@@ -24,17 +25,23 @@ class TeacherLoaderForFixedSizeTeacher {
     TeacherLoaderForFixedSizeTeacher(const std::string& TeacherPath,
                                      bool Shuffle);
 
-    TeacherType operator[](std::size_t Index) const;
-    void loadAt(TeacherType* Dest, std::size_t Index) const;
+    TeacherType operator[](std::size_t Index);
+    void loadAt(TeacherType* Dest, std::size_t Index);
 
     std::size_t size() const;
 
+    void ensureOpen();
+
  private:
     const std::string Path;
+    const bool ShuffleEnabled;
+
+    std::ifstream Ifs;
+    pid_t OpenPid;
+
     std::size_t TeacherSizeUnit;
     std::size_t NumTeachers;
 
-    const bool ShuffleEnabled;
     std::unique_ptr<utils::PermutationGenerator> PG;
 };
 
