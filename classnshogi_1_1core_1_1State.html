@@ -178,6 +178,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:af63a12ff80e4c0e467e24827033af225"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classnshogi_1_1core_1_1State.html#af63a12ff80e4c0e467e24827033af225">canDeclare</a> () const noexcept</td></tr>
 <tr class="memdesc:af63a12ff80e4c0e467e24827033af225"><td class="mdescLeft">&#160;</td><td class="mdescRight">Check if the current player can win by declaration.  <a href="classnshogi_1_1core_1_1State.html#af63a12ff80e4c0e467e24827033af225">More...</a><br /></td></tr>
 <tr class="separator:af63a12ff80e4c0e467e24827033af225"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ace14aa452f148895c35abb1f1b125eac"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classnshogi_1_1core_1_1State.html#ace14aa452f148895c35abb1f1b125eac">isLastMoveDroppingAPawn</a> () const noexcept</td></tr>
+<tr class="memdesc:ace14aa452f148895c35abb1f1b125eac"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return true if the last move was a pawn drop.  <a href="classnshogi_1_1core_1_1State.html#ace14aa452f148895c35abb1f1b125eac">More...</a><br /></td></tr>
+<tr class="separator:ace14aa452f148895c35abb1f1b125eac"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-attribs" name="pro-attribs"></a>
 Protected Attributes</h2></td></tr>
@@ -707,6 +710,34 @@ Friends</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Return true if the king of the current turn is in check. </p>
+
+</div>
+</div>
+<a id="ace14aa452f148895c35abb1f1b125eac" name="ace14aa452f148895c35abb1f1b125eac"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ace14aa452f148895c35abb1f1b125eac">&#9670;&#160;</a></span>isLastMoveDroppingAPawn()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool nshogi::core::State::isLastMoveDroppingAPawn </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Return true if the last move was a pawn drop. </p>
+<p >Note: Return false when called at the intiial position (i.e., <a class="el" href="classnshogi_1_1core_1_1State.html#a63f960d5d52be5876103ca535ec16f31" title="Get the current ply (i.e., how many moves are applied).">getPly()</a> == 0). </p>
 
 </div>
 </div>

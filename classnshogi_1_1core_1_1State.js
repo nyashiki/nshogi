@@ -18,6 +18,7 @@ var classnshogi_1_1core_1_1State =
     [ "getRepetitionStatus", "classnshogi_1_1core_1_1State.html#a70200010b8c06227fdebd3bdcb386b18", null ],
     [ "getSideToMove", "classnshogi_1_1core_1_1State.html#ab459b87bfd66a2d366a1553a68830aa6", null ],
     [ "isInCheck", "classnshogi_1_1core_1_1State.html#af11ded7420dc3d0b74d7997edb363995", null ],
+    [ "isLastMoveDroppingAPawn", "classnshogi_1_1core_1_1State.html#ace14aa452f148895c35abb1f1b125eac", null ],
     [ "operator=", "classnshogi_1_1core_1_1State.html#accddff21bcc408724e0ab7cecee1a9a7", null ],
     [ "operator=", "classnshogi_1_1core_1_1State.html#a8bb4bae069498b01769e4132cd82b08b", null ],
     [ "undoMove", "classnshogi_1_1core_1_1State.html#a8c19fb89d3f8f2337ace2be35be1b53a", null ],
