@@ -24,6 +24,7 @@ class TeacherLoaderForFixedSizeTeacher {
  public:
     TeacherLoaderForFixedSizeTeacher(const std::string& TeacherPath,
                                      bool Shuffle);
+    ~TeacherLoaderForFixedSizeTeacher();
 
     TeacherType operator[](std::size_t Index);
     void loadAt(TeacherType* Dest, std::size_t Index);
@@ -38,6 +39,10 @@ class TeacherLoaderForFixedSizeTeacher {
 
     std::ifstream Ifs;
     pid_t OpenPid;
+    std::size_t FileSize;
+
+    // Used in Linux for mmap().
+    void* MappedFile;
 
     std::size_t TeacherSizeUnit;
     std::size_t NumTeachers;
