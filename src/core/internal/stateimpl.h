@@ -769,6 +769,12 @@ class StateImpl {
         return Helper.Ply > 0 && Helper.SHelper.back().IsLastMoveDroppingAPawn;
     }
 
+    template <core::Color C>
+    bool isLegal(Move16 Move) const noexcept;
+
+    template <core::Color C>
+    bool isLegal(Move32 Move) const noexcept;
+
     //  The functions below are for `ExtendedState` class,
     //  which means that they are not necessary for the game representation but
     //  are possibly useful.

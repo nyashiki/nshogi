@@ -624,7 +624,7 @@ struct Move16 {
     constexpr Move16() noexcept = default;
 
     explicit constexpr Move16(Move32 M) noexcept
-        : C_(M.C_ & 0xffff) {
+        : C_(M.C_ & 0x7fff) {
     }
 
     constexpr Move16(const Move16& M) noexcept = default;
