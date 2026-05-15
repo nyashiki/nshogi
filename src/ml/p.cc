@@ -1,97 +1,135 @@
 #include "p.h"
 
+#include "../core/internal/bitboard.h"
+#include "../core/internal/stateadapter.h"
+
 namespace nshogi {
 namespace ml {
 
 namespace {
 
 // clang-format off
+
 constexpr std::size_t OnBoardFeatureSize =
     (std::size_t)core::NumSquares // My piece's position.
     * (std::size_t)core::NumColors // My piece's color.
     * ((std::size_t)core::NumPieceType - 1); // My piece's type (excluding empty).
 
-constexpr std::size_t OtherFeatureSize =
-    18 * 2 // Pawns (max 18 for each color).
-    + 4 * 4 * 2 // Lances, knights, silvers, and golds (max 4 for each color).
-    + 2 * 2 * 2; // Bishops and rooks (max 2 for each color).
 // clang-format on
 
 template <core::Color C>
-std::vector<std::size_t> ids_(const core::State& S) {
-    std::vector<std::size_t> Ids;
+void idsAt_(
+    int32_t* DestMyIds,
+    int32_t* DestOpIds,
+    int32_t* DestMyIdsCount,
+    int32_t* DestOpIdsCount,
+    const core::State& S
+) {
+    *DestMyIdsCount = 0;
+    *DestOpIdsCount = 0;
 
-    const auto Position = S.getPosition();
+    const auto& Position = S.getPosition();
+    core::internal::ImmutableStateAdapter Adapter(S);
 
-    for (auto Sq : core::Squares) {
+    const core::internal::bitboard::Bitboard OccupiedBB =
+        Adapter->getBitboard<core::Black>() | Adapter->getBitboard<core::White>();
+
+    OccupiedBB.forEach([&](core::Square Sq) {
         const auto Piece = Position.pieceOn(Sq);
-        if (Piece != core::PK_Empty) {
-            const auto PieceType = core::getPieceType(Piece);
-            const auto PieceColor = (C == core::Black) ? core::getColor(Piece) : ~core::getColor(Piece);
-            const auto IndexSq = (C == core::Black) ? Sq : (80 - Sq);
-            const std::size_t Index =
-                (std::size_t)IndexSq * ((std::size_t)core::NumColors * ((std::size_t)core::NumPieceType - 1)) +
-                (std::size_t)PieceColor * ((std::size_t)core::NumPieceType - 1) +
-                ((std::size_t)PieceType - 1);
+        assert(Piece != core::PieceKind::PK_Empty);
 
-            Ids.push_back(Index);
+        const auto PieceType = core::getPieceType(Piece);
+        const auto PieceColor = (C == core::Black) ? core::getColor(Piece) : ~core::getColor(Piece);
+        const auto IndexSq = (C == core::Black) ? Sq : core::getInversed(Sq);
+
+        const std::size_t MyIndex =
+            (std::size_t)IndexSq * ((std::size_t)core::NumColors * ((std::size_t)core::NumPieceType - 1)) +
+            (std::size_t)PieceColor * ((std::size_t)core::NumPieceType - 1) +
+            ((std::size_t)PieceType - 1);
+
+        const std::size_t OpIndex =
+            (std::size_t)core::getInversed(IndexSq) * ((std::size_t)core::NumColors * ((std::size_t)core::NumPieceType - 1)) +
+            (std::size_t)(~PieceColor) * ((std::size_t)core::NumPieceType - 1) +
+            ((std::size_t)PieceType - 1);
+
+        assert(MyIndex < OnBoardFeatureSize);
+        assert(OpIndex < OnBoardFeatureSize);
+
+        DestMyIds[(*DestMyIdsCount)++] = (int32_t)MyIndex;
+        DestOpIds[(*DestOpIdsCount)++] = (int32_t)OpIndex;
+    });
+
+    const int32_t AuxiliaryBase = OnBoardFeatureSize;
+
+    auto appendStandPair = [&](
+        int32_t MyBase,
+        int32_t OpBase,
+        core::PieceTypeKind Type
+    ) {
+        const uint8_t MyStandCount = Position.getStandCount(C, Type);
+        const uint8_t OpStandCount = Position.getStandCount(~C, Type);
+        for (uint8_t I = 0; I < MyStandCount; ++I) {
+            DestMyIds[(*DestMyIdsCount)++] = MyBase + I;
+            DestOpIds[(*DestOpIdsCount)++] = OpBase + I;
         }
-    }
+        for (uint8_t I = 0; I < OpStandCount; ++I) {
+            DestMyIds[(*DestMyIdsCount)++] = OpBase + I;
+            DestOpIds[(*DestOpIdsCount)++] = MyBase + I;
+        }
+    };
 
-    std::size_t AuxiliaryBase = OnBoardFeatureSize;
-
-    for (std::size_t I = 0; I < Position.getStandCount<C, core::PTK_Pawn>(); ++I) {
-        Ids.push_back(AuxiliaryBase + I);
-    }
-    for (std::size_t I = 0; I < Position.getStandCount<~C, core::PTK_Pawn>(); ++I) {
-        Ids.push_back(AuxiliaryBase + 18 + I);
-    }
-    for (std::size_t I = 0; I < Position.getStandCount<C, core::PTK_Lance>(); ++I) {
-        Ids.push_back(AuxiliaryBase + 36 + I);
-    }
-    for (std::size_t I = 0; I < Position.getStandCount<~C, core::PTK_Lance>(); ++I) {
-        Ids.push_back(AuxiliaryBase + 40 + I);
-    }
-    for (std::size_t I = 0; I < Position.getStandCount<C, core::PTK_Knight>(); ++I) {
-        Ids.push_back(AuxiliaryBase + 44 + I);
-    }
-    for (std::size_t I = 0; I < Position.getStandCount<~C, core::PTK_Knight>(); ++I) {
-        Ids.push_back(AuxiliaryBase + 48 + I);
-    }
-    for (std::size_t I = 0; I < Position.getStandCount<C, core::PTK_Silver>(); ++I) {
-        Ids.push_back(AuxiliaryBase + 52 + I);
-    }
-    for (std::size_t I = 0; I < Position.getStandCount<~C, core::PTK_Silver>(); ++I) {
-        Ids.push_back(AuxiliaryBase + 56 + I);
-    }
-    for (std::size_t I = 0; I < Position.getStandCount<C, core::PTK_Gold>(); ++I) {
-        Ids.push_back(AuxiliaryBase + 60 + I);
-    }
-    for (std::size_t I = 0; I < Position.getStandCount<~C, core::PTK_Gold>(); ++I) {
-        Ids.push_back(AuxiliaryBase + 64 + I);
-    }
-    for (std::size_t I = 0; I < Position.getStandCount<C, core::PTK_Bishop>(); ++I) {
-        Ids.push_back(AuxiliaryBase + 68 + I);
-    }
-    for (std::size_t I = 0; I < Position.getStandCount<~C, core::PTK_Bishop>(); ++I) {
-        Ids.push_back(AuxiliaryBase + 70 + I);
-    }
-    for (std::size_t I = 0; I < Position.getStandCount<C, core::PTK_Rook>(); ++I) {
-        Ids.push_back(AuxiliaryBase + 72 + I);
-    }
-    for (std::size_t I = 0; I < Position.getStandCount<~C, core::PTK_Rook>(); ++I) {
-        Ids.push_back(AuxiliaryBase + 74 + I);
-    }
-
-    return Ids;
+    appendStandPair(
+        AuxiliaryBase,
+        AuxiliaryBase + 18,
+        core::PTK_Pawn
+    );
+    appendStandPair(
+        AuxiliaryBase + 36,
+        AuxiliaryBase + 40,
+        core::PTK_Lance
+    );
+    appendStandPair(
+        AuxiliaryBase + 44,
+        AuxiliaryBase + 48,
+        core::PTK_Knight
+    );
+    appendStandPair(
+        AuxiliaryBase + 52,
+        AuxiliaryBase + 56,
+        core::PTK_Silver
+    );
+    appendStandPair(
+        AuxiliaryBase + 60,
+        AuxiliaryBase + 62,
+        core::PTK_Bishop
+    );
+    appendStandPair(
+        AuxiliaryBase + 64,
+        AuxiliaryBase + 66,
+        core::PTK_Rook
+    );
+    appendStandPair(
+        AuxiliaryBase + 68,
+        AuxiliaryBase + 72,
+        core::PTK_Gold
+    );
 }
 
 template <core::Color C>
-void extract_(int8_t* Data, const core::State& S) {
-    const auto Ids = ids_<C>(S);
-    for (const auto Id : Ids) {
-        Data[Id] = 1;
-    }
+std::pair<std::vector<int32_t>, std::vector<int32_t>>
+ids_(const core::State& S) {
+    // There are 40 pieces on the board and stands.
+    std::vector<int32_t> MyIds(40);
+    std::vector<int32_t> OpIds(40);
+
+    int32_t MyIdsCount;
+    int32_t OpIdsCount;
+
+    idsAt_<C>(MyIds.data(), OpIds.data(), &MyIdsCount, &OpIdsCount, S);
+    MyIds.resize((std::size_t)MyIdsCount);
+    OpIds.resize((std::size_t)OpIdsCount);
+
+    return { std::move(MyIds), std::move(OpIds) };
 }
 
 } // namespace
@@ -99,33 +137,27 @@ void extract_(int8_t* Data, const core::State& S) {
 PFeatureExtractor::PFeatureExtractor() {
 }
 
-std::pair<std::vector<std::size_t>, std::vector<std::size_t>>
-PFeatureExtractor::ids(const core::State& S) const {
+void PFeatureExtractor::idsAt(
+    int32_t* DestMyIds,
+    int32_t* DestOpIds,
+    int32_t* DestMyIdsCount,
+    int32_t* DestOpIdsCount,
+    const core::State& S
+) {
     if (S.getSideToMove() == core::Black) {
-        return {
-            ids_<core::Black>(S),
-            ids_<core::White>(S)
-        };
+        idsAt_<core::Black>(DestMyIds, DestOpIds, DestMyIdsCount, DestOpIdsCount, S);
     } else {
-        return {
-            ids_<core::White>(S),
-            ids_<core::Black>(S)
-        };
+        idsAt_<core::White>(DestMyIds, DestOpIds, DestMyIdsCount, DestOpIdsCount, S);
     }
 }
 
-std::vector<int8_t> PFeatureExtractor::extract(const core::State& S) const {
-    std::vector<int8_t> Data(2 * (OnBoardFeatureSize + OtherFeatureSize), 0);
-
+std::pair<std::vector<int32_t>, std::vector<int32_t>>
+PFeatureExtractor::ids(const core::State& S) const {
     if (S.getSideToMove() == core::Black) {
-        extract_<core::Black>(Data.data(), S);
-        extract_<core::White>(Data.data() + OnBoardFeatureSize + OtherFeatureSize, S);
+        return ids_<core::Black>(S);
     } else {
-        extract_<core::White>(Data.data(), S);
-        extract_<core::Black>(Data.data() + OnBoardFeatureSize + OtherFeatureSize, S);
+        return ids_<core::White>(S);
     }
-
-    return Data;
 }
 
 } // namespace ml
