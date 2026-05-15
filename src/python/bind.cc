@@ -33,6 +33,7 @@
 #include "../ml/kp.h"
 #include "../ml/p.h"
 #include "../ml/teacherloader.h"
+#include "../ml/batchedteacherloader.h"
 #include "../ml/teacherwriter.h"
 #include "../ml/utils.h"
 
@@ -73,6 +74,30 @@ class PyFeatureStack {
  private:
     nshogi::ml::FeatureStackRuntime FeatureStack;
 };
+
+template <typename T>
+pybind11::array_t<T> makeArrayFromUniquePtr2d(
+    std::unique_ptr<T[]> Data,
+    std::size_t Dim0,
+    std::size_t Dim1) {
+
+    T* RawPtr = Data.release();
+
+    pybind11::capsule Base(
+        RawPtr,
+        [](void* Ptr) {
+            delete[] static_cast<T*>(Ptr);
+        }
+    );
+
+    return pybind11::array_t<T>(
+        {Dim0, Dim1},
+        {static_cast<pybind11::ssize_t>(Dim1 * sizeof(T)),
+         static_cast<pybind11::ssize_t>(sizeof(T))},
+        RawPtr,
+        Base
+    );
+}
 
 } // namespace
 
@@ -488,20 +513,6 @@ PYBIND11_MODULE(nshogi, Module) {
                 }
 
                 return pybind11::make_tuple(NpArray1, NpArray2);
-             })
-        .def("extract",
-             [](const nshogi::ml::KPFeatureExtractor& Extractor, const nshogi::core::State& State) {
-                const std::vector<int8_t> Extracted = Extractor.extract(State);
-
-                auto NpArray = pybind11::array_t<int8_t>((pybind11::ssize_t)Extracted.size());
-                auto Data = reinterpret_cast<int8_t*>(NpArray.request().ptr);
-                std::memcpy(reinterpret_cast<char*>(Data), Extracted.data(),
-                            Extracted.size() * sizeof(int8_t));
-
-                assert(Extracted.size() % 2 == 0);
-                NpArray.resize({(pybind11::ssize_t)2 , (pybind11::ssize_t)(Extracted.size() / 2)});
-
-                return NpArray;
              });
 
     pybind11::class_<nshogi::ml::PFeatureExtractor>(MLModule, "PFeatureExtractor")
@@ -524,20 +535,6 @@ PYBIND11_MODULE(nshogi, Module) {
                 }
 
                 return pybind11::make_tuple(NpArray1, NpArray2);
-             })
-        .def("extract",
-             [](const nshogi::ml::PFeatureExtractor& Extractor, const nshogi::core::State& State) {
-                const std::vector<int8_t> Extracted = Extractor.extract(State);
-
-                auto NpArray = pybind11::array_t<int8_t>((pybind11::ssize_t)Extracted.size());
-                auto Data = reinterpret_cast<int8_t*>(NpArray.request().ptr);
-                std::memcpy(reinterpret_cast<char*>(Data), Extracted.data(),
-                            Extracted.size() * sizeof(int8_t));
-
-                assert(Extracted.size() % 2 == 0);
-                NpArray.resize({(pybind11::ssize_t)2 , (pybind11::ssize_t)(Extracted.size() / 2)});
-
-                return NpArray;
              });
 
     pybind11::class_<nshogi::ml::AZTeacher>(MLModule, "AZTeacher")
@@ -818,7 +815,7 @@ PYBIND11_MODULE(nshogi, Module) {
         .def(pybind11::init<const std::string&, bool>(), pybind11::arg("path"),
              pybind11::arg("shuffle"))
         .def("filter",
-             [](const nshogi::ml::TeacherLoaderForFixedSizeTeacher<
+             [](nshogi::ml::TeacherLoaderForFixedSizeTeacher<
                     nshogi::ml::AZTeacher>& Loader,
                 const std::string& OutputPath) {
                  std::ofstream Ofs(OutputPath, std::ios::out | std::ios::app);
@@ -846,4 +843,56 @@ PYBIND11_MODULE(nshogi, Module) {
                             nshogi::ml::SimpleTeacher>::size)
         .def("__getitem__", &nshogi::ml::TeacherLoaderForFixedSizeTeacher<
                                 nshogi::ml::SimpleTeacher>::operator[]);
+
+    pybind11::class_<nshogi::ml::BatchedTeacherLoader>(MLModule, "BatchedTeacherLoader")
+        .def(pybind11::init<
+                const std::string&,
+                std::size_t,
+                bool,
+                std::size_t,
+                std::size_t
+            >(), pybind11::arg("paths"),
+                 pybind11::arg("batch_size"),
+                 pybind11::arg("shuffle"),
+                 pybind11::arg("num_workers"),
+                 pybind11::arg("prefetch"))
+        .def("__len__", &nshogi::ml::BatchedTeacherLoader::size)
+        .def("next", [](nshogi::ml::BatchedTeacherLoader& Loader) -> pybind11::object {
+            std::optional<nshogi::ml::BatchedTeacher> Batch;
+
+            {
+                pybind11::gil_scoped_release Release;
+                Batch = Loader.next();
+            }
+
+            if (!Batch.has_value()) {
+                return pybind11::none();
+            }
+
+            auto& B = Batch.value();
+
+            const std::size_t BatchSize = Loader.batchSize();
+
+            pybind11::array_t<int32_t> MyIds = makeArrayFromUniquePtr2d<int32_t>(
+                std::move(B.MyIds),
+                BatchSize,
+                40);
+
+            pybind11::array_t<int32_t> OpIds = makeArrayFromUniquePtr2d<int32_t>(
+                std::move(B.OpIds),
+                BatchSize,
+                40);
+
+            pybind11::array_t<int8_t> Results = makeArrayFromUniquePtr2d<int8_t>(
+                std::move(B.Results),
+                BatchSize,
+                1);
+
+            pybind11::array_t<int8_t> IsStables = makeArrayFromUniquePtr2d<int8_t>(
+                std::move(B.IsStables),
+                BatchSize,
+                1);
+
+            return pybind11::make_tuple(MyIds, OpIds, Results, IsStables);
+        });
 }
