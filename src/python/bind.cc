@@ -143,8 +143,8 @@ PYBIND11_MODULE(nshogi, Module) {
     // clang-format on
 
     pybind11::class_<nshogi::core::Move32>(Module, "Move")
-        .def_property_readonly("from", &nshogi::core::Move32::from)
-        .def_property_readonly("to", &nshogi::core::Move32::to)
+        .def_property_readonly("from_sq", &nshogi::core::Move32::from)
+        .def_property_readonly("to_sq", &nshogi::core::Move32::to)
         .def_property_readonly("piece_type", &nshogi::core::Move32::pieceType)
         .def_property_readonly("capture_piece_type",
                                &nshogi::core::Move32::capturePieceType)
