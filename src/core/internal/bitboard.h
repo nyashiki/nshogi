@@ -803,10 +803,11 @@ inline Bitboard getRookAttackBB(Square Sq,
 }
 
 template <Color C, PieceTypeKind Type>
-inline Bitboard getSliderAttackBB(Square Sq, const Bitboard& OccupiedBB) noexcept {
-    static_assert(Type == PTK_Lance ||
-            Type == PTK_Bishop || Type == PTK_ProBishop ||
-            Type == PTK_Rook || Type == PTK_ProRook);
+inline Bitboard getSliderAttackBB(Square Sq,
+                                  const Bitboard& OccupiedBB) noexcept {
+    static_assert(Type == PTK_Lance || Type == PTK_Bishop ||
+                  Type == PTK_ProBishop || Type == PTK_Rook ||
+                  Type == PTK_ProRook);
 
     if constexpr (Type == PTK_Lance) {
         return getLanceAttackBB<C>(Sq, OccupiedBB);
@@ -818,11 +819,8 @@ inline Bitboard getSliderAttackBB(Square Sq, const Bitboard& OccupiedBB) noexcep
 }
 
 template <Color C>
-inline Bitboard getSliderAttackBB(
-    PieceTypeKind Type,
-    Square Sq,
-    const Bitboard& OccupiedBB
-) noexcept {
+inline Bitboard getSliderAttackBB(PieceTypeKind Type, Square Sq,
+                                  const Bitboard& OccupiedBB) noexcept {
     switch (Type) {
     case PTK_Lance:
         return getSliderAttackBB<C, PTK_Lance>(Sq, OccupiedBB);

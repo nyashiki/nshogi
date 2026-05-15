@@ -8,10 +8,10 @@
 //
 
 #include "stateimpl.h"
+#include "../types.h"
 #include "bitboard.h"
 #include "statehelper.h"
 #include "utils.h"
-#include "../types.h"
 
 #include <cassert>
 #include <cstring>
@@ -356,7 +356,7 @@ bool StateImpl::isLegal(Move16 Move) const noexcept {
 
     const auto& P = getPosition();
 
-    const  bitboard::Bitboard& CheckerBB = getCheckerBB();
+    const bitboard::Bitboard& CheckerBB = getCheckerBB();
 
     if (Move.drop()) {
         const PieceTypeKind Type =
@@ -394,7 +394,8 @@ bool StateImpl::isLegal(Move16 Move) const noexcept {
                 return false;
             }
             if (Type == PTK_Knight) {
-                if (bitboard::Bitboard::SecondFurthestBB<C>().isSet(Move.to())) {
+                if (bitboard::Bitboard::SecondFurthestBB<C>().isSet(
+                        Move.to())) {
                     return false;
                 }
             }
@@ -404,7 +405,8 @@ bool StateImpl::isLegal(Move16 Move) const noexcept {
         if (!CheckerBB.isZero()) {
             // If the checker is on an adjacent square to the king,
             // any dropping move is illegal.
-            if (!(bitboard::KingAttackBB[getKingSquare<C>()] & CheckerBB).isZero()) {
+            if (!(bitboard::KingAttackBB[getKingSquare<C>()] & CheckerBB)
+                     .isZero()) {
                 return false;
             }
 
@@ -421,11 +423,13 @@ bool StateImpl::isLegal(Move16 Move) const noexcept {
                 // block the check by a slider.
                 // A move blocks the ckeck iff the king square,
                 // the checker square, and the move's destination square are
-                // aligned on the same line and the destination square is between the king square and the
-                return bitboard::BetweenBB[CheckerSq][getKingSquare<C>()].isSet(Move.to());
+                // aligned on the same line and the destination square is
+                // between the king square and the
+                return bitboard::BetweenBB[CheckerSq][getKingSquare<C>()].isSet(
+                    Move.to());
             } else { // CheckerBB.popCount() >= 2.
-                // If there are two or more checkers, the only legal moves are king moves.
-                // Therefore, any dropping move is illegal.
+                // If there are two or more checkers, the only legal moves are
+                // king moves. Therefore, any dropping move is illegal.
                 return false;
             }
         }
@@ -447,7 +451,8 @@ bool StateImpl::isLegal(Move16 Move) const noexcept {
         }
 
         // Check if the destination square has no piece or an opponent's piece.
-        if (P.pieceOn(Move.to()) != PK_Empty && getColor(P.pieceOn(Move.to())) == C) {
+        if (P.pieceOn(Move.to()) != PK_Empty &&
+            getColor(P.pieceOn(Move.to())) == C) {
             return false;
         }
 
@@ -460,8 +465,9 @@ bool StateImpl::isLegal(Move16 Move) const noexcept {
             }
 
             const auto& PromotableBB = bitboard::PromotableBB[C];
-            if ((PromotableBB &
-                    (bitboard::SquareBB[Move.from()] | bitboard::SquareBB[Move.to()])).isZero()) {
+            if ((PromotableBB & (bitboard::SquareBB[Move.from()] |
+                                 bitboard::SquareBB[Move.to()]))
+                    .isZero()) {
                 return false;
             }
         } else {
@@ -471,23 +477,25 @@ bool StateImpl::isLegal(Move16 Move) const noexcept {
                     return false;
                 }
                 if (Type == PTK_Knight) {
-                    if (bitboard::Bitboard::SecondFurthestBB<C>().isSet(Move.to())) {
+                    if (bitboard::Bitboard::SecondFurthestBB<C>().isSet(
+                            Move.to())) {
                         return false;
                     }
                 }
             }
         }
 
-        // Check if the piece can move to the destination from the source square.
+        // Check if the piece can move to the destination from the source
+        // square.
         if (!bitboard::getStepAttackBB<C>(Type, Move.from()).isSet(Move.to())) {
             // Check slider moves.
-            if (Type == PTK_Bishop || Type == PTK_ProBishop
-                || Type == PTK_Rook || Type == PTK_ProRook
-                || Type == PTK_Lance
-            ) {
-                const bitboard::Bitboard OccupiedBB = getBitboard<Black>() | getBitboard<White>();
-                if (!bitboard::getSliderAttackBB<C>(Type, Move.from(), OccupiedBB)
-                    .isSet(Move.to())) {
+            if (Type == PTK_Bishop || Type == PTK_ProBishop ||
+                Type == PTK_Rook || Type == PTK_ProRook || Type == PTK_Lance) {
+                const bitboard::Bitboard OccupiedBB =
+                    getBitboard<Black>() | getBitboard<White>();
+                if (!bitboard::getSliderAttackBB<C>(Type, Move.from(),
+                                                    OccupiedBB)
+                         .isSet(Move.to())) {
                     return false;
                 }
             } else {
@@ -499,11 +507,13 @@ bool StateImpl::isLegal(Move16 Move) const noexcept {
         if (!CheckerBB.isZero()) {
             if (CheckerBB.popCount() >= 2) {
                 if (Type != PTK_King) {
-                    // If there are two or more checkers, the only legal moves are king moves.
-                    // Therefore, if the move is not a king move, it is illegal.
+                    // If there are two or more checkers, the only legal moves
+                    // are king moves. Therefore, if the move is not a king
+                    // move, it is illegal.
                     return false;
                 }
-                // Checking if the move can evade the check by moving the king later (*).
+                // Checking if the move can evade the check by moving the king
+                // later (*).
             }
 
             // If the move captures the checker, the move is legal.
@@ -511,16 +521,22 @@ bool StateImpl::isLegal(Move16 Move) const noexcept {
             // or block slider check.
             if (!CheckerBB.isSet(Move.to())) {
                 if (Type != PTK_King) {
-                    // Otherwise, if checked by a step piece from a adjacent square
-                    // or a knight, the move is illegal.
-                    if (!((bitboard::KingAttackBB[getKingSquare<C>()]
-                           | bitboard::getAttackBB<C, PTK_Knight>(getKingSquare<C>())) & CheckerBB).isZero()) {
+                    // Otherwise, if checked by a step piece from a adjacent
+                    // square or a knight, the move is illegal.
+                    if (!((bitboard::KingAttackBB[getKingSquare<C>()] |
+                           bitboard::getAttackBB<C, PTK_Knight>(
+                               getKingSquare<C>())) &
+                          CheckerBB)
+                             .isZero()) {
                         return false;
                     }
 
-                    // If checked by a slider, the move is legal only if it can block the check.
-                    const bitboard::Bitboard OccupiedBB = getBitboard<Black>() | getBitboard<White>();
-                    if (isAttackedBySlider<C>(getKingSquare<C>(), OccupiedBB, Move.to())) {
+                    // If checked by a slider, the move is legal only if it can
+                    // block the check.
+                    const bitboard::Bitboard OccupiedBB =
+                        getBitboard<Black>() | getBitboard<White>();
+                    if (isAttackedBySlider<C>(getKingSquare<C>(), OccupiedBB,
+                                              Move.to())) {
                         return false;
                     }
                 }
@@ -535,8 +551,10 @@ bool StateImpl::isLegal(Move16 Move) const noexcept {
         // Check if the king is not in check after moving a pinned piece.
         if (getDefendingOpponentSliderBB<C>().isSet(Move.from())) {
             // When moving a pinned piece, the move is legal only if
-            // the source squaren, the destination square, and the king square are aligned.
-            return utils::isSameLine(getKingSquare<C>(), Move.from(), Move.to());
+            // the source squaren, the destination square, and the king square
+            // are aligned.
+            return utils::isSameLine(getKingSquare<C>(), Move.from(),
+                                     Move.to());
         }
     }
 
@@ -558,7 +576,8 @@ bool StateImpl::isLegal(Move32 Move) const noexcept {
 
         // Check if the source square has the piece type.
         // Note: piece color check will be done in isLegal(Move16).
-        if (getPieceType(getPosition().pieceOn(Move.from())) != Move.pieceType()) {
+        if (getPieceType(getPosition().pieceOn(Move.from())) !=
+            Move.pieceType()) {
             return false;
         }
 

@@ -20,9 +20,9 @@
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
+#include <deque>
 #include <iostream>
 #include <map>
-#include <deque>
 #include <random>
 
 namespace {
