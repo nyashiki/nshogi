@@ -27,31 +27,87 @@ class AZTeacherIO : public ml::AZTeacher {
         : ml::AZTeacher(AT) {
     }
 
-    ml::AZTeacher load_0_1_0(std::ifstream& Ifs) {
-        Ifs.read(Sfen, SfenCStrLength * sizeof(char));
+    static void loadAt_0_1_0(ml::AZTeacher* Dest, std::ifstream& Ifs) {
+        Ifs.read(Dest->Sfen, SfenCStrLength * sizeof(char));
 
-        Ifs.read(reinterpret_cast<char*>(&SideToMove), sizeof(core::Color));
-        Ifs.read(reinterpret_cast<char*>(&Winner), sizeof(core::Color));
-        Ifs.read(reinterpret_cast<char*>(&NumMoves), sizeof(uint8_t));
+        Ifs.read(reinterpret_cast<char*>(&Dest->SideToMove), sizeof(core::Color));
+        Ifs.read(reinterpret_cast<char*>(&Dest->Winner), sizeof(core::Color));
+        Ifs.read(reinterpret_cast<char*>(&Dest->NumMoves), sizeof(uint8_t));
         for (std::size_t I = 0; I < NumSavedPlayouts; ++I) {
-            Ifs.read(Moves[I].data(), 6 * sizeof(char));
+            Ifs.read(Dest->Moves[I].data(), 6 * sizeof(char));
         }
-        Ifs.read(reinterpret_cast<char*>(Visits.data()),
+        Ifs.read(reinterpret_cast<char*>(Dest->Visits.data()),
                  NumSavedPlayouts * sizeof(uint16_t));
 
-        Ifs.read(reinterpret_cast<char*>(&EndingRule),
+        Ifs.read(reinterpret_cast<char*>(&Dest->EndingRule),
                  sizeof(core::EndingRule));
-        Ifs.read(reinterpret_cast<char*>(&MaxPly), sizeof(uint16_t));
-        Ifs.read(reinterpret_cast<char*>(&BlackDrawValue), sizeof(float));
-        Ifs.read(reinterpret_cast<char*>(&WhiteDrawValue), sizeof(float));
+        Ifs.read(reinterpret_cast<char*>(&Dest->MaxPly), sizeof(uint16_t));
+        Ifs.read(reinterpret_cast<char*>(&Dest->BlackDrawValue), sizeof(float));
+        Ifs.read(reinterpret_cast<char*>(&Dest->WhiteDrawValue), sizeof(float));
 
-        Ifs.read(reinterpret_cast<char*>(&Declared), sizeof(bool));
+        Ifs.read(reinterpret_cast<char*>(&Dest->Declared), sizeof(bool));
 
         int16_t Dummy = 0;
         Ifs.read(reinterpret_cast<char*>(&Dummy), sizeof(int16_t));
 
         if (Dummy != 0xabc) {
             throw std::runtime_error("Parity incoincidence.");
+        }
+    }
+
+    static std::size_t loadAt_0_1_0(ml::AZTeacher* Dest, const char* Source) {
+        const char* Cur = Source;
+
+        std::memcpy(Dest->Sfen, Cur, SfenCStrLength * sizeof(char));
+        Cur += SfenCStrLength * sizeof(char);
+
+        std::memcpy(&Dest->SideToMove, Cur, sizeof(core::Color));
+        Cur += sizeof(core::Color);
+        std::memcpy(&Dest->Winner, Cur, sizeof(core::Color));
+        Cur += sizeof(core::Color);
+        std::memcpy(&Dest->NumMoves, Cur, sizeof(uint8_t));
+        Cur += sizeof(uint8_t);
+        for (std::size_t I = 0; I < NumSavedPlayouts; ++I) {
+            std::memcpy(Dest->Moves[I].data(), Cur, 6 * sizeof(char));
+            Cur += 6 * sizeof(char);
+        }
+        std::memcpy(Dest->Visits.data(), Cur,
+                    NumSavedPlayouts * sizeof(uint16_t));
+        Cur += NumSavedPlayouts * sizeof(uint16_t);
+
+        std::memcpy(&Dest->EndingRule, Cur, sizeof(core::EndingRule));
+        Cur += sizeof(core::EndingRule);
+        std::memcpy(&Dest->MaxPly, Cur, sizeof(uint16_t));
+        Cur += sizeof(uint16_t);
+        std::memcpy(&Dest->BlackDrawValue, Cur, sizeof(float));
+        Cur += sizeof(float);
+        std::memcpy(&Dest->WhiteDrawValue, Cur, sizeof(float));
+        Cur += sizeof(float);
+
+        std::memcpy(&Dest->Declared, Cur, sizeof(bool));
+        Cur += sizeof(bool);
+
+        int16_t Dummy;
+        std::memcpy(&Dummy, Cur, sizeof(int16_t));
+        Cur += sizeof(int16_t);
+
+        if (Dummy != 0xabc) {
+            throw std::runtime_error("Parity incoincidence.");
+        }
+
+        return static_cast<std::size_t>(Cur - Source);
+    }
+
+    ml::AZTeacher load_0_1_0(std::ifstream& Ifs) {
+        loadAt_0_1_0(this, Ifs);
+        return *this;
+    }
+
+    ml::AZTeacher load_0_1_0(const char* Source, std::size_t* BytesRead) {
+        const std::size_t Read = loadAt_0_1_0(this, Source);
+
+        if (BytesRead != nullptr) {
+            *BytesRead = Read;
         }
 
         return *this;
@@ -63,6 +119,19 @@ class AZTeacherIO : public ml::AZTeacher {
 
         if (std::strcmp(Version, "0.1.0") == 0) {
             return load_0_1_0(Ifs);
+        }
+
+        const std::string ErrorMessage =
+            "Unknown version (" + std::string(Version) + ").";
+        throw std::runtime_error(ErrorMessage.c_str());
+    }
+
+    ml::AZTeacher load(const char* Source, std::size_t* BytesRead) {
+        char Version[8];
+        std::memcpy(Version, Source, 8 * sizeof(char));
+
+        if (std::strcmp(Version, "0.1.0") == 0) {
+            return load_0_1_0(Source, BytesRead);
         }
 
         const std::string ErrorMessage =
@@ -116,6 +185,11 @@ ml::AZTeacher load(std::ifstream& Ifs) {
     return IO.load(Ifs);
 }
 
+ml::AZTeacher load(const char* Source, std::size_t* BytesRead) {
+    AZTeacherIO IO;
+    return IO.load(Source, BytesRead);
+}
+
 void save(std::ofstream& Ofs, const ml::AZTeacher& AT) {
     AZTeacherIO IO(AT);
     IO.save(Ofs);
@@ -148,8 +222,43 @@ class SimpleTeacherIO : public ml::SimpleTeacher {
         Dest->NextMove = core::Move16::fromValue(Move16);
     }
 
+    static std::size_t loadAt(ml::SimpleTeacher* Dest, const char* Source) {
+        const char* Cur = Source;
+
+        uint64_t Codes[4];
+        uint16_t Move16;
+
+        std::memcpy(Codes, Cur, 4 * sizeof(uint64_t));
+        Cur += 4 * sizeof(uint64_t);
+        std::memcpy(&Dest->Ply, Cur, sizeof(Ply));
+        Cur += sizeof(Ply);
+        std::memcpy(&Dest->MaxPly, Cur, sizeof(MaxPly));
+        Cur += sizeof(MaxPly);
+        std::memcpy(Dest->DrawValues, Cur, sizeof(DrawValues));
+        Cur += sizeof(DrawValues);
+        std::memcpy(&Move16, Cur, sizeof(uint16_t));
+        Cur += sizeof(uint16_t);
+        std::memcpy(&Dest->Winner, Cur, sizeof(Winner));
+        Cur += sizeof(Winner);
+
+        Dest->HuffmanCode = core::HuffmanCode(Codes[3], Codes[2], Codes[1], Codes[0]);
+        Dest->NextMove = core::Move16::fromValue(Move16);
+
+        return static_cast<std::size_t>(Cur - Source);
+    }
+
     ml::SimpleTeacher load(std::ifstream& Ifs) {
         loadAt(this, Ifs);
+        return *this;
+    }
+
+    ml::SimpleTeacher load(const char* Source, std::size_t* BytesRead = nullptr) {
+        const std::size_t Read = loadAt(this, Source);
+
+        if (BytesRead != nullptr) {
+            *BytesRead = Read;
+        }
+
         return *this;
     }
 
@@ -170,6 +279,11 @@ ml::SimpleTeacher load(std::ifstream& Ifs) {
     return IO.load(Ifs);
 }
 
+ml::SimpleTeacher load(const char* Source, std::size_t* BytesRead) {
+    SimpleTeacherIO IO;
+    return IO.load(Source, BytesRead);
+}
+
 void save(std::ofstream& Ofs, const ml::SimpleTeacher& SimpleTeacher) {
     SimpleTeacherIO IO(SimpleTeacher);
     IO.save(Ofs);
@@ -177,6 +291,10 @@ void save(std::ofstream& Ofs, const ml::SimpleTeacher& SimpleTeacher) {
 
 void loadAt(ml::SimpleTeacher* Dest, std::ifstream& Ifs) {
     SimpleTeacherIO::loadAt(Dest, Ifs);
+}
+
+std::size_t loadAt(ml::SimpleTeacher* Dest, const char* Source) {
+    return SimpleTeacherIO::loadAt(Dest, Source);
 }
 
 } // namespace simple_teacher
@@ -187,22 +305,28 @@ ml::AZTeacher load<ml::AZTeacher>(std::ifstream& Ifs) {
 }
 
 template <>
-void save<ml::AZTeacher>(std::ofstream& Ofs, const ml::AZTeacher& AT) {
-    az_teacher::save(Ofs, AT);
-}
-
-template <>
 ml::SimpleTeacher load<ml::SimpleTeacher>(std::ifstream& Ifs) {
     return simple_teacher::load(Ifs);
 }
 
 template <>
-void save<ml::SimpleTeacher>(std::ofstream& Ofs, const ml::SimpleTeacher& ST) {
-    simple_teacher::save(Ofs, ST);
+ml::AZTeacher load<ml::AZTeacher>(const char* Source, std::size_t* BytesRead) {
+    return az_teacher::load(Source, BytesRead);
 }
 
-void loadAt(ml::SimpleTeacher* Dest, std::ifstream& Ifs) {
-    simple_teacher::loadAt(Dest, Ifs);
+template <>
+ml::SimpleTeacher load<ml::SimpleTeacher>(const char* Source, std::size_t* BytesRead) {
+    return simple_teacher::load(Source, BytesRead);
+}
+
+template <>
+void save<ml::AZTeacher>(std::ofstream& Ofs, const ml::AZTeacher& AT) {
+    az_teacher::save(Ofs, AT);
+}
+
+template <>
+void save<ml::SimpleTeacher>(std::ofstream& Ofs, const ml::SimpleTeacher& ST) {
+    simple_teacher::save(Ofs, ST);
 }
 
 } // namespace file
