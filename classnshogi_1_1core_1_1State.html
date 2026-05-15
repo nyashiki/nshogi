@@ -181,6 +181,12 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:ace14aa452f148895c35abb1f1b125eac"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classnshogi_1_1core_1_1State.html#ace14aa452f148895c35abb1f1b125eac">isLastMoveDroppingAPawn</a> () const noexcept</td></tr>
 <tr class="memdesc:ace14aa452f148895c35abb1f1b125eac"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return true if the last move was a pawn drop.  <a href="classnshogi_1_1core_1_1State.html#ace14aa452f148895c35abb1f1b125eac">More...</a><br /></td></tr>
 <tr class="separator:ace14aa452f148895c35abb1f1b125eac"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:affb580d0476865050ccac3f763cadd3f"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classnshogi_1_1core_1_1State.html#affb580d0476865050ccac3f763cadd3f">isLegal</a> (<a class="el" href="structnshogi_1_1core_1_1Move16.html">Move16</a> Move) const noexcept</td></tr>
+<tr class="memdesc:affb580d0476865050ccac3f763cadd3f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Check if a move is legal for the current player.  <a href="classnshogi_1_1core_1_1State.html#affb580d0476865050ccac3f763cadd3f">More...</a><br /></td></tr>
+<tr class="separator:affb580d0476865050ccac3f763cadd3f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a151e99679185d979746edd14af911eac"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classnshogi_1_1core_1_1State.html#a151e99679185d979746edd14af911eac">isLegal</a> (<a class="el" href="structnshogi_1_1core_1_1Move32.html">Move32</a> Move) const noexcept</td></tr>
+<tr class="memdesc:a151e99679185d979746edd14af911eac"><td class="mdescLeft">&#160;</td><td class="mdescRight">Check if a move is legal for the current player.  <a href="classnshogi_1_1core_1_1State.html#a151e99679185d979746edd14af911eac">More...</a><br /></td></tr>
+<tr class="separator:a151e99679185d979746edd14af911eac"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-attribs" name="pro-attribs"></a>
 Protected Attributes</h2></td></tr>
@@ -738,6 +744,75 @@ Friends</h2></td></tr>
 
 <p>Return true if the last move was a pawn drop. </p>
 <p >Note: Return false when called at the intiial position (i.e., <a class="el" href="classnshogi_1_1core_1_1State.html#a63f960d5d52be5876103ca535ec16f31" title="Get the current ply (i.e., how many moves are applied).">getPly()</a> == 0). </p>
+
+</div>
+</div>
+<a id="affb580d0476865050ccac3f763cadd3f" name="affb580d0476865050ccac3f763cadd3f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#affb580d0476865050ccac3f763cadd3f">&#9670;&#160;</a></span>isLegal() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool nshogi::core::State::isLegal </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structnshogi_1_1core_1_1Move16.html">Move16</a>&#160;</td>
+          <td class="paramname"><em>Move</em></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Check if a move is legal for the current player. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">Move</td><td>The move to be checked. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a151e99679185d979746edd14af911eac" name="a151e99679185d979746edd14af911eac"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a151e99679185d979746edd14af911eac">&#9670;&#160;</a></span>isLegal() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool nshogi::core::State::isLegal </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structnshogi_1_1core_1_1Move32.html">Move32</a>&#160;</td>
+          <td class="paramname"><em>Move</em></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Check if a move is legal for the current player. </p>
+<p >This function checks same conditions as <code>isLegal(Move16)</code>, but it also checks the validity of piece type and capture piece type that are held in <code><a class="el" href="structnshogi_1_1core_1_1Move32.html" title="Represents any legal move in Shogi with 32 bits.">Move32</a></code>.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">Move</td><td>The move to be checked. </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>

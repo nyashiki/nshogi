@@ -19,6 +19,8 @@ var classnshogi_1_1core_1_1State =
     [ "getSideToMove", "classnshogi_1_1core_1_1State.html#ab459b87bfd66a2d366a1553a68830aa6", null ],
     [ "isInCheck", "classnshogi_1_1core_1_1State.html#af11ded7420dc3d0b74d7997edb363995", null ],
     [ "isLastMoveDroppingAPawn", "classnshogi_1_1core_1_1State.html#ace14aa452f148895c35abb1f1b125eac", null ],
+    [ "isLegal", "classnshogi_1_1core_1_1State.html#affb580d0476865050ccac3f763cadd3f", null ],
+    [ "isLegal", "classnshogi_1_1core_1_1State.html#a151e99679185d979746edd14af911eac", null ],
     [ "operator=", "classnshogi_1_1core_1_1State.html#accddff21bcc408724e0ab7cecee1a9a7", null ],
     [ "operator=", "classnshogi_1_1core_1_1State.html#a8bb4bae069498b01769e4132cd82b08b", null ],
     [ "undoMove", "classnshogi_1_1core_1_1State.html#a8c19fb89d3f8f2337ace2be35be1b53a", null ],

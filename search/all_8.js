@@ -11,13 +11,14 @@ var searchData=
   ['isincheck_8',['isInCheck',['../classnshogi_1_1core_1_1State.html#af11ded7420dc3d0b74d7997edb363995',1,'nshogi::core::State']]],
   ['isinvalid_9',['isInvalid',['../structnshogi_1_1core_1_1Move32.html#a10bd416fa091d7cba292cb6d02ff85f2',1,'nshogi::core::Move32::isInvalid()'],['../structnshogi_1_1core_1_1Move16.html#a7ff5de6c20cc553170a141f58a73cc07',1,'nshogi::core::Move16::isInvalid()']]],
   ['islastmovedroppingapawn_10',['isLastMoveDroppingAPawn',['../classnshogi_1_1core_1_1State.html#ace14aa452f148895c35abb1f1b125eac',1,'nshogi::core::State']]],
-  ['isnone_11',['isNone',['../structnshogi_1_1core_1_1Move32.html#a0092913c56c3180adcd642f20f25d01a',1,'nshogi::core::Move32::isNone()'],['../structnshogi_1_1core_1_1Move16.html#a418330c29faafa2a845bc6feae5860e3',1,'nshogi::core::Move16::isNone()']]],
-  ['isnull_12',['isNull',['../structnshogi_1_1core_1_1Move32.html#ab6b9aee7a646385a7dc42e5719346751',1,'nshogi::core::Move32::isNull()'],['../structnshogi_1_1core_1_1Move16.html#a2135e778e4f3d6f53f478d726369249d',1,'nshogi::core::Move16::isNull()']]],
-  ['ispromoted_13',['isPromoted',['../namespacenshogi_1_1core.html#abf4a96ad06db9257852cbbad126c68d1',1,'nshogi::core']]],
-  ['isrotated_14',['isRotated',['../structnshogi_1_1ml_1_1FeatureBitboard.html#a79556b2fb0e4bf5178417ccf2c4c96be',1,'nshogi::ml::FeatureBitboard']]],
-  ['issuperiororequal_15',['isSuperiorOrEqual',['../namespacenshogi_1_1core.html#a8bbaf0f8b227ceb2924df4f8bb8e2226',1,'nshogi::core']]],
-  ['iswin_16',['isWin',['../structnshogi_1_1core_1_1Move32.html#a9e510e08578447399b77bb4cf60fd8d6',1,'nshogi::core::Move32::isWin()'],['../structnshogi_1_1core_1_1Move16.html#a4a704dc576b8a2577f0ee5a8fc9efe15',1,'nshogi::core::Move16::isWin()']]],
-  ['iterateorder_17',['IterateOrder',['../namespacenshogi_1_1core.html#ab8baa483d1eb2b34682c3aca88080269',1,'nshogi::core']]],
-  ['mutablestateadapter_18',['MutableStateAdapter',['../classnshogi_1_1core_1_1State.html#aaf3b674303632679e3e9fcc868b49ee3',1,'nshogi::core::State']]],
-  ['stateimpl_19',['StateImpl',['../structnshogi_1_1core_1_1Position.html#a1e3155fb744ff8650b9b022f32c9d181',1,'nshogi::core::Position']]]
+  ['islegal_11',['isLegal',['../classnshogi_1_1core_1_1State.html#a151e99679185d979746edd14af911eac',1,'nshogi::core::State::isLegal(Move32 Move) const noexcept'],['../classnshogi_1_1core_1_1State.html#affb580d0476865050ccac3f763cadd3f',1,'nshogi::core::State::isLegal(Move16 Move) const noexcept']]],
+  ['isnone_12',['isNone',['../structnshogi_1_1core_1_1Move32.html#a0092913c56c3180adcd642f20f25d01a',1,'nshogi::core::Move32::isNone()'],['../structnshogi_1_1core_1_1Move16.html#a418330c29faafa2a845bc6feae5860e3',1,'nshogi::core::Move16::isNone()']]],
+  ['isnull_13',['isNull',['../structnshogi_1_1core_1_1Move32.html#ab6b9aee7a646385a7dc42e5719346751',1,'nshogi::core::Move32::isNull()'],['../structnshogi_1_1core_1_1Move16.html#a2135e778e4f3d6f53f478d726369249d',1,'nshogi::core::Move16::isNull()']]],
+  ['ispromoted_14',['isPromoted',['../namespacenshogi_1_1core.html#abf4a96ad06db9257852cbbad126c68d1',1,'nshogi::core']]],
+  ['isrotated_15',['isRotated',['../structnshogi_1_1ml_1_1FeatureBitboard.html#a79556b2fb0e4bf5178417ccf2c4c96be',1,'nshogi::ml::FeatureBitboard']]],
+  ['issuperiororequal_16',['isSuperiorOrEqual',['../namespacenshogi_1_1core.html#a8bbaf0f8b227ceb2924df4f8bb8e2226',1,'nshogi::core']]],
+  ['iswin_17',['isWin',['../structnshogi_1_1core_1_1Move32.html#a9e510e08578447399b77bb4cf60fd8d6',1,'nshogi::core::Move32::isWin()'],['../structnshogi_1_1core_1_1Move16.html#a4a704dc576b8a2577f0ee5a8fc9efe15',1,'nshogi::core::Move16::isWin()']]],
+  ['iterateorder_18',['IterateOrder',['../namespacenshogi_1_1core.html#ab8baa483d1eb2b34682c3aca88080269',1,'nshogi::core']]],
+  ['mutablestateadapter_19',['MutableStateAdapter',['../classnshogi_1_1core_1_1State.html#aaf3b674303632679e3e9fcc868b49ee3',1,'nshogi::core::State']]],
+  ['stateimpl_20',['StateImpl',['../structnshogi_1_1core_1_1Position.html#a1e3155fb744ff8650b9b022f32c9d181',1,'nshogi::core::Position']]]
 ];
