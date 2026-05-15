@@ -26,17 +26,18 @@ namespace internal {
 
 struct StepHelper {
     StepHelper()
-        : Move(Move32::MoveNone()) {
+        : Move(Move32::MoveNone())
+        , IsLastMoveDroppingAPawn(false) {
     }
-
-    Move32 Move;
-    uint64_t BoardHash;
-    uint8_t ContinuousCheckCounts[NumColors];
-    Stands EachStand[NumColors];
 
     bitboard::Bitboard DefendingOpponentSliderBB[NumColors];
     bitboard::Bitboard CheckerBB;
-    // __m128i Hash;
+
+    uint64_t BoardHash;
+    Move32 Move;
+    Stands EachStand[NumColors];
+    uint8_t ContinuousCheckCounts[NumColors];
+    bool IsLastMoveDroppingAPawn;
 };
 
 struct StateHelper {

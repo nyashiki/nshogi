@@ -765,6 +765,10 @@ class StateImpl {
         return isAttackedBySlider<C>(Sq, OccupiedBB, ExcludeSq, VirtualSq);
     }
 
+    bool isLastMoveDroppingAPawn() const noexcept {
+        return Helper.Ply > 0 && Helper.SHelper.back().IsLastMoveDroppingAPawn;
+    }
+
     //  The functions below are for `ExtendedState` class,
     //  which means that they are not necessary for the game representation but
     //  are possibly useful.

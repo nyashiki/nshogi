@@ -922,6 +922,35 @@ TEST(State, DeclarationExamplePositions) {
     }
 }
 
+TEST(State, IsLastMoveDroppingAPawn) {
+    const int N = 1000;
+    std::mt19937_64 mt(20260512);
+
+    for (int I = 0; I < N; ++I) {
+        nshogi::core::ExtendedState State =
+            nshogi::core::StateBuilder::getInitialState();
+
+        for (uint16_t Ply = 0; Ply < 512; ++Ply) {
+            const auto Moves =
+                nshogi::core::MoveGenerator::generateLegalMoves(State);
+
+            if (Moves.size() == 0) {
+                break;
+            }
+
+            const auto RandomMove = Moves[mt() % Moves.size()];
+            State.doMove(RandomMove);
+
+            if (RandomMove.drop() &&
+                RandomMove.pieceType() == nshogi::core::PTK_Pawn) {
+                TEST_ASSERT_TRUE(State.isLastMoveDroppingAPawn());
+            } else {
+                TEST_ASSERT_FALSE(State.isLastMoveDroppingAPawn());
+            }
+        }
+    }
+}
+
 TEST(ExtendedState, DoAndUndoRandom) {
     const int N = 1000;
     std::mt19937_64 mt(20260427);
