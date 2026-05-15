@@ -766,8 +766,7 @@ class StateImpl {
     }
 
     bool isLastMoveDroppingAPawn() const noexcept {
-        return Helper.Ply > 0 &&
-            Helper.SHelper.back().IsLastMoveDroppingAPawn;
+        return Helper.Ply > 0 && Helper.SHelper.back().IsLastMoveDroppingAPawn;
     }
 
     //  The functions below are for `ExtendedState` class,

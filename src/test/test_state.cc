@@ -941,7 +941,8 @@ TEST(State, IsLastMoveDroppingAPawn) {
             const auto RandomMove = Moves[mt() % Moves.size()];
             State.doMove(RandomMove);
 
-            if (RandomMove.drop() && RandomMove.pieceType() == nshogi::core::PTK_Pawn) {
+            if (RandomMove.drop() &&
+                RandomMove.pieceType() == nshogi::core::PTK_Pawn) {
                 TEST_ASSERT_TRUE(State.isLastMoveDroppingAPawn());
             } else {
                 TEST_ASSERT_FALSE(State.isLastMoveDroppingAPawn());
