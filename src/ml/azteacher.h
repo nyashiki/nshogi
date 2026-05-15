@@ -30,8 +30,8 @@ struct AZTeacher {
 
  public:
     AZTeacher();
-
     AZTeacher(const AZTeacher& T);
+    AZTeacher& operator=(const AZTeacher& T);
 
     bool checkSanity(int Level) const;
 

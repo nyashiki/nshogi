@@ -34,6 +34,7 @@ struct SimpleTeacher {
  public:
     SimpleTeacher();
     SimpleTeacher(const SimpleTeacher&);
+    SimpleTeacher& operator=(const SimpleTeacher&);
 
     core::Position getPosition() const;
     core::State getState() const;

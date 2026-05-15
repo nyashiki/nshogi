@@ -44,6 +44,30 @@ AZTeacher::AZTeacher(const AZTeacher& T) {
     Declared = T.Declared;
 }
 
+AZTeacher& AZTeacher::operator=(const AZTeacher& T) {
+    if (this != &T) {
+        std::memcpy(Sfen, T.Sfen, SfenCStrLength * sizeof(char));
+
+        SideToMove = T.SideToMove;
+        Winner = T.Winner;
+        NumMoves = T.NumMoves;
+
+        std::copy(T.Moves.begin(), T.Moves.end(), Moves.data());
+
+        std::memcpy(reinterpret_cast<char*>(Visits.data()),
+                    reinterpret_cast<const char*>(T.Visits.data()),
+                    NumSavedPlayouts * sizeof(uint16_t));
+
+        EndingRule = T.EndingRule;
+        MaxPly = T.MaxPly;
+        BlackDrawValue = T.BlackDrawValue;
+        WhiteDrawValue = T.WhiteDrawValue;
+
+        Declared = T.Declared;
+    }
+    return *this;
+}
+
 void AZTeacher::corruptMyself() {
     static std::mt19937_64 Mt(20230711);
 

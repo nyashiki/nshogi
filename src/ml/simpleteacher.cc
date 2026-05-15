@@ -30,6 +30,19 @@ SimpleTeacher::SimpleTeacher(const SimpleTeacher& ST)
     , Winner(ST.Winner) {
 }
 
+SimpleTeacher& SimpleTeacher::operator=(const SimpleTeacher& ST) {
+    if (this != &ST) {
+        HuffmanCode = ST.HuffmanCode;
+        Ply = ST.Ply;
+        MaxPly = ST.MaxPly;
+        DrawValues[0] = ST.DrawValues[0];
+        DrawValues[1] = ST.DrawValues[1];
+        NextMove = ST.NextMove;
+        Winner = ST.Winner;
+    }
+    return *this;
+}
+
 core::Position SimpleTeacher::getPosition() const {
     return core::PositionBuilder::newPosition(
         core::HuffmanCode::decode(HuffmanCode), Ply);
