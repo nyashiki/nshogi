@@ -802,6 +802,41 @@ inline Bitboard getRookAttackBB(Square Sq,
     return AttackBB;
 }
 
+template <Color C, PieceTypeKind Type>
+inline Bitboard getSliderAttackBB(Square Sq, const Bitboard& OccupiedBB) noexcept {
+    static_assert(Type == PTK_Lance ||
+            Type == PTK_Bishop || Type == PTK_ProBishop ||
+            Type == PTK_Rook || Type == PTK_ProRook);
+
+    if constexpr (Type == PTK_Lance) {
+        return getLanceAttackBB<C>(Sq, OccupiedBB);
+    } else if constexpr (Type == PTK_Bishop || Type == PTK_ProBishop) {
+        return getBishopAttackBB<Type>(Sq, OccupiedBB);
+    } else {
+        return getRookAttackBB<Type>(Sq, OccupiedBB);
+    }
+}
+
+template <Color C>
+inline Bitboard getSliderAttackBB(
+    PieceTypeKind Type,
+    Square Sq,
+    const Bitboard& OccupiedBB
+) noexcept {
+    switch (Type) {
+    case PTK_Lance:
+        return getSliderAttackBB<C, PTK_Lance>(Sq, OccupiedBB);
+    case PTK_Bishop:
+    case PTK_ProBishop:
+        return getSliderAttackBB<C, PTK_Bishop>(Sq, OccupiedBB);
+    case PTK_Rook:
+    case PTK_ProRook:
+        return getSliderAttackBB<C, PTK_Rook>(Sq, OccupiedBB);
+    default:
+        return Bitboard::ZeroBB();
+    }
+}
+
 inline Bitboard getBetweenBB(Square Sq1, Square Sq2) noexcept {
     return BetweenBB[Sq1][Sq2];
 }
