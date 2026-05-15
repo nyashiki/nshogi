@@ -22,6 +22,7 @@
 #include <cstring>
 #include <iostream>
 #include <map>
+#include <deque>
 #include <random>
 
 namespace {
@@ -947,6 +948,58 @@ TEST(State, IsLastMoveDroppingAPawn) {
             } else {
                 TEST_ASSERT_FALSE(State.isLastMoveDroppingAPawn());
             }
+        }
+    }
+}
+
+TEST(State, IsLegal) {
+    const int N = 1000;
+    std::mt19937_64 mt(20260515);
+
+    std::deque<nshogi::core::Move16> LegalHistory;
+    const std::size_t HistorySize = 1000;
+
+    for (int I = 0; I < N; ++I) {
+        nshogi::core::ExtendedState State =
+            nshogi::core::StateBuilder::getInitialState();
+
+        for (uint16_t Ply = 0; Ply < 512; ++Ply) {
+            const auto Moves =
+                nshogi::core::MoveGenerator::generateLegalMoves<false>(State);
+
+            if (Moves.size() == 0) {
+                break;
+            }
+
+            for (const auto& Move : Moves) {
+                TEST_ASSERT_TRUE(State.isLegal(Move));
+                TEST_ASSERT_TRUE(State.isLegal(nshogi::core::Move16(Move)));
+
+                LegalHistory.emplace_back(nshogi::core::Move16(Move));
+                if (LegalHistory.size() > HistorySize) {
+                    LegalHistory.pop_front();
+                }
+            }
+
+            // Check any history move that does not exist in `Moves` is illegal.
+            for (const auto& Move : LegalHistory) {
+                // We don't use MoveList::find() because we want to find
+                // Move16 in Move32 list.
+                bool Found = false;
+                for (const auto& M : Moves) {
+                    if (Move == nshogi::core::Move16(M)) {
+                        Found = true;
+                        break;
+                    }
+                }
+
+                if (!Found) {
+                    TEST_ASSERT_FALSE(State.isLegal(Move));
+                }
+            }
+
+            const auto RandomMove = Moves[mt() % Moves.size()];
+            State.doMove(RandomMove);
         }
     }
 }
