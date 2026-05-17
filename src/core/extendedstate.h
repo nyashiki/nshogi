@@ -7,6 +7,9 @@
 // SPDX-License-Identifier: MIT
 //
 
+#ifndef NSHOGI_CORE_EXTENDEDSTATE_H
+#define NSHOGI_CORE_EXTENDEDSTATE_H
+
 #include "state.h"
 
 namespace nshogi {
@@ -41,3 +44,5 @@ class ExtendedState : public State {
 
 } // namespace core
 } // namespace nshogi
+
+#endif // #ifndef NSHOGI_CORE_EXTENDEDSTATE_H

@@ -551,7 +551,7 @@ bool StateImpl::isLegal(Move16 Move) const noexcept {
         // Check if the king is not in check after moving a pinned piece.
         if (getDefendingOpponentSliderBB<C>().isSet(Move.from())) {
             // When moving a pinned piece, the move is legal only if
-            // the source squaren, the destination square, and the king square
+            // the source square, the destination square, and the king square
             // are aligned.
             return utils::isSameLine(getKingSquare<C>(), Move.from(),
                                      Move.to());
