@@ -59,6 +59,14 @@ class MoveGenerator {
     static MoveList generateLegalCaptureMoves(const State& S) noexcept;
 
     ///
+    /// @brief Generate the smallest legal move that moves a piece of color C to
+    /// the given square.
+    /// @tparam C The color of the piece to be moved.
+    ///
+    template <Color C>
+    static Move32 generateLegalSmallestMove(const State& S, Square To) noexcept;
+
+    ///
     /// @brief Generate all legal moves for a given state.
     /// @tparam WilyPromote If true, trivial non-promoting moves are ommited
     ///         to reduce the move set.
@@ -81,6 +89,14 @@ class MoveGenerator {
     ///
     template <bool WilyPromote = true>
     static MoveList generateLegalCaptureMoves(const State& S) noexcept;
+
+    ///
+    /// @brief Generate the smallest legal move that moves a piece to the given
+    /// square.
+    ///
+    /// Note that the destination square must be empty or occupied by an opponent's piece.
+    ///
+    static Move32 generateLegalSmallestMove(const State& S, Square To) noexcept;
 };
 
 } // namespace core

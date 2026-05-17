@@ -35,6 +35,9 @@ class MoveGeneratorInternal {
     template <Color C, bool WilyPromote = true>
     static MoveList
     generateLegalCaptureMoves(const internal::StateImpl& S) noexcept;
+
+    template <Color C>
+    static Move32 generateLegalSmallestMove(const internal::StateImpl& S, Square To) noexcept;
 };
 
 } // namespace internal

@@ -2427,6 +2427,215 @@ MoveGeneratorInternal::generateLegalEvasionMoves(const StateImpl& S) noexcept {
     return List;
 }
 
+template <Color C>
+Move32
+MoveGeneratorInternal::generateLegalSmallestMove(const internal::StateImpl& S, Square To) noexcept {
+    { // When the king is in check, we can only move the king or capture the checker.
+        const Bitboard CheckerBB = S.getCheckerBB();
+
+        if (!CheckerBB.isZero()) {
+            if (CheckerBB.popCount() >= 2) {
+                // When there are more than one checkers,
+                // no moves are available but moving the king,
+                // which is not a capture move.
+                // Thus, we can return MoveNone() without generating moves.
+                return Move32::MoveNone();
+            }
+
+            if (!CheckerBB.isSet(To)) {
+                // If the destination square is not the square of the checker,
+                // there is no capture move to the destination square.
+                return Move32::MoveNone();
+            }
+        }
+    }
+
+    // Order:
+    //      1. Pawn
+    //      2. ProPawn
+    //      3. Lance
+    //      4. ProLance
+    //      5. Knight
+    //      6. ProKnight
+    //      7. Silver
+    //      8. ProSilver
+    //      9. Gold
+    //     10. Bishop
+    //     11. Rook
+    //     12. ProBishop
+    //     13. ProRook
+    //     14. King
+    //
+    // Process Pawn and King separately because it needs additional check.
+
+    // Pawn.
+    if constexpr (C == Black) {
+        if (S.getBitboard<C, PTK_Pawn>().getLeftShiftEpi64(1).isSet(To)) {
+            if (S.getDefendingOpponentSliderBB<C>().isSet(To + South)) {
+                // This pawn is pinned.
+                // We have to check whether this move is legal or not.
+                // This move is legal when the line (= file because this is a pawn)
+                // between the king and the piece contains the destination square.
+                if (LineBB[To + South][S.getKingSquare<C>()].isSet(To)) {
+                    if (PromotableBB[C].isSet(To)) {
+                        return Move32::boardPromotingMove(
+                                To + South, To, PTK_Pawn,
+                                getPieceType(S.getPosition().pieceOn(To)));
+                    } else {
+                        return Move32::boardMove(
+                                To + South, To, PTK_Pawn,
+                                getPieceType(S.getPosition().pieceOn(To)));
+                    }
+                }
+            } else {
+                if (PromotableBB[C].isSet(To)) {
+                    return Move32::boardPromotingMove(
+                            To + South, To, PTK_Pawn,
+                            getPieceType(S.getPosition().pieceOn(To)));
+                } else {
+                    return Move32::boardMove(
+                            To + South, To, PTK_Pawn,
+                            getPieceType(S.getPosition().pieceOn(To)));
+                }
+            }
+        }
+    } else {
+        if (S.getBitboard<C, PTK_Pawn>().getRightShiftEpi64(1).isSet(To)) {
+            if (S.getDefendingOpponentSliderBB<C>().isSet(To + North)) {
+                if (LineBB[To + North][S.getKingSquare<C>()].isSet(To)) {
+                    if (PromotableBB[C].isSet(To)) {
+                        return Move32::boardPromotingMove(
+                                To + North, To, PTK_Pawn,
+                                getPieceType(S.getPosition().pieceOn(To)));
+                    } else {
+                        return Move32::boardMove(
+                                To + North, To, PTK_Pawn,
+                                getPieceType(S.getPosition().pieceOn(To)));
+                    }
+                }
+            } else {
+                if (PromotableBB[C].isSet(To)) {
+                    return Move32::boardPromotingMove(
+                            To + North, To, PTK_Pawn,
+                            getPieceType(S.getPosition().pieceOn(To)));
+                } else {
+                    return Move32::boardMove(
+                            To + North, To, PTK_Pawn,
+                            getPieceType(S.getPosition().pieceOn(To)));
+                }
+            }
+        }
+    }
+
+    const Bitboard MyBB = S.getBitboard<C>();
+    const Bitboard OpBB = S.getBitboard<~C>();
+    const Bitboard OccupiedBB = MyBB | OpBB;
+
+// clang-format off
+#define NSHOGI_GENERATE_SMALLEST_CAPTURE_MOVE_PROCESS_STEP(Type) {                         \
+    Bitboard FromBB = S.getBitboard<C, Type>() & getAttackBB<~C, Type>(To);                \
+                                                                                           \
+    while (!FromBB.isZero()) {                                                             \
+        const Square FromSq = FromBB.popOne();                                             \
+        if (S.getDefendingOpponentSliderBB<C>().isSet(FromSq)) {                           \
+            if (LineBB[FromSq][S.getKingSquare<C>()].isSet(To)) {                          \
+                if (!isPromoted(Type) && Type != PTK_Gold &&                               \
+                      !(PromotableBB[C] & (SquareBB[To] | SquareBB[FromSq])).isZero()) {   \
+                    return Move32::boardPromotingMove(                                     \
+                            FromSq, To, Type,                                              \
+                            getPieceType(S.getPosition().pieceOn(To)));                    \
+                } else {                                                                   \
+                    return Move32::boardMove(                                              \
+                            FromSq, To, Type,                                              \
+                            getPieceType(S.getPosition().pieceOn(To)));                    \
+                }                                                                          \
+            }                                                                              \
+        } else {                                                                           \
+            if (!isPromoted(Type) && Type != PTK_Gold &&                                   \
+                  !(PromotableBB[C] & (SquareBB[To] | SquareBB[FromSq])).isZero()) {       \
+                return Move32::boardPromotingMove(                                         \
+                        FromSq, To, Type,                                                  \
+                        getPieceType(S.getPosition().pieceOn(To)));                        \
+            } else {                                                                       \
+                return Move32::boardMove(                                                  \
+                        FromSq, To, Type,                                                  \
+                        getPieceType(S.getPosition().pieceOn(To)));                        \
+            }                                                                              \
+        }                                                                                  \
+    }                                                                                      \
+}
+
+#define NSHOGI_GENERATE_SMALLEST_CAPTURE_MOVE_PROCESS_SLIDER(Type) {                       \
+    Bitboard FromBB = S.getBitboard<C, Type>() &                                           \
+        getSliderAttackBB<~C, Type>(To, OccupiedBB);                                       \
+                                                                                           \
+    while (!FromBB.isZero()) {                                                             \
+        const Square FromSq = FromBB.popOne();                                             \
+        if (S.getDefendingOpponentSliderBB<C>().isSet(FromSq)) {                           \
+            if (LineBB[FromSq][S.getKingSquare<C>()].isSet(To)) {                          \
+                if (!isPromoted(Type) &&                                                   \
+                        !(PromotableBB[C] & (SquareBB[To] | SquareBB[FromSq])).isZero()) { \
+                    return Move32::boardPromotingMove(                                     \
+                            FromSq, To, Type,                                              \
+                            getPieceType(S.getPosition().pieceOn(To)));                    \
+                } else {                                                                   \
+                    return Move32::boardMove(                                              \
+                            FromSq, To, Type,                                              \
+                            getPieceType(S.getPosition().pieceOn(To)));                    \
+                }                                                                          \
+            }                                                                              \
+        } else {                                                                           \
+            if (!isPromoted(Type) &&                                                       \
+                    !(PromotableBB[C] & (SquareBB[To] | SquareBB[FromSq])).isZero()) {     \
+                return Move32::boardPromotingMove(                                         \
+                        FromSq, To, Type,                                                  \
+                        getPieceType(S.getPosition().pieceOn(To)));                        \
+            } else {                                                                       \
+                return Move32::boardMove(                                                  \
+                        FromSq, To, Type,                                                  \
+                        getPieceType(S.getPosition().pieceOn(To)));                        \
+            }                                                                              \
+        }                                                                                  \
+    }                                                                                      \
+}
+// clang-format on
+
+    NSHOGI_GENERATE_SMALLEST_CAPTURE_MOVE_PROCESS_STEP(PTK_ProPawn);
+    NSHOGI_GENERATE_SMALLEST_CAPTURE_MOVE_PROCESS_SLIDER(PTK_Lance);
+    NSHOGI_GENERATE_SMALLEST_CAPTURE_MOVE_PROCESS_STEP(PTK_ProLance);
+    NSHOGI_GENERATE_SMALLEST_CAPTURE_MOVE_PROCESS_STEP(PTK_Knight);
+    NSHOGI_GENERATE_SMALLEST_CAPTURE_MOVE_PROCESS_STEP(PTK_ProKnight);
+    NSHOGI_GENERATE_SMALLEST_CAPTURE_MOVE_PROCESS_STEP(PTK_Silver);
+    NSHOGI_GENERATE_SMALLEST_CAPTURE_MOVE_PROCESS_STEP(PTK_ProSilver);
+    NSHOGI_GENERATE_SMALLEST_CAPTURE_MOVE_PROCESS_STEP(PTK_Gold);
+    NSHOGI_GENERATE_SMALLEST_CAPTURE_MOVE_PROCESS_SLIDER(PTK_Bishop);
+    NSHOGI_GENERATE_SMALLEST_CAPTURE_MOVE_PROCESS_SLIDER(PTK_Rook);
+    NSHOGI_GENERATE_SMALLEST_CAPTURE_MOVE_PROCESS_SLIDER(PTK_ProBishop);
+    NSHOGI_GENERATE_SMALLEST_CAPTURE_MOVE_PROCESS_SLIDER(PTK_ProRook);
+
+#undef NSHOGI_GENERATE_SMALLEST_CAPTURE_MOVE_PROCESS_STEP
+#undef NSHOGI_GENERATE_SMALLEST_CAPTURE_MOVE_PROCESS_SLIDER
+
+    // King.
+    const Square KingSq = S.getKingSquare<C>();
+    if (getAttackBB<C, PTK_King>(KingSq).isSet(To)) {
+        // We have to check moving the king to
+        // `To` is legal or not.
+        // If the square is attacked by opponent's piece,
+        // it's not legal.
+        assert(getPieceType(S.getPosition().pieceOn(To)) != PTK_Empty);
+        if (!S.isAttacked<C>(To, KingSq)) {
+            // The square is not attacked.
+            // Thus, the king can capture the checker.
+            return Move32::boardMove(
+                KingSq, To, PTK_King,
+                getPieceType(S.getPosition().pieceOn(To)));
+        }
+    }
+
+    return Move32::MoveNone();
+}
+
 template MoveList MoveGeneratorInternal::generateLegalMoves<Black, false>(
     const StateImpl& S) noexcept;
 template MoveList MoveGeneratorInternal::generateLegalMoves<Black, true>(
@@ -2466,6 +2675,11 @@ MoveGeneratorInternal::generateLegalEvasionMoves<White, false>(
     const StateImpl& S) noexcept;
 template MoveList MoveGeneratorInternal::generateLegalEvasionMoves<White, true>(
     const StateImpl& S) noexcept;
+
+template Move32 MoveGeneratorInternal::generateLegalSmallestMove<Black>(
+    const internal::StateImpl& S, Square To) noexcept;
+template Move32 MoveGeneratorInternal::generateLegalSmallestMove<White>(
+    const internal::StateImpl& S, Square To) noexcept;
 
 } // namespace internal
 } // namespace core
