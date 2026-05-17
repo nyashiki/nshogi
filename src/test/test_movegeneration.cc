@@ -284,6 +284,50 @@ TEST(MoveGeneration, SameAfterDoAndUndo) {
     }
 }
 
+TEST(MoveGeneration, SmallestMoveExists) {
+    const int N = 10000;
+    std::mt19937_64 mt(20260513);
+
+    bool SmallestMoveExists = false;
+
+    for (int I = 0; I < N; ++I) {
+        nshogi::core::State State =
+            nshogi::core::StateBuilder::getInitialState();
+
+        for (uint16_t Ply = 0; Ply < 512; ++Ply) {
+            const auto Moves =
+                nshogi::core::MoveGenerator::generateLegalMoves(State);
+
+            if (Moves.size() == 0) {
+                break;
+            }
+
+            for (const auto Sq : nshogi::core::Squares) {
+                const auto PieceOn = State.getPosition().pieceOn(Sq);
+                if (PieceOn == nshogi::core::PK_Empty ||
+                    nshogi::core::getColor(PieceOn) != ~State.getPosition().sideToMove()) {
+                    continue;
+                }
+
+                const auto SmallestMove =
+                    nshogi::core::MoveGenerator::generateLegalSmallestMove(
+                        State, Sq);
+
+                // Check if the smallest move exists and is legal.
+                if (!SmallestMove.isNone()) {
+                    SmallestMoveExists = true;
+                    TEST_ASSERT_TRUE(Moves.find(SmallestMove) != Moves.end());
+                }
+            }
+
+            const auto RandomMove = Moves[mt() % Moves.size()];
+            State.doMove(RandomMove);
+        }
+    }
+
+    TEST_ASSERT_TRUE(SmallestMoveExists);
+}
+
 TEST(MoveGeneration, ExtendedStateSameAfterDoNullAndUndoNull) {
     const int N = 1000;
     std::mt19937_64 mt(20260427);
