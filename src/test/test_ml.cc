@@ -12,6 +12,7 @@
 #include "../core/internal/stateadapter.h"
 #include "../core/movegenerator.h"
 #include "../core/state.h"
+#include "../core/extendedstate.h"
 #include "../core/statebuilder.h"
 #include "../core/stateconfig.h"
 #include "../io/file.h"
@@ -21,9 +22,12 @@
 #include "../ml/featurestack.h"
 #include "../ml/internal/featurebitboardutil.h"
 #include "../ml/simpleteacher.h"
+#include "../ml/kp.h"
+#include "../ml/p.h"
 #include "../ml/utils.h"
 #include "common.h"
 
+#include <set>
 #include <filesystem>
 #include <fstream>
 #include <random>
@@ -1409,5 +1413,83 @@ TEST(ML, ChannelsLastComptimeAndRuntime) {
         }
 
         State.doMove(Moves[0]);
+    }
+}
+
+TEST(ML, KPFeatureExtractorPerspectiveTest) {
+    const int N = 1000;
+    std::mt19937_64 mt(20260519);
+
+    nshogi::ml::KPFeatureExtractor Extractor;
+
+    for (int I = 0; I < N; ++I) {
+        nshogi::core::ExtendedState State =
+            nshogi::core::StateBuilder::getInitialState();
+
+        for (uint16_t Ply = 0; Ply < 512; ++Ply) {
+            const auto Moves =
+                nshogi::core::MoveGenerator::generateLegalMoves(State);
+
+            if (Moves.size() == 0) {
+                break;
+            }
+
+            if (!State.isInCheck()) {
+                const auto& [MyIds0, OpIds0] = Extractor.ids(State);
+                State.doNullMove();
+                const auto& [MyIds1, OpIds1] = Extractor.ids(State);
+                State.undoNullMove();
+
+                std::set<int32_t> MySet0(MyIds0.begin(), MyIds0.end());
+                std::set<int32_t> OpSet0(OpIds0.begin(), OpIds0.end());
+                std::set<int32_t> MySet1(MyIds1.begin(), MyIds1.end());
+                std::set<int32_t> OpSet1(OpIds1.begin(), OpIds1.end());
+
+                TEST_ASSERT_TRUE(MySet0 == OpSet1);
+                TEST_ASSERT_TRUE(OpSet0 == MySet1);
+            }
+
+            const auto RandomMove = Moves[mt() % Moves.size()];
+            State.doMove(RandomMove);
+        }
+    }
+}
+
+TEST(ML, PFeatureExtractorPerspectiveTest) {
+    const int N = 1000;
+    std::mt19937_64 mt(20260519);
+
+    nshogi::ml::PFeatureExtractor Extractor;
+
+    for (int I = 0; I < N; ++I) {
+        nshogi::core::ExtendedState State =
+            nshogi::core::StateBuilder::getInitialState();
+
+        for (uint16_t Ply = 0; Ply < 512; ++Ply) {
+            const auto Moves =
+                nshogi::core::MoveGenerator::generateLegalMoves(State);
+
+            if (Moves.size() == 0) {
+                break;
+            }
+
+            if (!State.isInCheck()) {
+                const auto& [MyIds0, OpIds0] = Extractor.ids(State);
+                State.doNullMove();
+                const auto& [MyIds1, OpIds1] = Extractor.ids(State);
+                State.undoNullMove();
+
+                std::set<int32_t> MySet0(MyIds0.begin(), MyIds0.end());
+                std::set<int32_t> OpSet0(OpIds0.begin(), OpIds0.end());
+                std::set<int32_t> MySet1(MyIds1.begin(), MyIds1.end());
+                std::set<int32_t> OpSet1(OpIds1.begin(), OpIds1.end());
+
+                TEST_ASSERT_TRUE(MySet0 == OpSet1);
+                TEST_ASSERT_TRUE(OpSet0 == MySet1);
+            }
+
+            const auto RandomMove = Moves[mt() % Moves.size()];
+            State.doMove(RandomMove);
+        }
     }
 }
