@@ -40,6 +40,18 @@ class ExtendedState : public State {
     /// @brief Undo a null move.
     ///
     void undoNullMove();
+
+    ///
+    /// @brief Compute the Static Exchange Evaluation (SEE) for a given move.
+    ///
+    /// @param To The destination square of the move.
+    /// @param PieceValues An array of piece values used for the SEE calculation.
+    /// The array should be indexed by `PieceTypeKind` and contain the values of
+    /// each piece type (i.e., `PieceValues[PTK_Pawn]` should give the value of a pawn).
+    ///
+    /// @return The computed SEE value for the move.
+    ///
+    int32_t computeSEE(Square To, const int32_t* const PieceValues) const noexcept;
 };
 
 } // namespace core

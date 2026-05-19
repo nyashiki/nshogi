@@ -19,5 +19,10 @@ void ExtendedState::undoNullMove() {
     Impl->undoNullMove();
 }
 
+int32_t ExtendedState::computeSEE(
+    Square To, const int32_t* const PieceValues) const noexcept {
+    return Impl->computeSEE(To, PieceValues);
+}
+
 } // namespace core
 } // namespace nshogi
