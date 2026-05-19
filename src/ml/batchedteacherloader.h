@@ -30,6 +30,7 @@ struct BatchedTeacher {
     std::unique_ptr<int32_t[]> MyIds;
     std::unique_ptr<int32_t[]> OpIds;
     std::unique_ptr<int8_t[]> Results;
+    std::unique_ptr<float[]> Qs;
     std::unique_ptr<int8_t[]> IsStables;
 };
 
@@ -39,6 +40,7 @@ class BatchedTeacherLoader {
         const std::string& Path,
         std::size_t BatchSize,
         bool Shuffle,
+        bool BatchShuffle,
         std::size_t NumWorkerThreads,
         std::size_t Prefetch
     );
@@ -66,6 +68,7 @@ class BatchedTeacherLoader {
     const std::string TeacherPath;
     const std::size_t MyBatchSize;
     const bool ShuffleEnabled;
+    const bool BatchShuffleEnabled;
     const std::size_t PrefetchFactor;
     std::size_t NumBatches;
 

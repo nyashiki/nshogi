@@ -20,11 +20,13 @@ BatchedTeacherLoader::BatchedTeacherLoader(
     const std::string& Path,
     std::size_t BatchSize,
     bool Shuffle,
+    bool BatchShuffle,
     std::size_t NumWorkerThreads,
     std::size_t Prefetch
 ) : TeacherPath(Path)
   , MyBatchSize(BatchSize)
   , ShuffleEnabled(Shuffle)
+  , BatchShuffleEnabled(BatchShuffle)
   , PrefetchFactor(Prefetch) {
     if (NumWorkerThreads == 0) {
         throw std::invalid_argument("NumWorkerThreads must be greater than 0.");
@@ -34,11 +36,16 @@ BatchedTeacherLoader::BatchedTeacherLoader(
     }
 
     {
-        TeacherLoaderForFixedSizeTeacher<SimpleTeacher> TeacherLoader(Path, false);
+        TeacherLoaderForFixedSizeTeacher<SimpleTeacher> TeacherLoader(Path, false, /* Version = */ 2);
         NumBatches = TeacherLoader.size() / MyBatchSize;
         if (ShuffleEnabled) {
             std::random_device RD;
-            PG = std::make_unique<utils::PermutationGenerator>(RD(), TeacherLoader.size());
+
+            if (BatchShuffleEnabled) {
+                PG = std::make_unique<utils::PermutationGenerator>(RD(), NumBatches);
+            } else {
+                PG = std::make_unique<utils::PermutationGenerator>(RD(), TeacherLoader.size());
+            }
         }
     }
 
@@ -87,7 +94,7 @@ std::optional<BatchedTeacher> BatchedTeacherLoader::next() {
 }
 
 void BatchedTeacherLoader::doTask() {
-    TeacherLoaderForFixedSizeTeacher<SimpleTeacher> TeacherLoader(TeacherPath, false);
+    TeacherLoaderForFixedSizeTeacher<SimpleTeacher> TeacherLoader(TeacherPath, false, /* Version = */ 2);
 
     SimpleTeacher Teacher;
 
@@ -106,13 +113,22 @@ void BatchedTeacherLoader::doTask() {
         std::unique_ptr<int32_t[]> MyIds = std::make_unique<int32_t[]>(MyBatchSize * 40);
         std::unique_ptr<int32_t[]> OpIds = std::make_unique<int32_t[]>(MyBatchSize * 40);
         std::unique_ptr<int8_t[]> Results = std::make_unique<int8_t[]>(MyBatchSize);
+        std::unique_ptr<float[]> Qs = std::make_unique<float[]>(MyBatchSize);
         std::unique_ptr<int8_t[]> IsStables = std::make_unique<int8_t[]>(MyBatchSize);
 
         for (std::size_t I = 0; I < MyBatchSize; ++I) {
             // Load the teacher.
-            const std::size_t TargetIndex = ShuffleEnabled
-                ? (*PG)(MyIndex * MyBatchSize + I)
-                : (MyIndex * MyBatchSize + I);
+            const std::size_t TargetIndex = [&]() {
+                if (ShuffleEnabled) {
+                    if (BatchShuffleEnabled) {
+                        return (*PG)(MyIndex) * MyBatchSize + I;
+                    } else {
+                        return (*PG)(MyIndex * MyBatchSize + I);
+                    }
+                } else {
+                    return MyIndex * MyBatchSize + I;
+                }
+            }();
 
             TeacherLoader.loadAt(&Teacher, TargetIndex);
 
@@ -137,13 +153,15 @@ void BatchedTeacherLoader::doTask() {
                     (Teacher.getWinner() == State.getSideToMove()) ? 1 : -1;
             }
 
+            Qs[I] = Teacher.q();
+
             IsStables[I] = 1;
 
             if (State.isInCheck()) {
                 IsStables[I] = 0;
             } else {
-                const auto CaptureMoves = core::MoveGenerator::generateLegalCaptureMoves(State);
-                if (CaptureMoves.size() > 0) {
+                const auto NextMove = Teacher.getNextMove();
+                if (State.getPosition().pieceOn(NextMove.to()) != core::PK_Empty) {
                     IsStables[I] = 0;
                 }
             }
@@ -160,6 +178,7 @@ void BatchedTeacherLoader::doTask() {
                     .MyIds = std::move(MyIds),
                     .OpIds = std::move(OpIds),
                     .Results = std::move(Results),
+                    .Qs = std::move(Qs),
                     .IsStables = std::move(IsStables)
                     });
         }

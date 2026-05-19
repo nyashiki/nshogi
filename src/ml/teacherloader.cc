@@ -31,9 +31,10 @@ namespace ml {
 
 template <typename TeacherType>
 TeacherLoaderForFixedSizeTeacher<TeacherType>::TeacherLoaderForFixedSizeTeacher(
-    const std::string& TeacherPath, bool Shuffle)
+    const std::string& TeacherPath, bool Shuffle, int32_t FileVersion)
     : Path(TeacherPath)
     , ShuffleEnabled(Shuffle)
+    , Version(FileVersion)
     , FileSize(0)
     , MappedFile(nullptr) {
 
@@ -91,7 +92,7 @@ void TeacherLoaderForFixedSizeTeacher<TeacherType>::ensureOpen() {
         throw std::runtime_error("Failed to map file.");
     }
 
-    io::file::load<TeacherType>(static_cast<const char*>(MappedFile), &TeacherSizeUnit);
+    io::file::load<TeacherType>(static_cast<const char*>(MappedFile), Version, &TeacherSizeUnit);
 #else
     const pid_t CurrentPid = getpid();
 
@@ -113,7 +114,7 @@ void TeacherLoaderForFixedSizeTeacher<TeacherType>::ensureOpen() {
 
     // Load one teacher entry so that we can determine
     // the size of one teacher binary.
-    [[maybe_unused]] TeacherType T = io::file::load<TeacherType>(Ifs);
+    [[maybe_unused]] TeacherType T = io::file::load<TeacherType>(Ifs, Version);
 
     TeacherSizeUnit = (std::size_t)Ifs.tellg();
 
@@ -153,12 +154,12 @@ TeacherType TeacherLoaderForFixedSizeTeacher<TeacherType>::operator[](
 
 #ifdef __linux__
     TeacherType T = io::file::load<TeacherType>(
-        static_cast<const char*>(MappedFile) + Index * TeacherSizeUnit
+        static_cast<const char*>(MappedFile) + Index * TeacherSizeUnit, Version
     );
 #else
     Ifs.clear();
     Ifs.seekg((long)(Index * TeacherSizeUnit), std::ios_base::beg);
-    TeacherType T = io::file::load<TeacherType>(Ifs);
+    TeacherType T = io::file::load<TeacherType>(Ifs, Version);
 #endif
 
     return T;
@@ -183,12 +184,12 @@ void TeacherLoaderForFixedSizeTeacher<SimpleTeacher>::loadAt(
 #ifdef __linux__
     io::file::simple_teacher::loadAt(
         Dest,
-        static_cast<const char*>(MappedFile) + Index * TeacherSizeUnit
+        static_cast<const char*>(MappedFile) + Index * TeacherSizeUnit, Version
     );
 #else
     Ifs.clear();
     Ifs.seekg((long)(Index * TeacherSizeUnit), std::ios_base::beg);
-    io::file::simple_teacher::loadAt(Dest, Ifs);
+    io::file::simple_teacher::loadAt(Dest, Ifs, Version);
 #endif
 };
 

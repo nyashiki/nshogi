@@ -23,7 +23,7 @@ template <typename TeacherType>
 class TeacherLoaderForFixedSizeTeacher {
  public:
     TeacherLoaderForFixedSizeTeacher(const std::string& TeacherPath,
-                                     bool Shuffle);
+                                     bool Shuffle, int32_t FileVersion);
     ~TeacherLoaderForFixedSizeTeacher();
 
     TeacherType operator[](std::size_t Index);
@@ -36,6 +36,7 @@ class TeacherLoaderForFixedSizeTeacher {
  private:
     const std::string Path;
     const bool ShuffleEnabled;
+    const int32_t Version;
 
     std::ifstream Ifs;
     pid_t OpenPid;
