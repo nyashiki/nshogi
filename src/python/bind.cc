@@ -774,6 +774,8 @@ PYBIND11_MODULE(nshogi, Module) {
              [](const nshogi::ml::SimpleTeacher& T) {
                  return (T.getWinner() == nshogi::core::NoColor) ? 1.0f : 0.0f;
              })
+        .def("q", &nshogi::ml::SimpleTeacher::q)
+        .def("game_ply", &nshogi::ml::SimpleTeacher::gamePly)
         .def("declaration_score", [](const nshogi::ml::SimpleTeacher& T) {
             const auto State = T.getState();
             nshogi::core::internal::ImmutableStateAdapter Adapter(State);
@@ -812,8 +814,8 @@ PYBIND11_MODULE(nshogi, Module) {
     pybind11::class_<
         nshogi::ml::TeacherLoaderForFixedSizeTeacher<nshogi::ml::AZTeacher>>(
         MLModule, "AZTeacherLoader")
-        .def(pybind11::init<const std::string&, bool>(), pybind11::arg("path"),
-             pybind11::arg("shuffle"))
+        .def(pybind11::init<const std::string&, bool, int32_t>(), pybind11::arg("path"),
+             pybind11::arg("shuffle"), pybind11::arg("version"))
         .def("filter",
              [](nshogi::ml::TeacherLoaderForFixedSizeTeacher<
                     nshogi::ml::AZTeacher>& Loader,
@@ -837,8 +839,8 @@ PYBIND11_MODULE(nshogi, Module) {
 
     pybind11::class_<nshogi::ml::TeacherLoaderForFixedSizeTeacher<
         nshogi::ml::SimpleTeacher>>(MLModule, "SimpleTeacherLoader")
-        .def(pybind11::init<const std::string&, bool>(), pybind11::arg("path"),
-             pybind11::arg("shuffle"))
+        .def(pybind11::init<const std::string&, bool, int32_t>(), pybind11::arg("path"),
+             pybind11::arg("shuffle"), pybind11::arg("version"))
         .def("__len__", &nshogi::ml::TeacherLoaderForFixedSizeTeacher<
                             nshogi::ml::SimpleTeacher>::size)
         .def("__getitem__", &nshogi::ml::TeacherLoaderForFixedSizeTeacher<
@@ -849,11 +851,13 @@ PYBIND11_MODULE(nshogi, Module) {
                 const std::string&,
                 std::size_t,
                 bool,
+                bool,
                 std::size_t,
                 std::size_t
             >(), pybind11::arg("paths"),
                  pybind11::arg("batch_size"),
                  pybind11::arg("shuffle"),
+                 pybind11::arg("batch_shuffle"),
                  pybind11::arg("num_workers"),
                  pybind11::arg("prefetch"))
         .def("__len__", &nshogi::ml::BatchedTeacherLoader::size)
@@ -888,11 +892,16 @@ PYBIND11_MODULE(nshogi, Module) {
                 BatchSize,
                 1);
 
+            pybind11::array_t<float> Qs = makeArrayFromUniquePtr2d<float>(
+                std::move(B.Qs),
+                BatchSize,
+                1);
+
             pybind11::array_t<int8_t> IsStables = makeArrayFromUniquePtr2d<int8_t>(
                 std::move(B.IsStables),
                 BatchSize,
                 1);
 
-            return pybind11::make_tuple(MyIds, OpIds, Results, IsStables);
+            return pybind11::make_tuple(MyIds, OpIds, Results, Qs, IsStables);
         });
 }
