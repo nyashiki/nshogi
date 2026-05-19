@@ -185,6 +185,15 @@ void testEntryingScore(const nshogi::core::State& S, uint8_t BlackScore,
                    WhiteScore);
 }
 
+// clang-format off
+constexpr int32_t SEEValue[nshogi::core::NumPieceType] = {
+    /* PTK_Empty */     0,
+    /* PTK_Pawn */    100, /* PTK_Lance */    200, /* PTK_Knight */    300, /* PTK_Silver */    400, /* PTK_Bishop */    600, /* PTK_Rook */    700, /* PTK_Gold */ 500, /* PTK_King */ 0,
+    /* PTK_ProPawn */ 110, /* PTK_ProLance */ 220, /* PTK_ProKnight */ 330, /* PTK_ProSilver */ 440, /* PTK_ProBishop */ 660, /* PTK_ProRook */ 770,
+
+};
+// clang-format on
+
 } // namespace
 
 TEST(State, Defender) {
@@ -1028,4 +1037,18 @@ TEST(ExtendedState, DoAndUndoRandom) {
             State.doMove(RandomMove);
         }
     }
+}
+
+TEST(ExtendedState, ComputeSEEHandmade1) {
+    const std::string Sfen = "startpos";
+    nshogi::core::ExtendedState State = nshogi::io::sfen::StateBuilder::newState(Sfen);
+
+    TEST_ASSERT_EQ(0, State.computeSEE(nshogi::core::Sq7F, SEEValue));
+}
+
+TEST(ExtendedState, ComputeSEEHandmade2) {
+    const std::string Sfen = "1ks1lgs2/4r2b1/pppnln1pp/3ppgp2/4Sp3/2PSPG3/PP1NRNPPP/1B2L4/2K1LG3 w Pp 1";
+    nshogi::core::ExtendedState State = nshogi::io::sfen::StateBuilder::newState(Sfen);
+
+    TEST_ASSERT_EQ(400, State.computeSEE(nshogi::core::Sq5E, SEEValue));
 }
