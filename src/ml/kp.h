@@ -21,8 +21,16 @@ class KPFeatureExtractor {
  public:
     KPFeatureExtractor();
 
-    auto ids(const core::State&) const -> std::pair<std::vector<std::size_t>, std::vector<std::size_t>>;
-    std::vector<int8_t> extract(const core::State&) const;
+    static void idsAt(
+        int32_t* DestMyIds,
+        int32_t* DestOpIds,
+        int32_t* DestMyIdsCount,
+        int32_t* DestOpIdsCount,
+        const core::State& S
+    );
+
+    auto ids(const core::State&) const
+        -> std::pair<std::vector<int32_t>, std::vector<int32_t>>;
 };
 
 } // namespace ml

@@ -8,6 +8,8 @@
 //
 
 #include "kp.h"
+#include "../core/internal/bitboard.h"
+#include "../core/internal/stateadapter.h"
 
 namespace nshogi {
 namespace ml {
@@ -15,103 +17,167 @@ namespace ml {
 namespace {
 
 // clang-format off
-constexpr std::size_t SubClassSize =
+constexpr std::size_t BoardFeatureSize =
     (std::size_t)core::NumSquares // The other piece's position.
-    * (std::size_t)core::NumColors // The other piece's color.
-    * ((std::size_t)core::NumPieceType - 1); // The other piece's type (excluding empty).
+    * 27;
 
-constexpr std::size_t OnBoardFeatureSize =
-    (std::size_t)core::NumSquares // My king's position.
-    * SubClassSize;
-
-constexpr std::size_t OtherFeatureSize =
+constexpr std::size_t StandFeatureSize =
     18 * 2 // Pawns (max 18 for each color).
     + 4 * 4 * 2 // Lances, knights, silvers, and golds (max 4 for each color).
     + 2 * 2 * 2; // Bishops and rooks (max 2 for each color).
+
+constexpr std::size_t FeatureSizePerKingSquare =
+    BoardFeatureSize + StandFeatureSize;
+
+constexpr std::size_t FeatureSize =
+    (std::size_t)core::NumSquares // My king's position.
+    * FeatureSizePerKingSquare;
+
+constexpr static int32_t PieceToIndex[core::NumPieceKind] = {
+    -1, // My Empty
+     0, // My Pawn
+     1, // My Lance
+     2, // My Knight
+     3, // My Silver
+     4, // My Bishop
+     5, // My Rook
+     6, // My Gold
+    -1, // My King
+     7, // My ProPawn
+     8, // My ProLance
+     9, // My ProKnight
+    10, // My ProSilver
+    11, // My ProBishop
+    12, // My ProRook
+    -1, // Not used
+    -1, // Not used
+    13, // Op Pawn
+    14, // Op Lance
+    15, // Op Knight
+    16, // Op Silver
+    17, // Op Bishop
+    18, // Op Rook
+    19, // Op Gold
+    20, // Op King
+    21, // Op ProPawn
+    22, // Op ProLance
+    23, // Op ProKnight
+    24, // Op ProSilver
+    25, // Op ProBishop
+    26, // Op ProRook
+};
+
 // clang-format on
 
 template <core::Color C>
-std::vector<std::size_t> ids_(const core::State& S) {
-    std::vector<std::size_t> Ids;
+void idsAt_(
+    int32_t* DestMyIds,
+    int32_t* DestOpIds,
+    int32_t* DestMyIdsCount,
+    int32_t* DestOpIdsCount,
+    const core::State& S
+) {
+    *DestMyIdsCount = 0;
+    *DestOpIdsCount = 0;
 
     const auto Position = S.getPosition();
+    core::internal::ImmutableStateAdapter Adapter(S);
 
-    const auto KingSquare = (C == core::Black)
+    const auto MyKingSquare = (C == core::Black)
         ? S.getKingSquare(core::Black)
-        : (80 - S.getKingSquare(core::White));
+        : core::getInversed(S.getKingSquare(core::White));
+
+    const auto OpKingSquare = (C == core::Black)
+        ? S.getKingSquare(core::White)
+        : core::getInversed(S.getKingSquare(core::Black));
 
     const auto MyKingPiece = (C == core::Black) ? core::PK_BlackKing : core::PK_WhiteKing;
+    const auto OpKingPiece = (C == core::Black) ? core::PK_WhiteKing : core::PK_BlackKing;
 
-    std::size_t Base = (std::size_t)KingSquare * SubClassSize;
+    const std::size_t MyBase = (std::size_t)MyKingSquare * FeatureSizePerKingSquare;
+    const std::size_t OpBase = (std::size_t)core::getInversed(OpKingSquare) * FeatureSizePerKingSquare;
 
-    for (auto Sq : core::Squares) {
-        const auto Piece = Position.pieceOn(Sq);
-        if (Piece != core::PK_Empty && Piece != MyKingPiece) {
-            const auto PieceType = core::getPieceType(Piece);
-            const auto PieceColor = (C == core::Black) ? core::getColor(Piece) : ~core::getColor(Piece);
-            const auto IndexSq = (C == core::Black) ? Sq : (80 - Sq);
-            const std::size_t Index =
-                (std::size_t)IndexSq * ((std::size_t)core::NumColors * ((std::size_t)core::NumPieceType - 1)) +
-                (std::size_t)PieceColor * ((std::size_t)core::NumPieceType - 1) +
-                ((std::size_t)PieceType - 1);
+    const core::internal::bitboard::Bitboard OccupiedBB =
+        Adapter->getBitboard<core::Black>() | Adapter->getBitboard<core::White>();
 
-            Ids.push_back(Base + Index);
+    OccupiedBB.forEach([&](core::Square Sq) {
+        const auto RawPiece = Position.pieceOn(Sq);
+        if (RawPiece != core::PK_Empty) {
+            if (RawPiece != MyKingPiece) { // From my perspective.
+                const auto Piece = (C == core::Black) ? RawPiece : core::getInversed(RawPiece);
+
+                const int32_t PieceIndex = PieceToIndex[(std::size_t)Piece];
+                assert(PieceIndex >= 0 && PieceIndex < 27);
+
+                const auto IndexSq = (C == core::Black) ? Sq : core::getInversed(Sq);
+                const std::size_t Index = (std::size_t)IndexSq * 27 + (std::size_t)PieceIndex;
+                DestMyIds[(*DestMyIdsCount)++] = (int32_t)(MyBase + Index);
+            }
+
+            if (RawPiece != OpKingPiece) { // From opponent's perspective.
+                const auto Piece = (C == core::Black) ? core::getInversed(RawPiece) : RawPiece;
+
+                const int32_t PieceIndex = PieceToIndex[(std::size_t)Piece];
+                assert(PieceIndex >= 0 && PieceIndex < 27);
+
+                const auto IndexSq = (C == core::Black) ? core::getInversed(Sq) : Sq;
+                const std::size_t Index = (std::size_t)IndexSq * 27 + (std::size_t)PieceIndex;
+                DestOpIds[(*DestOpIdsCount)++] = (int32_t)(OpBase + Index);
+            }
         }
-    }
+    });
 
-    std::size_t AuxiliaryBase = OnBoardFeatureSize;
-    for (std::size_t I = 0; I < Position.getStandCount<C, core::PTK_Pawn>(); ++I) {
-        Ids.push_back(AuxiliaryBase + I);
-    }
-    for (std::size_t I = 0; I < Position.getStandCount<~C, core::PTK_Pawn>(); ++I) {
-        Ids.push_back(AuxiliaryBase + 18 + I);
-    }
-    for (std::size_t I = 0; I < Position.getStandCount<C, core::PTK_Lance>(); ++I) {
-        Ids.push_back(AuxiliaryBase + 36 + I);
-    }
-    for (std::size_t I = 0; I < Position.getStandCount<~C, core::PTK_Lance>(); ++I) {
-        Ids.push_back(AuxiliaryBase + 40 + I);
-    }
-    for (std::size_t I = 0; I < Position.getStandCount<C, core::PTK_Knight>(); ++I) {
-        Ids.push_back(AuxiliaryBase + 44 + I);
-    }
-    for (std::size_t I = 0; I < Position.getStandCount<~C, core::PTK_Knight>(); ++I) {
-        Ids.push_back(AuxiliaryBase + 48 + I);
-    }
-    for (std::size_t I = 0; I < Position.getStandCount<C, core::PTK_Silver>(); ++I) {
-        Ids.push_back(AuxiliaryBase + 52 + I);
-    }
-    for (std::size_t I = 0; I < Position.getStandCount<~C, core::PTK_Silver>(); ++I) {
-        Ids.push_back(AuxiliaryBase + 56 + I);
-    }
-    for (std::size_t I = 0; I < Position.getStandCount<C, core::PTK_Gold>(); ++I) {
-        Ids.push_back(AuxiliaryBase + 60 + I);
-    }
-    for (std::size_t I = 0; I < Position.getStandCount<~C, core::PTK_Gold>(); ++I) {
-        Ids.push_back(AuxiliaryBase + 64 + I);
-    }
-    for (std::size_t I = 0; I < Position.getStandCount<C, core::PTK_Bishop>(); ++I) {
-        Ids.push_back(AuxiliaryBase + 68 + I);
-    }
-    for (std::size_t I = 0; I < Position.getStandCount<~C, core::PTK_Bishop>(); ++I) {
-        Ids.push_back(AuxiliaryBase + 70 + I);
-    }
-    for (std::size_t I = 0; I < Position.getStandCount<C, core::PTK_Rook>(); ++I) {
-        Ids.push_back(AuxiliaryBase + 72 + I);
-    }
-    for (std::size_t I = 0; I < Position.getStandCount<~C, core::PTK_Rook>(); ++I) {
-        Ids.push_back(AuxiliaryBase + 74 + I);
-    }
+    const std::size_t MyAuxiliaryBase = MyBase + BoardFeatureSize;
+    const std::size_t OpAuxiliaryBase = OpBase + BoardFeatureSize;
 
-    return Ids;
+    auto appendStandPair = [&](
+        std::size_t Offset,
+        std::size_t MaxCount,
+        core::PieceTypeKind Type
+    ) {
+        const uint8_t MyStandCount = Position.getStandCount(C, Type);
+        const uint8_t OpStandCount = Position.getStandCount(~C, Type);
+        for (uint8_t I = 0; I < MyStandCount; ++I) {
+            DestMyIds[(*DestMyIdsCount)++] = (int32_t)(MyAuxiliaryBase + Offset + I);
+            DestOpIds[(*DestOpIdsCount)++] = (int32_t)(OpAuxiliaryBase + Offset + MaxCount + I);
+        }
+        for (uint8_t I = 0; I < OpStandCount; ++I) {
+            DestMyIds[(*DestMyIdsCount)++] = (int32_t)(MyAuxiliaryBase + Offset + MaxCount + I);
+            DestOpIds[(*DestOpIdsCount)++] = (int32_t)(OpAuxiliaryBase + Offset + I);
+        }
+    };
+
+    // clang-format off
+    appendStandPair( 0, 18, core::PTK_Pawn  );
+    appendStandPair(36,  4, core::PTK_Lance );
+    appendStandPair(44,  4, core::PTK_Knight);
+    appendStandPair(52,  4, core::PTK_Silver);
+    appendStandPair(60,  2, core::PTK_Bishop);
+    appendStandPair(64,  2, core::PTK_Rook  );
+    appendStandPair(68,  4, core::PTK_Gold  );
+    // clang-format on
 }
 
 template <core::Color C>
-void extract_(int8_t* Data, const core::State& S) {
-    const auto Ids = ids_<C>(S);
-    for (const auto Id : Ids) {
-        Data[Id] = 1;
-    }
+std::pair<std::vector<int32_t>, std::vector<int32_t>>
+ids_(const core::State& S) {
+    std::vector<int32_t> MyIds(39);
+    std::vector<int32_t> OpIds(39);
+
+    int32_t MyIdsCount;
+    int32_t OpIdsCount;
+
+    idsAt_<C>(
+        (int32_t*)MyIds.data(),
+        (int32_t*)OpIds.data(),
+        &MyIdsCount,
+        &OpIdsCount,
+        S
+    );
+
+    assert(MyIdsCount == 39);
+    assert(OpIdsCount == 39);
+    return { std::move(MyIds), std::move(OpIds) };
 }
 
 } // namespace
@@ -119,33 +185,31 @@ void extract_(int8_t* Data, const core::State& S) {
 KPFeatureExtractor::KPFeatureExtractor() {
 }
 
-std::pair<std::vector<std::size_t>, std::vector<std::size_t>>
-KPFeatureExtractor::ids(const core::State& S) const {
+void idsAt(
+    int32_t* DestMyIds,
+    int32_t* DestOpIds,
+    int32_t* DestMyIdsCount,
+    int32_t* DestOpIdsCount,
+    const core::State& S
+) {
     if (S.getSideToMove() == core::Black) {
-        return {
-            ids_<core::Black>(S),
-            ids_<core::White>(S)
-        };
+        idsAt_<core::Black>(DestMyIds, DestOpIds, DestMyIdsCount, DestOpIdsCount, S);
+        assert(*DestMyIdsCount == 39);
+        assert(*DestOpIdsCount == 39);
     } else {
-        return {
-            ids_<core::White>(S),
-            ids_<core::Black>(S),
-        };
+        idsAt_<core::White>(DestMyIds, DestOpIds, DestMyIdsCount, DestOpIdsCount, S);
+        assert(*DestMyIdsCount == 39);
+        assert(*DestOpIdsCount == 39);
     }
 }
 
-std::vector<int8_t> KPFeatureExtractor::extract(const core::State& S) const {
-    std::vector<int8_t> Data(2 * (OnBoardFeatureSize + OtherFeatureSize), 0);
-
+std::pair<std::vector<int32_t>, std::vector<int32_t>>
+KPFeatureExtractor::ids(const core::State& S) const {
     if (S.getSideToMove() == core::Black) {
-        extract_<core::Black>(Data.data(), S);
-        extract_<core::White>(Data.data() + OnBoardFeatureSize + OtherFeatureSize, S);
+        return ids_<core::Black>(S);
     } else {
-        extract_<core::White>(Data.data(), S);
-        extract_<core::Black>(Data.data() + OnBoardFeatureSize + OtherFeatureSize, S);
+        return ids_<core::White>(S);
     }
-
-    return Data;
 }
 
 } // namespace ml

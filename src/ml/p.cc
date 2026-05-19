@@ -126,9 +126,9 @@ ids_(const core::State& S) {
     int32_t OpIdsCount;
 
     idsAt_<C>(MyIds.data(), OpIds.data(), &MyIdsCount, &OpIdsCount, S);
-    MyIds.resize((std::size_t)MyIdsCount);
-    OpIds.resize((std::size_t)OpIdsCount);
 
+    assert(MyIdsCount == 40);
+    assert(OpIdsCount == 40);
     return { std::move(MyIds), std::move(OpIds) };
 }
 
@@ -146,8 +146,12 @@ void PFeatureExtractor::idsAt(
 ) {
     if (S.getSideToMove() == core::Black) {
         idsAt_<core::Black>(DestMyIds, DestOpIds, DestMyIdsCount, DestOpIdsCount, S);
+        assert(*DestMyIdsCount == 40);
+        assert(*DestOpIdsCount == 40);
     } else {
         idsAt_<core::White>(DestMyIds, DestOpIds, DestMyIdsCount, DestOpIdsCount, S);
+        assert(*DestMyIdsCount == 40);
+        assert(*DestOpIdsCount == 40);
     }
 }
 
