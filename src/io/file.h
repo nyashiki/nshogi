@@ -30,20 +30,20 @@ void save(std::ofstream&, const ml::AZTeacher&);
 
 namespace simple_teacher {
 
-void loadAt(ml::SimpleTeacher* Dest, std::ifstream&);
-std::size_t loadAt(ml::SimpleTeacher* Dest, const char* Source);
-ml::SimpleTeacher load(std::ifstream&);
-ml::SimpleTeacher load(const char* Source);
+void loadAt(ml::SimpleTeacher* Dest, std::ifstream&, int32_t Version);
+std::size_t loadAt(ml::SimpleTeacher* Dest, const char* Source, int32_t Version);
+ml::SimpleTeacher load(std::ifstream&, int32_t Version);
+ml::SimpleTeacher load(const char* Source, int32_t Version);
 
 void save(std::ofstream&, const ml::SimpleTeacher&);
 
 } // namespace simple_teacher
 
 template <typename T>
-T load(std::ifstream&);
+T load(std::ifstream&, int32_t Version);
 
 template <typename T>
-T load(const char* Source, std::size_t* BytesRead = nullptr);
+T load(const char* Source, int32_t Version, std::size_t* BytesRead = nullptr);
 
 template <typename T>
 void save(std::ofstream&, const T&);

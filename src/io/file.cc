@@ -207,7 +207,7 @@ class SimpleTeacherIO : public ml::SimpleTeacher {
         : ml::SimpleTeacher(ST) {
     }
 
-    static void loadAt(ml::SimpleTeacher* Dest, std::ifstream& Ifs) {
+    static void loadAt(ml::SimpleTeacher* Dest, std::ifstream& Ifs, int32_t Version) {
         uint64_t Codes[4];
         uint16_t Move16;
 
@@ -220,9 +220,17 @@ class SimpleTeacherIO : public ml::SimpleTeacher {
 
         Dest->HuffmanCode = core::HuffmanCode(Codes[3], Codes[2], Codes[1], Codes[0]);
         Dest->NextMove = core::Move16::fromValue(Move16);
+
+        Dest->Q = 0.0f;
+        Dest->GamePly = 0;
+
+        if (Version >= 2) {
+            Ifs.read(reinterpret_cast<char*>(&Dest->Q), sizeof(float));
+            Ifs.read(reinterpret_cast<char*>(&Dest->GamePly), sizeof(uint16_t));
+        }
     }
 
-    static std::size_t loadAt(ml::SimpleTeacher* Dest, const char* Source) {
+    static std::size_t loadAt(ml::SimpleTeacher* Dest, const char* Source, int32_t Version) {
         const char* Cur = Source;
 
         uint64_t Codes[4];
@@ -244,16 +252,26 @@ class SimpleTeacherIO : public ml::SimpleTeacher {
         Dest->HuffmanCode = core::HuffmanCode(Codes[3], Codes[2], Codes[1], Codes[0]);
         Dest->NextMove = core::Move16::fromValue(Move16);
 
+        Dest->Q = 0.0f;
+        Dest->GamePly = 0;
+
+        if (Version >= 2) {
+            std::memcpy(&Dest->Q, Cur, sizeof(float));
+            Cur += sizeof(float);
+            std::memcpy(&Dest->GamePly, Cur, sizeof(uint16_t));
+            Cur += sizeof(uint16_t);
+        }
+
         return static_cast<std::size_t>(Cur - Source);
     }
 
-    ml::SimpleTeacher load(std::ifstream& Ifs) {
-        loadAt(this, Ifs);
+    ml::SimpleTeacher load(std::ifstream& Ifs, int32_t Version) {
+        loadAt(this, Ifs, Version);
         return *this;
     }
 
-    ml::SimpleTeacher load(const char* Source, std::size_t* BytesRead = nullptr) {
-        const std::size_t Read = loadAt(this, Source);
+    ml::SimpleTeacher load(const char* Source, int32_t Version, std::size_t* BytesRead = nullptr) {
+        const std::size_t Read = loadAt(this, Source, Version);
 
         if (BytesRead != nullptr) {
             *BytesRead = Read;
@@ -271,17 +289,19 @@ class SimpleTeacherIO : public ml::SimpleTeacher {
         Ofs.write(reinterpret_cast<char*>(DrawValues), sizeof(DrawValues));
         Ofs.write(reinterpret_cast<char*>(&Move16), sizeof(uint16_t));
         Ofs.write(reinterpret_cast<char*>(&Winner), sizeof(Winner));
+        Ofs.write(reinterpret_cast<char*>(&Q), sizeof(float));
+        Ofs.write(reinterpret_cast<char*>(&GamePly), sizeof(uint16_t));
     }
 };
 
-ml::SimpleTeacher load(std::ifstream& Ifs) {
+ml::SimpleTeacher load(std::ifstream& Ifs, int32_t Version) {
     SimpleTeacherIO IO;
-    return IO.load(Ifs);
+    return IO.load(Ifs, Version);
 }
 
-ml::SimpleTeacher load(const char* Source, std::size_t* BytesRead) {
+ml::SimpleTeacher load(const char* Source, int32_t Version, std::size_t* BytesRead) {
     SimpleTeacherIO IO;
-    return IO.load(Source, BytesRead);
+    return IO.load(Source, Version, BytesRead);
 }
 
 void save(std::ofstream& Ofs, const ml::SimpleTeacher& SimpleTeacher) {
@@ -289,34 +309,34 @@ void save(std::ofstream& Ofs, const ml::SimpleTeacher& SimpleTeacher) {
     IO.save(Ofs);
 }
 
-void loadAt(ml::SimpleTeacher* Dest, std::ifstream& Ifs) {
-    SimpleTeacherIO::loadAt(Dest, Ifs);
+void loadAt(ml::SimpleTeacher* Dest, std::ifstream& Ifs, int32_t Version) {
+    SimpleTeacherIO::loadAt(Dest, Ifs, Version);
 }
 
-std::size_t loadAt(ml::SimpleTeacher* Dest, const char* Source) {
-    return SimpleTeacherIO::loadAt(Dest, Source);
+std::size_t loadAt(ml::SimpleTeacher* Dest, const char* Source, int32_t Version) {
+    return SimpleTeacherIO::loadAt(Dest, Source, Version);
 }
 
 } // namespace simple_teacher
 
 template <>
-ml::AZTeacher load<ml::AZTeacher>(std::ifstream& Ifs) {
+ml::AZTeacher load<ml::AZTeacher>(std::ifstream& Ifs, int32_t /* Version */) {
     return az_teacher::load(Ifs);
 }
 
 template <>
-ml::SimpleTeacher load<ml::SimpleTeacher>(std::ifstream& Ifs) {
-    return simple_teacher::load(Ifs);
+ml::SimpleTeacher load<ml::SimpleTeacher>(std::ifstream& Ifs, int32_t Version) {
+    return simple_teacher::load(Ifs, Version);
 }
 
 template <>
-ml::AZTeacher load<ml::AZTeacher>(const char* Source, std::size_t* BytesRead) {
+ml::AZTeacher load<ml::AZTeacher>(const char* Source, int32_t /* Version */, std::size_t* BytesRead) {
     return az_teacher::load(Source, BytesRead);
 }
 
 template <>
-ml::SimpleTeacher load<ml::SimpleTeacher>(const char* Source, std::size_t* BytesRead) {
-    return simple_teacher::load(Source, BytesRead);
+ml::SimpleTeacher load<ml::SimpleTeacher>(const char* Source, int32_t Version, std::size_t* BytesRead) {
+    return simple_teacher::load(Source, Version, BytesRead);
 }
 
 template <>

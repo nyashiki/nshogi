@@ -41,20 +41,25 @@ struct SimpleTeacher {
     core::StateConfig getConfig() const;
     core::Move16 getNextMove() const;
     core::Color getWinner() const;
+    float q() const;
+    uint16_t gamePly() const;
 
     SimpleTeacher& setState(const core::State&);
     SimpleTeacher& setConfig(const core::StateConfig&);
     SimpleTeacher& setNextMove(core::Move16);
     SimpleTeacher& setWinner(core::Color);
+    SimpleTeacher& setQ(float);
+    SimpleTeacher& setGamePly(uint16_t);
 
     bool equals(const SimpleTeacher&) const;
 
     /// Generate completely random noisy data.
     /// This function is for test.
-    [[maybe_unused]]
     void corruptMyself();
 
  private:
+    // ----- VERSION 1 -----
+
     // State.
     core::HuffmanCode HuffmanCode;
     uint16_t Ply;
@@ -66,6 +71,10 @@ struct SimpleTeacher {
     // Result.
     core::Move16 NextMove;
     core::Color Winner;
+
+    // ----- VERSION 2 -----
+    float Q;
+    uint16_t GamePly;
 
  friend class io::file::simple_teacher::SimpleTeacherIO;
 };

@@ -1034,7 +1034,7 @@ TEST(ML, AZTeacherSaveAndLoad) {
         {
             std::ifstream Ifs(Path, std::ios::in | std::ios::binary);
 
-            auto T2 = nshogi::io::file::load<nshogi::ml::AZTeacher>(Ifs);
+            auto T2 = nshogi::io::file::load<nshogi::ml::AZTeacher>(Ifs, 1);
 
             TEST_ASSERT_TRUE(T1.equals(T2));
             TEST_ASSERT_TRUE(T2.equals(T1));
@@ -1268,7 +1268,7 @@ TEST(ML, SimpleTeacherSaveAndLoad) {
         {
             std::ifstream Ifs(Path, std::ios::in | std::ios::binary);
 
-            auto T2 = nshogi::io::file::load<nshogi::ml::SimpleTeacher>(Ifs);
+            auto T2 = nshogi::io::file::load<nshogi::ml::SimpleTeacher>(Ifs, 2);
 
             TEST_ASSERT_TRUE(T1.equals(T2));
             TEST_ASSERT_TRUE(T2.equals(T1));
