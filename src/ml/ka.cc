@@ -7,7 +7,7 @@
 // SPDX-License-Identifier: MIT
 //
 
-#include "kp.h"
+#include "ka.h"
 #include "../core/internal/bitboard.h"
 #include "../core/internal/stateadapter.h"
 
@@ -182,7 +182,7 @@ ids_(const core::State& S) {
 
 } // namespace
 
-KPFeatureExtractor::KPFeatureExtractor() {
+KAFeatureExtractor::KAFeatureExtractor() {
 }
 
 void idsAt(
@@ -204,7 +204,7 @@ void idsAt(
 }
 
 std::pair<std::vector<int32_t>, std::vector<int32_t>>
-KPFeatureExtractor::ids(const core::State& S) const {
+KAFeatureExtractor::ids(const core::State& S) const {
     if (S.getSideToMove() == core::Black) {
         return ids_<core::Black>(S);
     } else {

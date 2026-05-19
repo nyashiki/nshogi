@@ -73,7 +73,7 @@ SOURCES :=                             \
 	src/ml/azteacher.cc                \
 	src/ml/featurebitboard.cc          \
 	src/ml/featurestack.cc             \
-    src/ml/kp.cc                       \
+    src/ml/ka.cc                       \
     src/ml/p.cc                        \
 	src/ml/simpleteacher.cc            \
 	src/ml/teacherloader.cc            \

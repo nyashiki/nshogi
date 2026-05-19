@@ -7,8 +7,8 @@
 // SPDX-License-Identifier: MIT
 //
 
-#ifndef NSHOGI_ML_KP_H
-#define NSHOGI_ML_KP_H
+#ifndef NSHOGI_ML_KA_H
+#define NSHOGI_ML_KA_H
 
 #include "../core/state.h"
 
@@ -17,9 +17,9 @@
 namespace nshogi {
 namespace ml {
 
-class KPFeatureExtractor {
+class KAFeatureExtractor {
  public:
-    KPFeatureExtractor();
+    KAFeatureExtractor();
 
     static void idsAt(
         int32_t* DestMyIds,
@@ -36,4 +36,4 @@ class KPFeatureExtractor {
 } // namespace ml
 } // namespace nshogi
 
-#endif // #ifndef NSHOGI_ML_KP_H
+#endif // #ifndef NSHOGI_ML_KA_H

@@ -22,7 +22,7 @@
 #include "../ml/featurestack.h"
 #include "../ml/internal/featurebitboardutil.h"
 #include "../ml/simpleteacher.h"
-#include "../ml/kp.h"
+#include "../ml/ka.h"
 #include "../ml/p.h"
 #include "../ml/utils.h"
 #include "common.h"
@@ -1416,11 +1416,11 @@ TEST(ML, ChannelsLastComptimeAndRuntime) {
     }
 }
 
-TEST(ML, KPFeatureExtractorPerspectiveTest) {
+TEST(ML, KAFeatureExtractorPerspectiveTest) {
     const int N = 1000;
     std::mt19937_64 mt(20260519);
 
-    nshogi::ml::KPFeatureExtractor Extractor;
+    nshogi::ml::KAFeatureExtractor Extractor;
 
     for (int I = 0; I < N; ++I) {
         nshogi::core::ExtendedState State =
