@@ -30,7 +30,7 @@
 #include "../ml/common.h"
 #include "../ml/featurestack.h"
 #include "../ml/internal/featurebitboardutil.h"
-#include "../ml/kp.h"
+#include "../ml/ka.h"
 #include "../ml/p.h"
 #include "../ml/teacherloader.h"
 #include "../ml/batchedteacherloader.h"
@@ -493,10 +493,10 @@ PYBIND11_MODULE(nshogi, Module) {
         .def("to_numpy", &PyFeatureStack::to_numpy,
              pybind11::arg("channels_first") = true);
 
-    pybind11::class_<nshogi::ml::KPFeatureExtractor>(MLModule, "KPFeatureExtractor")
+    pybind11::class_<nshogi::ml::KAFeatureExtractor>(MLModule, "KAFeatureExtractor")
         .def(pybind11::init<>())
         .def("ids",
-             [](const nshogi::ml::KPFeatureExtractor& Extractor, const nshogi::core::State& State) {
+             [](const nshogi::ml::KAFeatureExtractor& Extractor, const nshogi::core::State& State) {
                 const auto& [Ids1, Ids2] = Extractor.ids(State);
 
                 auto NpArray1 = pybind11::array_t<pybind11::ssize_t>((pybind11::ssize_t)(Ids1.size()));
