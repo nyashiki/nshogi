@@ -82,6 +82,8 @@ enum PieceKind : uint8_t {
     PK_BlackProPawn =  9, PK_BlackProLance = 10, PK_BlackProKnight = 11, PK_BlackProSilver = 12, PK_BlackProBishop = 13, PK_BlackProRook = 14,
     PK_WhitePawn    = 17, PK_WhiteLance    = 18, PK_WhiteKnight    = 19, PK_WhiteSilver    = 20, PK_WhiteBishop    = 21, PK_WhiteRook    = 22, PK_WhiteGold = 23, PK_WhiteKing = 24,
     PK_WhiteProPawn = 25, PK_WhiteProLance = 26, PK_WhiteProKnight = 27, PK_WhiteProSilver = 28, PK_WhiteProBishop = 29, PK_WhiteProRook = 30,
+
+    NumPieceKind = 31,
 };
 // clang-format on
 
@@ -120,6 +122,10 @@ inline PieceKind makePiece(Color C, PieceTypeKind Pt) noexcept {
     }
 
     return makePiece<Color::White>(Pt);
+}
+
+inline PieceKind getInversed(PieceKind P) noexcept {
+    return (PieceKind)(P ^ 0b10000);
 }
 
 // clang-format off
