@@ -26,6 +26,14 @@
 
 #endif
 
+#ifdef __APPLE__
+
+// For getpid().
+#include <unistd.h>
+#include <sys/types.h>
+
+#endif
+
 namespace nshogi {
 namespace ml {
 
