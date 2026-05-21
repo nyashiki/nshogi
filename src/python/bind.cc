@@ -493,7 +493,14 @@ PYBIND11_MODULE(nshogi, Module) {
         .def("to_numpy", &PyFeatureStack::to_numpy,
              pybind11::arg("channels_first") = true);
 
-    pybind11::class_<nshogi::ml::KAFeatureExtractor>(MLModule, "KAFeatureExtractor")
+    pybind11::class_<
+        nshogi::ml::IFeatureExtractor,
+        std::shared_ptr<nshogi::ml::IFeatureExtractor>>(MLModule, "IFeatureExtractor");
+
+    pybind11::class_<
+        nshogi::ml::KAFeatureExtractor,
+        nshogi::ml::IFeatureExtractor,
+        std::shared_ptr<nshogi::ml::KAFeatureExtractor>>(MLModule, "KAFeatureExtractor")
         .def(pybind11::init<>())
         .def("ids",
              [](const nshogi::ml::KAFeatureExtractor& Extractor, const nshogi::core::State& State) {
@@ -515,7 +522,10 @@ PYBIND11_MODULE(nshogi, Module) {
                 return pybind11::make_tuple(NpArray1, NpArray2);
              });
 
-    pybind11::class_<nshogi::ml::PFeatureExtractor>(MLModule, "PFeatureExtractor")
+    pybind11::class_<
+        nshogi::ml::PFeatureExtractor,
+        nshogi::ml::IFeatureExtractor,
+        std::shared_ptr<nshogi::ml::PFeatureExtractor>>(MLModule, "PFeatureExtractor")
         .def(pybind11::init<>())
         .def("ids",
              [](const nshogi::ml::PFeatureExtractor& Extractor, const nshogi::core::State& State) {
@@ -849,12 +859,14 @@ PYBIND11_MODULE(nshogi, Module) {
     pybind11::class_<nshogi::ml::BatchedTeacherLoader>(MLModule, "BatchedTeacherLoader")
         .def(pybind11::init<
                 const std::string&,
+                std::shared_ptr<nshogi::ml::IFeatureExtractor>,
                 std::size_t,
                 bool,
                 bool,
                 std::size_t,
                 std::size_t
             >(), pybind11::arg("paths"),
+                 pybind11::arg("feature_extractor"),
                  pybind11::arg("batch_size"),
                  pybind11::arg("shuffle"),
                  pybind11::arg("batch_shuffle"),
@@ -880,12 +892,12 @@ PYBIND11_MODULE(nshogi, Module) {
             pybind11::array_t<int32_t> MyIds = makeArrayFromUniquePtr2d<int32_t>(
                 std::move(B.MyIds),
                 BatchSize,
-                40);
+                Loader.idSize());
 
             pybind11::array_t<int32_t> OpIds = makeArrayFromUniquePtr2d<int32_t>(
                 std::move(B.OpIds),
                 BatchSize,
-                40);
+                Loader.idSize());
 
             pybind11::array_t<int8_t> Results = makeArrayFromUniquePtr2d<int8_t>(
                 std::move(B.Results),

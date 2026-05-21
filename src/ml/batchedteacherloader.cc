@@ -18,12 +18,14 @@ namespace ml {
 
 BatchedTeacherLoader::BatchedTeacherLoader(
     const std::string& Path,
+    std::shared_ptr<IFeatureExtractor> Ext,
     std::size_t BatchSize,
     bool Shuffle,
     bool BatchShuffle,
     std::size_t NumWorkerThreads,
     std::size_t Prefetch
 ) : TeacherPath(Path)
+  , Extractor(std::move(Ext))
   , MyBatchSize(BatchSize)
   , ShuffleEnabled(Shuffle)
   , BatchShuffleEnabled(BatchShuffle)
@@ -110,8 +112,8 @@ void BatchedTeacherLoader::doTask() {
         }
 
         // Prepare the buffer.
-        std::unique_ptr<int32_t[]> MyIds = std::make_unique<int32_t[]>(MyBatchSize * 40);
-        std::unique_ptr<int32_t[]> OpIds = std::make_unique<int32_t[]>(MyBatchSize * 40);
+        std::unique_ptr<int32_t[]> MyIds = std::make_unique<int32_t[]>(MyBatchSize * Extractor->idSize());
+        std::unique_ptr<int32_t[]> OpIds = std::make_unique<int32_t[]>(MyBatchSize * Extractor->idSize());
         std::unique_ptr<int8_t[]> Results = std::make_unique<int8_t[]>(MyBatchSize);
         std::unique_ptr<float[]> Qs = std::make_unique<float[]>(MyBatchSize);
         std::unique_ptr<int8_t[]> IsStables = std::make_unique<int8_t[]>(MyBatchSize);
@@ -136,15 +138,15 @@ void BatchedTeacherLoader::doTask() {
             const auto State = Teacher.getState();
             int32_t MyIdsCount;
             int32_t OpIdsCount;
-            PFeatureExtractor::idsAt(
-                MyIds.get() + I * 40,
-                OpIds.get() + I * 40,
+            Extractor->idsAt(
+                MyIds.get() + I * Extractor->idSize(),
+                OpIds.get() + I * Extractor->idSize(),
                 &MyIdsCount,
                 &OpIdsCount,
                 State
             );
-            assert(MyIdsCount == 40);
-            assert(OpIdsCount == 40);
+            assert(MyIdsCount == Extractor->idSize());
+            assert(OpIdsCount == Extractor->idSize());
 
             if (Teacher.getWinner() == core::NoColor) {
                 Results[I] = 0;

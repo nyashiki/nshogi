@@ -10,6 +10,7 @@
 #ifndef NSHOGI_ML_P_H
 #define NSHOGI_ML_P_H
 
+#include "featureextractor.h"
 #include "../core/state.h"
 
 #include <cstdint>
@@ -18,20 +19,23 @@
 namespace nshogi {
 namespace ml {
 
-class PFeatureExtractor {
+class PFeatureExtractor : public IFeatureExtractor {
  public:
     PFeatureExtractor();
+    ~PFeatureExtractor() override = default;
 
-    static void idsAt(
+    void idsAt(
         int32_t* DestMyIds,
         int32_t* DestOpIds,
         int32_t* DestMyIdsCount,
         int32_t* DestOpIdsCount,
         const core::State& S
-    );
+    ) const override;
 
     auto ids(const core::State&) const
-        -> std::pair<std::vector<int32_t>, std::vector<int32_t>>;
+        -> std::pair<std::vector<int32_t>, std::vector<int32_t>> override;
+
+    std::size_t idSize() const noexcept override;
 };
 
 } // namespace ml

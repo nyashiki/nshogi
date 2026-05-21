@@ -29,6 +29,7 @@ constexpr std::size_t StandFeatureSize =
 constexpr std::size_t FeatureSizePerKingSquare =
     BoardFeatureSize + StandFeatureSize;
 
+[[maybe_unused]]
 constexpr std::size_t FeatureSize =
     (std::size_t)core::NumSquares // My king's position.
     * FeatureSizePerKingSquare;
@@ -156,11 +157,23 @@ void idsAt_(
     appendStandPair(64,  2, core::PTK_Rook  );
     appendStandPair(68,  4, core::PTK_Gold  );
     // clang-format on
+
+#ifndef NDEBUG
+    for (int32_t I = 0; I < *DestMyIdsCount; ++I) {
+       assert(DestMyIds[I] >= 0);
+       assert(DestMyIds[I] < FeatureSize);
+    }
+    for (int32_t I = 0; I < *DestOpIdsCount; ++I) {
+       assert(DestOpIds[I] >= 0);
+       assert(DestOpIds[I] < FeatureSize);
+    }
+#endif
 }
 
 template <core::Color C>
 std::pair<std::vector<int32_t>, std::vector<int32_t>>
 ids_(const core::State& S) {
+    // There are 39 pieces on the board and stands except for my king.
     std::vector<int32_t> MyIds(39);
     std::vector<int32_t> OpIds(39);
 
@@ -175,8 +188,6 @@ ids_(const core::State& S) {
         S
     );
 
-    assert(MyIdsCount == 39);
-    assert(OpIdsCount == 39);
     return { std::move(MyIds), std::move(OpIds) };
 }
 
@@ -185,21 +196,21 @@ ids_(const core::State& S) {
 KAFeatureExtractor::KAFeatureExtractor() {
 }
 
-void idsAt(
+void KAFeatureExtractor::idsAt(
     int32_t* DestMyIds,
     int32_t* DestOpIds,
     int32_t* DestMyIdsCount,
     int32_t* DestOpIdsCount,
     const core::State& S
-) {
+) const {
     if (S.getSideToMove() == core::Black) {
         idsAt_<core::Black>(DestMyIds, DestOpIds, DestMyIdsCount, DestOpIdsCount, S);
-        assert(*DestMyIdsCount == 39);
-        assert(*DestOpIdsCount == 39);
+        assert(*DestMyIdsCount == idSize());
+        assert(*DestOpIdsCount == idSize());
     } else {
         idsAt_<core::White>(DestMyIds, DestOpIds, DestMyIdsCount, DestOpIdsCount, S);
-        assert(*DestMyIdsCount == 39);
-        assert(*DestOpIdsCount == 39);
+        assert(*DestMyIdsCount == idSize());
+        assert(*DestOpIdsCount == idSize());
     }
 }
 
@@ -210,6 +221,10 @@ KAFeatureExtractor::ids(const core::State& S) const {
     } else {
         return ids_<core::White>(S);
     }
+}
+
+std::size_t KAFeatureExtractor::idSize() const noexcept {
+    return 39;
 }
 
 } // namespace ml

@@ -10,11 +10,13 @@
 #ifndef NSHOGI_ML_BATCHEDTEACHERLOADER_H
 #define NSHOGI_ML_BATCHEDTEACHERLOADER_H
 
+#include "featureextractor.h"
 #include "teacherloader.h"
 #include "simpleteacher.h"
 
 #include <atomic>
 #include <condition_variable>
+#include <memory>
 #include <mutex>
 #include <optional>
 #include <queue>
@@ -38,6 +40,7 @@ class BatchedTeacherLoader {
  public:
     BatchedTeacherLoader(
         const std::string& Path,
+        std::shared_ptr<IFeatureExtractor>,
         std::size_t BatchSize,
         bool Shuffle,
         bool BatchShuffle,
@@ -56,6 +59,10 @@ class BatchedTeacherLoader {
         return MyBatchSize;
     }
 
+    std::size_t idSize() const noexcept {
+        return Extractor->idSize();
+    }
+
     std::size_t size() const noexcept;
 
     std::optional<BatchedTeacher> next();
@@ -66,6 +73,7 @@ class BatchedTeacherLoader {
     std::unique_ptr<utils::PermutationGenerator> PG;
 
     const std::string TeacherPath;
+    std::shared_ptr<IFeatureExtractor> Extractor;
     const std::size_t MyBatchSize;
     const bool ShuffleEnabled;
     const bool BatchShuffleEnabled;

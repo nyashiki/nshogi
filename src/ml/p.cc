@@ -127,8 +127,6 @@ ids_(const core::State& S) {
 
     idsAt_<C>(MyIds.data(), OpIds.data(), &MyIdsCount, &OpIdsCount, S);
 
-    assert(MyIdsCount == 40);
-    assert(OpIdsCount == 40);
     return { std::move(MyIds), std::move(OpIds) };
 }
 
@@ -143,15 +141,15 @@ void PFeatureExtractor::idsAt(
     int32_t* DestMyIdsCount,
     int32_t* DestOpIdsCount,
     const core::State& S
-) {
+) const {
     if (S.getSideToMove() == core::Black) {
         idsAt_<core::Black>(DestMyIds, DestOpIds, DestMyIdsCount, DestOpIdsCount, S);
-        assert(*DestMyIdsCount == 40);
-        assert(*DestOpIdsCount == 40);
+        assert(*DestMyIdsCount == idSize());
+        assert(*DestOpIdsCount == idSize());
     } else {
         idsAt_<core::White>(DestMyIds, DestOpIds, DestMyIdsCount, DestOpIdsCount, S);
-        assert(*DestMyIdsCount == 40);
-        assert(*DestOpIdsCount == 40);
+        assert(*DestMyIdsCount == idSize());
+        assert(*DestOpIdsCount == idSize());
     }
 }
 
@@ -162,6 +160,10 @@ PFeatureExtractor::ids(const core::State& S) const {
     } else {
         return ids_<core::White>(S);
     }
+}
+
+std::size_t PFeatureExtractor::idSize() const noexcept {
+    return 40;
 }
 
 } // namespace ml

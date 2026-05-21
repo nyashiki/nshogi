@@ -7,37 +7,34 @@
 // SPDX-License-Identifier: MIT
 //
 
-#ifndef NSHOGI_ML_KA_H
-#define NSHOGI_ML_KA_H
+#ifndef NSHOGI_ML_FEATUREEXTRACTOR_H
+#define NSHOGI_ML_FEATUREEXTRACTOR_H
 
-#include "featureextractor.h"
 #include "../core/state.h"
-
 #include <vector>
 
 namespace nshogi {
 namespace ml {
 
-class KAFeatureExtractor : public IFeatureExtractor {
+class IFeatureExtractor {
  public:
-    KAFeatureExtractor();
-    ~KAFeatureExtractor() override = default;
+    virtual ~IFeatureExtractor() = default;
 
-    void idsAt(
+    virtual void idsAt(
         int32_t* DestMyIds,
         int32_t* DestOpIds,
         int32_t* DestMyIdsCount,
         int32_t* DestOpIdsCount,
         const core::State& S
-    ) const override;
+    ) const = 0;
 
-    auto ids(const core::State&) const
-        -> std::pair<std::vector<int32_t>, std::vector<int32_t>> override;
+    virtual auto ids(const core::State&) const
+        -> std::pair<std::vector<int32_t>, std::vector<int32_t>> = 0;
 
-    std::size_t idSize() const noexcept override;
+    virtual std::size_t idSize() const noexcept = 0;
 };
 
 } // namespace ml
 } // namespace nshogi
 
-#endif // #ifndef NSHOGI_ML_KA_H
+#endif // #ifndef NSHOGI_ML_FEATUREEXTRACTOR_H
