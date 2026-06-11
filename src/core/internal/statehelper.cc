@@ -12,6 +12,7 @@
 
 #include <cstdlib>
 #include <cstring>
+#include <utility>
 
 namespace nshogi {
 namespace core {
@@ -36,7 +37,7 @@ StateHelper::StateHelper(const Position& Pos, uint16_t PlyOffset)
 StateHelper::StateHelper(StateHelper&& Helper) noexcept
     : InitialPosition(Helper.InitialPosition)
     , Ply(Helper.Ply)
-    , SHelper(Helper.SHelper) {
+    , SHelper(std::move(Helper.SHelper)) {
 
     std::memcpy(static_cast<void*>(ColorBB),
                 static_cast<const void*>(Helper.ColorBB),
