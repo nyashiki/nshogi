@@ -22,6 +22,7 @@ var NAVTREEINDEX2 =
 "namespacenshogi_1_1build__info_1_1capability.html#adab6106c37709d9ef01b90883414be8a":[0,0,0,0,0,1],
 "namespacenshogi_1_1core.html":[0,0,0,1],
 "namespacenshogi_1_1core.html#a0240c8e65b510a2fef9eb7cf804bb8dd":[0,0,0,1,51],
+"namespacenshogi_1_1core.html#a092f1bf3a35a4fef7b66c0703a901076":[0,0,0,1,54],
 "namespacenshogi_1_1core.html#a12c9215be02d67fe5af6e9c59bcd0310":[0,0,0,1,22],
 "namespacenshogi_1_1core.html#a12c9215be02d67fe5af6e9c59bcd0310a4eaea8ee3a22cb0a8809099b69e9e564":[0,0,0,1,22,1],
 "namespacenshogi_1_1core.html#a12c9215be02d67fe5af6e9c59bcd0310ab40c1d6b547f5050dd847dee9ad158ec":[0,0,0,1,22,3],
@@ -30,6 +31,7 @@ var NAVTREEINDEX2 =
 "namespacenshogi_1_1core.html#a12c9215be02d67fe5af6e9c59bcd0310ae147898d99f02af7ac368f37454705b6":[0,0,0,1,22,0],
 "namespacenshogi_1_1core.html#a12c9215be02d67fe5af6e9c59bcd0310aec446bbf34af6adfb236f8108103b280":[0,0,0,1,22,6],
 "namespacenshogi_1_1core.html#a12c9215be02d67fe5af6e9c59bcd0310af4a077465cfc6f004f10240ffc33cfa1":[0,0,0,1,22,4],
+"namespacenshogi_1_1core.html#a19c2cf5ee7426c10b4df7473c682e7e4":[0,0,0,1,53],
 "namespacenshogi_1_1core.html#a2ab9dddfc2641361af5cd63d82db69da":[0,0,0,1,28],
 "namespacenshogi_1_1core.html#a31bbefbdbc08642dd7fffa28c0533659":[0,0,0,1,14],
 "namespacenshogi_1_1core.html#a31bbefbdbc08642dd7fffa28c0533659a5fc087f8cd9de5378ea62e827ede03a4":[0,0,0,1,14,1],
@@ -194,6 +196,7 @@ var NAVTREEINDEX2 =
 "namespacenshogi_1_1core.html#abf4a96ad06db9257852cbbad126c68d1":[0,0,0,1,37],
 "namespacenshogi_1_1core.html#ac668019f9aaa4577775e074adf277765":[0,0,0,1,40],
 "namespacenshogi_1_1core.html#acc03c3924076504818aaaa3199acf6bf":[0,0,0,1,50],
+"namespacenshogi_1_1core.html#ad5766b2daa5af66cb6cbe3b5ad39e7ec":[0,0,0,1,55],
 "namespacenshogi_1_1core.html#ad642e15b8a102db107d0d7ad3bef9454":[0,0,0,1,41],
 "namespacenshogi_1_1core.html#adc1de9799c7b2e61418437a1e35a1a18":[0,0,0,1,15],
 "namespacenshogi_1_1core.html#adc1de9799c7b2e61418437a1e35a1a18a3fea9a7fe418711df0a947afe47275db":[0,0,0,1,15,5],
@@ -246,8 +249,5 @@ var NAVTREEINDEX2 =
 "namespacenshogi_1_1core_1_1internal.html":[0,0,0,1,1],
 "namespacenshogi_1_1io.html":[0,0,0,2],
 "namespacenshogi_1_1io_1_1csa.html":[0,0,0,2,0],
-"namespacenshogi_1_1io_1_1csa.html#a081dc23bec7c1191e985951b1fa128e8":[0,0,0,2,0,6],
-"namespacenshogi_1_1io_1_1csa.html#a0eee89f1b2c020beaba80b7cc4d63974":[0,0,0,2,0,15],
-"namespacenshogi_1_1io_1_1csa.html#a336173ff8c767c102696d941a26b03ec":[0,0,0,2,0,14],
-"namespacenshogi_1_1io_1_1csa.html#a3aecc7de23b378318a7b07ef95943bd4":[0,0,0,2,0,16]
+"namespacenshogi_1_1io_1_1csa.html#a081dc23bec7c1191e985951b1fa128e8":[0,0,0,2,0,6]
 };

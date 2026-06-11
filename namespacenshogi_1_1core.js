@@ -246,5 +246,8 @@ var namespacenshogi_1_1core =
     [ "reverseOrder", "namespacenshogi_1_1core.html#a37376703aa6edadf49ea2c9f77d24166", null ],
     [ "squareToFile", "namespacenshogi_1_1core.html#acc03c3924076504818aaaa3199acf6bf", null ],
     [ "squareToRank", "namespacenshogi_1_1core.html#a0240c8e65b510a2fef9eb7cf804bb8dd", null ],
-    [ "Colors", "namespacenshogi_1_1core.html#a5d48debc5a9b6ed0fde6c57e39f3a457", null ]
+    [ "Colors", "namespacenshogi_1_1core.html#a5d48debc5a9b6ed0fde6c57e39f3a457", null ],
+    [ "DirectionDataInternal", "namespacenshogi_1_1core.html#a19c2cf5ee7426c10b4df7473c682e7e4", null ],
+    [ "SquareDirection", "namespacenshogi_1_1core.html#a092f1bf3a35a4fef7b66c0703a901076", null ],
+    [ "SquareSerializedDirection", "namespacenshogi_1_1core.html#ad5766b2daa5af66cb6cbe3b5ad39e7ec", null ]
 ];

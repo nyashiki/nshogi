@@ -474,6 +474,13 @@ Functions</h2></td></tr>
 Variables</h2></td></tr>
 <tr class="memitem:a5d48debc5a9b6ed0fde6c57e39f3a457"><td class="memItemLeft" align="right" valign="top">constexpr <a class="el" href="namespacenshogi_1_1core.html#a31bbefbdbc08642dd7fffa28c0533659">Color</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacenshogi_1_1core.html#a5d48debc5a9b6ed0fde6c57e39f3a457">Colors</a> [<a class="el" href="namespacenshogi_1_1core.html#a31bbefbdbc08642dd7fffa28c0533659af352878e66f01a049c2241ad02d9a078">NumColors</a>] = {<a class="el" href="namespacenshogi_1_1core.html#a31bbefbdbc08642dd7fffa28c0533659a75ec2d688132f4e4fe69358ded79a1a3">Black</a>, <a class="el" href="namespacenshogi_1_1core.html#a31bbefbdbc08642dd7fffa28c0533659a5fc087f8cd9de5378ea62e827ede03a4">White</a>}</td></tr>
 <tr class="separator:a5d48debc5a9b6ed0fde6c57e39f3a457"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a19c2cf5ee7426c10b4df7473c682e7e4"><td class="memItemLeft" align="right" valign="top">constexpr auto&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacenshogi_1_1core.html#a19c2cf5ee7426c10b4df7473c682e7e4">DirectionDataInternal</a></td></tr>
+<tr class="memdesc:a19c2cf5ee7426c10b4df7473c682e7e4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Relative direction from <code>Sq1</code> to <code>Sq2</code>.  <a href="namespacenshogi_1_1core.html#a19c2cf5ee7426c10b4df7473c682e7e4">More...</a><br /></td></tr>
+<tr class="separator:a19c2cf5ee7426c10b4df7473c682e7e4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a092f1bf3a35a4fef7b66c0703a901076"><td class="memItemLeft" align="right" valign="top">constexpr std::array&lt; std::array&lt; <a class="el" href="namespacenshogi_1_1core.html#adc1de9799c7b2e61418437a1e35a1a18">Direction</a>, <a class="el" href="namespacenshogi_1_1core.html#a4fc4e1258dfdd1f019167d58c1d7a6c1acf42a8918d87934334f18c63dfe52877">NumSquares</a> &gt;, <a class="el" href="namespacenshogi_1_1core.html#a4fc4e1258dfdd1f019167d58c1d7a6c1acf42a8918d87934334f18c63dfe52877">NumSquares</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacenshogi_1_1core.html#a092f1bf3a35a4fef7b66c0703a901076">SquareDirection</a> = DirectionDataInternal.first</td></tr>
+<tr class="separator:a092f1bf3a35a4fef7b66c0703a901076"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad5766b2daa5af66cb6cbe3b5ad39e7ec"><td class="memItemLeft" align="right" valign="top">constexpr std::array&lt; std::array&lt; uint8_t, <a class="el" href="namespacenshogi_1_1core.html#a4fc4e1258dfdd1f019167d58c1d7a6c1acf42a8918d87934334f18c63dfe52877">NumSquares</a> &gt;, <a class="el" href="namespacenshogi_1_1core.html#a4fc4e1258dfdd1f019167d58c1d7a6c1acf42a8918d87934334f18c63dfe52877">NumSquares</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacenshogi_1_1core.html#ad5766b2daa5af66cb6cbe3b5ad39e7ec">SquareSerializedDirection</a> = DirectionDataInternal.second</td></tr>
+<tr class="separator:ad5766b2daa5af66cb6cbe3b5ad39e7ec"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Enumeration Type Documentation</h2>
 <a id="a31bbefbdbc08642dd7fffa28c0533659" name="a31bbefbdbc08642dd7fffa28c0533659"></a>
@@ -1703,6 +1710,74 @@ template&lt;<a class="el" href="namespacenshogi_1_1core.html#ab8baa483d1eb2b3468
   </td>
   <td class="mlabels-right">
 <span class="mlabels"><span class="mlabel">constexpr</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a19c2cf5ee7426c10b4df7473c682e7e4" name="a19c2cf5ee7426c10b4df7473c682e7e4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a19c2cf5ee7426c10b4df7473c682e7e4">&#9670;&#160;</a></span>DirectionDataInternal</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">constexpr auto nshogi::core::DirectionDataInternal</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">constexpr</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Relative direction from <code>Sq1</code> to <code>Sq2</code>. </p>
+
+</div>
+</div>
+<a id="a092f1bf3a35a4fef7b66c0703a901076" name="a092f1bf3a35a4fef7b66c0703a901076"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a092f1bf3a35a4fef7b66c0703a901076">&#9670;&#160;</a></span>SquareDirection</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">constexpr std::array&lt;std::array&lt;<a class="el" href="namespacenshogi_1_1core.html#adc1de9799c7b2e61418437a1e35a1a18">Direction</a>, <a class="el" href="namespacenshogi_1_1core.html#a4fc4e1258dfdd1f019167d58c1d7a6c1acf42a8918d87934334f18c63dfe52877">NumSquares</a>&gt;, <a class="el" href="namespacenshogi_1_1core.html#a4fc4e1258dfdd1f019167d58c1d7a6c1acf42a8918d87934334f18c63dfe52877">NumSquares</a>&gt; nshogi::core::SquareDirection = DirectionDataInternal.first</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">constexpr</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ad5766b2daa5af66cb6cbe3b5ad39e7ec" name="ad5766b2daa5af66cb6cbe3b5ad39e7ec"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad5766b2daa5af66cb6cbe3b5ad39e7ec">&#9670;&#160;</a></span>SquareSerializedDirection</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">constexpr std::array&lt;std::array&lt;uint8_t, <a class="el" href="namespacenshogi_1_1core.html#a4fc4e1258dfdd1f019167d58c1d7a6c1acf42a8918d87934334f18c63dfe52877">NumSquares</a>&gt;, <a class="el" href="namespacenshogi_1_1core.html#a4fc4e1258dfdd1f019167d58c1d7a6c1acf42a8918d87934334f18c63dfe52877">NumSquares</a>&gt; nshogi::core::SquareSerializedDirection = DirectionDataInternal.second</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">constexpr</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">

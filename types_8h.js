@@ -224,5 +224,8 @@ var types_8h =
     [ "promotePieceType", "types_8h.html#a85f025b777ec3482680033df7e0cc189", null ],
     [ "squareToFile", "types_8h.html#acc03c3924076504818aaaa3199acf6bf", null ],
     [ "squareToRank", "types_8h.html#a0240c8e65b510a2fef9eb7cf804bb8dd", null ],
-    [ "Colors", "types_8h.html#a5d48debc5a9b6ed0fde6c57e39f3a457", null ]
+    [ "Colors", "types_8h.html#a5d48debc5a9b6ed0fde6c57e39f3a457", null ],
+    [ "DirectionDataInternal", "types_8h.html#a19c2cf5ee7426c10b4df7473c682e7e4", null ],
+    [ "SquareDirection", "types_8h.html#a092f1bf3a35a4fef7b66c0703a901076", null ],
+    [ "SquareSerializedDirection", "types_8h.html#ad5766b2daa5af66cb6cbe3b5ad39e7ec", null ]
 ];
