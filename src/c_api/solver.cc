@@ -71,18 +71,17 @@ int solverApiSolveWithPVByDfPn(nshogi_state_t* CState,
 } // namespace
 
 nshogi_solver_api_t* c_api::solver::getApi() {
-    static bool Initialized = false;
-    static nshogi_solver_api_t Api;
+    static nshogi_solver_api_t Api = [] {
+        nshogi_solver_api_t A;
 
-    if (!Initialized) {
-        Api.dfs = solverApiDFS;
-        Api.createDfPnSolver = solverApiCreateDfPnSolver;
-        Api.destroyDfPnSolver = solverApiDestroyDfPnSolver;
-        Api.solveByDfPn = solverApiSolveByDfPn;
-        Api.solveWithPVByDfPn = solverApiSolveWithPVByDfPn;
+        A.dfs = solverApiDFS;
+        A.createDfPnSolver = solverApiCreateDfPnSolver;
+        A.destroyDfPnSolver = solverApiDestroyDfPnSolver;
+        A.solveByDfPn = solverApiSolveByDfPn;
+        A.solveWithPVByDfPn = solverApiSolveWithPVByDfPn;
 
-        Initialized = true;
-    }
+        return A;
+    }();
 
     return &Api;
 }

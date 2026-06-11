@@ -161,42 +161,41 @@ void stateApiSetWhiteDrawValue(nshogi_state_config_t* CStateConfig,
 } // namespace
 
 nshogi_state_api_t* c_api::state::getApi() {
-    static bool Initialized = false;
-    static nshogi_state_api_t Api;
+    static nshogi_state_api_t Api = [] {
+        nshogi_state_api_t A;
 
-    if (!Initialized) {
-        Api.destroyState = stateApiDestroyState;
+        A.destroyState = stateApiDestroyState;
 
-        Api.clone = stateApiClone;
+        A.clone = stateApiClone;
 
-        Api.getSideToMove = stateApiGetSideToMove;
-        Api.getPly = stateApiGetPly;
-        Api.getPosition = stateApiGetPosition;
-        Api.getInitialPosition = stateApiGetInitialPosition;
-        Api.getRepetition = stateApiGetRepetition;
-        Api.canDeclare = stateApiCanDeclare;
-        Api.getHistoryMove = stateApiGetHistoryMove;
-        Api.getLastMove = stateApiGetLastMove;
-        Api.getHash = stateApiGetHash;
-        Api.isInCheck = stateApiIsInCheck;
+        A.getSideToMove = stateApiGetSideToMove;
+        A.getPly = stateApiGetPly;
+        A.getPosition = stateApiGetPosition;
+        A.getInitialPosition = stateApiGetInitialPosition;
+        A.getRepetition = stateApiGetRepetition;
+        A.canDeclare = stateApiCanDeclare;
+        A.getHistoryMove = stateApiGetHistoryMove;
+        A.getLastMove = stateApiGetLastMove;
+        A.getHash = stateApiGetHash;
+        A.isInCheck = stateApiIsInCheck;
 
-        Api.generateMoves = stateApiGenerateMoves;
-        Api.doMove = stateApiDoMove;
-        Api.undoMove = stateApiUndoMove;
+        A.generateMoves = stateApiGenerateMoves;
+        A.doMove = stateApiDoMove;
+        A.undoMove = stateApiUndoMove;
 
-        Api.createStateConfig = stateApiCreateStateConfig;
-        Api.destroyStateConfig = stateApiDestroyStateConfig;
+        A.createStateConfig = stateApiCreateStateConfig;
+        A.destroyStateConfig = stateApiDestroyStateConfig;
 
-        Api.getMaxPly = stateApiGetMaxPly;
-        Api.getBlackDrawValue = stateApiGetBlackDrawValue;
-        Api.getWhiteDrawValue = stateApiGetWhiteDrawValue;
+        A.getMaxPly = stateApiGetMaxPly;
+        A.getBlackDrawValue = stateApiGetBlackDrawValue;
+        A.getWhiteDrawValue = stateApiGetWhiteDrawValue;
 
-        Api.setMaxPly = stateApiSetMaxPly;
-        Api.setBlackDrawValue = stateApiSetBlackDrawValue;
-        Api.setWhiteDrawValue = stateApiSetWhiteDrawValue;
+        A.setMaxPly = stateApiSetMaxPly;
+        A.setBlackDrawValue = stateApiSetBlackDrawValue;
+        A.setWhiteDrawValue = stateApiSetWhiteDrawValue;
 
-        Initialized = true;
-    }
+        return A;
+    }();
 
     return &Api;
 }
