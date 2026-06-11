@@ -111,43 +111,47 @@ $(document).ready(function(){initNavTree('math_8h_source.html',''); initResizabl
 <div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="preprocessor">#define NSHOGI_ML_MATH_H</span></div>
 <div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span> </div>
 <div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="preprocessor">#include &lt;algorithm&gt;</span></div>
-<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="preprocessor">#include &lt;cmath&gt;</span></div>
-<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="preprocessor">#include &lt;cstddef&gt;</span></div>
-<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span> </div>
-<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span><span class="keyword">namespace </span><a class="code hl_namespace" href="namespacenshogi.html">nshogi</a> {</div>
-<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span><span class="keyword">namespace </span>ml {</div>
-<div class="line"><a id="l00019" name="l00019"></a><span class="lineno"><a class="line" href="namespacenshogi_1_1ml_1_1math.html">   19</a></span><span class="keyword">namespace </span>math {</div>
-<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span> </div>
-<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="keyword">template</span> &lt;<span class="keyword">typename</span> DType&gt;</div>
-<div class="line"><a id="l00022" name="l00022"></a><span class="lineno"><a class="line" href="namespacenshogi_1_1ml_1_1math.html#a231349c41f17eda4ba84d62cacb0c03f">   22</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="namespacenshogi_1_1ml_1_1math.html#a231349c41f17eda4ba84d62cacb0c03f">softmax_</a>(DType* X, std::size_t N, DType Temperature = 1.0) {</div>
-<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span>    <span class="keyword">const</span> DType MaxValue = *std::max_element(X, X + N);</div>
-<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span>    DType Sum = 0;</div>
-<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span> </div>
-<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span>    <span class="keyword">const</span> DType InvTemperature = (DType)1.0 / Temperature;</div>
-<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span> </div>
-<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span>    <span class="keywordflow">for</span> (std::size_t I = 0; I &lt; N; ++I) {</div>
-<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span>        X[I] = std::exp((X[I] - MaxValue) * InvTemperature);</div>
-<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span>        Sum += X[I];</div>
-<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span>    }</div>
-<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span> </div>
-<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span>    <span class="keyword">const</span> DType InvSum = (DType)1.0 / Sum;</div>
-<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span>    <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> I = 0; I &lt; N; ++I) {</div>
-<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span>        X[I] *= InvSum;</div>
-<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span>    }</div>
-<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span>}</div>
-<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span> </div>
-<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span><span class="keyword">template</span> &lt;<span class="keyword">typename</span> DType&gt;</div>
-<div class="line"><a id="l00040" name="l00040"></a><span class="lineno"><a class="line" href="namespacenshogi_1_1ml_1_1math.html#a4818c72d852a9fe2bf79c591f87e2a9f">   40</a></span>DType <a class="code hl_function" href="namespacenshogi_1_1ml_1_1math.html#a4818c72d852a9fe2bf79c591f87e2a9f">sigmoid</a>(DType X) {</div>
-<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span>    <span class="keywordflow">return</span> (DType)1.0 / ((DType)1.0 + std::exp(-X));</div>
-<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span>}</div>
-<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span> </div>
-<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span>} <span class="comment">// namespace math</span></div>
-<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span>} <span class="comment">// namespace ml</span></div>
-<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span>} <span class="comment">// namespace nshogi</span></div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="preprocessor">#include &lt;cassert&gt;</span></div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="preprocessor">#include &lt;cmath&gt;</span></div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span><span class="preprocessor">#include &lt;cstddef&gt;</span></div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span> </div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span><span class="keyword">namespace </span><a class="code hl_namespace" href="namespacenshogi.html">nshogi</a> {</div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span><span class="keyword">namespace </span>ml {</div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno"><a class="line" href="namespacenshogi_1_1ml_1_1math.html">   20</a></span><span class="keyword">namespace </span>math {</div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span> </div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span><span class="keyword">template</span> &lt;<span class="keyword">typename</span> DType&gt;</div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno"><a class="line" href="namespacenshogi_1_1ml_1_1math.html#a231349c41f17eda4ba84d62cacb0c03f">   23</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="namespacenshogi_1_1ml_1_1math.html#a231349c41f17eda4ba84d62cacb0c03f">softmax_</a>(DType* X, std::size_t N, DType Temperature = 1.0) {</div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span>    assert(N &gt; 0);</div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span>    assert(Temperature != 0);</div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span> </div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span>    <span class="keyword">const</span> DType MaxValue = *std::max_element(X, X + N);</div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span>    DType Sum = 0;</div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span> </div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span>    <span class="keyword">const</span> DType InvTemperature = (DType)1.0 / Temperature;</div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span> </div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span>    <span class="keywordflow">for</span> (std::size_t I = 0; I &lt; N; ++I) {</div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span>        X[I] = std::exp((X[I] - MaxValue) * InvTemperature);</div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span>        Sum += X[I];</div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span>    }</div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span> </div>
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span>    <span class="keyword">const</span> DType InvSum = (DType)1.0 / Sum;</div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span>    <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> I = 0; I &lt; N; ++I) {</div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>        X[I] *= InvSum;</div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>    }</div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span>}</div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span> </div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span><span class="keyword">template</span> &lt;<span class="keyword">typename</span> DType&gt;</div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno"><a class="line" href="namespacenshogi_1_1ml_1_1math.html#a4818c72d852a9fe2bf79c591f87e2a9f">   44</a></span>DType <a class="code hl_function" href="namespacenshogi_1_1ml_1_1math.html#a4818c72d852a9fe2bf79c591f87e2a9f">sigmoid</a>(DType X) {</div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span>    <span class="keywordflow">return</span> (DType)1.0 / ((DType)1.0 + std::exp(-X));</div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span>}</div>
 <div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span> </div>
-<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span><span class="preprocessor">#endif </span><span class="comment">// #define NSHOGI_ML_MATH_H</span></div>
-<div class="ttc" id="anamespacenshogi_1_1ml_1_1math_html_a231349c41f17eda4ba84d62cacb0c03f"><div class="ttname"><a href="namespacenshogi_1_1ml_1_1math.html#a231349c41f17eda4ba84d62cacb0c03f">nshogi::ml::math::softmax_</a></div><div class="ttdeci">void softmax_(DType *X, std::size_t N, DType Temperature=1.0)</div><div class="ttdef"><b>Definition:</b> math.h:22</div></div>
-<div class="ttc" id="anamespacenshogi_1_1ml_1_1math_html_a4818c72d852a9fe2bf79c591f87e2a9f"><div class="ttname"><a href="namespacenshogi_1_1ml_1_1math.html#a4818c72d852a9fe2bf79c591f87e2a9f">nshogi::ml::math::sigmoid</a></div><div class="ttdeci">DType sigmoid(DType X)</div><div class="ttdef"><b>Definition:</b> math.h:40</div></div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span>} <span class="comment">// namespace math</span></div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span>} <span class="comment">// namespace ml</span></div>
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span>} <span class="comment">// namespace nshogi</span></div>
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span> </div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span><span class="preprocessor">#endif </span><span class="comment">// #define NSHOGI_ML_MATH_H</span></div>
+<div class="ttc" id="anamespacenshogi_1_1ml_1_1math_html_a231349c41f17eda4ba84d62cacb0c03f"><div class="ttname"><a href="namespacenshogi_1_1ml_1_1math.html#a231349c41f17eda4ba84d62cacb0c03f">nshogi::ml::math::softmax_</a></div><div class="ttdeci">void softmax_(DType *X, std::size_t N, DType Temperature=1.0)</div><div class="ttdef"><b>Definition:</b> math.h:23</div></div>
+<div class="ttc" id="anamespacenshogi_1_1ml_1_1math_html_a4818c72d852a9fe2bf79c591f87e2a9f"><div class="ttname"><a href="namespacenshogi_1_1ml_1_1math.html#a4818c72d852a9fe2bf79c591f87e2a9f">nshogi::ml::math::sigmoid</a></div><div class="ttdeci">DType sigmoid(DType X)</div><div class="ttdef"><b>Definition:</b> math.h:44</div></div>
 <div class="ttc" id="anamespacenshogi_html"><div class="ttname"><a href="namespacenshogi.html">nshogi</a></div><div class="ttdef"><b>Definition:</b> capability.cc:12</div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
