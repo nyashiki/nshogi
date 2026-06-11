@@ -68,6 +68,11 @@ static constexpr PieceTypeKind PieceTypes[] = {
 };
 
 inline constexpr PieceTypeKind promotePieceType(PieceTypeKind Pt) noexcept {
+    // The XOR-based implementation only yields a valid promoted piece type
+    // for the promotable, not-yet-promoted piece types (Pawn .. Rook).
+    // Applying it to PTK_Gold, PTK_King, or an already-promoted type
+    // produces a bogus value.
+    assert(Pt >= PTK_Pawn && Pt <= PTK_Rook);
     return (PieceTypeKind)(Pt ^ 0b1000);
 }
 
