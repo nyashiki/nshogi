@@ -2434,17 +2434,19 @@ MoveGeneratorInternal::generateLegalSmallestMove(const internal::StateImpl& S, S
         const Bitboard CheckerBB = S.getCheckerBB();
 
         if (!CheckerBB.isZero()) {
-            if (CheckerBB.popCount() >= 2) {
-                // When there are more than one checkers,
-                // no moves are available but moving the king,
-                // which is not a capture move.
-                // Thus, we can return MoveNone() without generating moves.
-                return Move32::MoveNone();
-            }
-
-            if (!CheckerBB.isSet(To)) {
-                // If the destination square is not the square of the checker,
-                // there is no capture move to the destination square.
+            if (CheckerBB.popCount() >= 2 || !CheckerBB.isSet(To)) {
+                // When there are more than one checkers, or the destination
+                // square is not the square of the (single) checker, no
+                // non-king move to the destination square can resolve the
+                // check. The only candidate is moving the king to the
+                // destination square so that the king escapes the check.
+                const Square KingSq = S.getKingSquare<C>();
+                if (getAttackBB<C, PTK_King>(KingSq).isSet(To) &&
+                    !S.isAttacked<C>(To, KingSq)) {
+                    return Move32::boardMove(
+                        KingSq, To, PTK_King,
+                        getPieceType(S.getPosition().pieceOn(To)));
+                }
                 return Move32::MoveNone();
             }
         }
