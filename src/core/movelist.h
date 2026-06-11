@@ -11,6 +11,7 @@
 #define NSHOGI_CORE_MOVELIST_H
 
 #include "types.h"
+#include <algorithm>
 #include <cstddef>
 
 namespace nshogi {
