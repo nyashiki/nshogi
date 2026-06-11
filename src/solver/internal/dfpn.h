@@ -133,10 +133,10 @@ class SolverImpl {
     SolverImpl(std::size_t MemoryMB);
     ~SolverImpl();
 
-    core::Move32 solve(core::State* S, uint64_t MaxDepth, uint64_t MaxNodeCount,
+    core::Move32 solve(core::State* S, uint64_t MaxNodeCount, uint64_t MaxDepth,
                        bool Strict);
-    std::vector<core::Move32> solveWithPV(core::State* S, uint64_t MaxDepth,
-                                          uint64_t MaxNodeCount, bool Strict);
+    std::vector<core::Move32> solveWithPV(core::State* S, uint64_t MaxNodeCount,
+                                          uint64_t MaxDepth, bool Strict);
 
     uint64_t searchedNodeCount() const;
 
