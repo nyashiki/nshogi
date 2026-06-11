@@ -434,14 +434,14 @@ bool StateImpl::isLegal(Move16 Move) const noexcept {
             }
         }
     } else { // A move on the board.
+        if (Move.from() >= NumSquares || Move.to() >= NumSquares) {
+            return false;
+        }
+
         const core::PieceKind Piece = P.pieceOn(Move.from());
         const core::PieceTypeKind Type = getPieceType(Piece);
 
         if (Type >= NumPieceType) {
-            return false;
-        }
-
-        if (Move.from() >= NumSquares || Move.to() >= NumSquares) {
             return false;
         }
 
