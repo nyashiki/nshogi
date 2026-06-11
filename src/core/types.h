@@ -269,10 +269,8 @@ inline constexpr Rank squareToRank(Square Sq) noexcept {
 };
 // clang-format on
 
-namespace {
-
 /// Relative direction from `Sq1` to `Sq2`.
-static constexpr auto DirectionDataInternal =
+inline constexpr auto DirectionDataInternal =
     []() -> std::pair<std::array<std::array<Direction, NumSquares>, NumSquares>,
                       std::array<std::array<uint8_t, NumSquares>, NumSquares>> {
     std::array<std::array<Direction, NumSquares>, NumSquares> Directions = {};
@@ -330,11 +328,9 @@ static constexpr auto DirectionDataInternal =
     return {Directions, SerializedDirections};
 }();
 
-} // namespace
-
-static constexpr std::array<std::array<Direction, NumSquares>, NumSquares>
+inline constexpr std::array<std::array<Direction, NumSquares>, NumSquares>
     SquareDirection = DirectionDataInternal.first;
-static constexpr std::array<std::array<uint8_t, NumSquares>, NumSquares>
+inline constexpr std::array<std::array<uint8_t, NumSquares>, NumSquares>
     SquareSerializedDirection = DirectionDataInternal.second;
 
 enum Stands : uint32_t { NumStandKinds = 8 };
