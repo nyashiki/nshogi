@@ -493,8 +493,8 @@ StateBuilder::StateBuilder(const std::string& Sfen)
         return;
     }
 
-    if (Sfen.size() < Cursor + 5) {
-        const auto ExpectMovesStr = Sfen.substr(Cursor, +5);
+    if (Sfen.size() >= Cursor + 5) {
+        const auto ExpectMovesStr = Sfen.substr(Cursor, 5);
 
         if (ExpectMovesStr != "moves") {
             throw std::runtime_error("invalid sfen string (moves error)\n" +
