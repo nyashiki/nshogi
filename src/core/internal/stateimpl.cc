@@ -627,29 +627,50 @@ void StateImpl::undoNullMove() {
     HashValue.updateColor();
 }
 
-int32_t StateImpl::computeSEE(Square To, const int32_t* const PieceValues) const noexcept {
+int32_t StateImpl::computeSEE(const Move32 Move, const int32_t* const PieceValues) const noexcept {
+    assert(!Move.isNone() && !Move.isNull());
+    assert(!Move.drop());
+    assert(Move.capturePieceType() != PTK_Empty);
+    assert(getPieceType(getPosition().pieceOn(Move.to())) ==
+           Move.capturePieceType());
+
+    const Square To = Move.to();
     Color C = getSideToMove();
 
     bitboard::Bitboard BBs[2] = { getBitboard(Black), getBitboard(White) };
     int32_t Gains[64];
 
-    const PieceKind TargetPiece = getPosition().pieceOn(To);
-    assert(TargetPiece == PK_Empty || getColor(TargetPiece) != C);
+    // The exchange starts with the given move, which is assumed to be legal.
+    Gains[0] = PieceValues[Move.capturePieceType()];
 
-    PieceTypeKind TargetType = getPieceType(TargetPiece);
+    PieceTypeKind TargetType =
+        Move.promote() ? promotePieceType(Move.pieceType()) : Move.pieceType();
+
+    // My piece must exist.
+    assert(BBs[C].isSet(Move.from()));
+    // The opponent's piece must exist.
+    assert(BBs[~C].isSet(Move.to()));
+
+    // Move my piece.
+    BBs[C].toggleBit(Move.from());
+    BBs[C].toggleBit(Move.to());
+    // Remove the opponent's piece.
+    BBs[~C].toggleBit(Move.to());
+
+    C = ~C;
 
     int32_t Depth;
 
-    for (Depth = 0; ; ++Depth, C = ~C) {
+    for (Depth = 1; ; ++Depth, C = ~C) {
         assert(Depth < 64);
 
         bitboard::Bitboard& MyBB = BBs[C];
         bitboard::Bitboard& OpBB = BBs[~C];
 
-        if (Depth <= 1) {
+        if (Depth <= 2) {
             // A pawn attacker to To, if any, is fixed by color and square.
             // Since pieces only leave their source squares during SEE, no new pawn attacker
-            // can be revealed after depth >= 2.
+            // can be revealed after each color's first turn (depth 1 and 2).
             if (processSEEPiece<PTK_Pawn>(C, To, &MyBB, &OpBB, &TargetType, &Gains[Depth], PieceValues)) {
                 assert(TargetType != PTK_King);
                 continue;

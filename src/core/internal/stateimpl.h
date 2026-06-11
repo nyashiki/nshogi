@@ -788,7 +788,7 @@ class StateImpl {
 
     void undoNullMove();
 
-    int32_t computeSEE(Square To, const int32_t* const PieceValues) const noexcept;
+    int32_t computeSEE(const Move32 Move, const int32_t* const PieceValues) const noexcept;
 
  protected:
     Position Pos;
