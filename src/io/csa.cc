@@ -11,6 +11,7 @@
 #include "../core/internal/utils.h"
 #include "../core/squareiterator.h"
 
+#include <cassert>
 #include <cstddef>
 #include <cstdint>
 #include <cstdio>
@@ -103,6 +104,8 @@ core::PieceTypeKind CSAToPieceType(const std::string& CSA) noexcept {
 }
 
 core::PieceKind CSAToPiece(const std::string& CSA) noexcept {
+    assert(!CSA.empty());
+
     core::PieceTypeKind Type = CSAToPieceType(CSA.substr(1));
 
     if (Type == core::PTK_Empty) {
@@ -185,6 +188,11 @@ core::Move32 CSAToMove32(const core::Position& Pos, const std::string& CSA) {
     core::PieceTypeKind CaptureType = core::getPieceType(Pos.pieceOn(ToSq));
 
     if (FromType != Type) {
+        // CSA encodes a promoting move by writing the *promoted* piece
+        // type, while the move's `FromType` is the piece's type before
+        // promotion.
+        assert(Type == core::promotePieceType(FromType));
+
         return core::Move32::boardPromotingMove(FromSq, ToSq, FromType,
                                                 CaptureType);
     } else {

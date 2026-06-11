@@ -11,6 +11,7 @@
 #include "../core/squareiterator.h"
 #include "../core/types.h"
 
+#include <cassert>
 #include <cstddef>
 #include <cstdint>
 #include <map>
@@ -324,6 +325,11 @@ core::Position PositionBuilder::newPosition(const std::string& Sfen) {
     std::size_t Cursor = 0;
 
     for (; Sfen[Cursor] != ' '; ++Cursor) {
+        // `Sfen[Cursor]` above relies on `std::string::operator[]` returning
+        // '\0' for `Cursor == Sfen.size()`, which is well-defined since
+        // C++11 only as long as `Cursor` does not exceed `Sfen.size()`.
+        assert(Cursor <= Sfen.size());
+
         if (Cursor >= Sfen.size()) {
             throw std::runtime_error("invalid sfen string (cursor error).\n" +
                                      ("    Sfen: " + Sfen));
@@ -354,6 +360,12 @@ core::Position PositionBuilder::newPosition(const std::string& Sfen) {
         if (Piece == PK_Empty) {
             throw std::runtime_error(
                 "invalid sfen string (piece empty error).\n" +
+                ("    Sfen: " + Sfen));
+        }
+
+        if (*SquareIt == NumSquares) {
+            throw std::runtime_error(
+                "invalid sfen string (too many squares error).\n" +
                 ("    Sfen: " + Sfen));
         }
 
@@ -390,6 +402,8 @@ core::Position PositionBuilder::newPosition(const std::string& Sfen) {
 
     uint8_t StandCount = 0;
     for (; Sfen[Cursor] != ' '; ++Cursor) {
+        assert(Cursor <= Sfen.size());
+
         if (Cursor >= Sfen.size()) {
             throw std::runtime_error(
                 "invalid sfen string (stand cursor error).\n" +
@@ -401,6 +415,10 @@ core::Position PositionBuilder::newPosition(const std::string& Sfen) {
         }
 
         if (Sfen[Cursor] >= '0' && Sfen[Cursor] <= '9') {
+            // Guard against the uint8_t multiplication below silently
+            // overflowing on malformed input such as "999P".
+            assert(10 * (unsigned)StandCount + (unsigned)(Sfen[Cursor] - '0') <=
+                   255);
             StandCount = (uint8_t)(10 * StandCount + (Sfen[Cursor] - '0'));
             continue;
         }
@@ -456,6 +474,9 @@ core::Position PositionBuilder::newPosition(const std::string& Sfen) {
                 ("    Sfen: " + Sfen));
         }
 
+        // Guard against the uint16_t multiplication below silently
+        // overflowing on malformed input with an excessive ply count.
+        assert((uint32_t)Ply * 10 + (uint32_t)(Sfen[Cursor] - '0') <= 0xFFFF);
         Ply = (uint16_t)(Ply * 10) + (uint16_t)(Sfen[Cursor] - '0');
     }
 
