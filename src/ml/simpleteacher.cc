@@ -18,7 +18,14 @@ namespace nshogi {
 namespace ml {
 
 SimpleTeacher::SimpleTeacher()
-    : HuffmanCode(core::HuffmanCode::zero()) {
+    : HuffmanCode(core::HuffmanCode::zero())
+    , Ply(0)
+    , MaxPly(256)
+    , DrawValues{0.5f, 0.5f}
+    , NextMove(core::Move16::MoveNone())
+    , Winner(core::NoColor)
+    , Q(0.0f)
+    , GamePly(0) {
 }
 
 SimpleTeacher::SimpleTeacher(const SimpleTeacher& ST)
