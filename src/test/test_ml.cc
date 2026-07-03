@@ -9,10 +9,10 @@
 
 #include <cstddef>
 
+#include "../core/extendedstate.h"
 #include "../core/internal/stateadapter.h"
 #include "../core/movegenerator.h"
 #include "../core/state.h"
-#include "../core/extendedstate.h"
 #include "../core/statebuilder.h"
 #include "../core/stateconfig.h"
 #include "../io/file.h"
@@ -21,16 +21,16 @@
 #include "../ml/common.h"
 #include "../ml/featurestack.h"
 #include "../ml/internal/featurebitboardutil.h"
-#include "../ml/simpleteacher.h"
 #include "../ml/ka.h"
 #include "../ml/p.h"
+#include "../ml/simpleteacher.h"
 #include "../ml/utils.h"
 #include "common.h"
 
-#include <set>
 #include <filesystem>
 #include <fstream>
 #include <random>
+#include <set>
 
 namespace {
 

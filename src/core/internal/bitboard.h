@@ -126,6 +126,10 @@ struct alignas(16) Bitboard {
         }
     }
 
+    static Bitboard FurthermostBB(Color C) noexcept {
+        return (C == Black) ? RankBB[RankA] : RankBB[RankI];
+    }
+
     template <Color C>
     static Bitboard SecondFurthestBB() noexcept {
         if constexpr (C == Black) {
@@ -133,6 +137,10 @@ struct alignas(16) Bitboard {
         } else {
             return RankBB[RankH];
         }
+    }
+
+    static Bitboard SecondFurthestBB(Color C) noexcept {
+        return (C == Black) ? RankBB[RankB] : RankBB[RankH];
     }
 
 #if defined(USE_SSE41)
@@ -693,6 +701,39 @@ inline Bitboard getAttackBB(Square From) noexcept {
     }
 }
 
+template <PieceTypeKind Type>
+inline Bitboard getAttackBB(Color C, Square From) noexcept {
+    static_assert(Type != PTK_Lance,
+                  "getAttackBB() is not implemented for PieceType::PTK_Lance");
+    static_assert(Type != PTK_Bishop,
+                  "getAttackBB() is not implemented for PieceType::PTK_Bishop");
+    static_assert(Type != PTK_Rook,
+                  "getAttackBB() is not implemented for PieceType::PTK_Rook");
+
+    if constexpr (Type == PTK_Pawn) {
+        if (C == Black) {
+            return SquareBB[From].getLeftShiftEpi64<1>();
+        } else {
+            return SquareBB[From].getRightShiftEpi64<1>();
+        }
+    }
+    if constexpr (Type == PTK_Knight) {
+        return StepPieceAttackBB[C][0][From];
+    } else if constexpr (Type == PTK_Silver) {
+        return StepPieceAttackBB[C][1][From];
+    } else if constexpr (Type == PTK_Gold || Type == PTK_ProPawn ||
+                         Type == PTK_ProLance || Type == PTK_ProKnight ||
+                         Type == PTK_ProSilver) {
+        return StepPieceAttackBB[C][2][From];
+    } else if constexpr (Type == PTK_King || Type == PTK_ProBishop ||
+                         Type == PTK_ProRook) {
+        return KingAttackBB[From];
+    } else {
+        assert(false);
+        return Bitboard::ZeroBB();
+    }
+}
+
 template <Color C>
 inline Bitboard getStepAttackBB(PieceTypeKind Type, Square From) noexcept {
     switch (Type) {
@@ -725,6 +766,22 @@ inline Bitboard getLanceAttackBB(Square Sq,
     }
 
     if constexpr (C == Black) {
+        auto Temp = OccupiedBB ^ (OccupiedBB.subtract(SquareBB[Sq + North]));
+        return Temp & ForwardBB[Sq];
+    } else {
+        auto Temp = (BackwardBB[Sq] & (OccupiedBB | RankBB[RankI]))
+                        .pickUpMostSignificantBB();
+        return SquareBB[Sq].subtract(Temp);
+    }
+}
+
+inline Bitboard getLanceAttackBB(Color C, Square Sq,
+                                 const Bitboard& OccupiedBB) noexcept {
+    if (Bitboard::FurthermostBB(C).isSet(Sq)) {
+        return Bitboard::ZeroBB();
+    }
+
+    if (C == Black) {
         auto Temp = OccupiedBB ^ (OccupiedBB.subtract(SquareBB[Sq + North]));
         return Temp & ForwardBB[Sq];
     } else {

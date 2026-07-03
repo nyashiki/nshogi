@@ -24,9 +24,8 @@ class ThreadsafeTeacherWriter {
     ThreadsafeTeacherWriter(const std::string& TeacherPath);
 
     void write(const TeacherType& Teacher);
-    static void
-    shuffle(TeacherLoaderForFixedSizeTeacher<TeacherType>& Loader,
-            const std::string& OutputPath, uint64_t Seed);
+    static void shuffle(TeacherLoaderForFixedSizeTeacher<TeacherType>& Loader,
+                        const std::string& OutputPath, uint64_t Seed);
 
  private:
     std::mutex Mutex;

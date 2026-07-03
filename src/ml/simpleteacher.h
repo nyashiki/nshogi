@@ -76,7 +76,7 @@ struct SimpleTeacher {
     float Q;
     uint16_t GamePly;
 
- friend class io::file::simple_teacher::SimpleTeacherIO;
+    friend class io::file::simple_teacher::SimpleTeacherIO;
 };
 
 } // namespace ml

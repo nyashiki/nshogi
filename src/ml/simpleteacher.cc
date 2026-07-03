@@ -18,7 +18,14 @@ namespace nshogi {
 namespace ml {
 
 SimpleTeacher::SimpleTeacher()
-    : HuffmanCode(core::HuffmanCode::zero()) {
+    : HuffmanCode(core::HuffmanCode::zero())
+    , Ply(0)
+    , MaxPly(256)
+    , DrawValues{0.5f, 0.5f}
+    , NextMove(core::Move16::MoveNone())
+    , Winner(core::NoColor)
+    , Q(0.0f)
+    , GamePly(0) {
 }
 
 SimpleTeacher::SimpleTeacher(const SimpleTeacher& ST)
@@ -120,8 +127,7 @@ bool SimpleTeacher::equals(const SimpleTeacher& ST) const {
     return HuffmanCode == ST.HuffmanCode && Ply == ST.Ply &&
            MaxPly == ST.MaxPly && DrawValues[0] == ST.DrawValues[0] &&
            DrawValues[1] == ST.DrawValues[1] && NextMove == ST.NextMove &&
-           Winner == ST.Winner &&
-           Q == ST.Q && GamePly == ST.GamePly;
+           Winner == ST.Winner && Q == ST.Q && GamePly == ST.GamePly;
 }
 
 void SimpleTeacher::corruptMyself() {

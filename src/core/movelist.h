@@ -37,6 +37,14 @@ struct MoveList {
     MoveList& operator=(const MoveList&) = delete;
     MoveList& operator=(MoveList&&) = delete;
 
+    inline Move32* begin() noexcept {
+        return Moves;
+    }
+
+    inline Move32* end() noexcept {
+        return Tail;
+    }
+
     inline const Move32* begin() const noexcept {
         return Moves;
     }
@@ -46,6 +54,10 @@ struct MoveList {
     }
 
     inline Move32 operator[](std::size_t Index) const noexcept {
+        return Moves[Index];
+    }
+
+    inline Move32& operator[](std::size_t Index) noexcept {
         return Moves[Index];
     }
 

@@ -20,17 +20,17 @@
 
 // Use mmap() in Linux instead of ifstream to avoid overhead.
 #include <fcntl.h>
-#include <unistd.h>
-#include <sys/stat.h>
 #include <sys/mman.h>
+#include <sys/stat.h>
+#include <unistd.h>
 
 #endif
 
 #ifdef __APPLE__
 
 // For getpid().
-#include <unistd.h>
 #include <sys/types.h>
+#include <unistd.h>
 
 #endif
 
@@ -55,7 +55,8 @@ TeacherLoaderForFixedSizeTeacher<TeacherType>::TeacherLoaderForFixedSizeTeacher(
 }
 
 template <typename TeacherType>
-TeacherLoaderForFixedSizeTeacher<TeacherType>::~TeacherLoaderForFixedSizeTeacher() {
+TeacherLoaderForFixedSizeTeacher<
+    TeacherType>::~TeacherLoaderForFixedSizeTeacher() {
 #ifdef __linux__
     if (MappedFile != nullptr) {
         ::munmap(MappedFile, FileSize);
@@ -81,7 +82,7 @@ void TeacherLoaderForFixedSizeTeacher<TeacherType>::ensureOpen() {
         throw std::runtime_error("File not found.");
     }
 
-    struct stat Stat{};
+    struct stat Stat {};
     if (::fstat(FileDescriptor, &Stat) < 0) {
         ::close(FileDescriptor);
         throw std::runtime_error("Failed to get file size.");
@@ -93,14 +94,16 @@ void TeacherLoaderForFixedSizeTeacher<TeacherType>::ensureOpen() {
         throw std::runtime_error("File is empty.");
     }
 
-    MappedFile = ::mmap(nullptr, FileSize, PROT_READ, MAP_PRIVATE, FileDescriptor, 0);
+    MappedFile =
+        ::mmap(nullptr, FileSize, PROT_READ, MAP_PRIVATE, FileDescriptor, 0);
     ::close(FileDescriptor);
 
     if (MappedFile == MAP_FAILED) {
         throw std::runtime_error("Failed to map file.");
     }
 
-    io::file::load<TeacherType>(static_cast<const char*>(MappedFile), Version, &TeacherSizeUnit);
+    io::file::load<TeacherType>(static_cast<const char*>(MappedFile), Version,
+                                &TeacherSizeUnit);
 #else
     const pid_t CurrentPid = getpid();
 
@@ -145,8 +148,8 @@ void TeacherLoaderForFixedSizeTeacher<TeacherType>::ensureOpen() {
 }
 
 template <typename TeacherType>
-TeacherType TeacherLoaderForFixedSizeTeacher<TeacherType>::operator[](
-    std::size_t Index) {
+TeacherType
+TeacherLoaderForFixedSizeTeacher<TeacherType>::operator[](std::size_t Index) {
     if (ShuffleEnabled) {
         Index = (*PG)(Index);
     }
@@ -159,11 +162,10 @@ TeacherType TeacherLoaderForFixedSizeTeacher<TeacherType>::operator[](
     ensureOpen();
 #endif
 
-
 #ifdef __linux__
     TeacherType T = io::file::load<TeacherType>(
-        static_cast<const char*>(MappedFile) + Index * TeacherSizeUnit, Version
-    );
+        static_cast<const char*>(MappedFile) + Index * TeacherSizeUnit,
+        Version);
 #else
     Ifs.clear();
     Ifs.seekg((long)(Index * TeacherSizeUnit), std::ios_base::beg);
@@ -175,9 +177,7 @@ TeacherType TeacherLoaderForFixedSizeTeacher<TeacherType>::operator[](
 
 template <>
 void TeacherLoaderForFixedSizeTeacher<SimpleTeacher>::loadAt(
-    SimpleTeacher* Dest,
-    std::size_t Index
-) {
+    SimpleTeacher* Dest, std::size_t Index) {
     if (ShuffleEnabled) {
         Index = (*PG)(Index);
     }
@@ -191,9 +191,8 @@ void TeacherLoaderForFixedSizeTeacher<SimpleTeacher>::loadAt(
 
 #ifdef __linux__
     io::file::simple_teacher::loadAt(
-        Dest,
-        static_cast<const char*>(MappedFile) + Index * TeacherSizeUnit, Version
-    );
+        Dest, static_cast<const char*>(MappedFile) + Index * TeacherSizeUnit,
+        Version);
 #else
     Ifs.clear();
     Ifs.seekg((long)(Index * TeacherSizeUnit), std::ios_base::beg);

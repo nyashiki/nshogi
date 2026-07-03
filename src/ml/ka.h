@@ -10,8 +10,8 @@
 #ifndef NSHOGI_ML_KA_H
 #define NSHOGI_ML_KA_H
 
-#include "featureextractor.h"
 #include "../core/state.h"
+#include "featureextractor.h"
 
 #include <vector>
 
@@ -23,13 +23,8 @@ class KAFeatureExtractor : public IFeatureExtractor {
     KAFeatureExtractor();
     ~KAFeatureExtractor() override = default;
 
-    void idsAt(
-        int32_t* DestMyIds,
-        int32_t* DestOpIds,
-        int32_t* DestMyIdsCount,
-        int32_t* DestOpIdsCount,
-        const core::State& S
-    ) const override;
+    void idsAt(int32_t* DestMyIds, int32_t* DestOpIds, int32_t* DestMyIdsCount,
+               int32_t* DestOpIdsCount, const core::State& S) const override;
 
     auto ids(const core::State&) const
         -> std::pair<std::vector<int32_t>, std::vector<int32_t>> override;

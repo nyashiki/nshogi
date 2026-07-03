@@ -71,58 +71,64 @@ constexpr static int32_t PieceToIndex[core::NumPieceKind] = {
 // clang-format on
 
 template <core::Color C>
-void idsAt_(
-    int32_t* DestMyIds,
-    int32_t* DestOpIds,
-    int32_t* DestMyIdsCount,
-    int32_t* DestOpIdsCount,
-    const core::State& S
-) {
+void idsAt_(int32_t* DestMyIds, int32_t* DestOpIds, int32_t* DestMyIdsCount,
+            int32_t* DestOpIdsCount, const core::State& S) {
     *DestMyIdsCount = 0;
     *DestOpIdsCount = 0;
 
     const auto Position = S.getPosition();
     core::internal::ImmutableStateAdapter Adapter(S);
 
-    const auto MyKingSquare = (C == core::Black)
-        ? S.getKingSquare(core::Black)
-        : core::getInversed(S.getKingSquare(core::White));
+    const auto MyKingSquare =
+        (C == core::Black) ? S.getKingSquare(core::Black)
+                           : core::getInversed(S.getKingSquare(core::White));
 
-    const auto OpKingSquare = (C == core::Black)
-        ? S.getKingSquare(core::White)
-        : core::getInversed(S.getKingSquare(core::Black));
+    const auto OpKingSquare =
+        (C == core::Black) ? S.getKingSquare(core::White)
+                           : core::getInversed(S.getKingSquare(core::Black));
 
-    const auto MyKingPiece = (C == core::Black) ? core::PK_BlackKing : core::PK_WhiteKing;
-    const auto OpKingPiece = (C == core::Black) ? core::PK_WhiteKing : core::PK_BlackKing;
+    const auto MyKingPiece =
+        (C == core::Black) ? core::PK_BlackKing : core::PK_WhiteKing;
+    const auto OpKingPiece =
+        (C == core::Black) ? core::PK_WhiteKing : core::PK_BlackKing;
 
-    const std::size_t MyBase = (std::size_t)MyKingSquare * FeatureSizePerKingSquare;
-    const std::size_t OpBase = (std::size_t)core::getInversed(OpKingSquare) * FeatureSizePerKingSquare;
+    const std::size_t MyBase =
+        (std::size_t)MyKingSquare * FeatureSizePerKingSquare;
+    const std::size_t OpBase =
+        (std::size_t)core::getInversed(OpKingSquare) * FeatureSizePerKingSquare;
 
     const core::internal::bitboard::Bitboard OccupiedBB =
-        Adapter->getBitboard<core::Black>() | Adapter->getBitboard<core::White>();
+        Adapter->getBitboard<core::Black>() |
+        Adapter->getBitboard<core::White>();
 
     OccupiedBB.forEach([&](core::Square Sq) {
         const auto RawPiece = Position.pieceOn(Sq);
         if (RawPiece != core::PK_Empty) {
             if (RawPiece != MyKingPiece) { // From my perspective.
-                const auto Piece = (C == core::Black) ? RawPiece : core::getInversed(RawPiece);
+                const auto Piece =
+                    (C == core::Black) ? RawPiece : core::getInversed(RawPiece);
 
                 const int32_t PieceIndex = PieceToIndex[(std::size_t)Piece];
                 assert(PieceIndex >= 0 && PieceIndex < 27);
 
-                const auto IndexSq = (C == core::Black) ? Sq : core::getInversed(Sq);
-                const std::size_t Index = (std::size_t)IndexSq * 27 + (std::size_t)PieceIndex;
+                const auto IndexSq =
+                    (C == core::Black) ? Sq : core::getInversed(Sq);
+                const std::size_t Index =
+                    (std::size_t)IndexSq * 27 + (std::size_t)PieceIndex;
                 DestMyIds[(*DestMyIdsCount)++] = (int32_t)(MyBase + Index);
             }
 
             if (RawPiece != OpKingPiece) { // From opponent's perspective.
-                const auto Piece = (C == core::Black) ? core::getInversed(RawPiece) : RawPiece;
+                const auto Piece =
+                    (C == core::Black) ? core::getInversed(RawPiece) : RawPiece;
 
                 const int32_t PieceIndex = PieceToIndex[(std::size_t)Piece];
                 assert(PieceIndex >= 0 && PieceIndex < 27);
 
-                const auto IndexSq = (C == core::Black) ? core::getInversed(Sq) : Sq;
-                const std::size_t Index = (std::size_t)IndexSq * 27 + (std::size_t)PieceIndex;
+                const auto IndexSq =
+                    (C == core::Black) ? core::getInversed(Sq) : Sq;
+                const std::size_t Index =
+                    (std::size_t)IndexSq * 27 + (std::size_t)PieceIndex;
                 DestOpIds[(*DestOpIdsCount)++] = (int32_t)(OpBase + Index);
             }
         }
@@ -131,20 +137,21 @@ void idsAt_(
     const std::size_t MyAuxiliaryBase = MyBase + BoardFeatureSize;
     const std::size_t OpAuxiliaryBase = OpBase + BoardFeatureSize;
 
-    auto appendStandPair = [&](
-        std::size_t Offset,
-        std::size_t MaxCount,
-        core::PieceTypeKind Type
-    ) {
+    auto appendStandPair = [&](std::size_t Offset, std::size_t MaxCount,
+                               core::PieceTypeKind Type) {
         const uint8_t MyStandCount = Position.getStandCount(C, Type);
         const uint8_t OpStandCount = Position.getStandCount(~C, Type);
         for (uint8_t I = 0; I < MyStandCount; ++I) {
-            DestMyIds[(*DestMyIdsCount)++] = (int32_t)(MyAuxiliaryBase + Offset + I);
-            DestOpIds[(*DestOpIdsCount)++] = (int32_t)(OpAuxiliaryBase + Offset + MaxCount + I);
+            DestMyIds[(*DestMyIdsCount)++] =
+                (int32_t)(MyAuxiliaryBase + Offset + I);
+            DestOpIds[(*DestOpIdsCount)++] =
+                (int32_t)(OpAuxiliaryBase + Offset + MaxCount + I);
         }
         for (uint8_t I = 0; I < OpStandCount; ++I) {
-            DestMyIds[(*DestMyIdsCount)++] = (int32_t)(MyAuxiliaryBase + Offset + MaxCount + I);
-            DestOpIds[(*DestOpIdsCount)++] = (int32_t)(OpAuxiliaryBase + Offset + I);
+            DestMyIds[(*DestMyIdsCount)++] =
+                (int32_t)(MyAuxiliaryBase + Offset + MaxCount + I);
+            DestOpIds[(*DestOpIdsCount)++] =
+                (int32_t)(OpAuxiliaryBase + Offset + I);
         }
     };
 
@@ -160,12 +167,12 @@ void idsAt_(
 
 #ifndef NDEBUG
     for (int32_t I = 0; I < *DestMyIdsCount; ++I) {
-       assert(DestMyIds[I] >= 0);
-       assert(DestMyIds[I] < FeatureSize);
+        assert(DestMyIds[I] >= 0);
+        assert(DestMyIds[I] < FeatureSize);
     }
     for (int32_t I = 0; I < *DestOpIdsCount; ++I) {
-       assert(DestOpIds[I] >= 0);
-       assert(DestOpIds[I] < FeatureSize);
+        assert(DestOpIds[I] >= 0);
+        assert(DestOpIds[I] < FeatureSize);
     }
 #endif
 }
@@ -180,15 +187,10 @@ ids_(const core::State& S) {
     int32_t MyIdsCount;
     int32_t OpIdsCount;
 
-    idsAt_<C>(
-        (int32_t*)MyIds.data(),
-        (int32_t*)OpIds.data(),
-        &MyIdsCount,
-        &OpIdsCount,
-        S
-    );
+    idsAt_<C>((int32_t*)MyIds.data(), (int32_t*)OpIds.data(), &MyIdsCount,
+              &OpIdsCount, S);
 
-    return { std::move(MyIds), std::move(OpIds) };
+    return {std::move(MyIds), std::move(OpIds)};
 }
 
 } // namespace
@@ -196,19 +198,17 @@ ids_(const core::State& S) {
 KAFeatureExtractor::KAFeatureExtractor() {
 }
 
-void KAFeatureExtractor::idsAt(
-    int32_t* DestMyIds,
-    int32_t* DestOpIds,
-    int32_t* DestMyIdsCount,
-    int32_t* DestOpIdsCount,
-    const core::State& S
-) const {
+void KAFeatureExtractor::idsAt(int32_t* DestMyIds, int32_t* DestOpIds,
+                               int32_t* DestMyIdsCount, int32_t* DestOpIdsCount,
+                               const core::State& S) const {
     if (S.getSideToMove() == core::Black) {
-        idsAt_<core::Black>(DestMyIds, DestOpIds, DestMyIdsCount, DestOpIdsCount, S);
+        idsAt_<core::Black>(DestMyIds, DestOpIds, DestMyIdsCount,
+                            DestOpIdsCount, S);
         assert(*DestMyIdsCount == idSize());
         assert(*DestOpIdsCount == idSize());
     } else {
-        idsAt_<core::White>(DestMyIds, DestOpIds, DestMyIdsCount, DestOpIdsCount, S);
+        idsAt_<core::White>(DestMyIds, DestOpIds, DestMyIdsCount,
+                            DestOpIdsCount, S);
         assert(*DestMyIdsCount == idSize());
         assert(*DestOpIdsCount == idSize());
     }

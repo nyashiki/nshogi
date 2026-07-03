@@ -18,13 +18,8 @@ constexpr std::size_t OnBoardFeatureSize =
 // clang-format on
 
 template <core::Color C>
-void idsAt_(
-    int32_t* DestMyIds,
-    int32_t* DestOpIds,
-    int32_t* DestMyIdsCount,
-    int32_t* DestOpIdsCount,
-    const core::State& S
-) {
+void idsAt_(int32_t* DestMyIds, int32_t* DestOpIds, int32_t* DestMyIdsCount,
+            int32_t* DestOpIdsCount, const core::State& S) {
     *DestMyIdsCount = 0;
     *DestOpIdsCount = 0;
 
@@ -32,23 +27,28 @@ void idsAt_(
     core::internal::ImmutableStateAdapter Adapter(S);
 
     const core::internal::bitboard::Bitboard OccupiedBB =
-        Adapter->getBitboard<core::Black>() | Adapter->getBitboard<core::White>();
+        Adapter->getBitboard<core::Black>() |
+        Adapter->getBitboard<core::White>();
 
     OccupiedBB.forEach([&](core::Square Sq) {
         const auto Piece = Position.pieceOn(Sq);
         assert(Piece != core::PieceKind::PK_Empty);
 
         const auto PieceType = core::getPieceType(Piece);
-        const auto PieceColor = (C == core::Black) ? core::getColor(Piece) : ~core::getColor(Piece);
+        const auto PieceColor =
+            (C == core::Black) ? core::getColor(Piece) : ~core::getColor(Piece);
         const auto IndexSq = (C == core::Black) ? Sq : core::getInversed(Sq);
 
         const std::size_t MyIndex =
-            (std::size_t)IndexSq * ((std::size_t)core::NumColors * ((std::size_t)core::NumPieceType - 1)) +
+            (std::size_t)IndexSq * ((std::size_t)core::NumColors *
+                                    ((std::size_t)core::NumPieceType - 1)) +
             (std::size_t)PieceColor * ((std::size_t)core::NumPieceType - 1) +
             ((std::size_t)PieceType - 1);
 
         const std::size_t OpIndex =
-            (std::size_t)core::getInversed(IndexSq) * ((std::size_t)core::NumColors * ((std::size_t)core::NumPieceType - 1)) +
+            (std::size_t)core::getInversed(IndexSq) *
+                ((std::size_t)core::NumColors *
+                 ((std::size_t)core::NumPieceType - 1)) +
             (std::size_t)(~PieceColor) * ((std::size_t)core::NumPieceType - 1) +
             ((std::size_t)PieceType - 1);
 
@@ -61,11 +61,8 @@ void idsAt_(
 
     const int32_t AuxiliaryBase = OnBoardFeatureSize;
 
-    auto appendStandPair = [&](
-        int32_t MyBase,
-        int32_t OpBase,
-        core::PieceTypeKind Type
-    ) {
+    auto appendStandPair = [&](int32_t MyBase, int32_t OpBase,
+                               core::PieceTypeKind Type) {
         const uint8_t MyStandCount = Position.getStandCount(C, Type);
         const uint8_t OpStandCount = Position.getStandCount(~C, Type);
         for (uint8_t I = 0; I < MyStandCount; ++I) {
@@ -78,41 +75,13 @@ void idsAt_(
         }
     };
 
-    appendStandPair(
-        AuxiliaryBase,
-        AuxiliaryBase + 18,
-        core::PTK_Pawn
-    );
-    appendStandPair(
-        AuxiliaryBase + 36,
-        AuxiliaryBase + 40,
-        core::PTK_Lance
-    );
-    appendStandPair(
-        AuxiliaryBase + 44,
-        AuxiliaryBase + 48,
-        core::PTK_Knight
-    );
-    appendStandPair(
-        AuxiliaryBase + 52,
-        AuxiliaryBase + 56,
-        core::PTK_Silver
-    );
-    appendStandPair(
-        AuxiliaryBase + 60,
-        AuxiliaryBase + 62,
-        core::PTK_Bishop
-    );
-    appendStandPair(
-        AuxiliaryBase + 64,
-        AuxiliaryBase + 66,
-        core::PTK_Rook
-    );
-    appendStandPair(
-        AuxiliaryBase + 68,
-        AuxiliaryBase + 72,
-        core::PTK_Gold
-    );
+    appendStandPair(AuxiliaryBase, AuxiliaryBase + 18, core::PTK_Pawn);
+    appendStandPair(AuxiliaryBase + 36, AuxiliaryBase + 40, core::PTK_Lance);
+    appendStandPair(AuxiliaryBase + 44, AuxiliaryBase + 48, core::PTK_Knight);
+    appendStandPair(AuxiliaryBase + 52, AuxiliaryBase + 56, core::PTK_Silver);
+    appendStandPair(AuxiliaryBase + 60, AuxiliaryBase + 62, core::PTK_Bishop);
+    appendStandPair(AuxiliaryBase + 64, AuxiliaryBase + 66, core::PTK_Rook);
+    appendStandPair(AuxiliaryBase + 68, AuxiliaryBase + 72, core::PTK_Gold);
 }
 
 template <core::Color C>
@@ -127,7 +96,7 @@ ids_(const core::State& S) {
 
     idsAt_<C>(MyIds.data(), OpIds.data(), &MyIdsCount, &OpIdsCount, S);
 
-    return { std::move(MyIds), std::move(OpIds) };
+    return {std::move(MyIds), std::move(OpIds)};
 }
 
 } // namespace
@@ -135,19 +104,17 @@ ids_(const core::State& S) {
 PFeatureExtractor::PFeatureExtractor() {
 }
 
-void PFeatureExtractor::idsAt(
-    int32_t* DestMyIds,
-    int32_t* DestOpIds,
-    int32_t* DestMyIdsCount,
-    int32_t* DestOpIdsCount,
-    const core::State& S
-) const {
+void PFeatureExtractor::idsAt(int32_t* DestMyIds, int32_t* DestOpIds,
+                              int32_t* DestMyIdsCount, int32_t* DestOpIdsCount,
+                              const core::State& S) const {
     if (S.getSideToMove() == core::Black) {
-        idsAt_<core::Black>(DestMyIds, DestOpIds, DestMyIdsCount, DestOpIdsCount, S);
+        idsAt_<core::Black>(DestMyIds, DestOpIds, DestMyIdsCount,
+                            DestOpIdsCount, S);
         assert(*DestMyIdsCount == idSize());
         assert(*DestOpIdsCount == idSize());
     } else {
-        idsAt_<core::White>(DestMyIds, DestOpIds, DestMyIdsCount, DestOpIdsCount, S);
+        idsAt_<core::White>(DestMyIds, DestOpIds, DestMyIdsCount,
+                            DestOpIdsCount, S);
         assert(*DestMyIdsCount == idSize());
         assert(*DestOpIdsCount == idSize());
     }
