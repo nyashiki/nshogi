@@ -31,6 +31,7 @@ struct StepHelper {
     }
 
     bitboard::Bitboard DefendingOpponentSliderBB[NumColors];
+    bitboard::Bitboard Pinners[NumColors];
     bitboard::Bitboard CheckerBB;
 
     uint64_t BoardHash;

@@ -803,16 +803,22 @@ class StateImpl {
     template <Color C>
     void setStepCheckerBB(StepHelper* SHelper) noexcept;
 
-    template <PieceTypeKind Type>
-    bool processSEEPiece(
-        Color C,
+    bitboard::Bitboard computeSEEAttackersBB(
         Square To,
-        bitboard::Bitboard* MyBB,
-        bitboard::Bitboard* OpBB,
-        PieceTypeKind* TargetType,
-        int32_t* Gain,
-        const int32_t* const PieceValues
-    ) const noexcept;
+        const bitboard::Bitboard* BBs,
+        const bitboard::Bitboard& OccupiedBB) const noexcept;
+
+    void updateSEEAttackersBB(
+        bitboard::Bitboard* AttackersBB,
+        Square To,
+        Square FromSq,
+        const bitboard::Bitboard& OccupiedBB) const noexcept;
+
+    bool seeGivesDiscoveredCheck(
+        Color C,
+        Square FromSq,
+        const bitboard::Bitboard& MyBB,
+        const StepHelper* SHelper) const noexcept;
 };
 
 } // namespace internal

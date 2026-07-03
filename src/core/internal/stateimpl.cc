@@ -627,12 +627,31 @@ void StateImpl::undoNullMove() {
     HashValue.updateColor();
 }
 
+namespace {
+
+// The order in which computeSEE() picks the attackers. It must be kept
+// consistent with the order in which generateLegalSmallestMove() tries
+// the piece types.
+// clang-format off
+constexpr int32_t SEEAttackerOrder[NumPieceType] = {
+    /* PTK_Empty */     14,
+    /* PTK_Pawn */       0, /* PTK_Lance */     2, /* PTK_Knight */     4, /* PTK_Silver */     6,
+    /* PTK_Bishop */     9, /* PTK_Rook */     10, /* PTK_Gold */       8, /* PTK_King */      13,
+    /* PTK_ProPawn */    1, /* PTK_ProLance */  3, /* PTK_ProKnight */  5, /* PTK_ProSilver */  7,
+    /* PTK_ProBishop */ 11, /* PTK_ProRook */  12,
+};
+// clang-format on
+
+} // namespace
+
 int32_t StateImpl::computeSEE(const Move32 Move, const int32_t* const PieceValues) const noexcept {
     assert(!Move.isNone() && !Move.isNull());
     assert(!Move.drop());
     assert(Move.capturePieceType() != PTK_Empty);
     assert(getPieceType(getPosition().pieceOn(Move.to())) ==
            Move.capturePieceType());
+
+    const StepHelper* CurrentStepHelper = &Helper.getCurrentStepHelper();
 
     const Square To = Move.to();
     Color C = getSideToMove();
@@ -643,19 +662,41 @@ int32_t StateImpl::computeSEE(const Move32 Move, const int32_t* const PieceValue
     // The exchange starts with the given move, which is assumed to be legal.
     Gains[0] = PieceValues[Move.capturePieceType()];
 
-    PieceTypeKind TargetType =
-        Move.promote() ? promotePieceType(Move.pieceType()) : Move.pieceType();
+    PieceTypeKind TargetType = Move.pieceType();
+    if (Move.promote()) {
+        // The moving side gains the promotion bonus, and in exchange the
+        // opponent can now win the promoted piece back.
+        TargetType = promotePieceType(Move.pieceType());
+        Gains[0] += PieceValues[TargetType] - PieceValues[Move.pieceType()];
+    }
 
     // My piece must exist.
     assert(BBs[C].isSet(Move.from()));
     // The opponent's piece must exist.
     assert(BBs[~C].isSet(Move.to()));
 
-    // Move my piece.
+    // Move my piece. Only From squares get vacated during the exchange:
+    // To remains occupied all the time, so its ownership is not tracked.
     BBs[C].toggleBit(Move.from());
     BBs[C].toggleBit(Move.to());
-    // Remove the opponent's piece.
     BBs[~C].toggleBit(Move.to());
+
+    bitboard::Bitboard OccupiedBB = BBs[Black] | BBs[White];
+
+    // All pieces of both colors attacking To under the current occupancy.
+    // The set may keep bits of squares whose piece has already been
+    // exchanged away; such stale bits are always masked by BBs[] below.
+    bitboard::Bitboard AttackersBB = computeSEEAttackersBB(To, BBs, OccupiedBB);
+
+    // When a capture delivers a discovered check, capturing on To cannot
+    // resolve the check because To never lies on the discovered line
+    // (To has been occupied since the root position, so a line containing
+    // To would have had two blockers and would not have been recorded).
+    // Hence the only possible recapture is by the king. A direct check,
+    // on the other hand, is always resolved by capturing the checker on To
+    // and needs no special handling.
+    bool OnlyKingCanCapture =
+        seeGivesDiscoveredCheck(C, Move.from(), BBs[C], CurrentStepHelper);
 
     C = ~C;
 
@@ -664,74 +705,124 @@ int32_t StateImpl::computeSEE(const Move32 Move, const int32_t* const PieceValue
     for (Depth = 1; ; ++Depth, C = ~C) {
         assert(Depth < 64);
 
-        bitboard::Bitboard& MyBB = BBs[C];
-        bitboard::Bitboard& OpBB = BBs[~C];
+        const bitboard::Bitboard CandidatesBB = AttackersBB & BBs[C];
 
-        if (Depth <= 2) {
-            // A pawn attacker to To, if any, is fixed by color and square.
-            // Since pieces only leave their source squares during SEE, no new pawn attacker
-            // can be revealed after each color's first turn (depth 1 and 2).
-            if (processSEEPiece<PTK_Pawn>(C, To, &MyBB, &OpBB, &TargetType, &Gains[Depth], PieceValues)) {
-                assert(TargetType != PTK_King);
-                continue;
+        if (CandidatesBB.isZero()) {
+            // No capture is possible.
+            break;
+        }
+
+        // The pinners that still remain on their original squares.
+        const bitboard::Bitboard AlivePinnersBB =
+            BBs[~C] & CurrentStepHelper->Pinners[~C];
+
+        Square FromSq = SqInvalid;
+        PieceTypeKind AttackerType = PTK_Empty;
+
+        if (!OnlyKingCanCapture) {
+            // Search the least valuable attacker. Scanning the candidate
+            // squares directly is cheaper than testing each piece type
+            // because there are only a few attackers at a time.
+            int32_t BestOrder = SEEAttackerOrder[PTK_King];
+
+            bitboard::Bitboard ScanBB = CandidatesBB;
+
+            while (!ScanBB.isZero()) {
+                const Square Sq = ScanBB.popOne();
+                const PieceTypeKind Type = getPieceType(Pos.pieceOn(Sq));
+                const int32_t Order = SEEAttackerOrder[Type];
+
+                if (Order >= BestOrder) {
+                    // This also skips the king: it is handled separately
+                    // below because moving it needs a legality check.
+                    continue;
+                }
+
+                // Is this piece pinned?
+                // A pin disappears once its pinner moves or is captured
+                // during the exchange, so check that the pinner of this
+                // piece still remains on its original square.
+                if (getDefendingOpponentSliderBB(C).isSet(Sq)) {
+                    const Square MyKingSq = getKingSquare(C);
+
+                    bool Pinned = false;
+                    (AlivePinnersBB & bitboard::LineBB[Sq][MyKingSq])
+                        .forEach([&](Square PinnerSq) {
+                            if (bitboard::getBetweenBB(PinnerSq, MyKingSq)
+                                    .isSet(Sq)) {
+                                Pinned = true;
+                            }
+                        });
+
+                    // If pinned, the piece can only move to a square which
+                    // is aligned with the king and the piece's current
+                    // square.
+                    if (Pinned &&
+                        !bitboard::LineBB[Sq][MyKingSq].isSet(To)) {
+                        continue;
+                    }
+                }
+
+                BestOrder = Order;
+                FromSq = Sq;
+                AttackerType = Type;
             }
         }
 
-        if (processSEEPiece<PTK_ProPawn>(C, To, &MyBB, &OpBB, &TargetType, &Gains[Depth], PieceValues)) {
+        if (AttackerType == PTK_Empty) {
+            // No piece but possibly the king can capture.
+            if ((CandidatesBB & getBitboard<PTK_King>()).isZero()) {
+                break;
+            }
+
+            const Square KingSq = getKingSquare(C);
+            assert(CandidatesBB.isSet(KingSq));
+
+            // Moving the king is legal only if To is not defended.
+            OccupiedBB.toggleBit(KingSq);
+            AttackersBB.toggleBit(KingSq);
+            updateSEEAttackersBB(&AttackersBB, To, KingSq, OccupiedBB);
+
+            if (!(AttackersBB & BBs[~C]).isZero()) {
+                // To is defended: the king cannot capture.
+                break;
+            }
+
             assert(TargetType != PTK_King);
-            continue;
-        }
-        if (processSEEPiece<PTK_Lance>(C, To, &MyBB, &OpBB, &TargetType, &Gains[Depth], PieceValues)) {
-            assert(TargetType != PTK_King);
-            continue;
-        }
-        if (processSEEPiece<PTK_ProLance>(C, To, &MyBB, &OpBB, &TargetType, &Gains[Depth], PieceValues)) {
-            assert(TargetType != PTK_King);
-            continue;
-        }
-        if (processSEEPiece<PTK_Knight>(C, To, &MyBB, &OpBB, &TargetType, &Gains[Depth], PieceValues)) {
-            assert(TargetType != PTK_King);
-            continue;
-        }
-        if (processSEEPiece<PTK_ProKnight>(C, To, &MyBB, &OpBB, &TargetType, &Gains[Depth], PieceValues)) {
-            assert(TargetType != PTK_King);
-            continue;
-        }
-        if (processSEEPiece<PTK_Silver>(C, To, &MyBB, &OpBB, &TargetType, &Gains[Depth], PieceValues)) {
-            assert(TargetType != PTK_King);
-            continue;
-        }
-        if (processSEEPiece<PTK_ProSilver>(C, To, &MyBB, &OpBB, &TargetType, &Gains[Depth], PieceValues)) {
-            assert(TargetType != PTK_King);
-            continue;
-        }
-        if (processSEEPiece<PTK_Gold>(C, To, &MyBB, &OpBB, &TargetType, &Gains[Depth], PieceValues)) {
-            assert(TargetType != PTK_King);
-            continue;
-        }
-        if (processSEEPiece<PTK_Bishop>(C, To, &MyBB, &OpBB, &TargetType, &Gains[Depth], PieceValues)) {
-            assert(TargetType != PTK_King);
-            continue;
-        }
-        if (processSEEPiece<PTK_Rook>(C, To, &MyBB, &OpBB, &TargetType, &Gains[Depth], PieceValues)) {
-            assert(TargetType != PTK_King);
-            continue;
-        }
-        if (processSEEPiece<PTK_ProBishop>(C, To, &MyBB, &OpBB, &TargetType, &Gains[Depth], PieceValues)) {
-            assert(TargetType != PTK_King);
-            continue;
-        }
-        if (processSEEPiece<PTK_ProRook>(C, To, &MyBB, &OpBB, &TargetType, &Gains[Depth], PieceValues)) {
-            assert(TargetType != PTK_King);
-            continue;
-        }
-        if (processSEEPiece<PTK_King>(C, To, &MyBB, &OpBB, &TargetType, &Gains[Depth], PieceValues)) {
-            assert(TargetType != PTK_King);
+            Gains[Depth] = PieceValues[TargetType];
+            BBs[C].toggleBit(KingSq);
+            TargetType = PTK_King;
+
+            // No opponent attacker remains (verified right above), so the
+            // exchange ends at the next iteration.
+            OnlyKingCanCapture = false;
             continue;
         }
 
-        // No capture is possible.
-        break;
+        assert(checkRange(FromSq));
+        assert(TargetType != PTK_King);
+
+        const bool Promotes =
+            !isPromoted(AttackerType) && AttackerType != PTK_Gold &&
+            !(bitboard::PromotableBB[C] &
+              (bitboard::SquareBB[FromSq] | bitboard::SquareBB[To]))
+                 .isZero();
+
+        Gains[Depth] = PieceValues[TargetType];
+        if (Promotes) {
+            TargetType = promotePieceType(AttackerType);
+            Gains[Depth] += PieceValues[TargetType] - PieceValues[AttackerType];
+        } else {
+            TargetType = AttackerType;
+        }
+
+        BBs[C].toggleBit(FromSq);
+        OccupiedBB.toggleBit(FromSq);
+        AttackersBB.toggleBit(FromSq);
+        updateSEEAttackersBB(&AttackersBB, To, FromSq, OccupiedBB);
+
+        OnlyKingCanCapture =
+            seeGivesDiscoveredCheck(C, FromSq, BBs[C], CurrentStepHelper);
     }
 
     int32_t Gain = 0;
@@ -743,123 +834,120 @@ int32_t StateImpl::computeSEE(const Move32 Move, const int32_t* const PieceValue
     return Gain;
 }
 
-template <PieceTypeKind Type>
-bool StateImpl::processSEEPiece(
-    Color C,
-    Square To,
-    bitboard::Bitboard* MyBB,
-    bitboard::Bitboard* OpBB,
-    PieceTypeKind* TargetType,
-    int32_t* Gain,
-    const int32_t* const PieceValues
-) const noexcept {
-    bitboard::Bitboard FromBB =
-        getBitboard<Type>()
-        & *MyBB;
+bitboard::Bitboard StateImpl::computeSEEAttackersBB(
+    const Square To,
+    const bitboard::Bitboard* BBs,
+    const bitboard::Bitboard& OccupiedBB) const noexcept {
+    const bitboard::Bitboard GoldsBB =
+        getBitboard<PTK_Gold>() | getBitboard<PTK_ProPawn>() |
+        getBitboard<PTK_ProLance>() | getBitboard<PTK_ProKnight>() |
+        getBitboard<PTK_ProSilver>();
 
-    if (FromBB.isZero()) {
+    // A piece of color C on Sq attacks To if and only if Sq is attacked
+    // by the same piece type of color ~C placed on To.
+    const bitboard::Bitboard BlackAttackersBB =
+        ((bitboard::getAttackBB<White, PTK_Pawn>(To) & getBitboard<PTK_Pawn>()) |
+         (bitboard::getAttackBB<White, PTK_Knight>(To) & getBitboard<PTK_Knight>()) |
+         (bitboard::getAttackBB<White, PTK_Silver>(To) & getBitboard<PTK_Silver>()) |
+         (bitboard::getAttackBB<White, PTK_Gold>(To) & GoldsBB) |
+         (bitboard::getLanceAttackBB<White>(To, OccupiedBB) & getBitboard<PTK_Lance>()))
+        & BBs[Black];
+
+    const bitboard::Bitboard WhiteAttackersBB =
+        ((bitboard::getAttackBB<Black, PTK_Pawn>(To) & getBitboard<PTK_Pawn>()) |
+         (bitboard::getAttackBB<Black, PTK_Knight>(To) & getBitboard<PTK_Knight>()) |
+         (bitboard::getAttackBB<Black, PTK_Silver>(To) & getBitboard<PTK_Silver>()) |
+         (bitboard::getAttackBB<Black, PTK_Gold>(To) & GoldsBB) |
+         (bitboard::getLanceAttackBB<Black>(To, OccupiedBB) & getBitboard<PTK_Lance>()))
+        & BBs[White];
+
+    // The attacks of the king, the sliding parts of the bishop and the rook,
+    // and the step parts of the promoted bishop and the promoted rook are
+    // symmetric in color, and pieces on the vacated squares have already
+    // been filtered out through OccupiedBB.
+    const bitboard::Bitboard SymmetricAttackersBB =
+        ((bitboard::KingAttackBB[To] &
+          (getBitboard<PTK_King>() | getBitboard<PTK_ProBishop>() |
+           getBitboard<PTK_ProRook>())) |
+         (bitboard::getBishopAttackBB<PTK_Bishop>(To, OccupiedBB) &
+          (getBitboard<PTK_Bishop>() | getBitboard<PTK_ProBishop>())) |
+         (bitboard::getRookAttackBB<PTK_Rook>(To, OccupiedBB) &
+          (getBitboard<PTK_Rook>() | getBitboard<PTK_ProRook>())))
+        & OccupiedBB;
+
+    return BlackAttackersBB | WhiteAttackersBB | SymmetricAttackersBB;
+}
+
+void StateImpl::updateSEEAttackersBB(
+    bitboard::Bitboard* AttackersBB,
+    const Square To,
+    const Square FromSq,
+    const bitboard::Bitboard& OccupiedBB) const noexcept {
+    const bitboard::Bitboard& XRayLineBB = bitboard::LineBB[To][FromSq];
+
+    if (XRayLineBB.isZero()) {
+        // Not aligned with To (a knight): no slider can be revealed.
+        return;
+    }
+
+    if (squareToFile(To) == squareToFile(FromSq)) {
+        // Vertical: lances, rooks and dragons can be revealed.
+        const bitboard::Bitboard RookDragonBB =
+            getBitboard<PTK_Rook>() | getBitboard<PTK_ProRook>();
+
+        *AttackersBB |=
+            (bitboard::getLanceAttackBB<Black>(To, OccupiedBB) &
+             (RookDragonBB |
+              (getBitboard<PTK_Lance>() & getBitboard<White>()))) |
+            (bitboard::getLanceAttackBB<White>(To, OccupiedBB) &
+             (RookDragonBB |
+              (getBitboard<PTK_Lance>() & getBitboard<Black>())));
+    } else if (squareToRank(To) == squareToRank(FromSq)) {
+        // Horizontal: rooks and dragons can be revealed.
+        *AttackersBB |=
+            bitboard::getRookAttackBB<PTK_Rook>(To, OccupiedBB) & XRayLineBB &
+            (getBitboard<PTK_Rook>() | getBitboard<PTK_ProRook>());
+    } else {
+        // Diagonal: bishops and horses can be revealed.
+        *AttackersBB |=
+            bitboard::getBishopAttackBB<PTK_Bishop>(To, OccupiedBB) & XRayLineBB &
+            (getBitboard<PTK_Bishop>() | getBitboard<PTK_ProBishop>());
+    }
+}
+
+bool StateImpl::seeGivesDiscoveredCheck(
+    const Color C,
+    const Square FromSq,
+    const bitboard::Bitboard& MyBB,
+    const StepHelper* SHelper) const noexcept {
+    // Was the piece on FromSq shielding the opponent's king from one of
+    // my sliders at the root position?
+    if (!getDefendingOpponentSliderBB(~C).isSet(FromSq)) {
         return false;
     }
 
-    const bitboard::Bitboard OccupiedBB = *MyBB | *OpBB;
-    bitboard::Bitboard MovableFromBB = bitboard::Bitboard::ZeroBB();
+    // A discovered line becomes a check once FromSq gets vacated: pieces
+    // can enter only To during the exchange and To is never on the line.
+    // Verify that my slider still remains on its original square.
+    const Square OpKingSq = getKingSquare(~C);
 
-    if constexpr (Type != PTK_Lance && Type != PTK_Bishop && Type != PTK_Rook) {
-        MovableFromBB |= bitboard::getAttackBB<Type>(~C, To);
-    }
-    if constexpr (Type == PTK_Lance) {
-        MovableFromBB |= bitboard::getLanceAttackBB(~C, To, OccupiedBB);
-    } else if constexpr (Type == PTK_Bishop || Type == PTK_ProBishop) {
-        MovableFromBB |= bitboard::getBishopAttackBB<PTK_Bishop>(To, OccupiedBB);
-    } else if constexpr (Type == PTK_Rook || Type == PTK_ProRook) {
-        MovableFromBB |= bitboard::getRookAttackBB<PTK_Rook>(To, OccupiedBB);
-    }
-
-    FromBB &= MovableFromBB;
-
-    while (!FromBB.isZero()) {
-        const Square FromSq = FromBB.popOne();
-
-        // Is this piece pinned?
-        if (getDefendingOpponentSliderBB(C).isSet(FromSq)) {
-            // If pinned, the piece must move to a square which
-            // is aligned with the king and the piece's current square.
-            if (bitboard::LineBB[FromSq][getKingSquare(C)].isSet(To)) {
-                // Promotion.
-                if (!isPromoted(Type) && Type != PTK_Gold && Type != PTK_King &&
-                        !(bitboard::PromotableBB[C]
-                            & (bitboard::SquareBB[FromSq] | bitboard::SquareBB[To])
-                        ).isZero()) {
-                    *Gain = PieceValues[*TargetType];
-                    MyBB->toggleBit(FromSq);
-                    *TargetType = promotePieceType(Type);
-                    return true;
-                } else {
-                    *Gain = PieceValues[*TargetType];
-                    MyBB->toggleBit(FromSq);
-                    *TargetType = Type;
-                    return true;
-                }
+    bool Discovered = false;
+    (MyBB & SHelper->Pinners[C] & bitboard::LineBB[FromSq][OpKingSq])
+        .forEach([&](Square SliderSq) {
+            if (bitboard::getBetweenBB(SliderSq, OpKingSq).isSet(FromSq)) {
+                Discovered = true;
             }
-        } else { // Not pinned.
-            // Promotion.
-            if (!isPromoted(Type) && Type != PTK_Gold && Type != PTK_King &&
-                    !(bitboard::PromotableBB[C]
-                        & (bitboard::SquareBB[FromSq] | bitboard::SquareBB[To])
-                    ).isZero()) {
-                *Gain = PieceValues[*TargetType];
-                MyBB->toggleBit(FromSq);
-                *TargetType = promotePieceType(Type);
-                return true;
-            } else {
-                if constexpr (Type == PTK_King) {
-                    // When moving the king, we need to check if the move is legal.
+        });
 
-                    // Is attacked by opponent's step piece?
-                    const bitboard::Bitboard StepAttackersBB =
-                        ((bitboard::getAttackBB<PTK_Pawn>(C, To) & getBitboard<PTK_Pawn>()) |
-                         (bitboard::getAttackBB<PTK_Knight>(C, To) & getBitboard<PTK_Knight>()) |
-                         (bitboard::getAttackBB<PTK_Silver>(C, To) & getBitboard<PTK_Silver>()) |
-                         (bitboard::getAttackBB<PTK_Gold>(C, To) &
-                          (getBitboard<PTK_Gold>() | getBitboard<PTK_ProPawn>() |
-                           getBitboard<PTK_ProLance>() | getBitboard<PTK_ProKnight>() |
-                           getBitboard<PTK_ProSilver>())) |
-                         (bitboard::getAttackBB<PTK_King>(C, To) &
-                          (getBitboard<PTK_King>() | getBitboard<PTK_ProBishop>() | getBitboard<PTK_ProRook>())))
-                        & *OpBB;
-
-                    if (!StepAttackersBB.isZero()) {
-                        return false;
-                    }
-
-                    // Is attacked by opponent's slider piece?
-                    const bitboard::Bitboard AfterMoveOccupiedBB = OccupiedBB ^ bitboard::SquareBB[FromSq];
-                    const bitboard::Bitboard SliderAttackersBB =
-                        ((bitboard::getLanceAttackBB(C, To, AfterMoveOccupiedBB) & getBitboard<PTK_Lance>()) |
-                         (bitboard::getBishopAttackBB<PTK_Bishop>(To, AfterMoveOccupiedBB) & (getBitboard<PTK_Bishop>() | getBitboard<PTK_ProBishop>())) |
-                         (bitboard::getRookAttackBB<PTK_Rook>(To, AfterMoveOccupiedBB) & (getBitboard<PTK_Rook>() | getBitboard<PTK_ProRook>())))
-                        & *OpBB;
-
-                    if (!SliderAttackersBB.isZero()) {
-                        return false;
-                    }
-                }
-
-                *Gain = PieceValues[*TargetType];
-                MyBB->toggleBit(FromSq);
-                *TargetType = Type;
-                return true;
-            }
-        }
-    }
-
-    return false;
+    return Discovered;
 }
+
 
 template <Color C, bool UpdateCheckerBySliders>
 inline void StateImpl::setDefendingOpponentSliderBBAndSliderCheckerBB(
     StepHelper* SHelper, const bitboard::Bitboard& OccupiedBB) noexcept {
     SHelper->DefendingOpponentSliderBB[C].clear();
+    SHelper->Pinners[~C].clear();
 
     const bitboard::Bitboard Candidates =
         ((getBitboard<PTK_Lance>() &
@@ -881,6 +969,7 @@ inline void StateImpl::setDefendingOpponentSliderBBAndSliderCheckerBB(
             }
         } else if (PopCount == 1) {
             SHelper->DefendingOpponentSliderBB[C] |= BetweenOccupiedBB;
+            SHelper->Pinners[~C].toggleBit(Sq);
         }
     });
 }
