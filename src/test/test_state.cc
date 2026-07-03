@@ -207,8 +207,66 @@ int32_t seeMoveValue(nshogi::core::Move32 Move) {
     return Value;
 }
 
-int32_t computeSEEBySmallestMoves(nshogi::core::ExtendedState& State,
-                                  nshogi::core::Square To) {
+template <nshogi::core::Color C>
+bool hasSliderLineUnknownToRootImpl(
+    const nshogi::core::internal::StateImpl& S,
+    const nshogi::core::internal::bitboard::Bitboard& RootOccupiedBB) {
+    using namespace nshogi::core;
+    namespace bb = nshogi::core::internal::bitboard;
+
+    const Square KingSq = S.getKingSquare<C>();
+
+    const bb::Bitboard CandidateBB =
+        ((S.getBitboard<PTK_Lance>() & bb::getForwardBB<C>(KingSq)) |
+         ((S.getBitboard<PTK_Bishop>() | S.getBitboard<PTK_ProBishop>()) &
+          bb::getDiagBB(KingSq)) |
+         ((S.getBitboard<PTK_Rook>() | S.getBitboard<PTK_ProRook>()) &
+          bb::getCrossBB(KingSq))) &
+        S.getBitboard<~C>();
+
+    const bb::Bitboard OccupiedBB =
+        S.getBitboard<Black>() | S.getBitboard<White>();
+
+    bool Found = false;
+    CandidateBB.forEach([&](Square SliderSq) {
+        const bb::Bitboard BetweenBB = bb::getBetweenBB(SliderSq, KingSq);
+
+        if ((BetweenBB & OccupiedBB).popCount() <= 1 &&
+            (BetweenBB & RootOccupiedBB).popCount() >= 2) {
+            Found = true;
+        }
+    });
+
+    return Found;
+}
+
+// Returns true if a slider line toward either king is active under the
+// current occupancy (i.e., at most one piece in between, so it works as
+// a pin or a (discovered-)check line) even though it was not active at
+// the root position (two or more pieces in between). computeSEE() takes
+// the pin and the discovered-check lines only from the root position,
+// so exchanges in which such a line arises are out of its specification.
+bool hasSliderLineUnknownToRoot(
+    const nshogi::core::ExtendedState& State,
+    const nshogi::core::internal::bitboard::Bitboard& RootOccupiedBB) {
+    nshogi::core::internal::ImmutableStateAdapter Adapter(State);
+    const nshogi::core::internal::StateImpl& S = *Adapter.get();
+
+    return hasSliderLineUnknownToRootImpl<nshogi::core::Black>(
+               S, RootOccupiedBB) ||
+           hasSliderLineUnknownToRootImpl<nshogi::core::White>(
+               S, RootOccupiedBB);
+}
+
+int32_t computeSEEBySmallestMoves(
+    nshogi::core::ExtendedState& State, nshogi::core::Square To,
+    const nshogi::core::internal::bitboard::Bitboard& RootOccupiedBB,
+    bool* SawLineUnknownToRoot) {
+    if (!*SawLineUnknownToRoot &&
+        hasSliderLineUnknownToRoot(State, RootOccupiedBB)) {
+        *SawLineUnknownToRoot = true;
+    }
+
     const auto SmallestMove =
         nshogi::core::MoveGenerator::generateLegalSmallestMove(State, To);
 
@@ -220,7 +278,9 @@ int32_t computeSEEBySmallestMoves(nshogi::core::ExtendedState& State,
 
     State.doMove(SmallestMove);
     const int32_t Value =
-        CaptureValue - std::max(0, computeSEEBySmallestMoves(State, To));
+        CaptureValue - std::max(0, computeSEEBySmallestMoves(
+                                       State, To, RootOccupiedBB,
+                                       SawLineUnknownToRoot));
     State.undoMove();
 
     return Value;
@@ -1096,16 +1156,6 @@ TEST(ExtendedState, ComputeSEEMatchesSmallestMoveIteration) {
     const int N = 1000;
     std::mt19937_64 mt(20260610);
 
-    // computeSEE() relies on the pin and the discovered-check lines
-    // recorded at the root position, so it cannot see the lines that are
-    // newly created during an exchange (e.g., a pin that arises because a
-    // blocking piece has left). The mismatches caused by such lines are
-    // rare (460 out of 3153299 capture moves for this seed); this test
-    // pins down their exact count so that any regression (or improvement)
-    // is detected.
-    const uint64_t KnownMismatches = 460;
-    uint64_t NumMismatches = 0;
-
     for (int I = 0; I < N; ++I) {
         nshogi::core::ExtendedState State =
             nshogi::core::StateBuilder::getInitialState();
@@ -1125,28 +1175,34 @@ TEST(ExtendedState, ComputeSEEMatchesSmallestMoveIteration) {
 
                 const int32_t SEE = State.computeSEE(Move, SEEValue);
 
+                nshogi::core::internal::ImmutableStateAdapter Adapter(State);
+                const nshogi::core::internal::bitboard::Bitboard
+                    RootOccupiedBB =
+                        Adapter->getBitboard<nshogi::core::Black>() |
+                        Adapter->getBitboard<nshogi::core::White>();
+
                 const int32_t CaptureValue = seeMoveValue(Move);
+                bool SawLineUnknownToRoot = false;
                 State.doMove(Move);
                 const int32_t Expected =
                     CaptureValue -
-                    std::max(0, computeSEEBySmallestMoves(State, Move.to()));
+                    std::max(0, computeSEEBySmallestMoves(
+                                    State, Move.to(), RootOccupiedBB,
+                                    &SawLineUnknownToRoot));
                 State.undoMove();
 
-                if (SEE != Expected) {
-                    ++NumMismatches;
-                    std::cout
-                        << "Position: "
-                        << nshogi::io::sfen::positionToSfen(State.getPosition())
-                        << ", Move: " << nshogi::io::sfen::move32ToSfen(Move)
-                        << ", SEE: " << SEE << ", Expected: " << Expected
-                        << std::endl;
+                if (SawLineUnknownToRoot) {
+                    // The exchange involves a pin or a check line that
+                    // did not exist at the root position: computeSEE()
+                    // is allowed to return a different value here.
+                    continue;
                 }
+
+                TEST_ASSERT_EQ(SEE, Expected);
             }
 
             const auto RandomMove = Moves[mt() % Moves.size()];
             State.doMove(RandomMove);
         }
     }
-
-    TEST_ASSERT_EQ(NumMismatches, KnownMismatches);
 }
