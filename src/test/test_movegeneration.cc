@@ -305,7 +305,8 @@ TEST(MoveGeneration, SmallestMoveExists) {
             for (const auto Sq : nshogi::core::Squares) {
                 const auto PieceOn = State.getPosition().pieceOn(Sq);
                 if (PieceOn == nshogi::core::PK_Empty ||
-                    nshogi::core::getColor(PieceOn) != ~State.getPosition().sideToMove()) {
+                    nshogi::core::getColor(PieceOn) !=
+                        ~State.getPosition().sideToMove()) {
                     continue;
                 }
 

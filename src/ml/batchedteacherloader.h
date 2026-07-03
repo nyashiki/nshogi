@@ -11,8 +11,8 @@
 #define NSHOGI_ML_BATCHEDTEACHERLOADER_H
 
 #include "featureextractor.h"
-#include "teacherloader.h"
 #include "simpleteacher.h"
+#include "teacherloader.h"
 
 #include <atomic>
 #include <condition_variable>
@@ -38,15 +38,10 @@ struct BatchedTeacher {
 
 class BatchedTeacherLoader {
  public:
-    BatchedTeacherLoader(
-        const std::string& Path,
-        std::shared_ptr<IFeatureExtractor>,
-        std::size_t BatchSize,
-        bool Shuffle,
-        bool BatchShuffle,
-        std::size_t NumWorkerThreads,
-        std::size_t Prefetch
-    );
+    BatchedTeacherLoader(const std::string& Path,
+                         std::shared_ptr<IFeatureExtractor>,
+                         std::size_t BatchSize, bool Shuffle, bool BatchShuffle,
+                         std::size_t NumWorkerThreads, std::size_t Prefetch);
 
     ~BatchedTeacherLoader();
 

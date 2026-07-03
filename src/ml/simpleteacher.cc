@@ -127,8 +127,7 @@ bool SimpleTeacher::equals(const SimpleTeacher& ST) const {
     return HuffmanCode == ST.HuffmanCode && Ply == ST.Ply &&
            MaxPly == ST.MaxPly && DrawValues[0] == ST.DrawValues[0] &&
            DrawValues[1] == ST.DrawValues[1] && NextMove == ST.NextMove &&
-           Winner == ST.Winner &&
-           Q == ST.Q && GamePly == ST.GamePly;
+           Winner == ST.Winner && Q == ST.Q && GamePly == ST.GamePly;
 }
 
 void SimpleTeacher::corruptMyself() {

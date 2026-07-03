@@ -644,7 +644,8 @@ constexpr int32_t SEEAttackerOrder[NumPieceType] = {
 
 } // namespace
 
-int32_t StateImpl::computeSEE(const Move32 Move, const int32_t* const PieceValues) const noexcept {
+int32_t StateImpl::computeSEE(const Move32 Move,
+                              const int32_t* const PieceValues) const noexcept {
     assert(!Move.isNone() && !Move.isNull());
     assert(!Move.drop());
     assert(Move.capturePieceType() != PTK_Empty);
@@ -656,7 +657,7 @@ int32_t StateImpl::computeSEE(const Move32 Move, const int32_t* const PieceValue
     const Square To = Move.to();
     Color C = getSideToMove();
 
-    bitboard::Bitboard BBs[2] = { getBitboard(Black), getBitboard(White) };
+    bitboard::Bitboard BBs[2] = {getBitboard(Black), getBitboard(White)};
     int32_t Gains[64];
 
     // The exchange starts with the given move, which is assumed to be legal.
@@ -702,7 +703,7 @@ int32_t StateImpl::computeSEE(const Move32 Move, const int32_t* const PieceValue
 
     int32_t Depth;
 
-    for (Depth = 1; ; ++Depth, C = ~C) {
+    for (Depth = 1;; ++Depth, C = ~C) {
         assert(Depth < 64);
 
         const bitboard::Bitboard CandidatesBB = AttackersBB & BBs[C];
@@ -757,8 +758,7 @@ int32_t StateImpl::computeSEE(const Move32 Move, const int32_t* const PieceValue
                     // If pinned, the piece can only move to a square which
                     // is aligned with the king and the piece's current
                     // square.
-                    if (Pinned &&
-                        !bitboard::LineBB[Sq][MyKingSq].isSet(To)) {
+                    if (Pinned && !bitboard::LineBB[Sq][MyKingSq].isSet(To)) {
                         continue;
                     }
                 }
@@ -835,8 +835,7 @@ int32_t StateImpl::computeSEE(const Move32 Move, const int32_t* const PieceValue
 }
 
 bitboard::Bitboard StateImpl::computeSEEAttackersBB(
-    const Square To,
-    const bitboard::Bitboard* BBs,
+    const Square To, const bitboard::Bitboard* BBs,
     const bitboard::Bitboard& OccupiedBB) const noexcept {
     const bitboard::Bitboard GoldsBB =
         getBitboard<PTK_Gold>() | getBitboard<PTK_ProPawn>() |
@@ -846,20 +845,28 @@ bitboard::Bitboard StateImpl::computeSEEAttackersBB(
     // A piece of color C on Sq attacks To if and only if Sq is attacked
     // by the same piece type of color ~C placed on To.
     const bitboard::Bitboard BlackAttackersBB =
-        ((bitboard::getAttackBB<White, PTK_Pawn>(To) & getBitboard<PTK_Pawn>()) |
-         (bitboard::getAttackBB<White, PTK_Knight>(To) & getBitboard<PTK_Knight>()) |
-         (bitboard::getAttackBB<White, PTK_Silver>(To) & getBitboard<PTK_Silver>()) |
+        ((bitboard::getAttackBB<White, PTK_Pawn>(To) &
+          getBitboard<PTK_Pawn>()) |
+         (bitboard::getAttackBB<White, PTK_Knight>(To) &
+          getBitboard<PTK_Knight>()) |
+         (bitboard::getAttackBB<White, PTK_Silver>(To) &
+          getBitboard<PTK_Silver>()) |
          (bitboard::getAttackBB<White, PTK_Gold>(To) & GoldsBB) |
-         (bitboard::getLanceAttackBB<White>(To, OccupiedBB) & getBitboard<PTK_Lance>()))
-        & BBs[Black];
+         (bitboard::getLanceAttackBB<White>(To, OccupiedBB) &
+          getBitboard<PTK_Lance>())) &
+        BBs[Black];
 
     const bitboard::Bitboard WhiteAttackersBB =
-        ((bitboard::getAttackBB<Black, PTK_Pawn>(To) & getBitboard<PTK_Pawn>()) |
-         (bitboard::getAttackBB<Black, PTK_Knight>(To) & getBitboard<PTK_Knight>()) |
-         (bitboard::getAttackBB<Black, PTK_Silver>(To) & getBitboard<PTK_Silver>()) |
+        ((bitboard::getAttackBB<Black, PTK_Pawn>(To) &
+          getBitboard<PTK_Pawn>()) |
+         (bitboard::getAttackBB<Black, PTK_Knight>(To) &
+          getBitboard<PTK_Knight>()) |
+         (bitboard::getAttackBB<Black, PTK_Silver>(To) &
+          getBitboard<PTK_Silver>()) |
          (bitboard::getAttackBB<Black, PTK_Gold>(To) & GoldsBB) |
-         (bitboard::getLanceAttackBB<Black>(To, OccupiedBB) & getBitboard<PTK_Lance>()))
-        & BBs[White];
+         (bitboard::getLanceAttackBB<Black>(To, OccupiedBB) &
+          getBitboard<PTK_Lance>())) &
+        BBs[White];
 
     // The attacks of the king, the sliding parts of the bishop and the rook,
     // and the step parts of the promoted bishop and the promoted rook are
@@ -872,16 +879,14 @@ bitboard::Bitboard StateImpl::computeSEEAttackersBB(
          (bitboard::getBishopAttackBB<PTK_Bishop>(To, OccupiedBB) &
           (getBitboard<PTK_Bishop>() | getBitboard<PTK_ProBishop>())) |
          (bitboard::getRookAttackBB<PTK_Rook>(To, OccupiedBB) &
-          (getBitboard<PTK_Rook>() | getBitboard<PTK_ProRook>())))
-        & OccupiedBB;
+          (getBitboard<PTK_Rook>() | getBitboard<PTK_ProRook>()))) &
+        OccupiedBB;
 
     return BlackAttackersBB | WhiteAttackersBB | SymmetricAttackersBB;
 }
 
 void StateImpl::updateSEEAttackersBB(
-    bitboard::Bitboard* AttackersBB,
-    const Square To,
-    const Square FromSq,
+    bitboard::Bitboard* AttackersBB, const Square To, const Square FromSq,
     const bitboard::Bitboard& OccupiedBB) const noexcept {
     const bitboard::Bitboard& XRayLineBB = bitboard::LineBB[To][FromSq];
 
@@ -895,30 +900,28 @@ void StateImpl::updateSEEAttackersBB(
         const bitboard::Bitboard RookDragonBB =
             getBitboard<PTK_Rook>() | getBitboard<PTK_ProRook>();
 
-        *AttackersBB |=
-            (bitboard::getLanceAttackBB<Black>(To, OccupiedBB) &
-             (RookDragonBB |
-              (getBitboard<PTK_Lance>() & getBitboard<White>()))) |
-            (bitboard::getLanceAttackBB<White>(To, OccupiedBB) &
-             (RookDragonBB |
-              (getBitboard<PTK_Lance>() & getBitboard<Black>())));
+        *AttackersBB |= (bitboard::getLanceAttackBB<Black>(To, OccupiedBB) &
+                         (RookDragonBB |
+                          (getBitboard<PTK_Lance>() & getBitboard<White>()))) |
+                        (bitboard::getLanceAttackBB<White>(To, OccupiedBB) &
+                         (RookDragonBB |
+                          (getBitboard<PTK_Lance>() & getBitboard<Black>())));
     } else if (squareToRank(To) == squareToRank(FromSq)) {
         // Horizontal: rooks and dragons can be revealed.
-        *AttackersBB |=
-            bitboard::getRookAttackBB<PTK_Rook>(To, OccupiedBB) & XRayLineBB &
-            (getBitboard<PTK_Rook>() | getBitboard<PTK_ProRook>());
+        *AttackersBB |= bitboard::getRookAttackBB<PTK_Rook>(To, OccupiedBB) &
+                        XRayLineBB &
+                        (getBitboard<PTK_Rook>() | getBitboard<PTK_ProRook>());
     } else {
         // Diagonal: bishops and horses can be revealed.
         *AttackersBB |=
-            bitboard::getBishopAttackBB<PTK_Bishop>(To, OccupiedBB) & XRayLineBB &
+            bitboard::getBishopAttackBB<PTK_Bishop>(To, OccupiedBB) &
+            XRayLineBB &
             (getBitboard<PTK_Bishop>() | getBitboard<PTK_ProBishop>());
     }
 }
 
 bool StateImpl::seeGivesDiscoveredCheck(
-    const Color C,
-    const Square FromSq,
-    const bitboard::Bitboard& MyBB,
+    const Color C, const Square FromSq, const bitboard::Bitboard& MyBB,
     const StepHelper* SHelper) const noexcept {
     // Was the piece on FromSq shielding the opponent's king from one of
     // my sliders at the root position?
@@ -941,7 +944,6 @@ bool StateImpl::seeGivesDiscoveredCheck(
 
     return Discovered;
 }
-
 
 template <Color C, bool UpdateCheckerBySliders>
 inline void StateImpl::setDefendingOpponentSliderBBAndSliderCheckerBB(

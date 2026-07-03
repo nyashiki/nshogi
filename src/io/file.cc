@@ -30,7 +30,8 @@ class AZTeacherIO : public ml::AZTeacher {
     static void loadAt_0_1_0(ml::AZTeacher* Dest, std::ifstream& Ifs) {
         Ifs.read(Dest->Sfen, SfenCStrLength * sizeof(char));
 
-        Ifs.read(reinterpret_cast<char*>(&Dest->SideToMove), sizeof(core::Color));
+        Ifs.read(reinterpret_cast<char*>(&Dest->SideToMove),
+                 sizeof(core::Color));
         Ifs.read(reinterpret_cast<char*>(&Dest->Winner), sizeof(core::Color));
         Ifs.read(reinterpret_cast<char*>(&Dest->NumMoves), sizeof(uint8_t));
         for (std::size_t I = 0; I < NumSavedPlayouts; ++I) {
@@ -207,7 +208,8 @@ class SimpleTeacherIO : public ml::SimpleTeacher {
         : ml::SimpleTeacher(ST) {
     }
 
-    static void loadAt(ml::SimpleTeacher* Dest, std::ifstream& Ifs, int32_t Version) {
+    static void loadAt(ml::SimpleTeacher* Dest, std::ifstream& Ifs,
+                       int32_t Version) {
         uint64_t Codes[4];
         uint16_t Move16;
 
@@ -218,7 +220,8 @@ class SimpleTeacherIO : public ml::SimpleTeacher {
         Ifs.read(reinterpret_cast<char*>(&Move16), sizeof(uint16_t));
         Ifs.read(reinterpret_cast<char*>(&Dest->Winner), sizeof(Winner));
 
-        Dest->HuffmanCode = core::HuffmanCode(Codes[3], Codes[2], Codes[1], Codes[0]);
+        Dest->HuffmanCode =
+            core::HuffmanCode(Codes[3], Codes[2], Codes[1], Codes[0]);
         Dest->NextMove = core::Move16::fromValue(Move16);
 
         Dest->Q = 0.0f;
@@ -230,7 +233,8 @@ class SimpleTeacherIO : public ml::SimpleTeacher {
         }
     }
 
-    static std::size_t loadAt(ml::SimpleTeacher* Dest, const char* Source, int32_t Version) {
+    static std::size_t loadAt(ml::SimpleTeacher* Dest, const char* Source,
+                              int32_t Version) {
         const char* Cur = Source;
 
         uint64_t Codes[4];
@@ -249,7 +253,8 @@ class SimpleTeacherIO : public ml::SimpleTeacher {
         std::memcpy(&Dest->Winner, Cur, sizeof(Winner));
         Cur += sizeof(Winner);
 
-        Dest->HuffmanCode = core::HuffmanCode(Codes[3], Codes[2], Codes[1], Codes[0]);
+        Dest->HuffmanCode =
+            core::HuffmanCode(Codes[3], Codes[2], Codes[1], Codes[0]);
         Dest->NextMove = core::Move16::fromValue(Move16);
 
         Dest->Q = 0.0f;
@@ -270,7 +275,8 @@ class SimpleTeacherIO : public ml::SimpleTeacher {
         return *this;
     }
 
-    ml::SimpleTeacher load(const char* Source, int32_t Version, std::size_t* BytesRead = nullptr) {
+    ml::SimpleTeacher load(const char* Source, int32_t Version,
+                           std::size_t* BytesRead = nullptr) {
         const std::size_t Read = loadAt(this, Source, Version);
 
         if (BytesRead != nullptr) {
@@ -299,7 +305,8 @@ ml::SimpleTeacher load(std::ifstream& Ifs, int32_t Version) {
     return IO.load(Ifs, Version);
 }
 
-ml::SimpleTeacher load(const char* Source, int32_t Version, std::size_t* BytesRead) {
+ml::SimpleTeacher load(const char* Source, int32_t Version,
+                       std::size_t* BytesRead) {
     SimpleTeacherIO IO;
     return IO.load(Source, Version, BytesRead);
 }
@@ -313,7 +320,8 @@ void loadAt(ml::SimpleTeacher* Dest, std::ifstream& Ifs, int32_t Version) {
     SimpleTeacherIO::loadAt(Dest, Ifs, Version);
 }
 
-std::size_t loadAt(ml::SimpleTeacher* Dest, const char* Source, int32_t Version) {
+std::size_t loadAt(ml::SimpleTeacher* Dest, const char* Source,
+                   int32_t Version) {
     return SimpleTeacherIO::loadAt(Dest, Source, Version);
 }
 
@@ -330,12 +338,14 @@ ml::SimpleTeacher load<ml::SimpleTeacher>(std::ifstream& Ifs, int32_t Version) {
 }
 
 template <>
-ml::AZTeacher load<ml::AZTeacher>(const char* Source, int32_t /* Version */, std::size_t* BytesRead) {
+ml::AZTeacher load<ml::AZTeacher>(const char* Source, int32_t /* Version */,
+                                  std::size_t* BytesRead) {
     return az_teacher::load(Source, BytesRead);
 }
 
 template <>
-ml::SimpleTeacher load<ml::SimpleTeacher>(const char* Source, int32_t Version, std::size_t* BytesRead) {
+ml::SimpleTeacher load<ml::SimpleTeacher>(const char* Source, int32_t Version,
+                                          std::size_t* BytesRead) {
     return simple_teacher::load(Source, Version, BytesRead);
 }
 

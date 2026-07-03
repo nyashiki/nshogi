@@ -2429,8 +2429,10 @@ MoveGeneratorInternal::generateLegalEvasionMoves(const StateImpl& S) noexcept {
 
 template <Color C>
 Move32
-MoveGeneratorInternal::generateLegalSmallestMove(const internal::StateImpl& S, Square To) noexcept {
-    { // When the king is in check, we can only move the king or capture the checker.
+MoveGeneratorInternal::generateLegalSmallestMove(const internal::StateImpl& S,
+                                                 Square To) noexcept {
+    { // When the king is in check, we can only move the king or capture the
+      // checker.
         const Bitboard CheckerBB = S.getCheckerBB();
 
         if (!CheckerBB.isZero()) {
@@ -2476,28 +2478,29 @@ MoveGeneratorInternal::generateLegalSmallestMove(const internal::StateImpl& S, S
             if (S.getDefendingOpponentSliderBB<C>().isSet(To + South)) {
                 // This pawn is pinned.
                 // We have to check whether this move is legal or not.
-                // This move is legal when the line (= file because this is a pawn)
-                // between the king and the piece contains the destination square.
+                // This move is legal when the line (= file because this is a
+                // pawn) between the king and the piece contains the destination
+                // square.
                 if (LineBB[To + South][S.getKingSquare<C>()].isSet(To)) {
                     if (PromotableBB[C].isSet(To)) {
                         return Move32::boardPromotingMove(
-                                To + South, To, PTK_Pawn,
-                                getPieceType(S.getPosition().pieceOn(To)));
+                            To + South, To, PTK_Pawn,
+                            getPieceType(S.getPosition().pieceOn(To)));
                     } else {
                         return Move32::boardMove(
-                                To + South, To, PTK_Pawn,
-                                getPieceType(S.getPosition().pieceOn(To)));
+                            To + South, To, PTK_Pawn,
+                            getPieceType(S.getPosition().pieceOn(To)));
                     }
                 }
             } else {
                 if (PromotableBB[C].isSet(To)) {
                     return Move32::boardPromotingMove(
-                            To + South, To, PTK_Pawn,
-                            getPieceType(S.getPosition().pieceOn(To)));
+                        To + South, To, PTK_Pawn,
+                        getPieceType(S.getPosition().pieceOn(To)));
                 } else {
                     return Move32::boardMove(
-                            To + South, To, PTK_Pawn,
-                            getPieceType(S.getPosition().pieceOn(To)));
+                        To + South, To, PTK_Pawn,
+                        getPieceType(S.getPosition().pieceOn(To)));
                 }
             }
         }
@@ -2507,23 +2510,23 @@ MoveGeneratorInternal::generateLegalSmallestMove(const internal::StateImpl& S, S
                 if (LineBB[To + North][S.getKingSquare<C>()].isSet(To)) {
                     if (PromotableBB[C].isSet(To)) {
                         return Move32::boardPromotingMove(
-                                To + North, To, PTK_Pawn,
-                                getPieceType(S.getPosition().pieceOn(To)));
+                            To + North, To, PTK_Pawn,
+                            getPieceType(S.getPosition().pieceOn(To)));
                     } else {
                         return Move32::boardMove(
-                                To + North, To, PTK_Pawn,
-                                getPieceType(S.getPosition().pieceOn(To)));
+                            To + North, To, PTK_Pawn,
+                            getPieceType(S.getPosition().pieceOn(To)));
                     }
                 }
             } else {
                 if (PromotableBB[C].isSet(To)) {
                     return Move32::boardPromotingMove(
-                            To + North, To, PTK_Pawn,
-                            getPieceType(S.getPosition().pieceOn(To)));
+                        To + North, To, PTK_Pawn,
+                        getPieceType(S.getPosition().pieceOn(To)));
                 } else {
                     return Move32::boardMove(
-                            To + North, To, PTK_Pawn,
-                            getPieceType(S.getPosition().pieceOn(To)));
+                        To + North, To, PTK_Pawn,
+                        getPieceType(S.getPosition().pieceOn(To)));
                 }
             }
         }
@@ -2533,7 +2536,7 @@ MoveGeneratorInternal::generateLegalSmallestMove(const internal::StateImpl& S, S
     const Bitboard OpBB = S.getBitboard<~C>();
     const Bitboard OccupiedBB = MyBB | OpBB;
 
-// clang-format off
+    // clang-format off
 #define NSHOGI_GENERATE_SMALLEST_CAPTURE_MOVE_PROCESS_STEP(Type) {                         \
     Bitboard FromBB = S.getBitboard<C, Type>() & getAttackBB<~C, Type>(To);                \
                                                                                            \
@@ -2600,7 +2603,7 @@ MoveGeneratorInternal::generateLegalSmallestMove(const internal::StateImpl& S, S
         }                                                                                  \
     }                                                                                      \
 }
-// clang-format on
+    // clang-format on
 
     NSHOGI_GENERATE_SMALLEST_CAPTURE_MOVE_PROCESS_STEP(PTK_ProPawn);
     NSHOGI_GENERATE_SMALLEST_CAPTURE_MOVE_PROCESS_SLIDER(PTK_Lance);
@@ -2629,9 +2632,8 @@ MoveGeneratorInternal::generateLegalSmallestMove(const internal::StateImpl& S, S
         if (!S.isAttacked<C>(To, KingSq)) {
             // The square is not attacked.
             // Thus, the king can capture the checker.
-            return Move32::boardMove(
-                KingSq, To, PTK_King,
-                getPieceType(S.getPosition().pieceOn(To)));
+            return Move32::boardMove(KingSq, To, PTK_King,
+                                     getPieceType(S.getPosition().pieceOn(To)));
         }
     }
 

@@ -68,15 +68,16 @@ class ExtendedState : public State {
     /// @param Move The move to evaluate. It must be a legal capture move
     /// (a board move that captures an opponent's piece) in the current
     /// position.
-    /// @param PieceValues An array of piece values used for the SEE calculation.
-    /// The array should be indexed by `PieceTypeKind` and contain the values of
-    /// each piece type (i.e., `PieceValues[PTK_Pawn]` should give the value of a pawn).
-    /// The promoted piece types must not be valued less than their
-    /// corresponding raw piece types.
+    /// @param PieceValues An array of piece values used for the SEE
+    /// calculation. The array should be indexed by `PieceTypeKind` and contain
+    /// the values of each piece type (i.e., `PieceValues[PTK_Pawn]` should give
+    /// the value of a pawn). The promoted piece types must not be valued less
+    /// than their corresponding raw piece types.
     ///
     /// @return The computed SEE value for the move.
     ///
-    int32_t computeSEE(Move32 Move, const int32_t* const PieceValues) const noexcept;
+    int32_t computeSEE(Move32 Move,
+                       const int32_t* const PieceValues) const noexcept;
 };
 
 } // namespace core

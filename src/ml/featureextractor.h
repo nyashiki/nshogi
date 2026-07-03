@@ -20,13 +20,9 @@ class IFeatureExtractor {
  public:
     virtual ~IFeatureExtractor() = default;
 
-    virtual void idsAt(
-        int32_t* DestMyIds,
-        int32_t* DestOpIds,
-        int32_t* DestMyIdsCount,
-        int32_t* DestOpIdsCount,
-        const core::State& S
-    ) const = 0;
+    virtual void idsAt(int32_t* DestMyIds, int32_t* DestOpIds,
+                       int32_t* DestMyIdsCount, int32_t* DestOpIdsCount,
+                       const core::State& S) const = 0;
 
     virtual auto ids(const core::State&) const
         -> std::pair<std::vector<int32_t>, std::vector<int32_t>> = 0;

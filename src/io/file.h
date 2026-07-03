@@ -13,8 +13,8 @@
 #include "../ml/azteacher.h"
 #include "../ml/simpleteacher.h"
 
-#include <fstream>
 #include <cstddef>
+#include <fstream>
 
 namespace nshogi {
 namespace io {
@@ -31,7 +31,8 @@ void save(std::ofstream&, const ml::AZTeacher&);
 namespace simple_teacher {
 
 void loadAt(ml::SimpleTeacher* Dest, std::ifstream&, int32_t Version);
-std::size_t loadAt(ml::SimpleTeacher* Dest, const char* Source, int32_t Version);
+std::size_t loadAt(ml::SimpleTeacher* Dest, const char* Source,
+                   int32_t Version);
 ml::SimpleTeacher load(std::ifstream&, int32_t Version);
 ml::SimpleTeacher load(const char* Source, int32_t Version);
 

@@ -94,7 +94,8 @@ class MoveGenerator {
     /// @brief Generate the smallest legal move that moves a piece to the given
     /// square.
     ///
-    /// Note that the destination square must be empty or occupied by an opponent's piece.
+    /// Note that the destination square must be empty or occupied by an
+    /// opponent's piece.
     ///
     static Move32 generateLegalSmallestMove(const State& S, Square To) noexcept;
 };

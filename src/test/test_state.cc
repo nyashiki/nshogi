@@ -1073,7 +1073,8 @@ TEST(ExtendedState, DoAndUndoRandom) {
 
 TEST(ExtendedState, ComputeSEEHandmade1) {
     const std::string Sfen = "startpos";
-    nshogi::core::ExtendedState State = nshogi::io::sfen::StateBuilder::newState(Sfen);
+    nshogi::core::ExtendedState State =
+        nshogi::io::sfen::StateBuilder::newState(Sfen);
 
     const auto Move =
         nshogi::io::sfen::sfenToMove32(State.getPosition(), "7g7f");
@@ -1081,8 +1082,10 @@ TEST(ExtendedState, ComputeSEEHandmade1) {
 }
 
 TEST(ExtendedState, ComputeSEEHandmade2) {
-    const std::string Sfen = "1ks1lgs2/4r2b1/pppnln1pp/3ppgp2/4Sp3/2PSPG3/PP1NRNPPP/1B2L4/2K1LG3 w Pp 1";
-    nshogi::core::ExtendedState State = nshogi::io::sfen::StateBuilder::newState(Sfen);
+    const std::string Sfen = "1ks1lgs2/4r2b1/pppnln1pp/3ppgp2/4Sp3/2PSPG3/"
+                             "PP1NRNPPP/1B2L4/2K1LG3 w Pp 1";
+    nshogi::core::ExtendedState State =
+        nshogi::io::sfen::StateBuilder::newState(Sfen);
 
     const auto Move =
         nshogi::io::sfen::sfenToMove32(State.getPosition(), "5d5e");
@@ -1131,13 +1134,12 @@ TEST(ExtendedState, ComputeSEEMatchesSmallestMoveIteration) {
 
                 if (SEE != Expected) {
                     ++NumMismatches;
-                    std::cout << "Position: "
-                              << nshogi::io::sfen::positionToSfen(
-                                     State.getPosition())
-                              << ", Move: "
-                              << nshogi::io::sfen::move32ToSfen(Move)
-                              << ", SEE: " << SEE
-                              << ", Expected: " << Expected << std::endl;
+                    std::cout
+                        << "Position: "
+                        << nshogi::io::sfen::positionToSfen(State.getPosition())
+                        << ", Move: " << nshogi::io::sfen::move32ToSfen(Move)
+                        << ", SEE: " << SEE << ", Expected: " << Expected
+                        << std::endl;
                 }
             }
 

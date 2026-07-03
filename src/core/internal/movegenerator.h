@@ -37,7 +37,8 @@ class MoveGeneratorInternal {
     generateLegalCaptureMoves(const internal::StateImpl& S) noexcept;
 
     template <Color C>
-    static Move32 generateLegalSmallestMove(const internal::StateImpl& S, Square To) noexcept;
+    static Move32 generateLegalSmallestMove(const internal::StateImpl& S,
+                                            Square To) noexcept;
 };
 
 } // namespace internal
