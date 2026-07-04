@@ -6,6 +6,7 @@ var searchData=
   ['demotepiecetype_3',['demotePieceType',['../namespacenshogi_1_1core.html#a3e6764c635f882a9f942efa4cc0b0f95',1,'nshogi::core']]],
   ['domove_4',['doMove',['../classnshogi_1_1core_1_1State.html#ac1602275a38ffa04dc953ad3585fa225',1,'nshogi::core::State']]],
   ['donullmove_5',['doNullMove',['../classnshogi_1_1core_1_1ExtendedState.html#a027154b513e5ddbe88b868b5b8cf646b',1,'nshogi::core::ExtendedState']]],
-  ['drop_6',['drop',['../structnshogi_1_1core_1_1Move32.html#abfa0c31b9812508b654c72331d7285e1',1,'nshogi::core::Move32::drop()'],['../structnshogi_1_1core_1_1Move16.html#a46a98193f990f8335fd0e491d1db9462',1,'nshogi::core::Move16::drop()']]],
-  ['droppingmove_7',['droppingMove',['../structnshogi_1_1core_1_1Move32.html#a6e36dfe3aefe2a0bc460954af4f0962a',1,'nshogi::core::Move32']]]
+  ['dotask_6',['doTask',['../classnshogi_1_1ml_1_1BatchedTeacherLoader.html#ae0d85f8d04bf4a56fd03e69feb907726',1,'nshogi::ml::BatchedTeacherLoader']]],
+  ['drop_7',['drop',['../structnshogi_1_1core_1_1Move32.html#abfa0c31b9812508b654c72331d7285e1',1,'nshogi::core::Move32::drop()'],['../structnshogi_1_1core_1_1Move16.html#a46a98193f990f8335fd0e491d1db9462',1,'nshogi::core::Move16::drop()']]],
+  ['droppingmove_8',['droppingMove',['../structnshogi_1_1core_1_1Move32.html#a6e36dfe3aefe2a0bc460954af4f0962a',1,'nshogi::core::Move32']]]
 ];

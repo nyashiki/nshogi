@@ -242,6 +242,7 @@ Enumerations</h2></td></tr>
 , <a class="el" href="namespacenshogi_1_1core.html#adc49f924850845e9563ab7338d6f375fae45338ddfd5c155947f5bd48d5438253">PK_WhiteProBishop</a> = 29
 , <br />
 &#160;&#160;<a class="el" href="namespacenshogi_1_1core.html#adc49f924850845e9563ab7338d6f375fa617665d1c0e57410a824048f9396b171">PK_WhiteProRook</a> = 30
+, <a class="el" href="namespacenshogi_1_1core.html#adc49f924850845e9563ab7338d6f375fa8b024d66ca2df1ae0ee16fe49b576022">NumPieceKind</a> = 31
 <br />
  }</td></tr>
 <tr class="separator:adc49f924850845e9563ab7338d6f375f"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -436,6 +437,8 @@ Functions</h2></td></tr>
 <tr class="separator:aef35325d0fb8b9b4edb682f0c1bbd6b1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a97740f753af636cb7a41fd7c641ae93e"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacenshogi_1_1core.html#adc49f924850845e9563ab7338d6f375f">PieceKind</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacenshogi_1_1core.html#a97740f753af636cb7a41fd7c641ae93e">makePiece</a> (<a class="el" href="namespacenshogi_1_1core.html#a31bbefbdbc08642dd7fffa28c0533659">Color</a> C, <a class="el" href="namespacenshogi_1_1core.html#a48e95a20c4b8db53f6c955ddac0b0e12">PieceTypeKind</a> Pt) noexcept</td></tr>
 <tr class="separator:a97740f753af636cb7a41fd7c641ae93e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1b494ce8d2f6b851387c36063702b98f"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacenshogi_1_1core.html#adc49f924850845e9563ab7338d6f375f">PieceKind</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacenshogi_1_1core.html#a1b494ce8d2f6b851387c36063702b98f">getInversed</a> (<a class="el" href="namespacenshogi_1_1core.html#adc49f924850845e9563ab7338d6f375f">PieceKind</a> P) noexcept</td></tr>
+<tr class="separator:a1b494ce8d2f6b851387c36063702b98f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aab18829d7fd86be346d17800b4ac2e45"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacenshogi_1_1core.html#a4fc4e1258dfdd1f019167d58c1d7a6c1">Square</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacenshogi_1_1core.html#aab18829d7fd86be346d17800b4ac2e45">operator++</a> (<a class="el" href="namespacenshogi_1_1core.html#a4fc4e1258dfdd1f019167d58c1d7a6c1">Square</a> &amp;Sq) noexcept</td></tr>
 <tr class="separator:aab18829d7fd86be346d17800b4ac2e45"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8a2b0c2f0b3fbd126b7b3106bd5b92c5"><td class="memItemLeft" align="right" valign="top">constexpr <a class="el" href="namespacenshogi_1_1core.html#a4fc4e1258dfdd1f019167d58c1d7a6c1">Square</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacenshogi_1_1core.html#a8a2b0c2f0b3fbd126b7b3106bd5b92c5">getInversed</a> (<a class="el" href="namespacenshogi_1_1core.html#a4fc4e1258dfdd1f019167d58c1d7a6c1">Square</a> Sq) noexcept</td></tr>
@@ -647,6 +650,7 @@ Variables</h2></td></tr>
 <tr><td class="fieldname"><a id="adc49f924850845e9563ab7338d6f375fa6dc953648b70aefc9c6e39c755706623" name="adc49f924850845e9563ab7338d6f375fa6dc953648b70aefc9c6e39c755706623"></a>PK_WhiteProSilver&#160;</td><td class="fielddoc"></td></tr>
 <tr><td class="fieldname"><a id="adc49f924850845e9563ab7338d6f375fae45338ddfd5c155947f5bd48d5438253" name="adc49f924850845e9563ab7338d6f375fae45338ddfd5c155947f5bd48d5438253"></a>PK_WhiteProBishop&#160;</td><td class="fielddoc"></td></tr>
 <tr><td class="fieldname"><a id="adc49f924850845e9563ab7338d6f375fa617665d1c0e57410a824048f9396b171" name="adc49f924850845e9563ab7338d6f375fa617665d1c0e57410a824048f9396b171"></a>PK_WhiteProRook&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="adc49f924850845e9563ab7338d6f375fa8b024d66ca2df1ae0ee16fe49b576022" name="adc49f924850845e9563ab7338d6f375fa8b024d66ca2df1ae0ee16fe49b576022"></a>NumPieceKind&#160;</td><td class="fielddoc"></td></tr>
 </table>
 
 </div>
@@ -1091,8 +1095,34 @@ Variables</h2></td></tr>
 
 </div>
 </div>
+<a id="a1b494ce8d2f6b851387c36063702b98f" name="a1b494ce8d2f6b851387c36063702b98f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1b494ce8d2f6b851387c36063702b98f">&#9670;&#160;</a></span>getInversed() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="namespacenshogi_1_1core.html#adc49f924850845e9563ab7338d6f375f">PieceKind</a> nshogi::core::getInversed </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="namespacenshogi_1_1core.html#adc49f924850845e9563ab7338d6f375f">PieceKind</a>&#160;</td>
+          <td class="paramname"><em>P</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
 <a id="a8a2b0c2f0b3fbd126b7b3106bd5b92c5" name="a8a2b0c2f0b3fbd126b7b3106bd5b92c5"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a8a2b0c2f0b3fbd126b7b3106bd5b92c5">&#9670;&#160;</a></span>getInversed()</h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a8a2b0c2f0b3fbd126b7b3106bd5b92c5">&#9670;&#160;</a></span>getInversed() <span class="overload">[2/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">

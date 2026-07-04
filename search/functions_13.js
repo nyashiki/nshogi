@@ -1,4 +1,5 @@
 var searchData=
 [
-  ['write_0',['write',['../classnshogi_1_1ml_1_1ThreadsafeTeacherWriter.html#a3cf24c5ba8b8a2559874ad6bf6f4f786',1,'nshogi::ml::ThreadsafeTeacherWriter']]]
+  ['undomove_0',['undoMove',['../classnshogi_1_1core_1_1State.html#a8c19fb89d3f8f2337ace2be35be1b53a',1,'nshogi::core::State']]],
+  ['undonullmove_1',['undoNullMove',['../classnshogi_1_1core_1_1ExtendedState.html#a6314504e76a727cd7e030fba4baaffeb',1,'nshogi::core::ExtendedState']]]
 ];

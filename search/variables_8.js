@@ -1,5 +1,4 @@
 var searchData=
 [
-  ['nextmove_0',['NextMove',['../structnshogi_1_1ml_1_1SimpleTeacher.html#a5520302f3fe42dc8ca2f80730073d92d',1,'nshogi::ml::SimpleTeacher']]],
-  ['nummoves_1',['NumMoves',['../structnshogi_1_1ml_1_1AZTeacher.html#a0e51e7440e5d5806ade96da359197e38',1,'nshogi::ml::AZTeacher']]]
+  ['opids_0',['OpIds',['../structnshogi_1_1ml_1_1BatchedTeacher.html#a3c186df0c050deaf376a378f8206a0c7',1,'nshogi::ml::BatchedTeacher']]]
 ];

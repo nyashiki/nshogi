@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['ply_0',['Ply',['../structnshogi_1_1ml_1_1SimpleTeacher.html#afb026caa1da14d20102b731f1c760632',1,'nshogi::ml::SimpleTeacher']]]
+  ['qs_0',['Qs',['../structnshogi_1_1ml_1_1BatchedTeacher.html#a0c06b556b563e0b64341815e1fa2eed6',1,'nshogi::ml::BatchedTeacher']]]
 ];

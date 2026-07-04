@@ -1,12 +1,18 @@
 var hierarchy =
 [
     [ "nshogi::ml::AZTeacher", "structnshogi_1_1ml_1_1AZTeacher.html", null ],
+    [ "nshogi::ml::BatchedTeacher", "structnshogi_1_1ml_1_1BatchedTeacher.html", null ],
+    [ "nshogi::ml::BatchedTeacherLoader", "classnshogi_1_1ml_1_1BatchedTeacherLoader.html", null ],
     [ "nshogi::ml::FeatureBitboard", "structnshogi_1_1ml_1_1FeatureBitboard.html", null ],
     [ "nshogi::ml::FeatureStack", "structnshogi_1_1ml_1_1FeatureStack.html", [
       [ "nshogi::ml::FeatureStackComptime< FeatureTypes >", "structnshogi_1_1ml_1_1FeatureStackComptime.html", null ],
       [ "nshogi::ml::FeatureStackRuntime", "structnshogi_1_1ml_1_1FeatureStackRuntime.html", null ]
     ] ],
     [ "nshogi::core::HuffmanCode", "structnshogi_1_1core_1_1HuffmanCode.html", null ],
+    [ "nshogi::ml::IFeatureExtractor", "classnshogi_1_1ml_1_1IFeatureExtractor.html", [
+      [ "nshogi::ml::KAFeatureExtractor", "classnshogi_1_1ml_1_1KAFeatureExtractor.html", null ],
+      [ "nshogi::ml::PFeatureExtractor", "classnshogi_1_1ml_1_1PFeatureExtractor.html", null ]
+    ] ],
     [ "nshogi::core::Move16", "structnshogi_1_1core_1_1Move16.html", null ],
     [ "nshogi::core::Move32", "structnshogi_1_1core_1_1Move32.html", null ],
     [ "nshogi::core::MoveGenerator", "classnshogi_1_1core_1_1MoveGenerator.html", null ],
@@ -17,7 +23,9 @@ var hierarchy =
       [ "nshogi::io::csa::PositionBuilder", "classnshogi_1_1io_1_1csa_1_1PositionBuilder.html", null ],
       [ "nshogi::io::sfen::PositionBuilder", "classnshogi_1_1io_1_1sfen_1_1PositionBuilder.html", null ]
     ] ],
-    [ "nshogi::ml::SimpleTeacher", "structnshogi_1_1ml_1_1SimpleTeacher.html", null ],
+    [ "nshogi::ml::SimpleTeacher", "structnshogi_1_1ml_1_1SimpleTeacher.html", [
+      [ "nshogi::io::file::simple_teacher::SimpleTeacherIO", "classnshogi_1_1io_1_1file_1_1simple__teacher_1_1SimpleTeacherIO.html", null ]
+    ] ],
     [ "nshogi::solver::dfpn::Solver", "classnshogi_1_1solver_1_1dfpn_1_1Solver.html", null ],
     [ "nshogi::core::SquareIterator< Order >", "structnshogi_1_1core_1_1SquareIterator.html", null ],
     [ "nshogi::core::State", "classnshogi_1_1core_1_1State.html", [

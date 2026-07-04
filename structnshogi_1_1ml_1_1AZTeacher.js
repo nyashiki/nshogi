@@ -5,6 +5,7 @@ var structnshogi_1_1ml_1_1AZTeacher =
     [ "checkSanity", "structnshogi_1_1ml_1_1AZTeacher.html#a358833e15c64489becba14d87ca712fc", null ],
     [ "corruptMyself", "structnshogi_1_1ml_1_1AZTeacher.html#ae0c411c8e05da8e52669a0421791b01d", null ],
     [ "equals", "structnshogi_1_1ml_1_1AZTeacher.html#a7fa71d59e271fdffd458e136460aeb0a", null ],
+    [ "operator=", "structnshogi_1_1ml_1_1AZTeacher.html#ab3542eb6ad2466f6cb42c9b0b20754ad", null ],
     [ "BlackDrawValue", "structnshogi_1_1ml_1_1AZTeacher.html#aaf0434241a3f3f2796d50c2ff733106e", null ],
     [ "Declared", "structnshogi_1_1ml_1_1AZTeacher.html#a3610c854d58453f6801df5841e5f5e42", null ],
     [ "EndingRule", "structnshogi_1_1ml_1_1AZTeacher.html#a6d8aecb3ead483f4afacaec67112a6ea", null ],

@@ -1,6 +1,5 @@
 var searchData=
 [
-  ['teacherloaderforfixedsizeteacher_0',['TeacherLoaderForFixedSizeTeacher',['../classnshogi_1_1ml_1_1TeacherLoaderForFixedSizeTeacher.html#ac1b98ccd67615b2b8b4e7d3f18f90ef4',1,'nshogi::ml::TeacherLoaderForFixedSizeTeacher']]],
-  ['threadsafeteacherwriter_1',['ThreadsafeTeacherWriter',['../classnshogi_1_1ml_1_1ThreadsafeTeacherWriter.html#a2b3e02b665fa4cfc327353993e8e831f',1,'nshogi::ml::ThreadsafeTeacherWriter']]],
-  ['to_2',['to',['../structnshogi_1_1core_1_1Move32.html#a3032912089141c2678a9d8599f8651d7',1,'nshogi::core::Move32::to()'],['../structnshogi_1_1core_1_1Move16.html#a76249ae590fbe769f804c60409b8177c',1,'nshogi::core::Move16::to()']]]
+  ['ranktochar_0',['rankToChar',['../namespacenshogi_1_1io_1_1csa.html#a336173ff8c767c102696d941a26b03ec',1,'nshogi::io::csa::rankToChar(core::Rank Rank)'],['../namespacenshogi_1_1io_1_1csa.html#ad4b3120e13451fff114639531e11a940',1,'nshogi::io::csa::rankToChar(core::File File)'],['../namespacenshogi_1_1io_1_1sfen.html#a165f9e5ae70f8778560a1a09809b330e',1,'nshogi::io::sfen::rankToChar()']]],
+  ['reverseorder_1',['reverseOrder',['../namespacenshogi_1_1core.html#a37376703aa6edadf49ea2c9f77d24166',1,'nshogi::core']]]
 ];

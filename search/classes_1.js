@@ -1,4 +1,5 @@
 var searchData=
 [
-  ['extendedstate_0',['ExtendedState',['../classnshogi_1_1core_1_1ExtendedState.html',1,'nshogi::core']]]
+  ['batchedteacher_0',['BatchedTeacher',['../structnshogi_1_1ml_1_1BatchedTeacher.html',1,'nshogi::ml']]],
+  ['batchedteacherloader_1',['BatchedTeacherLoader',['../classnshogi_1_1ml_1_1BatchedTeacherLoader.html',1,'nshogi::ml']]]
 ];

@@ -20,6 +20,11 @@ var annotated_dup =
           [ "PositionBuilder", "classnshogi_1_1io_1_1csa_1_1PositionBuilder.html", null ],
           [ "StateBuilder", "classnshogi_1_1io_1_1csa_1_1StateBuilder.html", null ]
         ] ],
+        [ "file", "namespacenshogi_1_1io_1_1file.html", [
+          [ "simple_teacher", "namespacenshogi_1_1io_1_1file_1_1simple__teacher.html", [
+            [ "SimpleTeacherIO", "classnshogi_1_1io_1_1file_1_1simple__teacher_1_1SimpleTeacherIO.html", "classnshogi_1_1io_1_1file_1_1simple__teacher_1_1SimpleTeacherIO" ]
+          ] ]
+        ] ],
         [ "sfen", "namespacenshogi_1_1io_1_1sfen.html", [
           [ "PositionBuilder", "classnshogi_1_1io_1_1sfen_1_1PositionBuilder.html", null ],
           [ "StateBuilder", "classnshogi_1_1io_1_1sfen_1_1StateBuilder.html", null ]
@@ -30,10 +35,15 @@ var annotated_dup =
           [ "PermutationGenerator", "classnshogi_1_1ml_1_1utils_1_1PermutationGenerator.html", "classnshogi_1_1ml_1_1utils_1_1PermutationGenerator" ]
         ] ],
         [ "AZTeacher", "structnshogi_1_1ml_1_1AZTeacher.html", "structnshogi_1_1ml_1_1AZTeacher" ],
+        [ "BatchedTeacher", "structnshogi_1_1ml_1_1BatchedTeacher.html", "structnshogi_1_1ml_1_1BatchedTeacher" ],
+        [ "BatchedTeacherLoader", "classnshogi_1_1ml_1_1BatchedTeacherLoader.html", "classnshogi_1_1ml_1_1BatchedTeacherLoader" ],
         [ "FeatureBitboard", "structnshogi_1_1ml_1_1FeatureBitboard.html", "structnshogi_1_1ml_1_1FeatureBitboard" ],
         [ "FeatureStack", "structnshogi_1_1ml_1_1FeatureStack.html", "structnshogi_1_1ml_1_1FeatureStack" ],
         [ "FeatureStackComptime", "structnshogi_1_1ml_1_1FeatureStackComptime.html", "structnshogi_1_1ml_1_1FeatureStackComptime" ],
         [ "FeatureStackRuntime", "structnshogi_1_1ml_1_1FeatureStackRuntime.html", "structnshogi_1_1ml_1_1FeatureStackRuntime" ],
+        [ "IFeatureExtractor", "classnshogi_1_1ml_1_1IFeatureExtractor.html", "classnshogi_1_1ml_1_1IFeatureExtractor" ],
+        [ "KAFeatureExtractor", "classnshogi_1_1ml_1_1KAFeatureExtractor.html", "classnshogi_1_1ml_1_1KAFeatureExtractor" ],
+        [ "PFeatureExtractor", "classnshogi_1_1ml_1_1PFeatureExtractor.html", "classnshogi_1_1ml_1_1PFeatureExtractor" ],
         [ "SimpleTeacher", "structnshogi_1_1ml_1_1SimpleTeacher.html", "structnshogi_1_1ml_1_1SimpleTeacher" ],
         [ "TeacherLoaderForFixedSizeTeacher", "classnshogi_1_1ml_1_1TeacherLoaderForFixedSizeTeacher.html", "classnshogi_1_1ml_1_1TeacherLoaderForFixedSizeTeacher" ],
         [ "ThreadsafeTeacherWriter", "classnshogi_1_1ml_1_1ThreadsafeTeacherWriter.html", "classnshogi_1_1ml_1_1ThreadsafeTeacherWriter" ]

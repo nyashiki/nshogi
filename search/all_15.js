@@ -1,10 +1,10 @@
 var searchData=
 [
-  ['_7eextendedstate_0',['~ExtendedState',['../classnshogi_1_1core_1_1ExtendedState.html#a7d922d4db5f822a6497c516634ea9bff',1,'nshogi::core::ExtendedState']]],
-  ['_7efeaturestack_1',['~FeatureStack',['../structnshogi_1_1ml_1_1FeatureStack.html#ac2c95daa38abbc1fd9b9d198831c9c77',1,'nshogi::ml::FeatureStack']]],
-  ['_7efeaturestackruntime_2',['~FeatureStackRuntime',['../structnshogi_1_1ml_1_1FeatureStackRuntime.html#aff9d2560826d5f6866dd3776426d8177',1,'nshogi::ml::FeatureStackRuntime']]],
-  ['_7ehuffmancode_3',['~HuffmanCode',['../structnshogi_1_1core_1_1HuffmanCode.html#ad43205a9a7615b2150fd8bfcd4f2b907',1,'nshogi::core::HuffmanCode']]],
-  ['_7eposition_4',['~Position',['../structnshogi_1_1core_1_1Position.html#a982e7f50134ff2f7c1311dc131baaeb7',1,'nshogi::core::Position']]],
-  ['_7esolver_5',['~Solver',['../classnshogi_1_1solver_1_1dfpn_1_1Solver.html#afb34b49293b59b420fea82cd83261009',1,'nshogi::solver::dfpn::Solver']]],
-  ['_7estate_6',['~State',['../classnshogi_1_1core_1_1State.html#a68f199ead5787f52f3e898e4027736e1',1,'nshogi::core::State']]]
+  ['west_0',['West',['../namespacenshogi_1_1core.html#adc1de9799c7b2e61418437a1e35a1a18a3fea9a7fe418711df0a947afe47275db',1,'nshogi::core']]],
+  ['white_1',['White',['../namespacenshogi_1_1core.html#a31bbefbdbc08642dd7fffa28c0533659a5fc087f8cd9de5378ea62e827ede03a4',1,'nshogi::core']]],
+  ['whitedrawvalue_2',['WhiteDrawValue',['../structnshogi_1_1core_1_1StateConfig.html#a205fd10f3e6b88c61c8e201a2b940041',1,'nshogi::core::StateConfig::WhiteDrawValue()'],['../structnshogi_1_1ml_1_1AZTeacher.html#a0094f1db25a23569591b0d99b1693968',1,'nshogi::ml::AZTeacher::WhiteDrawValue()']]],
+  ['winner_3',['Winner',['../structnshogi_1_1ml_1_1AZTeacher.html#acfc17fd249ba8e8623727cd71844354a',1,'nshogi::ml::AZTeacher']]],
+  ['winrepetition_4',['WinRepetition',['../namespacenshogi_1_1core.html#a12c9215be02d67fe5af6e9c59bcd0310acf95e95ab0a9b843716beb1436757c7b',1,'nshogi::core']]],
+  ['wnes_5',['WNES',['../namespacenshogi_1_1core.html#ab8baa483d1eb2b34682c3aca88080269ac266d8f14fb08edd73470aac4172a766',1,'nshogi::core']]],
+  ['write_6',['write',['../classnshogi_1_1ml_1_1ThreadsafeTeacherWriter.html#a3cf24c5ba8b8a2559874ad6bf6f4f786',1,'nshogi::ml::ThreadsafeTeacherWriter']]]
 ];

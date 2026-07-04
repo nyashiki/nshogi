@@ -124,23 +124,22 @@ $(document).ready(function(){initNavTree('teacherwriter_8h_source.html',''); ini
 <div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span>    <a class="code hl_class" href="classnshogi_1_1ml_1_1ThreadsafeTeacherWriter.html">ThreadsafeTeacherWriter</a>(<span class="keyword">const</span> std::string&amp; TeacherPath);</div>
 <div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span> </div>
 <div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span>    <span class="keywordtype">void</span> <a class="code hl_function" href="classnshogi_1_1ml_1_1ThreadsafeTeacherWriter.html#a3cf24c5ba8b8a2559874ad6bf6f4f786">write</a>(<span class="keyword">const</span> TeacherType&amp; Teacher);</div>
-<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span>    <span class="keyword">static</span> <span class="keywordtype">void</span></div>
-<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span>    <a class="code hl_function" href="classnshogi_1_1ml_1_1ThreadsafeTeacherWriter.html#a74f6e9086aeda82bf622585881b59f04">shuffle</a>(<span class="keyword">const</span> <a class="code hl_class" href="classnshogi_1_1ml_1_1TeacherLoaderForFixedSizeTeacher.html">TeacherLoaderForFixedSizeTeacher&lt;TeacherType&gt;</a>&amp; Loader,</div>
-<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span>            <span class="keyword">const</span> std::string&amp; OutputPath, uint64_t Seed);</div>
-<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span> </div>
-<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span> <span class="keyword">private</span>:</div>
-<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span>    std::mutex Mutex;</div>
-<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span>    std::string Path;</div>
-<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span>};</div>
-<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span> </div>
-<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span>} <span class="comment">// namespace ml</span></div>
-<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span>} <span class="comment">// namespace nshogi</span></div>
-<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span> </div>
-<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span><span class="preprocessor">#endif </span><span class="comment">// #ifndef NSHOGI_ML_TEACHERWRITER_H</span></div>
-<div class="ttc" id="aclassnshogi_1_1ml_1_1TeacherLoaderForFixedSizeTeacher_html"><div class="ttname"><a href="classnshogi_1_1ml_1_1TeacherLoaderForFixedSizeTeacher.html">nshogi::ml::TeacherLoaderForFixedSizeTeacher</a></div><div class="ttdef"><b>Definition:</b> teacherloader.h:22</div></div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span>    <span class="keyword">static</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classnshogi_1_1ml_1_1ThreadsafeTeacherWriter.html#af5fced49f654e2dbd5d4fcd44e7921f5">shuffle</a>(<a class="code hl_class" href="classnshogi_1_1ml_1_1TeacherLoaderForFixedSizeTeacher.html">TeacherLoaderForFixedSizeTeacher&lt;TeacherType&gt;</a>&amp; Loader,</div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span>                        <span class="keyword">const</span> std::string&amp; OutputPath, uint64_t Seed);</div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span> </div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span> <span class="keyword">private</span>:</div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span>    std::mutex Mutex;</div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span>    std::string Path;</div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span>};</div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span> </div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span>} <span class="comment">// namespace ml</span></div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span>} <span class="comment">// namespace nshogi</span></div>
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span> </div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span><span class="preprocessor">#endif </span><span class="comment">// #ifndef NSHOGI_ML_TEACHERWRITER_H</span></div>
+<div class="ttc" id="aclassnshogi_1_1ml_1_1TeacherLoaderForFixedSizeTeacher_html"><div class="ttname"><a href="classnshogi_1_1ml_1_1TeacherLoaderForFixedSizeTeacher.html">nshogi::ml::TeacherLoaderForFixedSizeTeacher</a></div><div class="ttdef"><b>Definition:</b> teacherloader.h:23</div></div>
 <div class="ttc" id="aclassnshogi_1_1ml_1_1ThreadsafeTeacherWriter_html"><div class="ttname"><a href="classnshogi_1_1ml_1_1ThreadsafeTeacherWriter.html">nshogi::ml::ThreadsafeTeacherWriter</a></div><div class="ttdef"><b>Definition:</b> teacherwriter.h:22</div></div>
 <div class="ttc" id="aclassnshogi_1_1ml_1_1ThreadsafeTeacherWriter_html_a3cf24c5ba8b8a2559874ad6bf6f4f786"><div class="ttname"><a href="classnshogi_1_1ml_1_1ThreadsafeTeacherWriter.html#a3cf24c5ba8b8a2559874ad6bf6f4f786">nshogi::ml::ThreadsafeTeacherWriter::write</a></div><div class="ttdeci">void write(const TeacherType &amp;Teacher)</div><div class="ttdef"><b>Definition:</b> teacherwriter.cc:30</div></div>
-<div class="ttc" id="aclassnshogi_1_1ml_1_1ThreadsafeTeacherWriter_html_a74f6e9086aeda82bf622585881b59f04"><div class="ttname"><a href="classnshogi_1_1ml_1_1ThreadsafeTeacherWriter.html#a74f6e9086aeda82bf622585881b59f04">nshogi::ml::ThreadsafeTeacherWriter::shuffle</a></div><div class="ttdeci">static void shuffle(const TeacherLoaderForFixedSizeTeacher&lt; TeacherType &gt; &amp;Loader, const std::string &amp;OutputPath, uint64_t Seed)</div><div class="ttdef"><b>Definition:</b> teacherwriter.cc:40</div></div>
+<div class="ttc" id="aclassnshogi_1_1ml_1_1ThreadsafeTeacherWriter_html_af5fced49f654e2dbd5d4fcd44e7921f5"><div class="ttname"><a href="classnshogi_1_1ml_1_1ThreadsafeTeacherWriter.html#af5fced49f654e2dbd5d4fcd44e7921f5">nshogi::ml::ThreadsafeTeacherWriter::shuffle</a></div><div class="ttdeci">static void shuffle(TeacherLoaderForFixedSizeTeacher&lt; TeacherType &gt; &amp;Loader, const std::string &amp;OutputPath, uint64_t Seed)</div><div class="ttdef"><b>Definition:</b> teacherwriter.cc:40</div></div>
 <div class="ttc" id="anamespacenshogi_html"><div class="ttname"><a href="namespacenshogi.html">nshogi</a></div><div class="ttdef"><b>Definition:</b> capability.cc:12</div></div>
 <div class="ttc" id="ateacherloader_8h_html"><div class="ttname"><a href="teacherloader_8h.html">teacherloader.h</a></div></div>
 </div><!-- fragment --></div><!-- contents -->

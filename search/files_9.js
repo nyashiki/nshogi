@@ -1,13 +1,9 @@
 var searchData=
 [
-  ['sfen_2ecc_0',['sfen.cc',['../sfen_8cc.html',1,'']]],
-  ['sfen_2eh_1',['sfen.h',['../sfen_8h.html',1,'']]],
-  ['simpleteacher_2ecc_2',['simpleteacher.cc',['../simpleteacher_8cc.html',1,'']]],
-  ['simpleteacher_2eh_3',['simpleteacher.h',['../simpleteacher_8h.html',1,'']]],
-  ['squareiterator_2eh_4',['squareiterator.h',['../squareiterator_8h.html',1,'']]],
-  ['state_2ecc_5',['state.cc',['../state_8cc.html',1,'']]],
-  ['state_2eh_6',['state.h',['../state_8h.html',1,'']]],
-  ['statebuilder_2ecc_7',['statebuilder.cc',['../statebuilder_8cc.html',1,'']]],
-  ['statebuilder_2eh_8',['statebuilder.h',['../statebuilder_8h.html',1,'']]],
-  ['stateconfig_2eh_9',['stateconfig.h',['../stateconfig_8h.html',1,'']]]
+  ['mate1ply_2ecc_0',['mate1ply.cc',['../mate1ply_8cc.html',1,'']]],
+  ['mate1ply_2eh_1',['mate1ply.h',['../mate1ply_8h.html',1,'']]],
+  ['math_2eh_2',['math.h',['../math_8h.html',1,'']]],
+  ['movegenerator_2ecc_3',['movegenerator.cc',['../movegenerator_8cc.html',1,'']]],
+  ['movegenerator_2eh_4',['movegenerator.h',['../movegenerator_8h.html',1,'']]],
+  ['movelist_2eh_5',['movelist.h',['../movelist_8h.html',1,'']]]
 ];

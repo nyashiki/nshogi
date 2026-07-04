@@ -123,19 +123,24 @@ $(document).ready(function(){initNavTree('extendedstate_8h_source.html',''); ini
 <div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span>    <span class="keywordtype">void</span> <a class="code hl_function" href="classnshogi_1_1core_1_1ExtendedState.html#a027154b513e5ddbe88b868b5b8cf646b">doNullMove</a>() <span class="keyword">noexcept</span>;</div>
 <div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span> </div>
 <div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span>    <span class="keywordtype">void</span> <a class="code hl_function" href="classnshogi_1_1core_1_1ExtendedState.html#a6314504e76a727cd7e030fba4baaffeb">undoNullMove</a>();</div>
-<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span>};</div>
-<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span> </div>
-<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span>} <span class="comment">// namespace core</span></div>
-<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span>} <span class="comment">// namespace nshogi</span></div>
-<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span> </div>
-<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span><span class="preprocessor">#endif </span><span class="comment">// #ifndef NSHOGI_CORE_EXTENDEDSTATE_H</span></div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span> </div>
+<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span>    int32_t <a class="code hl_function" href="classnshogi_1_1core_1_1ExtendedState.html#ad912a65743982fcd2bc14ff56a3574ef">computeSEE</a>(<a class="code hl_struct" href="structnshogi_1_1core_1_1Move32.html">Move32</a> Move,</div>
+<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span>                       <span class="keyword">const</span> int32_t* <span class="keyword">const</span> PieceValues) <span class="keyword">const</span> <span class="keyword">noexcept</span>;</div>
+<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span>};</div>
+<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span> </div>
+<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span>} <span class="comment">// namespace core</span></div>
+<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span>} <span class="comment">// namespace nshogi</span></div>
+<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span> </div>
+<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span><span class="preprocessor">#endif </span><span class="comment">// #ifndef NSHOGI_CORE_EXTENDEDSTATE_H</span></div>
 <div class="ttc" id="aclassnshogi_1_1core_1_1ExtendedState_html"><div class="ttname"><a href="classnshogi_1_1core_1_1ExtendedState.html">nshogi::core::ExtendedState</a></div><div class="ttdoc">An extended version of the State class with additional functionalities.</div><div class="ttdef"><b>Definition:</b> extendedstate.h:29</div></div>
 <div class="ttc" id="aclassnshogi_1_1core_1_1ExtendedState_html_a027154b513e5ddbe88b868b5b8cf646b"><div class="ttname"><a href="classnshogi_1_1core_1_1ExtendedState.html#a027154b513e5ddbe88b868b5b8cf646b">nshogi::core::ExtendedState::doNullMove</a></div><div class="ttdeci">void doNullMove() noexcept</div><div class="ttdoc">Perform a null move.</div><div class="ttdef"><b>Definition:</b> extendedstate.cc:14</div></div>
 <div class="ttc" id="aclassnshogi_1_1core_1_1ExtendedState_html_a6314504e76a727cd7e030fba4baaffeb"><div class="ttname"><a href="classnshogi_1_1core_1_1ExtendedState.html#a6314504e76a727cd7e030fba4baaffeb">nshogi::core::ExtendedState::undoNullMove</a></div><div class="ttdeci">void undoNullMove()</div><div class="ttdoc">Undo a null move.</div><div class="ttdef"><b>Definition:</b> extendedstate.cc:18</div></div>
 <div class="ttc" id="aclassnshogi_1_1core_1_1ExtendedState_html_a7d922d4db5f822a6497c516634ea9bff"><div class="ttname"><a href="classnshogi_1_1core_1_1ExtendedState.html#a7d922d4db5f822a6497c516634ea9bff">nshogi::core::ExtendedState::~ExtendedState</a></div><div class="ttdeci">~ExtendedState()</div><div class="ttdef"><b>Definition:</b> extendedstate.cc:11</div></div>
+<div class="ttc" id="aclassnshogi_1_1core_1_1ExtendedState_html_ad912a65743982fcd2bc14ff56a3574ef"><div class="ttname"><a href="classnshogi_1_1core_1_1ExtendedState.html#ad912a65743982fcd2bc14ff56a3574ef">nshogi::core::ExtendedState::computeSEE</a></div><div class="ttdeci">int32_t computeSEE(Move32 Move, const int32_t *const PieceValues) const noexcept</div><div class="ttdoc">Compute the Static Exchange Evaluation (SEE) for a given move.</div><div class="ttdef"><b>Definition:</b> extendedstate.cc:23</div></div>
 <div class="ttc" id="aclassnshogi_1_1core_1_1State_html"><div class="ttname"><a href="classnshogi_1_1core_1_1State.html">nshogi::core::State</a></div><div class="ttdoc">Manages game states in Shogi.</div><div class="ttdef"><b>Definition:</b> state.h:43</div></div>
 <div class="ttc" id="anamespacenshogi_html"><div class="ttname"><a href="namespacenshogi.html">nshogi</a></div><div class="ttdef"><b>Definition:</b> capability.cc:12</div></div>
 <div class="ttc" id="astate_8h_html"><div class="ttname"><a href="state_8h.html">state.h</a></div></div>
+<div class="ttc" id="astructnshogi_1_1core_1_1Move32_html"><div class="ttname"><a href="structnshogi_1_1core_1_1Move32.html">nshogi::core::Move32</a></div><div class="ttdoc">Represents any legal move in Shogi with 32 bits.</div><div class="ttdef"><b>Definition:</b> types.h:451</div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->

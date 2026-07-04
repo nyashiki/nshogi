@@ -1,5 +1,7 @@
 var searchData=
 [
-  ['teacherloaderforfixedsizeteacher_0',['TeacherLoaderForFixedSizeTeacher',['../classnshogi_1_1ml_1_1TeacherLoaderForFixedSizeTeacher.html',1,'nshogi::ml']]],
-  ['threadsafeteacherwriter_1',['ThreadsafeTeacherWriter',['../classnshogi_1_1ml_1_1ThreadsafeTeacherWriter.html',1,'nshogi::ml']]]
+  ['move16_0',['Move16',['../structnshogi_1_1core_1_1Move16.html',1,'nshogi::core']]],
+  ['move32_1',['Move32',['../structnshogi_1_1core_1_1Move32.html',1,'nshogi::core']]],
+  ['movegenerator_2',['MoveGenerator',['../classnshogi_1_1core_1_1MoveGenerator.html',1,'nshogi::core']]],
+  ['movelist_3',['MoveList',['../structnshogi_1_1core_1_1MoveList.html',1,'nshogi::core']]]
 ];

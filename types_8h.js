@@ -69,7 +69,8 @@ var types_8h =
       [ "PK_WhiteProKnight", "types_8h.html#adc49f924850845e9563ab7338d6f375fa6cc4c4dff2d45692c2678034fe58aa33", null ],
       [ "PK_WhiteProSilver", "types_8h.html#adc49f924850845e9563ab7338d6f375fa6dc953648b70aefc9c6e39c755706623", null ],
       [ "PK_WhiteProBishop", "types_8h.html#adc49f924850845e9563ab7338d6f375fae45338ddfd5c155947f5bd48d5438253", null ],
-      [ "PK_WhiteProRook", "types_8h.html#adc49f924850845e9563ab7338d6f375fa617665d1c0e57410a824048f9396b171", null ]
+      [ "PK_WhiteProRook", "types_8h.html#adc49f924850845e9563ab7338d6f375fa617665d1c0e57410a824048f9396b171", null ],
+      [ "NumPieceKind", "types_8h.html#adc49f924850845e9563ab7338d6f375fa8b024d66ca2df1ae0ee16fe49b576022", null ]
     ] ],
     [ "PieceTypeKind", "types_8h.html#a48e95a20c4b8db53f6c955ddac0b0e12", [
       [ "PTK_Empty", "types_8h.html#a48e95a20c4b8db53f6c955ddac0b0e12aa8ff5602fc9063fefadb09bdd0f88119", null ],
@@ -205,6 +206,7 @@ var types_8h =
     [ "decrementStand", "types_8h.html#a9164d410e0f66795344e1ec40492d6dc", null ],
     [ "demotePieceType", "types_8h.html#a3e6764c635f882a9f942efa4cc0b0f95", null ],
     [ "getColor", "types_8h.html#a3420e6bcd4a221b792ca71243287c0a6", null ],
+    [ "getInversed", "types_8h.html#a1b494ce8d2f6b851387c36063702b98f", null ],
     [ "getInversed", "types_8h.html#a8a2b0c2f0b3fbd126b7b3106bd5b92c5", null ],
     [ "getPieceType", "types_8h.html#a56b1cef58857f93db8c6d8f43dd5cf8a", null ],
     [ "getStandCount", "types_8h.html#ae46f15910f447d0f49a09f3797421097", null ],
