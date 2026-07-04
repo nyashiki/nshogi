@@ -102,6 +102,26 @@ getTeacherAt(nshogi::ml::TeacherLoaderForFixedSizeTeacher<TeacherType>& Loader,
     return Loader[Index];
 }
 
+// AZTeacher records come from external files, so a corrupted record may
+// hold char arrays without a null terminator; reading them as C strings
+// would run out of bounds.
+std::string azTeacherSfen(const nshogi::ml::AZTeacher& T) {
+    if (std::memchr(T.Sfen, '\0', sizeof(T.Sfen)) == nullptr) {
+        throw std::runtime_error(
+            "AZTeacher: Sfen is not null-terminated (corrupted record?).");
+    }
+    return std::string(T.Sfen);
+}
+
+std::string azTeacherMove(const nshogi::ml::AZTeacher& T, uint8_t Index) {
+    if (std::memchr(T.Moves[Index].data(), '\0', T.Moves[Index].size()) ==
+        nullptr) {
+        throw std::runtime_error("AZTeacher: a move string is not "
+                                 "null-terminated (corrupted record?).");
+    }
+    return std::string(T.Moves[Index].data());
+}
+
 template <typename T>
 pybind11::array_t<T> makeArrayFromUniquePtr2d(std::unique_ptr<T[]> Data,
                                               std::size_t Dim0,
@@ -537,8 +557,8 @@ PYBIND11_MODULE(nshogi, Module) {
     pybind11::class_<nshogi::ml::AZTeacher>(MLModule, "AZTeacher")
         .def("state",
              [](const nshogi::ml::AZTeacher& T) {
-                 auto State = nshogi::io::sfen::StateBuilder::newState(
-                     std::string(T.Sfen));
+                 auto State =
+                     nshogi::io::sfen::StateBuilder::newState(azTeacherSfen(T));
 
                  return State;
              })
@@ -553,7 +573,8 @@ PYBIND11_MODULE(nshogi, Module) {
 
                  return Config;
              })
-        .def("sfen", [](const nshogi::ml::AZTeacher& T) { return T.Sfen; })
+        .def("sfen",
+             [](const nshogi::ml::AZTeacher& T) { return azTeacherSfen(T); })
         .def(
             "policy",
             [](const nshogi::ml::AZTeacher& T, bool ChannelsFirst) {
@@ -564,20 +585,35 @@ PYBIND11_MODULE(nshogi, Module) {
                 std::memset(reinterpret_cast<char*>(Data), 0,
                             nshogi::ml::MoveIndexMax * sizeof(float));
 
+                if (T.NumMoves > T.Visits.size()) {
+                    throw std::runtime_error(
+                        "AZTeacher.policy(): NumMoves exceeds the number of "
+                        "saved playouts (corrupted record?).");
+                }
+
                 uint32_t SumVisits = 0;
 
                 for (uint8_t I = 0; I < T.NumMoves; ++I) {
                     SumVisits += (uint32_t)T.Visits[I];
                 }
 
-                assert(SumVisits > 0);
+                if (SumVisits == 0) {
+                    throw std::runtime_error(
+                        "AZTeacher.policy(): sum of visits is zero.");
+                }
 
-                const auto State = nshogi::io::sfen::StateBuilder::newState(
-                    std::string(T.Sfen));
+                const auto State =
+                    nshogi::io::sfen::StateBuilder::newState(azTeacherSfen(T));
+
+                if (State.getSideToMove() != T.SideToMove) {
+                    throw std::runtime_error(
+                        "AZTeacher.policy(): SideToMove is inconsistent with "
+                        "Sfen (corrupted record?).");
+                }
 
                 for (uint8_t I = 0; I < T.NumMoves; ++I) {
                     const auto Move = nshogi::io::sfen::sfenToMove32(
-                        State.getPosition(), std::string(T.Moves[I].data()));
+                        State.getPosition(), azTeacherMove(T, I));
                     const std::size_t Index =
                         ChannelsFirst
                             ? nshogi::ml::getMoveIndex<true>(T.SideToMove, Move)
@@ -599,12 +635,16 @@ PYBIND11_MODULE(nshogi, Module) {
                 std::memset(reinterpret_cast<char*>(Data), 0,
                             nshogi::ml::MoveIndexMax * sizeof(float));
 
-                const auto State = nshogi::io::sfen::StateBuilder::newState(
-                    std::string(T.Sfen));
+                const auto State =
+                    nshogi::io::sfen::StateBuilder::newState(azTeacherSfen(T));
                 const auto LegalMoves =
                     nshogi::core::MoveGenerator::generateLegalMoves(State);
 
-                assert(State.getPosition().sideToMove() == T.SideToMove);
+                if (State.getPosition().sideToMove() != T.SideToMove) {
+                    throw std::runtime_error(
+                        "AZTeacher.legal_moves(): SideToMove is inconsistent "
+                        "with Sfen (corrupted record?).");
+                }
 
                 for (const nshogi::core::Move32 Move : LegalMoves) {
                     const std::size_t Index =
@@ -627,8 +667,8 @@ PYBIND11_MODULE(nshogi, Module) {
                 std::memset(reinterpret_cast<char*>(Data), 0,
                             2 * 81 * sizeof(float));
 
-                const auto State = nshogi::io::sfen::StateBuilder::newState(
-                    std::string(T.Sfen));
+                const auto State =
+                    nshogi::io::sfen::StateBuilder::newState(azTeacherSfen(T));
 
                 nshogi::ml::FeatureStackRuntime FSR(
                     {nshogi::ml::FeatureType::FT_MyAttack,
@@ -638,9 +678,11 @@ PYBIND11_MODULE(nshogi, Module) {
                 if (ChannelsFirst) {
                     FSR.extract<nshogi::core::IterateOrder::Fastest, true>(
                         Data);
+                    NpArray.resize({2, 9, 9});
                 } else {
                     FSR.extract<nshogi::core::IterateOrder::Fastest, false>(
                         Data);
+                    NpArray.resize({9, 9, 2});
                 }
 
                 return NpArray;
@@ -648,18 +690,13 @@ PYBIND11_MODULE(nshogi, Module) {
             pybind11::arg("channels_first"))
         .def("value",
              [](const nshogi::ml::AZTeacher& T) {
-                 if (T.SideToMove == T.Winner) {
-                     return 1.0;
-                 } else {
-                     return 0.0;
+                 if (T.Winner == nshogi::core::NoColor) {
+                     return 0.5f;
                  }
+                 return (T.SideToMove == T.Winner) ? 1.0f : 0.0f;
              })
         .def("draw", [](const nshogi::ml::AZTeacher& T) {
-            if (T.Winner == nshogi::core::NoColor) {
-                return 1.0;
-            }
-
-            return 0.0;
+            return (T.Winner == nshogi::core::NoColor) ? 1.0f : 0.0f;
         });
 
     pybind11::class_<nshogi::ml::SimpleTeacher>(MLModule, "SimpleTeacher")
@@ -816,7 +853,8 @@ PYBIND11_MODULE(nshogi, Module) {
              [](nshogi::ml::TeacherLoaderForFixedSizeTeacher<
                     nshogi::ml::AZTeacher>& Loader,
                 const std::string& OutputPath) {
-                 std::ofstream Ofs(OutputPath, std::ios::out | std::ios::app);
+                 std::ofstream Ofs(OutputPath, std::ios::out | std::ios::app |
+                                                   std::ios::binary);
 
                  for (std::size_t I = 0; I < Loader.size(); ++I) {
                      const auto T = Loader[I];

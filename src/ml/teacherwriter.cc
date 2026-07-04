@@ -30,7 +30,7 @@ template <typename TeacherType>
 void ThreadsafeTeacherWriter<TeacherType>::write(const TeacherType& Teacher) {
     std::lock_guard<std::mutex> lk(Mutex);
 
-    std::ofstream Ofs(Path, std::ios::out | std::ios::app);
+    std::ofstream Ofs(Path, std::ios::out | std::ios::app | std::ios::binary);
     io::file::save(Ofs, Teacher);
 
     Ofs.flush();
@@ -40,7 +40,12 @@ template <typename TeacherType>
 void ThreadsafeTeacherWriter<TeacherType>::shuffle(
     TeacherLoaderForFixedSizeTeacher<TeacherType>& Loader,
     const std::string& OutputPath, uint64_t Seed) {
-    std::ofstream Ofs(OutputPath, std::ios::out | std::ios::app);
+    if (Loader.size() == 0) {
+        return;
+    }
+
+    std::ofstream Ofs(OutputPath,
+                      std::ios::out | std::ios::app | std::ios::binary);
 
     std::vector<std::size_t> Indices(Loader.size());
     std::iota(Indices.begin(), Indices.end(), 0);
@@ -48,7 +53,7 @@ void ThreadsafeTeacherWriter<TeacherType>::shuffle(
     std::mt19937_64 mt(Seed);
 
     for (std::size_t I = Indices.size() - 1; I > 0; --I) {
-        std::size_t J = mt() % I;
+        std::size_t J = mt() % (I + 1);
 
         std::swap(Indices[I], Indices[J]);
     }
