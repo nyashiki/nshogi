@@ -11,6 +11,8 @@
 #include "../core/internal/bitboard.h"
 #include "../core/internal/stateadapter.h"
 
+#include <stdexcept>
+
 namespace nshogi {
 namespace ml {
 
@@ -70,14 +72,42 @@ constexpr static int32_t PieceToIndex[core::NumPieceKind] = {
 
 // clang-format on
 
+std::size_t countPieces(const core::Position& Position,
+                        const core::internal::bitboard::Bitboard& OccupiedBB) {
+    std::size_t NumPieces = OccupiedBB.popCount();
+    for (const auto Type :
+         {core::PTK_Pawn, core::PTK_Lance, core::PTK_Knight, core::PTK_Silver,
+          core::PTK_Gold, core::PTK_Bishop, core::PTK_Rook}) {
+        NumPieces += (std::size_t)(Position.getStandCount(core::Black, Type) +
+                                   Position.getStandCount(core::White, Type));
+    }
+    return NumPieces;
+}
+
 template <core::Color C>
 void idsAt_(int32_t* DestMyIds, int32_t* DestOpIds, int32_t* DestMyIdsCount,
             int32_t* DestOpIdsCount, const core::State& S) {
     *DestMyIdsCount = 0;
     *DestOpIdsCount = 0;
 
-    const auto Position = S.getPosition();
+    const auto& Position = S.getPosition();
     core::internal::ImmutableStateAdapter Adapter(S);
+
+    const core::internal::bitboard::Bitboard OccupiedBB =
+        Adapter->getBitboard<core::Black>() |
+        Adapter->getBitboard<core::White>();
+
+    // The destination buffers hold exactly 39 ids: every piece except the
+    // perspective owner's king emits one id per perspective. Any other piece
+    // count (or a missing/duplicated king) would overflow the buffers or
+    // silently leave id 0 in the unused slots.
+    if (countPieces(Position, OccupiedBB) != 40 ||
+        Adapter->getBitboard<core::Black, core::PTK_King>().popCount() != 1 ||
+        Adapter->getBitboard<core::White, core::PTK_King>().popCount() != 1) {
+        throw std::runtime_error(
+            "KAFeatureExtractor requires a position with exactly 40 pieces "
+            "including one king for each color.");
+    }
 
     const auto MyKingSquare =
         (C == core::Black) ? S.getKingSquare(core::Black)
@@ -96,10 +126,6 @@ void idsAt_(int32_t* DestMyIds, int32_t* DestOpIds, int32_t* DestMyIdsCount,
         (std::size_t)MyKingSquare * FeatureSizePerKingSquare;
     const std::size_t OpBase =
         (std::size_t)core::getInversed(OpKingSquare) * FeatureSizePerKingSquare;
-
-    const core::internal::bitboard::Bitboard OccupiedBB =
-        Adapter->getBitboard<core::Black>() |
-        Adapter->getBitboard<core::White>();
 
     OccupiedBB.forEach([&](core::Square Sq) {
         const auto RawPiece = Position.pieceOn(Sq);
@@ -187,8 +213,7 @@ ids_(const core::State& S) {
     int32_t MyIdsCount;
     int32_t OpIdsCount;
 
-    idsAt_<C>((int32_t*)MyIds.data(), (int32_t*)OpIds.data(), &MyIdsCount,
-              &OpIdsCount, S);
+    idsAt_<C>(MyIds.data(), OpIds.data(), &MyIdsCount, &OpIdsCount, S);
 
     return {std::move(MyIds), std::move(OpIds)};
 }
