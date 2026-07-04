@@ -254,8 +254,8 @@ bool hasSliderLineUnknownToRoot(
 
     return hasSliderLineUnknownToRootImpl<nshogi::core::Black>(
                S, RootOccupiedBB) ||
-           hasSliderLineUnknownToRootImpl<nshogi::core::White>(
-               S, RootOccupiedBB);
+           hasSliderLineUnknownToRootImpl<nshogi::core::White>(S,
+                                                               RootOccupiedBB);
 }
 
 int32_t computeSEEBySmallestMoves(
@@ -278,9 +278,9 @@ int32_t computeSEEBySmallestMoves(
 
     State.doMove(SmallestMove);
     const int32_t Value =
-        CaptureValue - std::max(0, computeSEEBySmallestMoves(
-                                       State, To, RootOccupiedBB,
-                                       SawLineUnknownToRoot));
+        CaptureValue -
+        std::max(0, computeSEEBySmallestMoves(State, To, RootOccupiedBB,
+                                              SawLineUnknownToRoot));
     State.undoMove();
 
     return Value;
