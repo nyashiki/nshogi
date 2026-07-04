@@ -14,6 +14,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
+#include <exception>
 #include <random>
 #include <string>
 
@@ -166,6 +167,14 @@ bool AZTeacher::checkSanity(int Level) const {
             return false;
         }
 
+        if (NumMoves > NumSavedPlayouts) {
+            return false;
+        }
+
+        if (std::memchr(Sfen, '\0', SfenCStrLength) == nullptr) {
+            return false;
+        }
+
         if (BlackDrawValue < 0 || BlackDrawValue > 1) {
             return false;
         }
@@ -195,24 +204,35 @@ bool AZTeacher::checkSanity(int Level) const {
     }
 
     if (Level >= 2) {
-        const auto State =
-            nshogi::io::sfen::StateBuilder::newState(std::string(Sfen));
-        // Check if SideToMove is identical to that of Sfen.
-        if (State.getSideToMove() != SideToMove) {
-            return false;
-        }
-
-        // Check if all moves is legal.
-        const auto LegalMoves =
-            nshogi::core::MoveGenerator::generateLegalMoves(State);
-
-        for (uint8_t I = 0; I < NumMoves; ++I) {
-            const auto Move = nshogi::io::sfen::sfenToMove32(
-                State.getPosition(), std::string(Moves[I].data()));
-
-            if (LegalMoves.find(Move) == LegalMoves.end()) {
+        try {
+            const auto State =
+                nshogi::io::sfen::StateBuilder::newState(std::string(Sfen));
+            // Check if SideToMove is identical to that of Sfen.
+            if (State.getSideToMove() != SideToMove) {
                 return false;
             }
+
+            // Check if all moves is legal.
+            const auto LegalMoves =
+                nshogi::core::MoveGenerator::generateLegalMoves(State);
+
+            for (uint8_t I = 0; I < NumMoves; ++I) {
+                if (std::memchr(Moves[I].data(), '\0', Moves[I].size()) ==
+                    nullptr) {
+                    return false;
+                }
+
+                const auto Move = nshogi::io::sfen::sfenToMove32(
+                    State.getPosition(), std::string(Moves[I].data()));
+
+                if (LegalMoves.find(Move) == LegalMoves.end()) {
+                    return false;
+                }
+            }
+        } catch (const std::exception&) {
+            // An unparsable Sfen or move string is insane data,
+            // not an error of this function.
+            return false;
         }
     }
 
