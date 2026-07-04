@@ -8,10 +8,9 @@
 //
 
 #include "batchedteacherloader.h"
-#include "../core/movegenerator.h"
-#include "../ml//p.h"
 
 #include <random>
+#include <stdexcept>
 
 namespace nshogi {
 namespace ml {
@@ -25,7 +24,11 @@ BatchedTeacherLoader::BatchedTeacherLoader(
     , MyBatchSize(BatchSize)
     , ShuffleEnabled(Shuffle)
     , BatchShuffleEnabled(BatchShuffle)
-    , PrefetchFactor(Prefetch) {
+    , PrefetchFactor(Prefetch)
+    , NumWorkers(NumWorkerThreads) {
+    if (MyBatchSize == 0) {
+        throw std::invalid_argument("BatchSize must be greater than 0.");
+    }
     if (NumWorkerThreads == 0) {
         throw std::invalid_argument("NumWorkerThreads must be greater than 0.");
     }
@@ -60,7 +63,12 @@ BatchedTeacherLoader::BatchedTeacherLoader(
 }
 
 BatchedTeacherLoader::~BatchedTeacherLoader() {
-    Finished.store(true);
+    {
+        // Update `Finished` while holding the lock so that a worker cannot
+        // miss the notification between its predicate check and its sleep.
+        std::lock_guard<std::mutex> Lock(BatchesMutex);
+        Finished.store(true);
+    }
     ProducerCV.notify_all();
     ConsumerCV.notify_all();
 
@@ -173,7 +181,7 @@ void BatchedTeacherLoader::doTask() {
         {
             std::unique_lock<std::mutex> Lock(BatchesMutex);
             ProducerCV.wait(Lock, [this] {
-                return Batches.size() < PrefetchFactor * Workers.size() ||
+                return Batches.size() < PrefetchFactor * NumWorkers ||
                        Finished.load();
             });
 
@@ -188,6 +196,9 @@ void BatchedTeacherLoader::doTask() {
     }
 
     if (NumRunningWorkers.fetch_sub(1) == 1) {
+        // Take the lock so that the notification cannot fire between the
+        // consumer's predicate check and its sleep (lost wakeup).
+        std::lock_guard<std::mutex> Lock(BatchesMutex);
         ConsumerCV.notify_all();
     }
 }

@@ -73,6 +73,7 @@ class BatchedTeacherLoader {
     const bool ShuffleEnabled;
     const bool BatchShuffleEnabled;
     const std::size_t PrefetchFactor;
+    const std::size_t NumWorkers;
     std::size_t NumBatches;
 
     std::atomic<bool> Finished;
