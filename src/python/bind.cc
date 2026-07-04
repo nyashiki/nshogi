@@ -37,6 +37,7 @@
 #include "../ml/teacherwriter.h"
 #include "../ml/utils.h"
 
+#include <cstring>
 #include <string>
 #include <vector>
 
@@ -74,6 +75,32 @@ class PyFeatureStack {
  private:
     nshogi::ml::FeatureStackRuntime FeatureStack;
 };
+
+template <typename ExtractorType>
+pybind11::tuple extractorIdsToNumpy(const ExtractorType& Extractor,
+                                    const nshogi::core::State& State) {
+    const auto& [MyIds, OpIds] = Extractor.ids(State);
+
+    auto MyArray = pybind11::array_t<int32_t>((pybind11::ssize_t)MyIds.size());
+    std::memcpy(MyArray.request().ptr, MyIds.data(),
+                MyIds.size() * sizeof(int32_t));
+
+    auto OpArray = pybind11::array_t<int32_t>((pybind11::ssize_t)OpIds.size());
+    std::memcpy(OpArray.request().ptr, OpIds.data(),
+                OpIds.size() * sizeof(int32_t));
+
+    return pybind11::make_tuple(MyArray, OpArray);
+}
+
+template <typename TeacherType>
+TeacherType
+getTeacherAt(nshogi::ml::TeacherLoaderForFixedSizeTeacher<TeacherType>& Loader,
+             std::size_t Index) {
+    if (Index >= Loader.size()) {
+        throw pybind11::index_error("teacher index out of range");
+    }
+    return Loader[Index];
+}
 
 template <typename T>
 pybind11::array_t<T> makeArrayFromUniquePtr2d(std::unique_ptr<T[]> Data,
@@ -498,58 +525,14 @@ PYBIND11_MODULE(nshogi, Module) {
                      std::shared_ptr<nshogi::ml::KAFeatureExtractor>>(
         MLModule, "KAFeatureExtractor")
         .def(pybind11::init<>())
-        .def("ids", [](const nshogi::ml::KAFeatureExtractor& Extractor,
-                       const nshogi::core::State& State) {
-            const auto& [Ids1, Ids2] = Extractor.ids(State);
-
-            auto NpArray1 = pybind11::array_t<pybind11::ssize_t>(
-                (pybind11::ssize_t)(Ids1.size()));
-            auto Data1 =
-                reinterpret_cast<pybind11::ssize_t*>(NpArray1.request().ptr);
-
-            auto NpArray2 = pybind11::array_t<pybind11::ssize_t>(
-                (pybind11::ssize_t)(Ids2.size()));
-            auto Data2 =
-                reinterpret_cast<pybind11::ssize_t*>(NpArray2.request().ptr);
-
-            for (std::size_t I = 0; I < Ids1.size(); ++I) {
-                Data1[I] = (pybind11::ssize_t)Ids1[I];
-            }
-            for (std::size_t I = 0; I < Ids2.size(); ++I) {
-                Data2[I] = (pybind11::ssize_t)Ids2[I];
-            }
-
-            return pybind11::make_tuple(NpArray1, NpArray2);
-        });
+        .def("ids", &extractorIdsToNumpy<nshogi::ml::KAFeatureExtractor>);
 
     pybind11::class_<nshogi::ml::PFeatureExtractor,
                      nshogi::ml::IFeatureExtractor,
                      std::shared_ptr<nshogi::ml::PFeatureExtractor>>(
         MLModule, "PFeatureExtractor")
         .def(pybind11::init<>())
-        .def("ids", [](const nshogi::ml::PFeatureExtractor& Extractor,
-                       const nshogi::core::State& State) {
-            const auto& [Ids1, Ids2] = Extractor.ids(State);
-
-            auto NpArray1 = pybind11::array_t<pybind11::ssize_t>(
-                (pybind11::ssize_t)(Ids1.size()));
-            auto Data1 =
-                reinterpret_cast<pybind11::ssize_t*>(NpArray1.request().ptr);
-
-            auto NpArray2 = pybind11::array_t<pybind11::ssize_t>(
-                (pybind11::ssize_t)(Ids2.size()));
-            auto Data2 =
-                reinterpret_cast<pybind11::ssize_t*>(NpArray2.request().ptr);
-
-            for (std::size_t I = 0; I < Ids1.size(); ++I) {
-                Data1[I] = (pybind11::ssize_t)Ids1[I];
-            }
-            for (std::size_t I = 0; I < Ids2.size(); ++I) {
-                Data2[I] = (pybind11::ssize_t)Ids2[I];
-            }
-
-            return pybind11::make_tuple(NpArray1, NpArray2);
-        });
+        .def("ids", &extractorIdsToNumpy<nshogi::ml::PFeatureExtractor>);
 
     pybind11::class_<nshogi::ml::AZTeacher>(MLModule, "AZTeacher")
         .def("state",
@@ -646,7 +629,6 @@ PYBIND11_MODULE(nshogi, Module) {
 
                 const auto State = nshogi::io::sfen::StateBuilder::newState(
                     std::string(T.Sfen));
-                nshogi::core::internal::ImmutableStateAdapter Adapter(State);
 
                 nshogi::ml::FeatureStackRuntime FSR(
                     {nshogi::ml::FeatureType::FT_MyAttack,
@@ -756,7 +738,6 @@ PYBIND11_MODULE(nshogi, Module) {
                             2 * 81 * sizeof(float));
 
                 const auto State = T.getState();
-                nshogi::core::internal::ImmutableStateAdapter Adapter(State);
 
                 nshogi::ml::FeatureStackRuntime FSR(
                     {nshogi::ml::FeatureType::FT_MyAttack,
@@ -849,8 +830,7 @@ PYBIND11_MODULE(nshogi, Module) {
              })
         .def("__len__", &nshogi::ml::TeacherLoaderForFixedSizeTeacher<
                             nshogi::ml::AZTeacher>::size)
-        .def("__getitem__", &nshogi::ml::TeacherLoaderForFixedSizeTeacher<
-                                nshogi::ml::AZTeacher>::operator[]);
+        .def("__getitem__", &getTeacherAt<nshogi::ml::AZTeacher>);
 
     pybind11::class_<nshogi::ml::TeacherLoaderForFixedSizeTeacher<
         nshogi::ml::SimpleTeacher>>(MLModule, "SimpleTeacherLoader")
@@ -859,8 +839,7 @@ PYBIND11_MODULE(nshogi, Module) {
              pybind11::arg("version"))
         .def("__len__", &nshogi::ml::TeacherLoaderForFixedSizeTeacher<
                             nshogi::ml::SimpleTeacher>::size)
-        .def("__getitem__", &nshogi::ml::TeacherLoaderForFixedSizeTeacher<
-                                nshogi::ml::SimpleTeacher>::operator[]);
+        .def("__getitem__", &getTeacherAt<nshogi::ml::SimpleTeacher>);
 
     pybind11::class_<nshogi::ml::BatchedTeacherLoader>(MLModule,
                                                        "BatchedTeacherLoader")
@@ -868,7 +847,7 @@ PYBIND11_MODULE(nshogi, Module) {
             pybind11::init<const std::string&,
                            std::shared_ptr<nshogi::ml::IFeatureExtractor>,
                            std::size_t, bool, bool, std::size_t, std::size_t>(),
-            pybind11::arg("paths"), pybind11::arg("feature_extractor"),
+            pybind11::arg("path"), pybind11::arg("feature_extractor"),
             pybind11::arg("batch_size"), pybind11::arg("shuffle"),
             pybind11::arg("batch_shuffle"), pybind11::arg("num_workers"),
             pybind11::arg("prefetch"))
