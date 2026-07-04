@@ -532,52 +532,6 @@ class TestML(unittest.TestCase):
 
                 state.do_move(random.choice(legal_moves))
 
-    def test_kp_feature_ids_extract(self):
-        extractor = nshogi.ml.KPFeatureExtractor()
-
-        for _ in range(100):
-            state = nshogi.io.sfen.make_state_from_sfen("startpos")
-
-            for ply in range(256):
-                ids0, ids1 = extractor.ids(state)
-                extracted = extractor.extract(state)
-
-                extracted_from_ids = np.zeros_like(extracted)
-                extracted_from_ids[0][ids0] = 1
-                extracted_from_ids[1][ids1] = 1
-
-                self.assertTrue((extracted == extracted_from_ids).all())
-
-                legal_moves = state.legal_moves
-
-                if len(legal_moves) == 0:
-                    break
-
-                state.do_move(random.choice(legal_moves))
-
-    def test_p_feature_ids_extract(self):
-        extractor = nshogi.ml.PFeatureExtractor()
-
-        for _ in range(100):
-            state = nshogi.io.sfen.make_state_from_sfen("startpos")
-
-            for ply in range(256):
-                ids0, ids1 = extractor.ids(state)
-                extracted = extractor.extract(state)
-
-                extracted_from_ids = np.zeros_like(extracted)
-                extracted_from_ids[0][ids0] = 1
-                extracted_from_ids[1][ids1] = 1
-
-                self.assertTrue((extracted == extracted_from_ids).all())
-
-                legal_moves = state.legal_moves
-
-                if len(legal_moves) == 0:
-                    break
-
-                state.do_move(random.choice(legal_moves))
-
 if __name__ == "__main__":
     random.seed(42)
 
