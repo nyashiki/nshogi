@@ -17,6 +17,7 @@
 #include "../core/statebuilder.h"
 #include "../io/sfen.h"
 
+#include <algorithm>
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
@@ -183,6 +184,106 @@ void testEntryingScore(const nshogi::core::State& S, uint8_t BlackScore,
                    BlackScore);
     TEST_ASSERT_EQ(Adapter->computeDeclarationScore<nshogi::core::White>(),
                    WhiteScore);
+}
+
+// clang-format off
+constexpr int32_t SEEValue[nshogi::core::NumPieceType] = {
+    /* PTK_Empty */     0,
+    /* PTK_Pawn */    100, /* PTK_Lance */    200, /* PTK_Knight */    300, /* PTK_Silver */    400, /* PTK_Bishop */    600, /* PTK_Rook */    700, /* PTK_Gold */ 500, /* PTK_King */ 0,
+    /* PTK_ProPawn */ 110, /* PTK_ProLance */ 220, /* PTK_ProKnight */ 330, /* PTK_ProSilver */ 440, /* PTK_ProBishop */ 660, /* PTK_ProRook */ 770,
+
+};
+// clang-format on
+
+int32_t seeMoveValue(nshogi::core::Move32 Move) {
+    int32_t Value = SEEValue[Move.capturePieceType()];
+
+    if (Move.promote()) {
+        // The moving side gains the promotion bonus.
+        Value += SEEValue[nshogi::core::promotePieceType(Move.pieceType())] -
+                 SEEValue[Move.pieceType()];
+    }
+
+    return Value;
+}
+
+template <nshogi::core::Color C>
+bool hasSliderLineUnknownToRootImpl(
+    const nshogi::core::internal::StateImpl& S,
+    const nshogi::core::internal::bitboard::Bitboard& RootOccupiedBB) {
+    using namespace nshogi::core;
+    namespace bb = nshogi::core::internal::bitboard;
+
+    const Square KingSq = S.getKingSquare<C>();
+
+    const bb::Bitboard CandidateBB =
+        ((S.getBitboard<PTK_Lance>() & bb::getForwardBB<C>(KingSq)) |
+         ((S.getBitboard<PTK_Bishop>() | S.getBitboard<PTK_ProBishop>()) &
+          bb::getDiagBB(KingSq)) |
+         ((S.getBitboard<PTK_Rook>() | S.getBitboard<PTK_ProRook>()) &
+          bb::getCrossBB(KingSq))) &
+        S.getBitboard<~C>();
+
+    const bb::Bitboard OccupiedBB =
+        S.getBitboard<Black>() | S.getBitboard<White>();
+
+    bool Found = false;
+    CandidateBB.forEach([&](Square SliderSq) {
+        const bb::Bitboard BetweenBB = bb::getBetweenBB(SliderSq, KingSq);
+
+        if ((BetweenBB & OccupiedBB).popCount() <= 1 &&
+            (BetweenBB & RootOccupiedBB).popCount() >= 2) {
+            Found = true;
+        }
+    });
+
+    return Found;
+}
+
+// Returns true if a slider line toward either king is active under the
+// current occupancy (i.e., at most one piece in between, so it works as
+// a pin or a (discovered-)check line) even though it was not active at
+// the root position (two or more pieces in between). computeSEE() takes
+// the pin and the discovered-check lines only from the root position,
+// so exchanges in which such a line arises are out of its specification.
+bool hasSliderLineUnknownToRoot(
+    const nshogi::core::ExtendedState& State,
+    const nshogi::core::internal::bitboard::Bitboard& RootOccupiedBB) {
+    nshogi::core::internal::ImmutableStateAdapter Adapter(State);
+    const nshogi::core::internal::StateImpl& S = *Adapter.get();
+
+    return hasSliderLineUnknownToRootImpl<nshogi::core::Black>(
+               S, RootOccupiedBB) ||
+           hasSliderLineUnknownToRootImpl<nshogi::core::White>(S,
+                                                               RootOccupiedBB);
+}
+
+int32_t computeSEEBySmallestMoves(
+    nshogi::core::ExtendedState& State, nshogi::core::Square To,
+    const nshogi::core::internal::bitboard::Bitboard& RootOccupiedBB,
+    bool* SawLineUnknownToRoot) {
+    if (!*SawLineUnknownToRoot &&
+        hasSliderLineUnknownToRoot(State, RootOccupiedBB)) {
+        *SawLineUnknownToRoot = true;
+    }
+
+    const auto SmallestMove =
+        nshogi::core::MoveGenerator::generateLegalSmallestMove(State, To);
+
+    if (SmallestMove.isNone()) {
+        return 0;
+    }
+
+    const int32_t CaptureValue = seeMoveValue(SmallestMove);
+
+    State.doMove(SmallestMove);
+    const int32_t Value =
+        CaptureValue -
+        std::max(0, computeSEEBySmallestMoves(State, To, RootOccupiedBB,
+                                              SawLineUnknownToRoot));
+    State.undoMove();
+
+    return Value;
 }
 
 } // namespace
@@ -1022,6 +1123,82 @@ TEST(ExtendedState, DoAndUndoRandom) {
 
             if (!State.isInCheck()) {
                 testDoMoveAndUndoMove(State, nshogi::core::Move32::MoveNull());
+            }
+
+            const auto RandomMove = Moves[mt() % Moves.size()];
+            State.doMove(RandomMove);
+        }
+    }
+}
+
+TEST(ExtendedState, ComputeSEEHandmade1) {
+    const std::string Sfen = "startpos";
+    nshogi::core::ExtendedState State =
+        nshogi::io::sfen::StateBuilder::newState(Sfen);
+
+    const auto Move =
+        nshogi::io::sfen::sfenToMove32(State.getPosition(), "7g7f");
+    TEST_ASSERT_EQ(0, State.computeSEE(Move, SEEValue));
+}
+
+TEST(ExtendedState, ComputeSEEHandmade2) {
+    const std::string Sfen = "1ks1lgs2/4r2b1/pppnln1pp/3ppgp2/4Sp3/2PSPG3/"
+                             "PP1NRNPPP/1B2L4/2K1LG3 w Pp 1";
+    nshogi::core::ExtendedState State =
+        nshogi::io::sfen::StateBuilder::newState(Sfen);
+
+    const auto Move =
+        nshogi::io::sfen::sfenToMove32(State.getPosition(), "5d5e");
+    TEST_ASSERT_EQ(400, State.computeSEE(Move, SEEValue));
+}
+
+TEST(ExtendedState, ComputeSEEMatchesSmallestMoveIteration) {
+    const int N = 1000;
+    std::mt19937_64 mt(20260610);
+
+    for (int I = 0; I < N; ++I) {
+        nshogi::core::ExtendedState State =
+            nshogi::core::StateBuilder::getInitialState();
+
+        for (uint16_t Ply = 0; Ply < 512; ++Ply) {
+            const auto Moves =
+                nshogi::core::MoveGenerator::generateLegalMoves(State);
+
+            if (Moves.size() == 0) {
+                break;
+            }
+
+            for (const auto& Move : Moves) {
+                if (Move.capturePieceType() == nshogi::core::PTK_Empty) {
+                    continue;
+                }
+
+                const int32_t SEE = State.computeSEE(Move, SEEValue);
+
+                nshogi::core::internal::ImmutableStateAdapter Adapter(State);
+                const nshogi::core::internal::bitboard::Bitboard
+                    RootOccupiedBB =
+                        Adapter->getBitboard<nshogi::core::Black>() |
+                        Adapter->getBitboard<nshogi::core::White>();
+
+                const int32_t CaptureValue = seeMoveValue(Move);
+                bool SawLineUnknownToRoot = false;
+                State.doMove(Move);
+                const int32_t Expected =
+                    CaptureValue -
+                    std::max(0, computeSEEBySmallestMoves(
+                                    State, Move.to(), RootOccupiedBB,
+                                    &SawLineUnknownToRoot));
+                State.undoMove();
+
+                if (SawLineUnknownToRoot) {
+                    // The exchange involves a pin or a check line that
+                    // did not exist at the root position: computeSEE()
+                    // is allowed to return a different value here.
+                    continue;
+                }
+
+                TEST_ASSERT_EQ(SEE, Expected);
             }
 
             const auto RandomMove = Moves[mt() % Moves.size()];

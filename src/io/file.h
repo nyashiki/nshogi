@@ -13,6 +13,7 @@
 #include "../ml/azteacher.h"
 #include "../ml/simpleteacher.h"
 
+#include <cstddef>
 #include <fstream>
 
 namespace nshogi {
@@ -22,19 +23,28 @@ namespace file {
 namespace az_teacher {
 
 ml::AZTeacher load(std::ifstream&);
+ml::AZTeacher load(const char* Source);
 void save(std::ofstream&, const ml::AZTeacher&);
 
 } // namespace az_teacher
 
 namespace simple_teacher {
 
-ml::SimpleTeacher load(std::ifstream&);
+void loadAt(ml::SimpleTeacher* Dest, std::ifstream&, int32_t Version);
+std::size_t loadAt(ml::SimpleTeacher* Dest, const char* Source,
+                   int32_t Version);
+ml::SimpleTeacher load(std::ifstream&, int32_t Version);
+ml::SimpleTeacher load(const char* Source, int32_t Version);
+
 void save(std::ofstream&, const ml::SimpleTeacher&);
 
 } // namespace simple_teacher
 
 template <typename T>
-T load(std::ifstream&);
+T load(std::ifstream&, int32_t Version);
+
+template <typename T>
+T load(const char* Source, int32_t Version, std::size_t* BytesRead = nullptr);
 
 template <typename T>
 void save(std::ofstream&, const T&);

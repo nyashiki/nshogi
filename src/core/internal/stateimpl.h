@@ -298,6 +298,11 @@ class StateImpl {
         return Helper.getCurrentStepHelper().DefendingOpponentSliderBB[C];
     }
 
+    inline const bitboard::Bitboard
+    getDefendingOpponentSliderBB(Color C) const noexcept {
+        return Helper.getCurrentStepHelper().DefendingOpponentSliderBB[C];
+    }
+
     template <Color C>
     inline bitboard::Bitboard
     getStepAttackBB(Square ExcludeSq = SqInvalid) const noexcept {
@@ -783,6 +788,9 @@ class StateImpl {
 
     void undoNullMove();
 
+    int32_t computeSEE(const Move32 Move,
+                       const int32_t* const PieceValues) const noexcept;
+
  protected:
     Position Pos;
     StateHelper Helper;
@@ -795,6 +803,19 @@ class StateImpl {
 
     template <Color C>
     void setStepCheckerBB(StepHelper* SHelper) noexcept;
+
+    bitboard::Bitboard
+    computeSEEAttackersBB(Square To, const bitboard::Bitboard* BBs,
+                          const bitboard::Bitboard& OccupiedBB) const noexcept;
+
+    void
+    updateSEEAttackersBB(bitboard::Bitboard* AttackersBB, Square To,
+                         Square FromSq,
+                         const bitboard::Bitboard& OccupiedBB) const noexcept;
+
+    bool seeGivesDiscoveredCheck(Color C, Square FromSq,
+                                 const bitboard::Bitboard& MyBB,
+                                 const StepHelper* SHelper) const noexcept;
 };
 
 } // namespace internal
