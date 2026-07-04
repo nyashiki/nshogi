@@ -132,7 +132,15 @@ class AZTeacherIO : public ml::AZTeacher {
         std::memcpy(Version, Source, 8 * sizeof(char));
 
         if (std::strcmp(Version, "0.1.0") == 0) {
-            return load_0_1_0(Source, BytesRead);
+            std::size_t PayloadBytes = 0;
+            const ml::AZTeacher T =
+                load_0_1_0(Source + 8 * sizeof(char), &PayloadBytes);
+
+            if (BytesRead != nullptr) {
+                *BytesRead = 8 * sizeof(char) + PayloadBytes;
+            }
+
+            return T;
         }
 
         const std::string ErrorMessage =
