@@ -3,6 +3,8 @@
 #include "../core/internal/bitboard.h"
 #include "../core/internal/stateadapter.h"
 
+#include <stdexcept>
+
 namespace nshogi {
 namespace ml {
 
@@ -17,6 +19,18 @@ constexpr std::size_t OnBoardFeatureSize =
 
 // clang-format on
 
+std::size_t countPieces(const core::Position& Position,
+                        const core::internal::bitboard::Bitboard& OccupiedBB) {
+    std::size_t NumPieces = OccupiedBB.popCount();
+    for (const auto Type :
+         {core::PTK_Pawn, core::PTK_Lance, core::PTK_Knight, core::PTK_Silver,
+          core::PTK_Gold, core::PTK_Bishop, core::PTK_Rook}) {
+        NumPieces += (std::size_t)(Position.getStandCount(core::Black, Type) +
+                                   Position.getStandCount(core::White, Type));
+    }
+    return NumPieces;
+}
+
 template <core::Color C>
 void idsAt_(int32_t* DestMyIds, int32_t* DestOpIds, int32_t* DestMyIdsCount,
             int32_t* DestOpIdsCount, const core::State& S) {
@@ -29,6 +43,14 @@ void idsAt_(int32_t* DestMyIds, int32_t* DestOpIds, int32_t* DestMyIdsCount,
     const core::internal::bitboard::Bitboard OccupiedBB =
         Adapter->getBitboard<core::Black>() |
         Adapter->getBitboard<core::White>();
+
+    // The destination buffers hold exactly 40 ids and every piece emits one
+    // id per perspective, so any other piece count would overflow the
+    // buffers (or silently leave id 0 in the unused slots).
+    if (countPieces(Position, OccupiedBB) != 40) {
+        throw std::runtime_error(
+            "PFeatureExtractor requires a position with exactly 40 pieces.");
+    }
 
     OccupiedBB.forEach([&](core::Square Sq) {
         const auto Piece = Position.pieceOn(Sq);
