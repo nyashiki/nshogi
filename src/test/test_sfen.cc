@@ -235,6 +235,15 @@ TEST(State, SfenWithMoves) {
                       Sfen.c_str());
 }
 
+TEST(State, SfenWithPlyOffsetAndMoves) {
+    const std::string Sfen = "lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/"
+                             "LNSGKGSNL b - 51 moves 7g7f 3c3d 8h2b+ 3a2b";
+    nshogi::core::State State = nshogi::io::sfen::StateBuilder::newState(Sfen);
+
+    TEST_ASSERT_STREQ(nshogi::io::sfen::stateToSfen(State).c_str(),
+                      Sfen.c_str());
+}
+
 TEST(State, SfenStartpos) {
     const std::string Sfen = "startpos";
 
