@@ -320,7 +320,7 @@ PYBIND11_MODULE(nshogi, Module) {
                                [](const nshogi::core::State& S) {
                                    std::vector<nshogi::core::Move32> Moves;
 
-                                   for (uint16_t Ply = 0; Ply < S.getPly();
+                                   for (uint16_t Ply = 0; Ply < S.getPly(false);
                                         ++Ply) {
                                        Moves.push_back(S.getHistoryMove(Ply));
                                    }

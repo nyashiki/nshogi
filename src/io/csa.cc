@@ -255,8 +255,8 @@ std::string stateToCSA(const core::State& State) {
     SStream << positionToCSA(State.getInitialPosition());
     core::Color Color = State.getInitialPosition().sideToMove();
 
-    if (State.getPly() > 0) {
-        for (uint16_t Ply = 0; Ply < State.getPly(); ++Ply) {
+    if (State.getPly(false) > 0) {
+        for (uint16_t Ply = 0; Ply < State.getPly(false); ++Ply) {
             SStream << move32ToCSA(State.getHistoryMove(Ply), Color) << "\n";
             Color = ~Color;
         }
