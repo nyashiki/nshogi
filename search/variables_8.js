@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['opids_0',['OpIds',['../structnshogi_1_1ml_1_1BatchedTeacher.html#a3c186df0c050deaf376a378f8206a0c7',1,'nshogi::ml::BatchedTeacher']]]
+  ['nummoves_0',['NumMoves',['../structnshogi_1_1ml_1_1AZTeacher.html#a0e51e7440e5d5806ade96da359197e38',1,'nshogi::ml::AZTeacher']]]
 ];

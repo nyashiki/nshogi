@@ -1,7 +1,13 @@
 var NAVTREEINDEX6 =
 {
-"structnshogi_1_1ml_1_1SimpleTeacher.html#af9c6d4d4ea11d9d27e51cfefd1ca87fc":[1,0,0,2,11,13],
+"structnshogi_1_1ml_1_1SimpleTeacher.html#ad9191633c63878576cb5ae6e8a920f71":[0,0,0,3,13,20],
+"structnshogi_1_1ml_1_1SimpleTeacher.html#ad9191633c63878576cb5ae6e8a920f71":[1,0,0,2,11,20],
+"structnshogi_1_1ml_1_1SimpleTeacher.html#af53f649d6863f0a18bed7fd05dd90104":[1,0,0,2,11,1],
+"structnshogi_1_1ml_1_1SimpleTeacher.html#af53f649d6863f0a18bed7fd05dd90104":[0,0,0,3,13,1],
+"structnshogi_1_1ml_1_1SimpleTeacher.html#af90f7958d73e846af02f3a804945266f":[1,0,0,2,11,0],
+"structnshogi_1_1ml_1_1SimpleTeacher.html#af90f7958d73e846af02f3a804945266f":[0,0,0,3,13,0],
 "structnshogi_1_1ml_1_1SimpleTeacher.html#af9c6d4d4ea11d9d27e51cfefd1ca87fc":[0,0,0,3,13,13],
+"structnshogi_1_1ml_1_1SimpleTeacher.html#af9c6d4d4ea11d9d27e51cfefd1ca87fc":[1,0,0,2,11,13],
 "structnshogi_1_1ml_1_1SimpleTeacher.html#afc7c66e4368ade23b5850a03734d61e6":[0,0,0,3,13,5],
 "structnshogi_1_1ml_1_1SimpleTeacher.html#afc7c66e4368ade23b5850a03734d61e6":[1,0,0,2,11,5],
 "teacherloader_8cc.html":[2,0,0,3,18],

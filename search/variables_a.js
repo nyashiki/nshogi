@@ -1,5 +1,5 @@
 var searchData=
 [
-  ['results_0',['Results',['../structnshogi_1_1ml_1_1BatchedTeacher.html#ac013c82e3ded4d77dfffd13e99b3435c',1,'nshogi::ml::BatchedTeacher']]],
-  ['rule_1',['Rule',['../structnshogi_1_1core_1_1StateConfig.html#a265eab914c4a04b830983a48bc733753',1,'nshogi::core::StateConfig']]]
+  ['q_0',['Q',['../structnshogi_1_1ml_1_1AZTeacher.html#a058225cdc102070a435ddf417856a37d',1,'nshogi::ml::AZTeacher']]],
+  ['qs_1',['Qs',['../structnshogi_1_1ml_1_1BatchedTeacher.html#a0c06b556b563e0b64341815e1fa2eed6',1,'nshogi::ml::BatchedTeacher']]]
 ];
