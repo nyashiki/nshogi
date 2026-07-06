@@ -1,5 +1,15 @@
 var NAVTREEINDEX6 =
 {
+"structnshogi_1_1ml_1_1SimpleTeacher.html#af9c6d4d4ea11d9d27e51cfefd1ca87fc":[1,0,0,2,11,13],
+"structnshogi_1_1ml_1_1SimpleTeacher.html#af9c6d4d4ea11d9d27e51cfefd1ca87fc":[0,0,0,3,13,13],
+"structnshogi_1_1ml_1_1SimpleTeacher.html#afc7c66e4368ade23b5850a03734d61e6":[0,0,0,3,13,5],
+"structnshogi_1_1ml_1_1SimpleTeacher.html#afc7c66e4368ade23b5850a03734d61e6":[1,0,0,2,11,5],
+"teacherloader_8cc.html":[2,0,0,3,18],
+"teacherloader_8h.html":[2,0,0,3,19],
+"teacherloader_8h_source.html":[2,0,0,3,19],
+"teacherwriter_8cc.html":[2,0,0,3,20],
+"teacherwriter_8h.html":[2,0,0,3,21],
+"teacherwriter_8h_source.html":[2,0,0,3,21],
 "types_8h.html":[2,0,0,1,19],
 "types_8h.html#a0240c8e65b510a2fef9eb7cf804bb8dd":[2,0,0,1,19,38],
 "types_8h.html#a092f1bf3a35a4fef7b66c0703a901076":[2,0,0,1,19,41],
