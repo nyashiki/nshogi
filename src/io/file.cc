@@ -232,12 +232,16 @@ class SimpleTeacherIO : public ml::SimpleTeacher {
             core::HuffmanCode(Codes[3], Codes[2], Codes[1], Codes[0]);
         Dest->NextMove = core::Move16::fromValue(Move16);
 
+        Dest->V = 0.0f;
         Dest->Q = 0.0f;
         Dest->GamePly = 0;
+        Dest->Declared = false;
 
         if (Version >= 2) {
+            Ifs.read(reinterpret_cast<char*>(&Dest->V), sizeof(float));
             Ifs.read(reinterpret_cast<char*>(&Dest->Q), sizeof(float));
             Ifs.read(reinterpret_cast<char*>(&Dest->GamePly), sizeof(uint16_t));
+            Ifs.read(reinterpret_cast<char*>(&Dest->Declared), sizeof(bool));
         }
     }
 
@@ -265,14 +269,20 @@ class SimpleTeacherIO : public ml::SimpleTeacher {
             core::HuffmanCode(Codes[3], Codes[2], Codes[1], Codes[0]);
         Dest->NextMove = core::Move16::fromValue(Move16);
 
+        Dest->V = 0.0f;
         Dest->Q = 0.0f;
         Dest->GamePly = 0;
+        Dest->Declared = false;
 
         if (Version >= 2) {
+            std::memcpy(&Dest->V, Cur, sizeof(float));
+            Cur += sizeof(float);
             std::memcpy(&Dest->Q, Cur, sizeof(float));
             Cur += sizeof(float);
             std::memcpy(&Dest->GamePly, Cur, sizeof(uint16_t));
             Cur += sizeof(uint16_t);
+            std::memcpy(&Dest->Declared, Cur, sizeof(bool));
+            Cur += sizeof(bool);
         }
 
         return static_cast<std::size_t>(Cur - Source);
@@ -303,8 +313,10 @@ class SimpleTeacherIO : public ml::SimpleTeacher {
         Ofs.write(reinterpret_cast<char*>(DrawValues), sizeof(DrawValues));
         Ofs.write(reinterpret_cast<char*>(&Move16), sizeof(uint16_t));
         Ofs.write(reinterpret_cast<char*>(&Winner), sizeof(Winner));
+        Ofs.write(reinterpret_cast<char*>(&V), sizeof(float));
         Ofs.write(reinterpret_cast<char*>(&Q), sizeof(float));
         Ofs.write(reinterpret_cast<char*>(&GamePly), sizeof(uint16_t));
+        Ofs.write(reinterpret_cast<char*>(&Declared), sizeof(bool));
     }
 };
 

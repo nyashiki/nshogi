@@ -36,20 +36,25 @@ struct SimpleTeacher {
     SimpleTeacher(const SimpleTeacher&);
     SimpleTeacher& operator=(const SimpleTeacher&);
 
+    const core::HuffmanCode& getHuffmanCode() const;
     core::Position getPosition() const;
     core::State getState() const;
     core::StateConfig getConfig() const;
     core::Move16 getNextMove() const;
     core::Color getWinner() const;
+    float v() const;
     float q() const;
     uint16_t gamePly() const;
+    bool declared() const;
 
     SimpleTeacher& setState(const core::State&);
     SimpleTeacher& setConfig(const core::StateConfig&);
     SimpleTeacher& setNextMove(core::Move16);
     SimpleTeacher& setWinner(core::Color);
+    SimpleTeacher& setV(float);
     SimpleTeacher& setQ(float);
     SimpleTeacher& setGamePly(uint16_t);
+    SimpleTeacher& setDeclared(bool);
 
     bool equals(const SimpleTeacher&) const;
 
@@ -73,8 +78,10 @@ struct SimpleTeacher {
     core::Color Winner;
 
     // ----- VERSION 2 -----
-    float Q;
+    float V; // Evaluation output (e.g., value head).
+    float Q; // Search result.
     uint16_t GamePly;
+    bool Declared; // Whether the game ended by declaration.
 
     friend class io::file::simple_teacher::SimpleTeacherIO;
 };
