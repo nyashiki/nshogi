@@ -46,6 +46,10 @@ class AZTeacherIO : public ml::AZTeacher {
         Ifs.read(reinterpret_cast<char*>(&Dest->BlackDrawValue), sizeof(float));
         Ifs.read(reinterpret_cast<char*>(&Dest->WhiteDrawValue), sizeof(float));
 
+        Ifs.read(reinterpret_cast<char*>(&Dest->V), sizeof(float));
+        Ifs.read(reinterpret_cast<char*>(&Dest->Q), sizeof(float));
+        Ifs.read(reinterpret_cast<char*>(&Dest->GamePly), sizeof(uint16_t));
+
         Ifs.read(reinterpret_cast<char*>(&Dest->Declared), sizeof(bool));
 
         int16_t Dummy = 0;
@@ -84,6 +88,13 @@ class AZTeacherIO : public ml::AZTeacher {
         Cur += sizeof(float);
         std::memcpy(&Dest->WhiteDrawValue, Cur, sizeof(float));
         Cur += sizeof(float);
+
+        std::memcpy(&Dest->V, Cur, sizeof(float));
+        Cur += sizeof(float);
+        std::memcpy(&Dest->Q, Cur, sizeof(float));
+        Cur += sizeof(float);
+        std::memcpy(&Dest->GamePly, Cur, sizeof(uint16_t));
+        Cur += sizeof(uint16_t);
 
         std::memcpy(&Dest->Declared, Cur, sizeof(bool));
         Cur += sizeof(bool);
@@ -171,6 +182,10 @@ class AZTeacherIO : public ml::AZTeacher {
                   sizeof(float));
         Ofs.write(reinterpret_cast<const char*>(&WhiteDrawValue),
                   sizeof(float));
+
+        Ofs.write(reinterpret_cast<const char*>(&V), sizeof(float));
+        Ofs.write(reinterpret_cast<const char*>(&Q), sizeof(float));
+        Ofs.write(reinterpret_cast<const char*>(&GamePly), sizeof(uint16_t));
 
         Ofs.write(reinterpret_cast<const char*>(&Declared), sizeof(bool));
 
