@@ -24,9 +24,12 @@
 #include "../ml/ka.h"
 #include "../ml/p.h"
 #include "../ml/simpleteacher.h"
+#include "../ml/teacheraggregator.h"
 #include "../ml/utils.h"
 #include "common.h"
 
+#include <cmath>
+#include <cstring>
 #include <filesystem>
 #include <fstream>
 #include <random>
@@ -1106,6 +1109,380 @@ TEST(ML, AZTeacherHandmade1) {
         "lnsgkgsnl/1b5r1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL b - 1");
     TEST_ASSERT_FALSE(T1.equals(T2));
     TEST_ASSERT_FALSE(T2.equals(T1));
+}
+
+TEST(ML, TeacherAggregatorBasic) {
+    nshogi::core::State State = nshogi::core::StateBuilder::getInitialState();
+
+    nshogi::core::StateConfig Config1;
+    Config1.MaxPly = 320;
+    Config1.BlackDrawValue = 0.5f;
+    Config1.WhiteDrawValue = 0.5f;
+
+    nshogi::core::StateConfig Config2;
+    Config2.MaxPly = 400;
+    Config2.BlackDrawValue = 0.4f;
+    Config2.WhiteDrawValue = 0.6f;
+
+    const auto M7g7f =
+        nshogi::io::sfen::sfenToMove32(State.getPosition(), "7g7f");
+    const auto M2g2f =
+        nshogi::io::sfen::sfenToMove32(State.getPosition(), "2g2f");
+
+    nshogi::ml::TeacherAggregator Aggregator;
+    nshogi::ml::SimpleTeacher T;
+
+    // Three records of the initial position.
+    T.setState(State)
+        .setConfig(Config1)
+        .setNextMove(nshogi::core::Move16(M7g7f))
+        .setWinner(nshogi::core::Black)
+        .setV(0.8f)
+        .setQ(0.6f)
+        .setGamePly(100);
+    Aggregator.add(T);
+
+    T.setConfig(Config2)
+        .setNextMove(nshogi::core::Move16(M7g7f))
+        .setWinner(nshogi::core::White)
+        .setV(0.6f)
+        .setQ(0.4f)
+        .setGamePly(120);
+    Aggregator.add(T);
+
+    T.setConfig(Config1)
+        .setNextMove(nshogi::core::Move16(M2g2f))
+        .setWinner(nshogi::core::Black)
+        .setV(0.4f)
+        .setQ(0.5f)
+        .setGamePly(80);
+    Aggregator.add(T);
+
+    // Two records of another position.
+    const std::string StartposSfen =
+        nshogi::io::sfen::positionToSfen(State.getPosition());
+    State.doMove(M7g7f);
+    const auto M3c3d =
+        nshogi::io::sfen::sfenToMove32(State.getPosition(), "3c3d");
+
+    T.setState(State)
+        .setConfig(Config1)
+        .setNextMove(nshogi::core::Move16(M3c3d))
+        .setWinner(nshogi::core::White)
+        .setV(0.5f)
+        .setQ(0.5f)
+        .setGamePly(60);
+    Aggregator.add(T);
+
+    T.setNextMove(nshogi::core::Move16(M3c3d))
+        .setWinner(nshogi::core::NoColor)
+        .setV(0.7f)
+        .setQ(0.3f)
+        .setGamePly(40);
+    Aggregator.add(T);
+
+    TEST_ASSERT_EQ(Aggregator.numAddedTeachers(), (std::size_t)5);
+    TEST_ASSERT_EQ(Aggregator.numUniquePositions(), (std::size_t)2);
+
+    const auto Teachers = Aggregator.aggregate(nshogi::core::ER_Declare27);
+    TEST_ASSERT_EQ(Teachers.size(), (std::size_t)2);
+
+    const nshogi::ml::AZTeacher* Startpos = nullptr;
+    const nshogi::ml::AZTeacher* After7g7f = nullptr;
+    for (const auto& AZT : Teachers) {
+        if (std::string(AZT.Sfen) == StartposSfen) {
+            Startpos = &AZT;
+        } else {
+            After7g7f = &AZT;
+        }
+    }
+    TEST_ASSERT_TRUE(Startpos != nullptr);
+    TEST_ASSERT_TRUE(After7g7f != nullptr);
+
+    TEST_ASSERT_EQ(Startpos->SideToMove, nshogi::core::Black);
+    TEST_ASSERT_EQ(Startpos->Winner, nshogi::core::Black);
+    TEST_ASSERT_EQ((int)Startpos->NumMoves, 2);
+    TEST_ASSERT_STREQ(Startpos->Moves[0].data(), "7g7f");
+    TEST_ASSERT_EQ(Startpos->Visits[0], (uint16_t)2);
+    TEST_ASSERT_STREQ(Startpos->Moves[1].data(), "2g2f");
+    TEST_ASSERT_EQ(Startpos->Visits[1], (uint16_t)1);
+    TEST_ASSERT_TRUE(std::abs(Startpos->V - (0.8 + 0.6 + 0.4) / 3.0) < 1e-6);
+    TEST_ASSERT_TRUE(std::abs(Startpos->Q - (0.6 + 0.4 + 0.5) / 3.0) < 1e-6);
+    TEST_ASSERT_EQ(Startpos->GamePly, (uint16_t)120);
+    TEST_ASSERT_EQ(Startpos->MaxPly, (uint16_t)400);
+    TEST_ASSERT_TRUE(
+        std::abs(Startpos->BlackDrawValue - (0.5 + 0.4 + 0.5) / 3.0) < 1e-6);
+    TEST_ASSERT_TRUE(
+        std::abs(Startpos->WhiteDrawValue - (0.5 + 0.6 + 0.5) / 3.0) < 1e-6);
+    TEST_ASSERT_EQ(Startpos->EndingRule, nshogi::core::ER_Declare27);
+    TEST_ASSERT_FALSE(Startpos->Declared);
+    TEST_ASSERT_TRUE(Startpos->checkSanity(2));
+
+    TEST_ASSERT_EQ(After7g7f->SideToMove, nshogi::core::White);
+    TEST_ASSERT_EQ(After7g7f->Winner, nshogi::core::White);
+    TEST_ASSERT_EQ((int)After7g7f->NumMoves, 1);
+    TEST_ASSERT_STREQ(After7g7f->Moves[0].data(), "3c3d");
+    TEST_ASSERT_EQ(After7g7f->Visits[0], (uint16_t)2);
+    TEST_ASSERT_TRUE(std::abs(After7g7f->V - (0.5 + 0.7) / 2.0) < 1e-6);
+    TEST_ASSERT_TRUE(std::abs(After7g7f->Q - (0.5 + 0.3) / 2.0) < 1e-6);
+    TEST_ASSERT_EQ(After7g7f->GamePly, (uint16_t)60);
+    TEST_ASSERT_TRUE(After7g7f->checkSanity(2));
+}
+
+TEST(ML, TeacherAggregatorTopMoves) {
+    const nshogi::core::State State =
+        nshogi::core::StateBuilder::getInitialState();
+    const auto LegalMoves =
+        nshogi::core::MoveGenerator::generateLegalMoves(State);
+    TEST_ASSERT_TRUE(LegalMoves.size() >= 20);
+
+    nshogi::core::StateConfig Config;
+
+    nshogi::ml::TeacherAggregator Aggregator;
+    nshogi::ml::SimpleTeacher T;
+    T.setState(State).setConfig(Config).setV(0.5f).setQ(0.5f).setGamePly(1);
+
+    // The I-th move is added (I + 1) times: the moves with the
+    // smallest counts must be dropped from the distribution.
+    for (std::size_t I = 0; I < 20; ++I) {
+        T.setNextMove(nshogi::core::Move16(LegalMoves[I]));
+        T.setWinner((I % 2 == 0) ? nshogi::core::Black : nshogi::core::White);
+        for (std::size_t C = 0; C < I + 1; ++C) {
+            Aggregator.add(T);
+        }
+    }
+
+    TEST_ASSERT_EQ(Aggregator.numUniquePositions(), (std::size_t)1);
+
+    const auto Teachers = Aggregator.aggregate(nshogi::core::ER_Draw24);
+    TEST_ASSERT_EQ(Teachers.size(), (std::size_t)1);
+
+    const auto& AZT = Teachers[0];
+    TEST_ASSERT_EQ(AZT.EndingRule, nshogi::core::ER_Draw24);
+    TEST_ASSERT_EQ((int)AZT.NumMoves, 16);
+
+    for (std::size_t I = 0; I < 16; ++I) {
+        // The (19 - I)-th move has the (I + 1)-th largest count.
+        TEST_ASSERT_STREQ(
+            AZT.Moves[I].data(),
+            nshogi::io::sfen::move32ToSfen(LegalMoves[19 - I]).c_str());
+        TEST_ASSERT_EQ(AZT.Visits[I], (uint16_t)(20 - I));
+    }
+
+    // 100 black wins (even indices) and 110 white wins (odd indices).
+    TEST_ASSERT_EQ(AZT.Winner, nshogi::core::White);
+    TEST_ASSERT_TRUE(AZT.checkSanity(2));
+}
+
+TEST(ML, TeacherAggregatorVisitsScaling) {
+    const nshogi::core::State State =
+        nshogi::core::StateBuilder::getInitialState();
+    const auto LegalMoves =
+        nshogi::core::MoveGenerator::generateLegalMoves(State);
+
+    nshogi::core::StateConfig Config;
+
+    nshogi::ml::TeacherAggregator Aggregator;
+    nshogi::ml::SimpleTeacher T;
+    T.setState(State).setConfig(Config).setWinner(nshogi::core::NoColor);
+
+    T.setNextMove(nshogi::core::Move16(LegalMoves[0]));
+    for (std::size_t I = 0; I < 70000; ++I) {
+        Aggregator.add(T);
+    }
+
+    T.setNextMove(nshogi::core::Move16(LegalMoves[1]));
+    for (std::size_t I = 0; I < 35000; ++I) {
+        Aggregator.add(T);
+    }
+
+    const auto Teachers = Aggregator.aggregate(nshogi::core::ER_Declare27);
+    TEST_ASSERT_EQ(Teachers.size(), (std::size_t)1);
+
+    const auto& AZT = Teachers[0];
+    TEST_ASSERT_EQ((int)AZT.NumMoves, 2);
+
+    // 70000 exceeds the 16-bit limit: the counts must be scaled
+    // down proportionally (70000 -> 65535, 35000 -> 32768).
+    TEST_ASSERT_EQ(AZT.Visits[0], (uint16_t)65535);
+    TEST_ASSERT_EQ(AZT.Visits[1], (uint16_t)32768);
+
+    // All the records are draws: the winner must be NoColor.
+    TEST_ASSERT_EQ(AZT.Winner, nshogi::core::NoColor);
+}
+
+TEST(ML, TeacherAggregatorWinnerDraw) {
+    nshogi::core::State State = nshogi::core::StateBuilder::getInitialState();
+    const auto M7g7f =
+        nshogi::io::sfen::sfenToMove32(State.getPosition(), "7g7f");
+
+    nshogi::core::StateConfig Config;
+
+    nshogi::ml::TeacherAggregator Aggregator;
+    nshogi::ml::SimpleTeacher T;
+    T.setState(State).setConfig(Config).setNextMove(
+        nshogi::core::Move16(M7g7f));
+
+    // Two black wins, one white win and three draws: the draws are
+    // the most frequent outcome, so the winner must be NoColor even
+    // though black won more than white.
+    Aggregator.add(T.setWinner(nshogi::core::Black));
+    Aggregator.add(T.setWinner(nshogi::core::Black));
+    Aggregator.add(T.setWinner(nshogi::core::White));
+    Aggregator.add(T.setWinner(nshogi::core::NoColor));
+    Aggregator.add(T.setWinner(nshogi::core::NoColor));
+    Aggregator.add(T.setWinner(nshogi::core::NoColor));
+
+    // Two black wins and two draws on another position: the draws are
+    // not strictly the most frequent, so black remains the winner.
+    const std::string StartposSfen =
+        nshogi::io::sfen::positionToSfen(State.getPosition());
+    State.doMove(M7g7f);
+    const auto M3c3d =
+        nshogi::io::sfen::sfenToMove32(State.getPosition(), "3c3d");
+    T.setState(State).setNextMove(nshogi::core::Move16(M3c3d));
+    Aggregator.add(T.setWinner(nshogi::core::Black));
+    Aggregator.add(T.setWinner(nshogi::core::Black));
+    Aggregator.add(T.setWinner(nshogi::core::NoColor));
+    Aggregator.add(T.setWinner(nshogi::core::NoColor));
+
+    const auto Teachers = Aggregator.aggregate(nshogi::core::ER_Declare27);
+    TEST_ASSERT_EQ(Teachers.size(), (std::size_t)2);
+
+    for (const auto& AZT : Teachers) {
+        if (std::string(AZT.Sfen) == StartposSfen) {
+            TEST_ASSERT_EQ(AZT.Winner, nshogi::core::NoColor);
+        } else {
+            TEST_ASSERT_EQ(AZT.Winner, nshogi::core::Black);
+        }
+    }
+}
+
+TEST(ML, ExternalTeacherAggregatorMatchesInMemory) {
+    std::mt19937_64 Mt(20260706);
+
+    // Generate records by random playouts. The games share the opening
+    // positions so that the data contains duplicated positions.
+    std::vector<nshogi::ml::SimpleTeacher> Records;
+    for (int Game = 0; Game < 6; ++Game) {
+        nshogi::core::State State =
+            nshogi::core::StateBuilder::getInitialState();
+
+        for (uint16_t Ply = 0; Ply < 40; ++Ply) {
+            const auto Moves =
+                nshogi::core::MoveGenerator::generateLegalMoves(State);
+            if (Moves.size() == 0) {
+                break;
+            }
+
+            nshogi::core::StateConfig Config;
+            Config.MaxPly = (uint16_t)(256 + Mt() % 256);
+
+            const int NumDuplicates = 1 + (int)(Mt() % 3);
+            for (int I = 0; I < NumDuplicates; ++I) {
+                nshogi::ml::SimpleTeacher T;
+                T.setState(State)
+                    .setConfig(Config)
+                    .setNextMove(
+                        nshogi::core::Move16(Moves[Mt() % Moves.size()]))
+                    .setWinner((nshogi::core::Color)(Mt() % 3))
+                    .setV((float)(Mt() % 257) / 256.0f)
+                    .setQ((float)(Mt() % 257) / 256.0f)
+                    .setGamePly((uint16_t)(Mt() % 512))
+                    .setDeclared((Mt() % 2) == 0);
+                Records.emplace_back(T);
+            }
+
+            State.doMove(Moves[Mt() % Moves.size()]);
+        }
+    }
+
+    // Save the records to two files.
+    const std::string TempDir =
+        std::filesystem::temp_directory_path().string();
+    const std::string Input1 = TempDir + "/external_aggregator_test_1.bin";
+    const std::string Input2 = TempDir + "/external_aggregator_test_2.bin";
+    {
+        std::ofstream Ofs1(Input1, std::ios::out | std::ios::binary);
+        std::ofstream Ofs2(Input2, std::ios::out | std::ios::binary);
+        for (std::size_t I = 0; I < Records.size(); ++I) {
+            nshogi::io::file::save((I % 2 == 0) ? Ofs1 : Ofs2, Records[I]);
+        }
+    }
+
+    // Aggregate in memory, feeding the records in the same order as
+    // the external aggregator reads them (the whole first file and then
+    // the whole second file) so that the outputs are bit-identical.
+    nshogi::ml::TeacherAggregator InMemory;
+    for (std::size_t I = 0; I < Records.size(); I += 2) {
+        InMemory.add(Records[I]);
+    }
+    for (std::size_t I = 1; I < Records.size(); I += 2) {
+        InMemory.add(Records[I]);
+    }
+    const auto ExpectedFileOrder =
+        InMemory.aggregate(nshogi::core::ER_Declare27);
+
+    // Aggregate externally with a tiny memory budget so that many
+    // sorted runs are generated.
+    const std::string Output = TempDir + "/external_aggregator_test_out.bin";
+    nshogi::ml::ExternalTeacherAggregator External(TempDir, 4096);
+    External.addTeacherFile(Input1);
+    External.addTeacherFile(Input2);
+    const uint64_t NumUnique =
+        External.aggregate(Output, nshogi::core::ER_Declare27);
+
+    TEST_ASSERT_EQ((std::size_t)NumUnique, ExpectedFileOrder.size());
+
+    std::ifstream Ifs(Output, std::ios::in | std::ios::binary);
+    for (std::size_t I = 0; I < ExpectedFileOrder.size(); ++I) {
+        const auto T = nshogi::io::file::load<nshogi::ml::AZTeacher>(Ifs, 1);
+        TEST_ASSERT_TRUE(T.equals(ExpectedFileOrder[I]));
+    }
+    // The whole output must have been consumed.
+    Ifs.peek();
+    TEST_ASSERT_TRUE(Ifs.eof());
+}
+
+TEST(ML, TeacherAggregatorDeclared) {
+    nshogi::core::State State = nshogi::core::StateBuilder::getInitialState();
+    const auto M7g7f =
+        nshogi::io::sfen::sfenToMove32(State.getPosition(), "7g7f");
+
+    nshogi::core::StateConfig Config;
+
+    nshogi::ml::TeacherAggregator Aggregator;
+    nshogi::ml::SimpleTeacher T;
+
+    // The majority of the records is declared: two out of three.
+    T.setState(State)
+        .setConfig(Config)
+        .setNextMove(nshogi::core::Move16(M7g7f))
+        .setWinner(nshogi::core::Black);
+    Aggregator.add(T.setDeclared(true));
+    Aggregator.add(T.setDeclared(true));
+    Aggregator.add(T.setDeclared(false));
+
+    // A tie: one declared and one not.
+    const std::string StartposSfen =
+        nshogi::io::sfen::positionToSfen(State.getPosition());
+    State.doMove(M7g7f);
+    const auto M3c3d =
+        nshogi::io::sfen::sfenToMove32(State.getPosition(), "3c3d");
+    T.setState(State).setNextMove(nshogi::core::Move16(M3c3d));
+    Aggregator.add(T.setDeclared(true));
+    Aggregator.add(T.setDeclared(false));
+
+    const auto Teachers = Aggregator.aggregate(nshogi::core::ER_Declare27);
+    TEST_ASSERT_EQ(Teachers.size(), (std::size_t)2);
+
+    for (const auto& AZT : Teachers) {
+        if (std::string(AZT.Sfen) == StartposSfen) {
+            TEST_ASSERT_TRUE(AZT.Declared);
+        } else {
+            TEST_ASSERT_FALSE(AZT.Declared);
+        }
+    }
 }
 
 TEST(ML, SimpleTeacherCopyConstructor) {
