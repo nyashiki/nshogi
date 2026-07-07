@@ -1207,7 +1207,8 @@ TEST(ML, TeacherAggregatorBasic) {
     TEST_ASSERT_STREQ(Startpos->Moves[1].data(), "2g2f");
     TEST_ASSERT_EQ(Startpos->Visits[1], (uint16_t)1);
     TEST_ASSERT_TRUE(std::abs(Startpos->V - (0.8 + 0.6 + 0.4) / 3.0) < 1e-6);
-    TEST_ASSERT_TRUE(std::abs(Startpos->Q - (0.6 + 0.4 + 0.5) / 3.0) < 1e-6);
+    // Two black wins out of three records with black to move.
+    TEST_ASSERT_TRUE(std::abs(Startpos->Q - 2.0 / 3.0) < 1e-6);
     TEST_ASSERT_EQ(Startpos->GamePly, (uint16_t)120);
     TEST_ASSERT_EQ(Startpos->MaxPly, (uint16_t)400);
     TEST_ASSERT_TRUE(
@@ -1224,7 +1225,8 @@ TEST(ML, TeacherAggregatorBasic) {
     TEST_ASSERT_STREQ(After7g7f->Moves[0].data(), "3c3d");
     TEST_ASSERT_EQ(After7g7f->Visits[0], (uint16_t)2);
     TEST_ASSERT_TRUE(std::abs(After7g7f->V - (0.5 + 0.7) / 2.0) < 1e-6);
-    TEST_ASSERT_TRUE(std::abs(After7g7f->Q - (0.5 + 0.3) / 2.0) < 1e-6);
+    // One white win and one draw out of two records with white to move.
+    TEST_ASSERT_TRUE(std::abs(After7g7f->Q - (1.0 + 0.5) / 2.0) < 1e-6);
     TEST_ASSERT_EQ(After7g7f->GamePly, (uint16_t)60);
     TEST_ASSERT_TRUE(After7g7f->checkSanity(2));
 }

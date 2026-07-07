@@ -34,7 +34,6 @@ struct TeacherAggregationEntry {
     std::vector<std::pair<uint16_t, uint64_t>> MoveCounts;
     uint64_t Count = 0;
     double VSum = 0.0;
-    double QSum = 0.0;
     double BlackDrawValueSum = 0.0;
     double WhiteDrawValueSum = 0.0;
     uint64_t NumBlackWins = 0;
@@ -65,7 +64,6 @@ void TeacherAggregationEntry::accumulate(const SimpleTeacher& Teacher) {
 
     ++Count;
     VSum += Teacher.v();
-    QSum += Teacher.q();
     BlackDrawValueSum += Config.BlackDrawValue;
     WhiteDrawValueSum += Config.WhiteDrawValue;
     GamePlyMax = std::max(GamePlyMax, Teacher.gamePly());
@@ -86,7 +84,6 @@ void TeacherAggregationEntry::clear() {
     MoveCounts.clear();
     Count = 0;
     VSum = 0.0;
-    QSum = 0.0;
     BlackDrawValueSum = 0.0;
     WhiteDrawValueSum = 0.0;
     NumBlackWins = 0;
@@ -179,7 +176,15 @@ AZTeacher aggregateEntry(const core::HuffmanCode& HC,
     T.Declared = Entry.NumDeclared * 2 > Entry.Count;
 
     T.V = (float)(Entry.VSum / (double)Entry.Count);
-    T.Q = (float)(Entry.QSum / (double)Entry.Count);
+
+    // The win rate of the player to move computed from the winners of
+    // the aggregated records, counting a draw as a half win.
+    const uint64_t NumStmWins = (T.SideToMove == core::Black)
+                                    ? Entry.NumBlackWins
+                                    : Entry.NumWhiteWins;
+    T.Q = (float)(((double)NumStmWins + 0.5 * (double)NumDraws) /
+                  (double)Entry.Count);
+
     T.GamePly = Entry.GamePlyMax;
 
     return T;

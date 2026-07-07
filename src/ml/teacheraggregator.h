@@ -33,7 +33,9 @@ namespace ml {
 ///    (the most frequent `AZTeacher::NumSavedPlayouts` moves are kept).
 ///    When a count exceeds the 16-bit Visits, all the counts are
 ///    scaled down proportionally.
-///  - V and Q: the averages over the aggregated records.
+///  - V: the average over the aggregated records.
+///  - Q: the win rate of the player to move computed from the winners
+///    of the aggregated records (a draw counts as a half win).
 ///  - Winner: the color that won more games. NoColor when the draws
 ///    are the most frequent outcome or when the wins are tied.
 ///  - GamePly and MaxPly: the maxima over the aggregated records.
