@@ -11,5 +11,6 @@ var searchData=
   ['_7eposition_8',['~Position',['../structnshogi_1_1core_1_1Position.html#a982e7f50134ff2f7c1311dc131baaeb7',1,'nshogi::core::Position']]],
   ['_7esolver_9',['~Solver',['../classnshogi_1_1solver_1_1dfpn_1_1Solver.html#afb34b49293b59b420fea82cd83261009',1,'nshogi::solver::dfpn::Solver']]],
   ['_7estate_10',['~State',['../classnshogi_1_1core_1_1State.html#a68f199ead5787f52f3e898e4027736e1',1,'nshogi::core::State']]],
-  ['_7eteacherloaderforfixedsizeteacher_11',['~TeacherLoaderForFixedSizeTeacher',['../classnshogi_1_1ml_1_1TeacherLoaderForFixedSizeTeacher.html#a96bb4111c39b01e60f0dd42b95361bf5',1,'nshogi::ml::TeacherLoaderForFixedSizeTeacher']]]
+  ['_7eteacheraggregator_11',['~TeacherAggregator',['../classnshogi_1_1ml_1_1TeacherAggregator.html#a2610d3fd8cfabb4dcb12fdcbad4d0c9d',1,'nshogi::ml::TeacherAggregator']]],
+  ['_7eteacherloaderforfixedsizeteacher_12',['~TeacherLoaderForFixedSizeTeacher',['../classnshogi_1_1ml_1_1TeacherLoaderForFixedSizeTeacher.html#a96bb4111c39b01e60f0dd42b95361bf5',1,'nshogi::ml::TeacherLoaderForFixedSizeTeacher']]]
 ];

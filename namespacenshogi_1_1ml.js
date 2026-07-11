@@ -1,6 +1,6 @@
 var namespacenshogi_1_1ml =
 [
-    [ "internal", "namespacenshogi_1_1ml_1_1internal.html", null ],
+    [ "internal", "namespacenshogi_1_1ml_1_1internal.html", "namespacenshogi_1_1ml_1_1internal" ],
     [ "math", "namespacenshogi_1_1ml_1_1math.html", [
       [ "sigmoid", "namespacenshogi_1_1ml_1_1math.html#a4818c72d852a9fe2bf79c591f87e2a9f", null ],
       [ "softmax_", "namespacenshogi_1_1ml_1_1math.html#a231349c41f17eda4ba84d62cacb0c03f", null ]
@@ -9,6 +9,7 @@ var namespacenshogi_1_1ml =
     [ "AZTeacher", "structnshogi_1_1ml_1_1AZTeacher.html", "structnshogi_1_1ml_1_1AZTeacher" ],
     [ "BatchedTeacher", "structnshogi_1_1ml_1_1BatchedTeacher.html", "structnshogi_1_1ml_1_1BatchedTeacher" ],
     [ "BatchedTeacherLoader", "classnshogi_1_1ml_1_1BatchedTeacherLoader.html", "classnshogi_1_1ml_1_1BatchedTeacherLoader" ],
+    [ "ExternalTeacherAggregator", "classnshogi_1_1ml_1_1ExternalTeacherAggregator.html", "classnshogi_1_1ml_1_1ExternalTeacherAggregator" ],
     [ "FeatureBitboard", "structnshogi_1_1ml_1_1FeatureBitboard.html", "structnshogi_1_1ml_1_1FeatureBitboard" ],
     [ "FeatureStack", "structnshogi_1_1ml_1_1FeatureStack.html", "structnshogi_1_1ml_1_1FeatureStack" ],
     [ "FeatureStackComptime", "structnshogi_1_1ml_1_1FeatureStackComptime.html", "structnshogi_1_1ml_1_1FeatureStackComptime" ],
@@ -17,6 +18,7 @@ var namespacenshogi_1_1ml =
     [ "KAFeatureExtractor", "classnshogi_1_1ml_1_1KAFeatureExtractor.html", "classnshogi_1_1ml_1_1KAFeatureExtractor" ],
     [ "PFeatureExtractor", "classnshogi_1_1ml_1_1PFeatureExtractor.html", "classnshogi_1_1ml_1_1PFeatureExtractor" ],
     [ "SimpleTeacher", "structnshogi_1_1ml_1_1SimpleTeacher.html", "structnshogi_1_1ml_1_1SimpleTeacher" ],
+    [ "TeacherAggregator", "classnshogi_1_1ml_1_1TeacherAggregator.html", "classnshogi_1_1ml_1_1TeacherAggregator" ],
     [ "TeacherLoaderForFixedSizeTeacher", "classnshogi_1_1ml_1_1TeacherLoaderForFixedSizeTeacher.html", "classnshogi_1_1ml_1_1TeacherLoaderForFixedSizeTeacher" ],
     [ "ThreadsafeTeacherWriter", "classnshogi_1_1ml_1_1ThreadsafeTeacherWriter.html", "classnshogi_1_1ml_1_1ThreadsafeTeacherWriter" ],
     [ "FeatureType", "namespacenshogi_1_1ml.html#abce888ea1742cbf42378e26c43e4a125", [
