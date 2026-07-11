@@ -15,6 +15,7 @@
 
 #include <cassert>
 #include <cstring>
+#include <utility>
 
 namespace nshogi {
 namespace core {
@@ -642,10 +643,43 @@ constexpr int32_t SEEAttackerOrder[NumPieceType] = {
 };
 // clang-format on
 
+// The largest promotion bonus a single capture in the exchange can gain.
+// Never negative: the promoted piece types must not be valued less than
+// their corresponding raw piece types (see computeSEE()).
+int32_t maxPromotionGain(const int32_t* const PieceValues) noexcept {
+    int32_t Gain = 0;
+
+    Gain = std::max(Gain, PieceValues[PTK_ProPawn] - PieceValues[PTK_Pawn]);
+    Gain = std::max(Gain, PieceValues[PTK_ProLance] - PieceValues[PTK_Lance]);
+    Gain =
+        std::max(Gain, PieceValues[PTK_ProKnight] - PieceValues[PTK_Knight]);
+    Gain =
+        std::max(Gain, PieceValues[PTK_ProSilver] - PieceValues[PTK_Silver]);
+    Gain =
+        std::max(Gain, PieceValues[PTK_ProBishop] - PieceValues[PTK_Bishop]);
+    Gain = std::max(Gain, PieceValues[PTK_ProRook] - PieceValues[PTK_Rook]);
+
+    return Gain;
+}
+
 } // namespace
 
-int32_t StateImpl::computeSEE(const Move32 Move,
-                              const int32_t* const PieceValues) const noexcept {
+// When `GEMode` is false, returns the SEE value of the move.
+// When `GEMode` is true, returns 1 if the SEE value is greater than or
+// equal to `Threshold` and 0 otherwise. Instead of folding the whole
+// `Gains` array back at the end, `Bound` carries the threshold through
+// the exchange so that the loop can stop as soon as the comparison
+// outcome is decided:
+//  - after an even-depth capture (by the moving side), `Bound` is the
+//    largest value the next opponent capture may gain while keeping
+//    the SEE value at least `Threshold`, and
+//  - after an odd-depth capture (by the opponent), `Bound` is the
+//    smallest value the next own capture must gain to keep the SEE
+//    value at least `Threshold`.
+template <bool GEMode>
+int32_t StateImpl::computeSEEImpl(const Move32 Move,
+                                  const int32_t* const PieceValues,
+                                  const int32_t Threshold) const noexcept {
     assert(!Move.isNone() && !Move.isNull());
     assert(!Move.drop());
     assert(Move.capturePieceType() != PTK_Empty);
@@ -657,7 +691,6 @@ int32_t StateImpl::computeSEE(const Move32 Move,
     const Square To = Move.to();
     Color C = getSideToMove();
 
-    bitboard::Bitboard BBs[2] = {getBitboard(Black), getBitboard(White)};
     int32_t Gains[64];
 
     // The exchange starts with the given move, which is assumed to be legal.
@@ -670,6 +703,29 @@ int32_t StateImpl::computeSEE(const Move32 Move,
         TargetType = promotePieceType(Move.pieceType());
         Gains[0] += PieceValues[TargetType] - PieceValues[Move.pieceType()];
     }
+
+    [[maybe_unused]] int32_t Bound = 0;
+    [[maybe_unused]] int32_t MaxPromotionGain = 0;
+    if constexpr (GEMode) {
+        // The SEE value never exceeds Gains[0] because the opponent may
+        // simply stop capturing.
+        Bound = Gains[0] - Threshold;
+        if (Bound < 0) {
+            return 0;
+        }
+
+        // Conversely, a capture at depth D wins at most the piece sitting
+        // on To plus the promotion bonus, and the deeper captures cannot
+        // make it more profitable (each side may stop capturing instead),
+        // so the SEE value is at least Gains[0] minus that maximum. Both
+        // exits skip building the attacker set below.
+        MaxPromotionGain = maxPromotionGain(PieceValues);
+        if (Bound >= PieceValues[TargetType] + MaxPromotionGain) {
+            return 1;
+        }
+    }
+
+    bitboard::Bitboard BBs[2] = {getBitboard(Black), getBitboard(White)};
 
     // My piece must exist.
     assert(BBs[C].isSet(Move.from()));
@@ -701,12 +757,18 @@ int32_t StateImpl::computeSEE(const Move32 Move,
 
     C = ~C;
 
+    // Keep the two color bitboards in locals so that they stay in
+    // registers across the exchange loop: BBs[] with a runtime color
+    // index would be spilled to the stack on every update.
+    bitboard::Bitboard MyBB = BBs[C];
+    bitboard::Bitboard OppBB = BBs[~C];
+
     int32_t Depth;
 
-    for (Depth = 1;; ++Depth, C = ~C) {
+    for (Depth = 1;; ++Depth, C = ~C, std::swap(MyBB, OppBB)) {
         assert(Depth < 64);
 
-        const bitboard::Bitboard CandidatesBB = AttackersBB & BBs[C];
+        const bitboard::Bitboard CandidatesBB = AttackersBB & MyBB;
 
         if (CandidatesBB.isZero()) {
             // No capture is possible.
@@ -715,7 +777,7 @@ int32_t StateImpl::computeSEE(const Move32 Move,
 
         // The pinners that still remain on their original squares.
         const bitboard::Bitboard AlivePinnersBB =
-            BBs[~C] & CurrentStepHelper->Pinners[~C];
+            OppBB & CurrentStepHelper->Pinners[~C];
 
         Square FromSq = SqInvalid;
         PieceTypeKind AttackerType = PTK_Empty;
@@ -783,14 +845,32 @@ int32_t StateImpl::computeSEE(const Move32 Move,
             AttackersBB.toggleBit(KingSq);
             updateSEEAttackersBB(&AttackersBB, To, KingSq, OccupiedBB);
 
-            if (!(AttackersBB & BBs[~C]).isZero()) {
+            if (!(AttackersBB & OppBB).isZero()) {
                 // To is defended: the king cannot capture.
                 break;
             }
 
             assert(TargetType != PTK_King);
             Gains[Depth] = PieceValues[TargetType];
-            BBs[C].toggleBit(KingSq);
+
+            if constexpr (GEMode) {
+                Bound = Gains[Depth] - Bound;
+                if ((Depth & 1) != 0) {
+                    // The opponent's capture is not profitable enough:
+                    // the SEE value stays at least Threshold.
+                    if (Bound <= 0) {
+                        return 1;
+                    }
+                } else {
+                    // Even this capture cannot bring the SEE value back
+                    // to Threshold.
+                    if (Bound < 0) {
+                        return 0;
+                    }
+                }
+            }
+
+            MyBB.toggleBit(KingSq);
             TargetType = PTK_King;
 
             // No opponent attacker remains (verified right above), so the
@@ -816,22 +896,71 @@ int32_t StateImpl::computeSEE(const Move32 Move,
             TargetType = AttackerType;
         }
 
-        BBs[C].toggleBit(FromSq);
+        if constexpr (GEMode) {
+            Bound = Gains[Depth] - Bound;
+            if ((Depth & 1) != 0) {
+                // The opponent's capture is not profitable enough: the
+                // SEE value stays at least Threshold.
+                if (Bound <= 0) {
+                    return 1;
+                }
+                // The recapture at the next depth cannot gain enough even
+                // with the largest possible victim: the SEE value stays
+                // below Threshold whether it is played or not.
+                if (PieceValues[TargetType] + MaxPromotionGain < Bound) {
+                    return 0;
+                }
+            } else {
+                // Even this capture cannot bring the SEE value back to
+                // Threshold.
+                if (Bound < 0) {
+                    return 0;
+                }
+                // The recapture at the next depth cannot win enough even
+                // with the largest possible victim: the SEE value stays
+                // at least Threshold whether it is played or not.
+                if (PieceValues[TargetType] + MaxPromotionGain <= Bound) {
+                    return 1;
+                }
+            }
+        }
+
+        MyBB.toggleBit(FromSq);
         OccupiedBB.toggleBit(FromSq);
         AttackersBB.toggleBit(FromSq);
         updateSEEAttackersBB(&AttackersBB, To, FromSq, OccupiedBB);
 
         OnlyKingCanCapture =
-            seeGivesDiscoveredCheck(C, FromSq, BBs[C], CurrentStepHelper);
+            seeGivesDiscoveredCheck(C, FromSq, MyBB, CurrentStepHelper);
     }
 
-    int32_t Gain = 0;
+    if constexpr (GEMode) {
+        // The side to move at Depth cannot capture anymore. If it is the
+        // opponent (odd depth), no capture was profitable enough to drop
+        // the SEE value below Threshold; if it is the moving side (even
+        // depth), the last opponent capture dropped the SEE value below
+        // Threshold and there is no way to recover.
+        return Depth & 1;
+    } else {
+        int32_t Gain = 0;
 
-    for (int32_t I = Depth - 1; I >= 0; --I) {
-        Gain = Gains[I] - std::max(Gain, 0);
+        for (int32_t I = Depth - 1; I >= 0; --I) {
+            Gain = Gains[I] - std::max(Gain, 0);
+        }
+
+        return Gain;
     }
+}
 
-    return Gain;
+int32_t StateImpl::computeSEE(const Move32 Move,
+                              const int32_t* const PieceValues) const noexcept {
+    return computeSEEImpl<false>(Move, PieceValues, 0);
+}
+
+bool StateImpl::computeSEEGE(const Move32 Move,
+                             const int32_t* const PieceValues,
+                             const int32_t Threshold) const noexcept {
+    return computeSEEImpl<true>(Move, PieceValues, Threshold) != 0;
 }
 
 bitboard::Bitboard StateImpl::computeSEEAttackersBB(
@@ -841,6 +970,14 @@ bitboard::Bitboard StateImpl::computeSEEAttackersBB(
         getBitboard<PTK_Gold>() | getBitboard<PTK_ProPawn>() |
         getBitboard<PTK_ProLance>() | getBitboard<PTK_ProKnight>() |
         getBitboard<PTK_ProSilver>();
+
+    // The rook attacks are reused for the lances: the file component of
+    // the rook attacks from To is exactly the union of the two lance rays
+    // (both go up to and including the first occupied square), so masking
+    // it with the forward squares of To from the lance's point of view
+    // gives the same bitboard as getLanceAttackBB() computes.
+    const bitboard::Bitboard RookAttackBB =
+        bitboard::getRookAttackBB<PTK_Rook>(To, OccupiedBB);
 
     // A piece of color C on Sq attacks To if and only if Sq is attacked
     // by the same piece type of color ~C placed on To.
@@ -852,7 +989,7 @@ bitboard::Bitboard StateImpl::computeSEEAttackersBB(
          (bitboard::getAttackBB<White, PTK_Silver>(To) &
           getBitboard<PTK_Silver>()) |
          (bitboard::getAttackBB<White, PTK_Gold>(To) & GoldsBB) |
-         (bitboard::getLanceAttackBB<White>(To, OccupiedBB) &
+         (RookAttackBB & bitboard::getForwardBB<White>(To) &
           getBitboard<PTK_Lance>())) &
         BBs[Black];
 
@@ -864,7 +1001,7 @@ bitboard::Bitboard StateImpl::computeSEEAttackersBB(
          (bitboard::getAttackBB<Black, PTK_Silver>(To) &
           getBitboard<PTK_Silver>()) |
          (bitboard::getAttackBB<Black, PTK_Gold>(To) & GoldsBB) |
-         (bitboard::getLanceAttackBB<Black>(To, OccupiedBB) &
+         (RookAttackBB & bitboard::getForwardBB<Black>(To) &
           getBitboard<PTK_Lance>())) &
         BBs[White];
 
@@ -878,7 +1015,7 @@ bitboard::Bitboard StateImpl::computeSEEAttackersBB(
            getBitboard<PTK_ProRook>())) |
          (bitboard::getBishopAttackBB<PTK_Bishop>(To, OccupiedBB) &
           (getBitboard<PTK_Bishop>() | getBitboard<PTK_ProBishop>())) |
-         (bitboard::getRookAttackBB<PTK_Rook>(To, OccupiedBB) &
+         (RookAttackBB &
           (getBitboard<PTK_Rook>() | getBitboard<PTK_ProRook>()))) &
         OccupiedBB;
 

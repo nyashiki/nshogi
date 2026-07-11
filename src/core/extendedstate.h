@@ -78,6 +78,31 @@ class ExtendedState : public State {
     ///
     int32_t computeSEE(Move32 Move,
                        const int32_t* const PieceValues) const noexcept;
+
+    ///
+    /// @brief Test whether the Static Exchange Evaluation (SEE) of a given
+    /// move is greater than or equal to a threshold.
+    ///
+    /// This function is equivalent to
+    /// `computeSEE(Move, PieceValues) >= Threshold`, but it stops
+    /// simulating the exchange as soon as the outcome of the comparison
+    /// is decided, so it can be faster than computing the exact SEE value
+    /// when only the comparison result is needed (e.g. for pruning
+    /// decisions in a search). All the notes on `computeSEE()` apply to
+    /// this function as well.
+    ///
+    /// @param Move The move to evaluate. It must be a legal capture move
+    /// (a board move that captures an opponent's piece) in the current
+    /// position.
+    /// @param PieceValues An array of piece values used for the SEE
+    /// calculation. See `computeSEE()` for the requirements.
+    /// @param Threshold The threshold to compare the SEE value against.
+    ///
+    /// @return True if the SEE value of the move is greater than or equal
+    /// to `Threshold`, and false otherwise.
+    ///
+    bool computeSEEGE(Move32 Move, const int32_t* const PieceValues,
+                      int32_t Threshold) const noexcept;
 };
 
 } // namespace core
