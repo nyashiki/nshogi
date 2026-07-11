@@ -272,6 +272,24 @@ fn move_from_sfen() {
 }
 
 #[test]
+fn move_from_csa() {
+    use crate::types::{Piece, Square};
+
+    let mut state = State::from_sfen("startpos").unwrap();
+    let m = Move::from_csa(&state, "+2726FU").unwrap();
+
+    assert_eq!(Move::from_sfen(&state, "2g2f").unwrap(), m);
+
+    // Check do_move is completed successfully.
+    state.do_move(m);
+
+    assert_eq!(
+        Piece::BLACK_PAWN,
+        state.get_position().piece_on(Square::SQ_2F)
+    );
+}
+
+#[test]
 fn initial_state_sfen_moves() {
     let state = State::from_sfen("startpos").unwrap();
 

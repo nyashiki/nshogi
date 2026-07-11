@@ -483,7 +483,7 @@ impl NShogiIOCApi {
     pub fn create_move_from_csa(&self, state: *const c_void, csa: &str) -> Result<Move, CSAParseError> {
         unsafe {
             let c_csa = CString::new(csa).expect("csa string contains null byte");
-            if (self.can_create_move_from_sfen)(state, c_csa.as_ptr()) == 0 {
+            if (self.can_create_move_from_csa)(state, c_csa.as_ptr()) == 0 {
                 Err(CSAParseError::RuntimeError("Invalid csa string."))
             } else {
                 Ok(Move::new((self.create_move_from_csa)(
