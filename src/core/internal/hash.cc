@@ -17,7 +17,7 @@ namespace internal {
 
 template <>
 Hash<uint64_t>::Hash() {
-    static std::ranlux48 Rng(20230622);
+    static std::mt19937_64 Rng(20260711);
 
     if (!IsTableGenerated) {
         IsTableGenerated = true;
@@ -25,6 +25,8 @@ Hash<uint64_t>::Hash() {
         for (Color C : Colors) {
             for (PieceTypeKind Type : PieceTypes) {
                 for (Square Sq : Squares) {
+                    // Shift by one so that bit 0 stays reserved for
+                    // ColorHash (the side to move).
                     OnBoardHash[C][Type][Sq] = Rng() << 1;
                 }
             }
