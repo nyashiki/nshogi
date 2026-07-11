@@ -808,8 +808,7 @@ class StateImpl {
     void setStepCheckerBB(StepHelper* SHelper) noexcept;
 
     template <bool GEMode>
-    int32_t computeSEEImpl(const Move32 Move,
-                           const int32_t* const PieceValues,
+    int32_t computeSEEImpl(const Move32 Move, const int32_t* const PieceValues,
                            int32_t Threshold) const noexcept;
 
     bitboard::Bitboard

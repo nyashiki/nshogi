@@ -25,8 +25,7 @@ ExtendedState::computeSEE(Move32 Move,
     return Impl->computeSEE(Move, PieceValues);
 }
 
-bool ExtendedState::computeSEEGE(Move32 Move,
-                                 const int32_t* const PieceValues,
+bool ExtendedState::computeSEEGE(Move32 Move, const int32_t* const PieceValues,
                                  int32_t Threshold) const noexcept {
     return Impl->computeSEEGE(Move, PieceValues, Threshold);
 }

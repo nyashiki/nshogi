@@ -651,12 +651,9 @@ int32_t maxPromotionGain(const int32_t* const PieceValues) noexcept {
 
     Gain = std::max(Gain, PieceValues[PTK_ProPawn] - PieceValues[PTK_Pawn]);
     Gain = std::max(Gain, PieceValues[PTK_ProLance] - PieceValues[PTK_Lance]);
-    Gain =
-        std::max(Gain, PieceValues[PTK_ProKnight] - PieceValues[PTK_Knight]);
-    Gain =
-        std::max(Gain, PieceValues[PTK_ProSilver] - PieceValues[PTK_Silver]);
-    Gain =
-        std::max(Gain, PieceValues[PTK_ProBishop] - PieceValues[PTK_Bishop]);
+    Gain = std::max(Gain, PieceValues[PTK_ProKnight] - PieceValues[PTK_Knight]);
+    Gain = std::max(Gain, PieceValues[PTK_ProSilver] - PieceValues[PTK_Silver]);
+    Gain = std::max(Gain, PieceValues[PTK_ProBishop] - PieceValues[PTK_Bishop]);
     Gain = std::max(Gain, PieceValues[PTK_ProRook] - PieceValues[PTK_Rook]);
 
     return Gain;
