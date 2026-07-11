@@ -56,13 +56,13 @@ var NAVTREE =
 var NAVTREEINDEX =
 [
 "annotated.html",
-"classnshogi_1_1ml_1_1utils_1_1PermutationGenerator.html#a3542e6edc94e057efccd5f89d4c6581d",
-"featuretype_8h.html#abce888ea1742cbf42378e26c43e4a125af405471049df0fed4d5ffbf3e55119fa",
-"namespacenshogi_1_1core.html#a4fc4e1258dfdd1f019167d58c1d7a6c1a8ce010141813ad4b05093e16204c4e84",
-"namespacenshogi_1_1ml.html#abce888ea1742cbf42378e26c43e4a125a45667dda4bc7ec29ade0403e5ac65b41",
-"structnshogi_1_1core_1_1Move32.html#a6da94a8fa54d9cdf3551ee2a4e82bbd0",
-"structnshogi_1_1ml_1_1SimpleTeacher.html#a406ac54dde3490c259a7a7279d1ad81a",
-"types_8h.html#ac668019f9aaa4577775e074adf277765"
+"classnshogi_1_1ml_1_1utils_1_1PermutationGenerator.html",
+"featuretype_8h.html#abce888ea1742cbf42378e26c43e4a125af0c4d4ab163ae5ca4f54909e6e09e05e",
+"namespacenshogi_1_1core.html#a4fc4e1258dfdd1f019167d58c1d7a6c1a87754ce9cc6ac5770907270b82b20320",
+"namespacenshogi_1_1ml.html#abce888ea1742cbf42378e26c43e4a125a3b5c82b520cd14f9f8e42909cc96ce55",
+"structnshogi_1_1core_1_1Move32.html#a3032912089141c2678a9d8599f8651d7",
+"structnshogi_1_1ml_1_1SimpleTeacher.html#a3f82730887ab6285996d0911a1d8d8cd",
+"types_8h.html#ab77af5da8f4d8145e4925bd412b1b205af399afc91faee04303ebac34e38dda16"
 ];
 
 var SYNCONMSG = 'click to disable panel synchronisation';

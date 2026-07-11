@@ -1,14 +1,16 @@
 var NAVTREEINDEX1 =
 {
+"classnshogi_1_1ml_1_1utils_1_1PermutationGenerator.html":[0,0,0,3,2,0],
 "classnshogi_1_1ml_1_1utils_1_1PermutationGenerator.html#a3542e6edc94e057efccd5f89d4c6581d":[1,0,0,2,1,0,0],
-"classnshogi_1_1ml_1_1utils_1_1PermutationGenerator.html#a41ff946a4e0b17fdd48406f688497201":[0,0,0,3,2,0,1],
+"classnshogi_1_1ml_1_1utils_1_1PermutationGenerator.html#a3542e6edc94e057efccd5f89d4c6581d":[0,0,0,3,2,0,0],
 "classnshogi_1_1ml_1_1utils_1_1PermutationGenerator.html#a41ff946a4e0b17fdd48406f688497201":[1,0,0,2,1,0,1],
+"classnshogi_1_1ml_1_1utils_1_1PermutationGenerator.html#a41ff946a4e0b17fdd48406f688497201":[0,0,0,3,2,0,1],
 "classnshogi_1_1solver_1_1dfpn_1_1Solver.html":[1,0,0,3,0,0],
 "classnshogi_1_1solver_1_1dfpn_1_1Solver.html":[0,0,0,4,0,0],
 "classnshogi_1_1solver_1_1dfpn_1_1Solver.html#a3473347771d3c521e49ebe3cacd1d63e":[0,0,0,4,0,0,3],
 "classnshogi_1_1solver_1_1dfpn_1_1Solver.html#a3473347771d3c521e49ebe3cacd1d63e":[1,0,0,3,0,0,3],
-"classnshogi_1_1solver_1_1dfpn_1_1Solver.html#a916fb10f6f3a9ab395c94fc02dbbfe2e":[0,0,0,4,0,0,0],
 "classnshogi_1_1solver_1_1dfpn_1_1Solver.html#a916fb10f6f3a9ab395c94fc02dbbfe2e":[1,0,0,3,0,0,0],
+"classnshogi_1_1solver_1_1dfpn_1_1Solver.html#a916fb10f6f3a9ab395c94fc02dbbfe2e":[0,0,0,4,0,0,0],
 "classnshogi_1_1solver_1_1dfpn_1_1Solver.html#a9fbe162b5e47e08d6214b194533184bd":[1,0,0,3,0,0,2],
 "classnshogi_1_1solver_1_1dfpn_1_1Solver.html#a9fbe162b5e47e08d6214b194533184bd":[0,0,0,4,0,0,2],
 "classnshogi_1_1solver_1_1dfpn_1_1Solver.html#ae00798c6ccfcd3111c68ea38f1c6d0b5":[1,0,0,3,0,0,4],
@@ -247,7 +249,5 @@ var NAVTREEINDEX1 =
 "featuretype_8h.html#abce888ea1742cbf42378e26c43e4a125ae7b0e5158f728a5f56f3e9abb82e61b7":[2,0,0,3,10,0,101],
 "featuretype_8h.html#abce888ea1742cbf42378e26c43e4a125ae92f08c9f08e02b8461d3da2b31c9a8a":[2,0,0,3,10,0,57],
 "featuretype_8h.html#abce888ea1742cbf42378e26c43e4a125aed63e7dad48dfd06bf631beb71ef5631":[2,0,0,3,10,0,22],
-"featuretype_8h.html#abce888ea1742cbf42378e26c43e4a125aefda1ea48406b811cc6c5d3c28dd3390":[2,0,0,3,10,0,16],
-"featuretype_8h.html#abce888ea1742cbf42378e26c43e4a125af0c4d4ab163ae5ca4f54909e6e09e05e":[2,0,0,3,10,0,84],
-"featuretype_8h.html#abce888ea1742cbf42378e26c43e4a125af17830a10a7b58f628efaa331302bda6":[2,0,0,3,10,0,29]
+"featuretype_8h.html#abce888ea1742cbf42378e26c43e4a125aefda1ea48406b811cc6c5d3c28dd3390":[2,0,0,3,10,0,16]
 };

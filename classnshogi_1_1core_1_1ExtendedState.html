@@ -131,6 +131,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:ad912a65743982fcd2bc14ff56a3574ef"><td class="memItemLeft" align="right" valign="top">int32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classnshogi_1_1core_1_1ExtendedState.html#ad912a65743982fcd2bc14ff56a3574ef">computeSEE</a> (<a class="el" href="structnshogi_1_1core_1_1Move32.html">Move32</a> Move, const int32_t *const PieceValues) const noexcept</td></tr>
 <tr class="memdesc:ad912a65743982fcd2bc14ff56a3574ef"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute the Static Exchange Evaluation (SEE) for a given move.  <a href="classnshogi_1_1core_1_1ExtendedState.html#ad912a65743982fcd2bc14ff56a3574ef">More...</a><br /></td></tr>
 <tr class="separator:ad912a65743982fcd2bc14ff56a3574ef"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab7d497c53c7472020919d6d522b7dd2c"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classnshogi_1_1core_1_1ExtendedState.html#ab7d497c53c7472020919d6d522b7dd2c">computeSEEGE</a> (<a class="el" href="structnshogi_1_1core_1_1Move32.html">Move32</a> Move, const int32_t *const PieceValues, int32_t Threshold) const noexcept</td></tr>
+<tr class="memdesc:ab7d497c53c7472020919d6d522b7dd2c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Test whether the Static Exchange Evaluation (SEE) of a given move is greater than or equal to a threshold.  <a href="classnshogi_1_1core_1_1ExtendedState.html#ab7d497c53c7472020919d6d522b7dd2c">More...</a><br /></td></tr>
+<tr class="separator:ab7d497c53c7472020919d6d522b7dd2c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_methods_classnshogi_1_1core_1_1State"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_classnshogi_1_1core_1_1State')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="classnshogi_1_1core_1_1State.html">nshogi::core::State</a></td></tr>
 <tr class="memitem:afc80a641d6987eaa898190a29d9b5f50 inherit pub_methods_classnshogi_1_1core_1_1State"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classnshogi_1_1core_1_1State.html#afc80a641d6987eaa898190a29d9b5f50">State</a> (const <a class="el" href="classnshogi_1_1core_1_1State.html">State</a> &amp;)=delete</td></tr>
 <tr class="separator:afc80a641d6987eaa898190a29d9b5f50 inherit pub_methods_classnshogi_1_1core_1_1State"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -299,6 +302,60 @@ Additional Inherited Members</h2></td></tr>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>The computed SEE value for the move. </dd></dl>
+
+</div>
+</div>
+<a id="ab7d497c53c7472020919d6d522b7dd2c" name="ab7d497c53c7472020919d6d522b7dd2c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab7d497c53c7472020919d6d522b7dd2c">&#9670;&#160;</a></span>computeSEEGE()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool nshogi::core::ExtendedState::computeSEEGE </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structnshogi_1_1core_1_1Move32.html">Move32</a>&#160;</td>
+          <td class="paramname"><em>Move</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int32_t *const&#160;</td>
+          <td class="paramname"><em>PieceValues</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int32_t&#160;</td>
+          <td class="paramname"><em>Threshold</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Test whether the Static Exchange Evaluation (SEE) of a given move is greater than or equal to a threshold. </p>
+<p >This function is equivalent to <code>computeSEE(Move, PieceValues) &gt;= Threshold</code>, but it stops simulating the exchange as soon as the outcome of the comparison is decided, so it can be faster than computing the exact SEE value when only the comparison result is needed (e.g. for pruning decisions in a search). All the notes on <code><a class="el" href="classnshogi_1_1core_1_1ExtendedState.html#ad912a65743982fcd2bc14ff56a3574ef" title="Compute the Static Exchange Evaluation (SEE) for a given move.">computeSEE()</a></code> apply to this function as well.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">Move</td><td>The move to evaluate. It must be a legal capture move (a board move that captures an opponent's piece) in the current position. </td></tr>
+    <tr><td class="paramname">PieceValues</td><td>An array of piece values used for the SEE calculation. See <code><a class="el" href="classnshogi_1_1core_1_1ExtendedState.html#ad912a65743982fcd2bc14ff56a3574ef" title="Compute the Static Exchange Evaluation (SEE) for a given move.">computeSEE()</a></code> for the requirements. </td></tr>
+    <tr><td class="paramname">Threshold</td><td>The threshold to compare the SEE value against.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>True if the SEE value of the move is greater than or equal to <code>Threshold</code>, and false otherwise. </dd></dl>
 
 </div>
 </div>

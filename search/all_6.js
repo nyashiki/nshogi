@@ -1,7 +1,7 @@
 var searchData=
 [
-  ['gameply_0',['gamePly',['../structnshogi_1_1ml_1_1SimpleTeacher.html#afc7c66e4368ade23b5850a03734d61e6',1,'nshogi::ml::SimpleTeacher']]],
-  ['gameply_1',['GamePly',['../structnshogi_1_1ml_1_1AZTeacher.html#a1a56eb3cb196a165e2e49afa4b5a9010',1,'nshogi::ml::AZTeacher']]],
+  ['gameply_0',['GamePly',['../structnshogi_1_1ml_1_1AZTeacher.html#a1a56eb3cb196a165e2e49afa4b5a9010',1,'nshogi::ml::AZTeacher']]],
+  ['gameply_1',['gamePly',['../structnshogi_1_1ml_1_1SimpleTeacher.html#afc7c66e4368ade23b5850a03734d61e6',1,'nshogi::ml::SimpleTeacher']]],
   ['gameplymax_2',['GamePlyMax',['../structnshogi_1_1ml_1_1internal_1_1TeacherAggregationEntry.html#adf1b5b6ac8fb96889555824e9e1dedd4',1,'nshogi::ml::internal::TeacherAggregationEntry']]],
   ['generatelegalcapturemoves_3',['generateLegalCaptureMoves',['../classnshogi_1_1core_1_1MoveGenerator.html#a9ab1c0fe426153dd7a40d77284091de1',1,'nshogi::core::MoveGenerator::generateLegalCaptureMoves(const State &amp;S) noexcept'],['../classnshogi_1_1core_1_1MoveGenerator.html#a1ac70dd1a9faccef165fc59963c47da7',1,'nshogi::core::MoveGenerator::generateLegalCaptureMoves(const State &amp;S) noexcept']]],
   ['generatelegalcheckmoves_4',['generateLegalCheckMoves',['../classnshogi_1_1core_1_1MoveGenerator.html#ae2de90f6db07a6669e7620258023c187',1,'nshogi::core::MoveGenerator::generateLegalCheckMoves(const State &amp;S) noexcept'],['../classnshogi_1_1core_1_1MoveGenerator.html#abf91a70ed10e945311217f81e5b243cd',1,'nshogi::core::MoveGenerator::generateLegalCheckMoves(const State &amp;S) noexcept']]],
