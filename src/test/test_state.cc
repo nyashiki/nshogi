@@ -1152,6 +1152,87 @@ TEST(ExtendedState, ComputeSEEHandmade2) {
     TEST_ASSERT_EQ(400, State.computeSEE(Move, SEEValue));
 }
 
+TEST(ExtendedState, ComputeSEEGEHandmade1) {
+    const std::string Sfen = "startpos";
+    nshogi::core::ExtendedState State =
+        nshogi::io::sfen::StateBuilder::newState(Sfen);
+
+    const auto Move =
+        nshogi::io::sfen::sfenToMove32(State.getPosition(), "7g7f");
+
+    const int32_t SEE = State.computeSEE(Move, SEEValue);
+    TEST_ASSERT_EQ(0, SEE);
+
+    TEST_ASSERT_TRUE(State.computeSEEGE(Move, SEEValue, -100));
+    TEST_ASSERT_TRUE(State.computeSEEGE(Move, SEEValue, SEE));
+    TEST_ASSERT_FALSE(State.computeSEEGE(Move, SEEValue, SEE + 1));
+    TEST_ASSERT_FALSE(State.computeSEEGE(Move, SEEValue, 100));
+}
+
+TEST(ExtendedState, ComputeSEEGEHandmade2) {
+    const std::string Sfen = "1ks1lgs2/4r2b1/pppnln1pp/3ppgp2/4Sp3/2PSPG3/"
+                             "PP1NRNPPP/1B2L4/2K1LG3 w Pp 1";
+    nshogi::core::ExtendedState State =
+        nshogi::io::sfen::StateBuilder::newState(Sfen);
+
+    const auto Move =
+        nshogi::io::sfen::sfenToMove32(State.getPosition(), "5d5e");
+
+    const int32_t SEE = State.computeSEE(Move, SEEValue);
+    TEST_ASSERT_EQ(400, SEE);
+
+    TEST_ASSERT_TRUE(State.computeSEEGE(Move, SEEValue, 0));
+    TEST_ASSERT_TRUE(State.computeSEEGE(Move, SEEValue, SEE - 1));
+    TEST_ASSERT_TRUE(State.computeSEEGE(Move, SEEValue, SEE));
+    TEST_ASSERT_FALSE(State.computeSEEGE(Move, SEEValue, SEE + 1));
+    TEST_ASSERT_FALSE(State.computeSEEGE(Move, SEEValue, 10000));
+}
+
+TEST(ExtendedState, ComputeSEEGEMatchesComputeSEE) {
+    const int N = 200;
+    std::mt19937_64 mt(20260710);
+
+    for (int I = 0; I < N; ++I) {
+        nshogi::core::ExtendedState State =
+            nshogi::core::StateBuilder::getInitialState();
+
+        for (uint16_t Ply = 0; Ply < 512; ++Ply) {
+            const auto Moves =
+                nshogi::core::MoveGenerator::generateLegalMoves(State);
+
+            if (Moves.size() == 0) {
+                break;
+            }
+
+            for (const auto& Move : Moves) {
+                if (Move.capturePieceType() == nshogi::core::PTK_Empty) {
+                    continue;
+                }
+
+                const int32_t SEE = State.computeSEE(Move, SEEValue);
+
+                // Check the boundary around the exact SEE value, some
+                // fixed thresholds and a random one: computeSEEGE() must
+                // answer whether the SEE value is at least the threshold.
+                const int32_t RandomThreshold =
+                    static_cast<int32_t>(mt() % 4001) - 2000;
+                const int32_t Thresholds[] = {
+                    SEE - 1, SEE, SEE + 1, -1000, 0, 1000, RandomThreshold,
+                };
+
+                for (const int32_t Threshold : Thresholds) {
+                    TEST_ASSERT_EQ(
+                        State.computeSEEGE(Move, SEEValue, Threshold),
+                        SEE >= Threshold);
+                }
+            }
+
+            const auto RandomMove = Moves[mt() % Moves.size()];
+            State.doMove(RandomMove);
+        }
+    }
+}
+
 TEST(ExtendedState, ComputeSEEMatchesSmallestMoveIteration) {
     const int N = 1000;
     std::mt19937_64 mt(20260610);

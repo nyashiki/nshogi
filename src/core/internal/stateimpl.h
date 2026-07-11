@@ -791,6 +791,9 @@ class StateImpl {
     int32_t computeSEE(const Move32 Move,
                        const int32_t* const PieceValues) const noexcept;
 
+    bool computeSEEGE(const Move32 Move, const int32_t* const PieceValues,
+                      int32_t Threshold) const noexcept;
+
  protected:
     Position Pos;
     StateHelper Helper;
@@ -803,6 +806,10 @@ class StateImpl {
 
     template <Color C>
     void setStepCheckerBB(StepHelper* SHelper) noexcept;
+
+    template <bool GEMode>
+    int32_t computeSEEImpl(const Move32 Move, const int32_t* const PieceValues,
+                           int32_t Threshold) const noexcept;
 
     bitboard::Bitboard
     computeSEEAttackersBB(Square To, const bitboard::Bitboard* BBs,
