@@ -762,7 +762,7 @@ int32_t StateImpl::computeSEEImpl(const Move32 Move,
 
     int32_t Depth;
 
-    for (Depth = 1;; ++Depth, C = ~C, std::swap(MyBB, OppBB)) {
+    for (Depth = 1;; ++Depth) {
         assert(Depth < 64);
 
         const bitboard::Bitboard CandidatesBB = AttackersBB & MyBB;
@@ -873,62 +873,65 @@ int32_t StateImpl::computeSEEImpl(const Move32 Move,
             // No opponent attacker remains (verified right above), so the
             // exchange ends at the next iteration.
             OnlyKingCanCapture = false;
-            continue;
-        }
-
-        assert(checkRange(FromSq));
-        assert(TargetType != PTK_King);
-
-        const bool Promotes =
-            !isPromoted(AttackerType) && AttackerType != PTK_Gold &&
-            !(bitboard::PromotableBB[C] &
-              (bitboard::SquareBB[FromSq] | bitboard::SquareBB[To]))
-                 .isZero();
-
-        Gains[Depth] = PieceValues[TargetType];
-        if (Promotes) {
-            TargetType = promotePieceType(AttackerType);
-            Gains[Depth] += PieceValues[TargetType] - PieceValues[AttackerType];
         } else {
-            TargetType = AttackerType;
-        }
+            assert(checkRange(FromSq));
+            assert(TargetType != PTK_King);
 
-        if constexpr (GEMode) {
-            Bound = Gains[Depth] - Bound;
-            if ((Depth & 1) != 0) {
-                // The opponent's capture is not profitable enough: the
-                // SEE value stays at least Threshold.
-                if (Bound <= 0) {
-                    return 1;
-                }
-                // The recapture at the next depth cannot gain enough even
-                // with the largest possible victim: the SEE value stays
-                // below Threshold whether it is played or not.
-                if (PieceValues[TargetType] + MaxPromotionGain < Bound) {
-                    return 0;
-                }
+            const bool Promotes =
+                !isPromoted(AttackerType) && AttackerType != PTK_Gold &&
+                !(bitboard::PromotableBB[C] &
+                  (bitboard::SquareBB[FromSq] | bitboard::SquareBB[To]))
+                     .isZero();
+
+            Gains[Depth] = PieceValues[TargetType];
+            if (Promotes) {
+                TargetType = promotePieceType(AttackerType);
+                Gains[Depth] +=
+                    PieceValues[TargetType] - PieceValues[AttackerType];
             } else {
-                // Even this capture cannot bring the SEE value back to
-                // Threshold.
-                if (Bound < 0) {
-                    return 0;
-                }
-                // The recapture at the next depth cannot win enough even
-                // with the largest possible victim: the SEE value stays
-                // at least Threshold whether it is played or not.
-                if (PieceValues[TargetType] + MaxPromotionGain <= Bound) {
-                    return 1;
+                TargetType = AttackerType;
+            }
+
+            if constexpr (GEMode) {
+                Bound = Gains[Depth] - Bound;
+                if ((Depth & 1) != 0) {
+                    // The opponent's capture is not profitable enough: the
+                    // SEE value stays at least Threshold.
+                    if (Bound <= 0) {
+                        return 1;
+                    }
+                    // The recapture at the next depth cannot gain enough
+                    // even with the largest possible victim: the SEE value
+                    // stays below Threshold whether it is played or not.
+                    if (PieceValues[TargetType] + MaxPromotionGain < Bound) {
+                        return 0;
+                    }
+                } else {
+                    // Even this capture cannot bring the SEE value back to
+                    // Threshold.
+                    if (Bound < 0) {
+                        return 0;
+                    }
+                    // The recapture at the next depth cannot win enough
+                    // even with the largest possible victim: the SEE value
+                    // stays at least Threshold whether it is played or not.
+                    if (PieceValues[TargetType] + MaxPromotionGain <= Bound) {
+                        return 1;
+                    }
                 }
             }
+
+            MyBB.toggleBit(FromSq);
+            OccupiedBB.toggleBit(FromSq);
+            AttackersBB.toggleBit(FromSq);
+            updateSEEAttackersBB(&AttackersBB, To, FromSq, OccupiedBB);
+
+            OnlyKingCanCapture =
+                seeGivesDiscoveredCheck(C, FromSq, MyBB, CurrentStepHelper);
         }
 
-        MyBB.toggleBit(FromSq);
-        OccupiedBB.toggleBit(FromSq);
-        AttackersBB.toggleBit(FromSq);
-        updateSEEAttackersBB(&AttackersBB, To, FromSq, OccupiedBB);
-
-        OnlyKingCanCapture =
-            seeGivesDiscoveredCheck(C, FromSq, MyBB, CurrentStepHelper);
+        C = ~C;
+        std::swap(MyBB, OppBB);
     }
 
     if constexpr (GEMode) {
