@@ -76,6 +76,7 @@ SOURCES :=                             \
     src/ml/ka.cc                       \
     src/ml/p.cc                        \
 	src/ml/simpleteacher.cc            \
+	src/ml/teacheraggregator.cc        \
 	src/ml/teacherloader.cc            \
 	src/ml/teacherwriter.cc            \
     src/ml/batchedteacherloader.cc     \
