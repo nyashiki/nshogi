@@ -21,9 +21,9 @@
 #include <fstream>
 #include <limits>
 #include <queue>
+#include <stdexcept>
 #include <unordered_map>
 #include <utility>
-#include <stdexcept>
 
 namespace nshogi {
 namespace ml {
@@ -142,10 +142,10 @@ AZTeacher aggregateEntry(const core::HuffmanCode& HC,
     // Visits is 16 bits wide: when a count exceeds its maximum,
     // scale all the counts down proportionally.
     const uint64_t MaxCount = MoveCounts.empty() ? 0 : MoveCounts[0].second;
-    const double Scale = (MaxCount > std::numeric_limits<uint16_t>::max())
-                             ? (double)std::numeric_limits<uint16_t>::max() /
-                                   (double)MaxCount
-                             : 1.0;
+    const double Scale =
+        (MaxCount > std::numeric_limits<uint16_t>::max())
+            ? (double)std::numeric_limits<uint16_t>::max() / (double)MaxCount
+            : 1.0;
 
     for (std::size_t I = 0; I < T.Moves.size(); ++I) {
         T.Moves[I].fill('\0');
@@ -179,9 +179,8 @@ AZTeacher aggregateEntry(const core::HuffmanCode& HC,
 
     // The win rate of the player to move computed from the winners of
     // the aggregated records, counting a draw as a half win.
-    const uint64_t NumStmWins = (T.SideToMove == core::Black)
-                                    ? Entry.NumBlackWins
-                                    : Entry.NumWhiteWins;
+    const uint64_t NumStmWins =
+        (T.SideToMove == core::Black) ? Entry.NumBlackWins : Entry.NumWhiteWins;
     T.Q = (float)(((double)NumStmWins + 0.5 * (double)NumDraws) /
                   (double)Entry.Count);
 
@@ -240,8 +239,8 @@ std::size_t TeacherAggregator::numUniquePositions() const {
     return PImpl->Entries.size();
 }
 
-std::vector<AZTeacher> TeacherAggregator::aggregate(
-    core::EndingRule Rule) const {
+std::vector<AZTeacher>
+TeacherAggregator::aggregate(core::EndingRule Rule) const {
     // Sort the keys so that the output does not depend on the
     // iteration order of the hash map.
     std::vector<const std::pair<const Impl::PositionKey,
@@ -337,8 +336,9 @@ class RunReader {
 
 } // namespace
 
-ExternalTeacherAggregator::ExternalTeacherAggregator(
-    const std::string& TempDir, std::size_t MemoryBytes, int32_t FileVersion)
+ExternalTeacherAggregator::ExternalTeacherAggregator(const std::string& TempDir,
+                                                     std::size_t MemoryBytes,
+                                                     int32_t FileVersion)
     : TempDirectory(TempDir)
     , MaxMemoryBytes(MemoryBytes)
     , Version(FileVersion) {
@@ -376,8 +376,8 @@ uint64_t ExternalTeacherAggregator::aggregate(const std::string& OutputPath,
         if (RecordSize == 0) {
             char Probe[1024] = {};
             Ifs.seekg(0);
-            Ifs.read(Probe, (std::streamsize)std::min<uint64_t>(
-                                FileSize, sizeof(Probe)));
+            Ifs.read(Probe, (std::streamsize)std::min<uint64_t>(FileSize,
+                                                                sizeof(Probe)));
             SimpleTeacher T;
             RecordSize = io::file::simple_teacher::loadAt(&T, Probe, Version);
         }
@@ -396,8 +396,7 @@ uint64_t ExternalTeacherAggregator::aggregate(const std::string& OutputPath,
     // ----- Phase 1: sorted run generation. -----
     const std::size_t ChunkRecords = std::min<std::size_t>(
         std::max<std::size_t>(1,
-                              MaxMemoryBytes /
-                                  (RecordSize + sizeof(uint32_t))),
+                              MaxMemoryBytes / (RecordSize + sizeof(uint32_t))),
         std::numeric_limits<uint32_t>::max());
 
     if ((TotalRecords + ChunkRecords - 1) / ChunkRecords > MaxNumRuns) {
@@ -434,9 +433,9 @@ uint64_t ExternalTeacherAggregator::aggregate(const std::string& OutputPath,
                       return Lhs < Rhs;
                   });
 
-        const std::string RunPath =
-            TempDirectory + "/nshogi_teacher_aggregator_run_" +
-            std::to_string(RunPaths.size()) + ".tmp";
+        const std::string RunPath = TempDirectory +
+                                    "/nshogi_teacher_aggregator_run_" +
+                                    std::to_string(RunPaths.size()) + ".tmp";
         std::ofstream RunOfs(RunPath, std::ios::binary);
         if (!RunOfs) {
             throw std::runtime_error("Failed to open a run file: " + RunPath);
@@ -454,8 +453,7 @@ uint64_t ExternalTeacherAggregator::aggregate(const std::string& OutputPath,
 
         while (true) {
             Ifs.read(Chunk.data() + Buffered * RecordSize,
-                     (std::streamsize)((ChunkRecords - Buffered) *
-                                       RecordSize));
+                     (std::streamsize)((ChunkRecords - Buffered) * RecordSize));
             Buffered += (std::size_t)Ifs.gcount() / RecordSize;
 
             if (Buffered == ChunkRecords) {
@@ -525,8 +523,7 @@ uint64_t ExternalTeacherAggregator::aggregate(const std::string& OutputPath,
 
         const char* Record = Readers[RunIndex].current();
 
-        if (!HasCurrent ||
-            compareHuffmanCodeBytes(Record, CurrentKey) != 0) {
+        if (!HasCurrent || compareHuffmanCodeBytes(Record, CurrentKey) != 0) {
             // A new position has arrived: the previous position (if
             // any) is complete, so save it and start a new entry.
             if (HasCurrent) {

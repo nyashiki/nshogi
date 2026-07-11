@@ -1400,8 +1400,7 @@ TEST(ML, ExternalTeacherAggregatorMatchesInMemory) {
     }
 
     // Save the records to two files.
-    const std::string TempDir =
-        std::filesystem::temp_directory_path().string();
+    const std::string TempDir = std::filesystem::temp_directory_path().string();
     const std::string Input1 = TempDir + "/external_aggregator_test_1.bin";
     const std::string Input2 = TempDir + "/external_aggregator_test_2.bin";
     {
