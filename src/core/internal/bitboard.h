@@ -463,6 +463,27 @@ struct alignas(16) Bitboard {
 #endif
     }
 
+    // Returns, in both lanes, all ones when the selected lane is zero and
+    // zero otherwise.
+    template <bool High>
+    [[nodiscard]] inline __attribute__((always_inline)) Bitboard
+    getLaneZeroMask() const noexcept {
+#if defined(USE_SSE41)
+        const __m128i IsZero = _mm_cmpeq_epi64(Bitboard_, _mm_setzero_si128());
+        return _mm_shuffle_epi32(IsZero, High ? 0xEE : 0x44);
+#elif defined(USE_NEON)
+        const uint64x2_t IsZero = vceqq_u64(Bitboard_, vdupq_n_u64(0));
+        if constexpr (High) {
+            return vdupq_laneq_u64(IsZero, 1);
+        } else {
+            return vdupq_laneq_u64(IsZero, 0);
+        }
+#else
+        const uint64_t Mask = (Primitive[High ? 1 : 0] == 0) ? ~0ULL : 0ULL;
+        return Bitboard(Mask, Mask);
+#endif
+    }
+
     template <bool High>
     [[nodiscard]] inline __attribute__((always_inline)) uint64_t
     getPrimitive() const noexcept {
@@ -642,31 +663,28 @@ struct alignas(16) Bitboard {
 #endif
 };
 
-// Magic bitboard.
-template <uint64_t NumBits>
-struct MagicBitboard {
-    MagicBitboard(){};
-
-#if defined(USE_BMI2) && defined(USE_PEXT)
-    uint64_t MagicNumber[2];
-    Bitboard Mask;
-#else
-    uint64_t MagicNumber;
-    Bitboard Masks[2];
-#endif
-
-    Bitboard* AttackBB[2][1 << NumBits];
+// Per-square ray masks for computing slider attacks with bit operations
+// only. Each of the two 64-bit lanes of a ray is resolved independently
+// and branchlessly (see getAscendingRayAttackBB() and
+// getDescendingRayAttackBB()); when a ray crosses the lane border, the
+// lane farther from the origin square is masked out unless the nearer
+// lane is free of blockers.
+struct alignas(64) BishopRay {
+    Bitboard NorthWest; // ascending
+    Bitboard SouthWest; // ascending
+    Bitboard NorthEast; // descending
+    Bitboard SouthEast; // descending
 };
 
-static constexpr uint16_t BishopMagicMasterCountMax = 880;
-extern Bitboard BishopMagicMaster[BishopMagicMasterCountMax];
-constexpr uint64_t DiagMagicBits = 7;
-extern MagicBitboard<DiagMagicBits> BishopMagicBB[NumSquares];
+struct alignas(64) RookRay {
+    Bitboard North; // ascending
+    Bitboard West;  // ascending
+    Bitboard South; // descending
+    Bitboard East;  // descending
+};
 
-static constexpr uint16_t RookMagicMasterCountMax = 1779;
-extern Bitboard RookMagicMaster[RookMagicMasterCountMax];
-constexpr uint64_t CrossMagicBits = 7;
-extern MagicBitboard<CrossMagicBits> RookMagicBB[NumSquares];
+extern BishopRay BishopRayBB[NumSquares];
+extern RookRay RookRayBB[NumSquares];
 
 template <Color C, PieceTypeKind Type>
 inline Bitboard getAttackBB(Square From) noexcept {
@@ -791,6 +809,61 @@ inline Bitboard getLanceAttackBB(Color C, Square Sq,
     }
 }
 
+// Computes the attacked squares along a ray whose squares ascend in bit
+// position as the ray leaves its origin square. Within each lane the same
+// sweep as the black lance is used: subtracting one flips exactly the bits
+// at or below the lowest set bit of (occupancy & ray), i.e. the blocker
+// nearest to the origin (all bits when the lane is empty), so the xor
+// spans the ray squares up to and including that blocker. The low lane
+// holds the part of the ray closer to the origin, so when the ray crosses
+// the lane border, the high lane contributes only when the low lane has
+// no blocker.
+template <bool CrossesLanes>
+inline __attribute__((always_inline)) Bitboard
+getAscendingRayAttackBB(const Bitboard& OccupiedBB,
+                        const Bitboard& RayBB) noexcept {
+    const Bitboard OccupiedOnRayBB = OccupiedBB & RayBB;
+    const Bitboard AttackBB =
+        (OccupiedOnRayBB ^ OccupiedOnRayBB.subtract(Bitboard(1, 1))) & RayBB;
+
+    if constexpr (CrossesLanes) {
+        return AttackBB & (OccupiedOnRayBB.getLaneZeroMask<false>() |
+                           Bitboard(0, ~0ULL));
+    }
+
+    return AttackBB;
+}
+
+// The descending-ray counterpart of getAscendingRayAttackBB(): the blocker
+// nearest to the origin square is now the highest set bit. Within one
+// lane, consecutive ray squares are exactly `StepBits` bit positions
+// apart, and one lane holds at most eight ray squares, so smearing the
+// blockers downward along that grid by 1 + 2 + 4 steps reaches every ray
+// square below the nearest blocker; shifting the smear one more step
+// excludes the blocker itself, and whatever it does not cover is the
+// attacked part of the ray. The high lane holds the part of the ray closer
+// to the origin here.
+template <int StepBits, bool CrossesLanes>
+inline __attribute__((always_inline)) Bitboard
+getDescendingRayAttackBB(const Bitboard& OccupiedBB,
+                         const Bitboard& RayBB) noexcept {
+    const Bitboard OccupiedOnRayBB = OccupiedBB & RayBB;
+
+    Bitboard SmearBB = OccupiedOnRayBB;
+    SmearBB |= SmearBB.getRightShiftEpi64<StepBits>();
+    SmearBB |= SmearBB.getRightShiftEpi64<2 * StepBits>();
+    SmearBB |= SmearBB.getRightShiftEpi64<4 * StepBits>();
+    const Bitboard AttackBB =
+        SmearBB.getRightShiftEpi64<StepBits>().andNot(RayBB);
+
+    if constexpr (CrossesLanes) {
+        return AttackBB & (OccupiedOnRayBB.getLaneZeroMask<true>() |
+                           Bitboard(~0ULL, 0));
+    }
+
+    return AttackBB;
+}
+
 template <PieceTypeKind Type>
 inline Bitboard getBishopAttackBB(Square Sq,
                                   const Bitboard& OccupiedBB) noexcept {
@@ -798,25 +871,17 @@ inline Bitboard getBishopAttackBB(Square Sq,
         Type == PTK_Bishop || Type == PTK_ProBishop,
         "the template parameter `Type` must be PTK_Bishop or PTK_ProBishop.");
 
-    const auto& Magic = BishopMagicBB[Sq];
+    const BishopRay& Rays = BishopRayBB[Sq];
 
-#if defined(USE_BMI2) && defined(USE_PEXT)
-    const uint64_t Base = (OccupiedBB & Magic.Mask).horizontalOr();
-    const uint64_t Pattern1 = _pext_u64(Base, Magic.MagicNumber[0]);
-    const uint64_t Pattern2 = _pext_u64(Base, Magic.MagicNumber[1]);
-#else
-    const uint16_t Pattern1 =
-        (uint16_t)(((OccupiedBB & Magic.Masks[0]).horizontalOr() *
-                    Magic.MagicNumber) >>
-                   (64 - DiagMagicBits));
-    const uint16_t Pattern2 =
-        (uint16_t)(((OccupiedBB & Magic.Masks[1]).horizontalOr() *
-                    Magic.MagicNumber) >>
-                   (64 - DiagMagicBits));
-#endif
-
-    const auto AttackBB =
-        *Magic.AttackBB[0][Pattern1] | *Magic.AttackBB[1][Pattern2];
+    // The step of each descending ray is the bit-position distance of its
+    // consecutive squares within one lane, i.e. the negated direction.
+    const Bitboard AttackBB =
+        (getAscendingRayAttackBB<true>(OccupiedBB, Rays.NorthWest) |
+         getAscendingRayAttackBB<true>(OccupiedBB, Rays.SouthWest)) |
+        (getDescendingRayAttackBB<-NorthEast, true>(OccupiedBB,
+                                                    Rays.NorthEast) |
+         getDescendingRayAttackBB<-SouthEast, true>(OccupiedBB,
+                                                    Rays.SouthEast));
 
     if constexpr (Type == PTK_ProBishop) {
         return AttackBB | KingAttackBB[Sq];
@@ -832,25 +897,15 @@ inline Bitboard getRookAttackBB(Square Sq,
         Type == PTK_Rook || Type == PTK_ProRook,
         "the template parameter `Type` must be PTK_Rook or PTK_ProRook.");
 
-    const auto& Magic = RookMagicBB[Sq];
+    const RookRay& Rays = RookRayBB[Sq];
 
-#if defined(USE_BMI2) && defined(USE_PEXT)
-    const uint64_t Base = (OccupiedBB & Magic.Mask).horizontalOr();
-    const uint64_t Pattern1 = _pext_u64(Base, Magic.MagicNumber[0]);
-    const uint64_t Pattern2 = _pext_u64(Base, Magic.MagicNumber[1]);
-#else
-    const uint16_t Pattern1 =
-        (uint16_t)(((OccupiedBB & Magic.Masks[0]).horizontalOr() *
-                    Magic.MagicNumber) >>
-                   (64 - CrossMagicBits));
-    const uint16_t Pattern2 =
-        (uint16_t)(((OccupiedBB & Magic.Masks[1]).horizontalOr() *
-                    Magic.MagicNumber) >>
-                   (64 - CrossMagicBits));
-#endif
-
-    const auto AttackBB =
-        *Magic.AttackBB[0][Pattern1] | *Magic.AttackBB[1][Pattern2];
+    // A file never crosses the lane border, so the north and south rays
+    // skip the lane gate.
+    const Bitboard AttackBB =
+        (getAscendingRayAttackBB<false>(OccupiedBB, Rays.North) |
+         getAscendingRayAttackBB<true>(OccupiedBB, Rays.West)) |
+        (getDescendingRayAttackBB<-South, false>(OccupiedBB, Rays.South) |
+         getDescendingRayAttackBB<-East, true>(OccupiedBB, Rays.East));
 
     if constexpr (Type == PTK_ProRook) {
         return AttackBB | KingAttackBB[Sq];
