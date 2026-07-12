@@ -123,7 +123,7 @@ TEST_OBJECTS = $(patsubst %.cc,$(OBJDIR)/%.o,$(TEST_SOURCES))
 BENCH_OBJECTS = $(patsubst %.cc,$(OBJDIR)/%.o,$(BENCH_SOURCES))
 PYTHON_OBJECTS = $(patsubst %.cc,$(OBJDIR)/%.o,$(PYTHON_SOURCES))
 
-DEPENDINGS = $(patsubst %.cc,$(OBJDIR)/%.d,$(SOURCES))
+DEPENDINGS = $(patsubst %.cc,$(OBJDIR)/%.d,$(SOURCES) $(TEST_SOURCES) $(BENCH_SOURCES))
 
 GENERIC ?= 0
 ARCH_FLAGS :=
