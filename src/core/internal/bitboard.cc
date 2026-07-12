@@ -8,6 +8,7 @@
 //
 
 #include "bitboard.h"
+#include <algorithm>
 #include <cstring>
 
 namespace nshogi {
