@@ -292,6 +292,7 @@ inline constexpr auto DirectionDataInternal =
         for (Square Sq2 : Squares) {
             if (Sq1 == Sq2) {
                 Directions[(std::size_t)Sq1][(std::size_t)Sq2] = (Direction)0;
+                continue;
             }
 
             const Rank R1 = squareToRank(Sq1);
