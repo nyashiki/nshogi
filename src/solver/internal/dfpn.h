@@ -23,29 +23,38 @@ struct DfPnValue {
  public:
     explicit DfPnValue()
         : ProofNumber(1)
-        , DisproofNumber(1) {
+        , DisproofNumber(1)
+        , NodeCacheable(true) {
     }
 
-    explicit DfPnValue(uint32_t P, uint32_t D)
+    explicit DfPnValue(uint32_t P, uint32_t D, bool CanCacheNode = true)
         : ProofNumber(P)
-        , DisproofNumber(D) {
+        , DisproofNumber(D)
+        , NodeCacheable(CanCacheNode) {
     }
 
     bool operator==(const DfPnValue& V) const {
         return ProofNumber == V.ProofNumber &&
-               DisproofNumber == V.DisproofNumber;
+               DisproofNumber == V.DisproofNumber &&
+               NodeCacheable == V.NodeCacheable;
     }
 
     uint32_t ProofNumber;
     uint32_t DisproofNumber;
+    // Path-dependent values remain valid for their edge but must not enter the
+    // shared node cache.
+    bool NodeCacheable;
 
     static constexpr uint32_t Infinity = 1 << 14;
 };
 
-// sizeof(DfPnTTEntry) == 16 byte.
-struct DfPnTTEntry {
+// A node entry is a derived cache of its outgoing edge statistics. Keeping
+// attacking stands separate from the position hash allows solved values to be
+// reused through stand superiority/inferiority.
+// sizeof(DfPnNodeTTEntry) == 16 byte.
+struct DfPnNodeTTEntry {
  public:
-    uint64_t hash() const {
+    uint64_t positionHash() const {
         return DataU64[1] & HASH_MASK;
     }
 
@@ -62,16 +71,16 @@ struct DfPnTTEntry {
     }
 
     uint16_t generation() const {
-        return (uint16_t)(DataU64[1] >> HASH_BITS);
+        return static_cast<uint16_t>(DataU64[1] >> HASH_BITS);
     }
 
-    bool isSameHash(uint64_t Hash) const {
-        return (Hash >> (64 - HASH_BITS)) == hash();
+    bool isSamePosition(uint64_t Hash) const {
+        return (Hash >> (64 - HASH_BITS)) == positionHash();
     }
 
-    void setHash(uint64_t Hash) {
-        const uint64_t Generation = DataU64[1] & GENERATION_MASK;
-        DataU64[1] = Generation | (Hash >> (64 - HASH_BITS));
+    void setPositionHash(uint64_t Hash) {
+        const uint64_t CurrentGeneration = DataU64[1] & GENERATION_MASK;
+        DataU64[1] = CurrentGeneration | (Hash >> (64 - HASH_BITS));
     }
 
     void setStandsAttacking(core::Stands Stands) {
@@ -86,9 +95,13 @@ struct DfPnTTEntry {
         DataU16[3] = Disproof;
     }
 
-    void setGeneration(uint16_t Generation) {
+    void setGeneration(uint16_t NewGeneration) {
         const uint64_t Hash = DataU64[1] & HASH_MASK;
-        DataU64[1] = ((uint64_t)Generation << HASH_BITS) | Hash;
+        DataU64[1] = (static_cast<uint64_t>(NewGeneration) << HASH_BITS) | Hash;
+    }
+
+    void reset() {
+        DataU64[1] = 0;
     }
 
  private:
@@ -97,35 +110,88 @@ struct DfPnTTEntry {
     static constexpr uint64_t GENERATION_MASK = ~HASH_MASK;
 
     union {
-        // DataU64[1]: hash.
         uint64_t DataU64[2];
-
-        // DataU32[0]: `Stands` for the side to move.
-        // DataU32[1-]: unused.
         uint32_t DataU32[4];
-
-        // DataU16[2]: proof number.
-        // DataU16[3]: disproof number.
-        // DataU16[4-6]: hash.
-        // DataU16[7]: generation.
         uint16_t DataU16[8];
     };
 };
 
-// sizeof(DfPnTTBundle) == 256 byte.
-struct alignas(256) DfPnTTBundle {
-    static constexpr std::size_t BundleSize = 15;
-    DfPnTTEntry Entries[BundleSize];
+// sizeof(DfPnNodeTTBundle) == 256 byte.
+struct alignas(256) DfPnNodeTTBundle {
+    static constexpr std::size_t BundleSize = 16;
+    DfPnNodeTTEntry Entries[BundleSize];
+};
 
-    core::RepetitionStatus repetitionStatus(std::size_t Index) const {
-        return static_cast<core::RepetitionStatus>(Reserved[Index]);
+// An entry stores the statistics for one outgoing edge. The source position
+// and Move16 uniquely identify the edge; proof/disproof numbers describe the
+// subtree reached by taking that edge.
+// sizeof(DfPnEdgeTTEntry) == 16 byte.
+struct DfPnEdgeTTEntry {
+ public:
+    uint64_t sourceHash() const {
+        return SourceHash;
     }
 
-    void setRepetitionStatus(std::size_t Index, core::RepetitionStatus RS) {
-        Reserved[Index] = static_cast<uint8_t>(RS);
+    core::Move16 move() const {
+        return core::Move16::fromValue(Move);
     }
 
-    uint8_t Reserved[16];
+    uint16_t proofNumber() const {
+        return ProofNumberAndFlags & PROOF_NUMBER_MASK;
+    }
+
+    bool isNodeCacheable() const {
+        return (ProofNumberAndFlags & NOT_NODE_CACHEABLE_BIT) == 0;
+    }
+
+    uint16_t disproofNumber() const {
+        return DisproofNumber;
+    }
+
+    uint16_t generation() const {
+        return Generation;
+    }
+
+    bool isSameEdge(uint64_t Hash, core::Move32 EdgeMove) const {
+        return Hash == sourceHash() && core::Move16(EdgeMove) == move();
+    }
+
+    void setSourceHash(uint64_t Hash) {
+        SourceHash = Hash;
+    }
+
+    void setMove(core::Move32 EdgeMove) {
+        Move = core::Move16(EdgeMove).value();
+    }
+
+    void setProofNumberAndNodeCacheable(uint16_t Proof, bool Cacheable) {
+        ProofNumberAndFlags =
+            Proof | (Cacheable ? 0 : NOT_NODE_CACHEABLE_BIT);
+    }
+
+    void setDisproofNumber(uint16_t Disproof) {
+        DisproofNumber = Disproof;
+    }
+
+    void setGeneration(uint16_t NewGeneration) {
+        Generation = NewGeneration;
+    }
+
+ private:
+    static constexpr uint16_t NOT_NODE_CACHEABLE_BIT = 1U << 15;
+    static constexpr uint16_t PROOF_NUMBER_MASK = 0x7fffU;
+
+    uint64_t SourceHash;
+    uint16_t Move;
+    uint16_t ProofNumberAndFlags;
+    uint16_t DisproofNumber;
+    uint16_t Generation;
+};
+
+// sizeof(DfPnEdgeTTBundle) == 256 byte.
+struct alignas(256) DfPnEdgeTTBundle {
+    static constexpr std::size_t BundleSize = 16;
+    DfPnEdgeTTEntry Entries[BundleSize];
 };
 
 class SolverImpl {
@@ -141,38 +207,23 @@ class SolverImpl {
     uint64_t searchedNodeCount() const;
 
  private:
-    template <core::Color C, bool Attacking>
-    class TTSaver {
-     public:
-        TTSaver(SolverImpl* SI, core::internal::StateImpl* S,
-                core::RepetitionStatus RS, uint64_t Depth, DfPnValue* Value)
-            : Impl(SI)
-            , State(S)
-            , RepetitionStatus(RS)
-            , ThisDepth(Depth)
-            , Target(Value) {
-        }
-
-        ~TTSaver() {
-            Impl->storeToTT<C, Attacking>(State, RepetitionStatus, ThisDepth,
-                                          *Target);
-        }
-
-     private:
-        SolverImpl* Impl;
-        core::internal::StateImpl* State;
-        core::RepetitionStatus RepetitionStatus;
-        uint64_t ThisDepth;
-        DfPnValue* Target;
-    };
+    void clearTT();
 
     template <core::Color C, bool Attacking>
-    void storeToTT(core::internal::StateImpl* S, core::RepetitionStatus RS,
-                   uint64_t Depth, const DfPnValue& Value);
+    void storeNodeToTT(core::internal::StateImpl* S, uint64_t Depth,
+                       const DfPnValue& Value);
 
     template <core::Color C, bool Attacking>
-    DfPnValue loadFromTT(core::internal::StateImpl* S, uint64_t Depth,
-                         bool* IsFound) const;
+    DfPnValue loadNodeFromTT(core::internal::StateImpl* S, uint64_t Depth,
+                             bool* IsFound) const;
+
+    template <bool Attacking>
+    void storeEdgeToTT(core::internal::StateImpl* S, core::Move32 Move,
+                       uint64_t Depth, const DfPnValue& Value);
+
+    template <bool Attacking>
+    DfPnValue loadEdgeFromTT(core::internal::StateImpl* S, core::Move32 Move,
+                             uint64_t Depth, bool* IsFound) const;
 
     template <core::Color C, bool WilyPromote>
     core::Move32 solve(core::internal::StateImpl* S, uint64_t MaxNodeCount,
@@ -180,7 +231,7 @@ class SolverImpl {
 
     template <core::Color C, bool Attacking, bool WilyPromote>
     core::Move32 search(core::internal::StateImpl* S, uint64_t Depth,
-                        DfPnValue* ThisValue, DfPnValue* Threshold,
+                        DfPnValue* IncomingEdgeValue, DfPnValue* Threshold,
                         uint64_t MaxNodeCount, uint64_t MaxDepth);
 
     template <core::Color C, bool Attacking, bool WilyPromote>
@@ -189,8 +240,11 @@ class SolverImpl {
     std::vector<core::Move32> findPV(core::internal::StateImpl* S,
                                      bool Strict) const;
 
-    std::size_t TTSize;
-    std::unique_ptr<DfPnTTBundle[]> TT;
+    std::size_t NodeTTSize;
+    std::unique_ptr<DfPnNodeTTBundle[]> NodeTT;
+
+    std::size_t EdgeTTSize;
+    std::unique_ptr<DfPnEdgeTTBundle[]> EdgeTT;
 
     uint16_t Generation;
     uint64_t SearchedNodeCount;
