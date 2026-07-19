@@ -70,6 +70,243 @@ FeatureBitboard processAttack(const core::State& State);
 template <core::Color MyColor>
 FeatureBitboard processDeclarationRemaining(const core::State& State);
 
+// Computes a single feature plane for a feature type known at compile
+// time. The side to move `C` must match `State`.
+template <core::Color C, FeatureType FT>
+FeatureBitboard processFeature(const core::State& State,
+                               const core::StateConfig& Config) {
+    if constexpr (FT == FeatureType::FT_Black) {
+        return processIsBlackTurn<C>();
+    } else if constexpr (FT == FeatureType::FT_White) {
+        return processIsWhiteTurn<C>();
+    } else if constexpr (FT == FeatureType::FT_Check) {
+        return processCheck(State);
+    } else if constexpr (FT == FeatureType::FT_NoMyPawnFile) {
+        return processNoPawnFile<C, C>(State);
+    } else if constexpr (FT == FeatureType::FT_NoOpPawnFile) {
+        return processNoPawnFile<C, ~C>(State);
+    } else if constexpr (FT == FeatureType::FT_Progress) {
+        return processProgress(State, Config);
+    } else if constexpr (FT == FeatureType::FT_ProgressUnit) {
+        return processProgressUnit(Config);
+    } else if constexpr (FT == FeatureType::FT_MyPawn) {
+        return processPiece<C, C>(State, core::PTK_Pawn);
+    } else if constexpr (FT == FeatureType::FT_MyLance) {
+        return processPiece<C, C>(State, core::PTK_Lance);
+    } else if constexpr (FT == FeatureType::FT_MyKnight) {
+        return processPiece<C, C>(State, core::PTK_Knight);
+    } else if constexpr (FT == FeatureType::FT_MySilver) {
+        return processPiece<C, C>(State, core::PTK_Silver);
+    } else if constexpr (FT == FeatureType::FT_MyGold) {
+        return processPiece<C, C>(State, core::PTK_Gold);
+    } else if constexpr (FT == FeatureType::FT_MyKing) {
+        return processPiece<C, C>(State, core::PTK_King);
+    } else if constexpr (FT == FeatureType::FT_MyBishop) {
+        return processPiece<C, C>(State, core::PTK_Bishop);
+    } else if constexpr (FT == FeatureType::FT_MyRook) {
+        return processPiece<C, C>(State, core::PTK_Rook);
+    } else if constexpr (FT == FeatureType::FT_MyProPawn) {
+        return processPiece<C, C>(State, core::PTK_ProPawn);
+    } else if constexpr (FT == FeatureType::FT_MyProLance) {
+        return processPiece<C, C>(State, core::PTK_ProLance);
+    } else if constexpr (FT == FeatureType::FT_MyProKnight) {
+        return processPiece<C, C>(State, core::PTK_ProKnight);
+    } else if constexpr (FT == FeatureType::FT_MyProSilver) {
+        return processPiece<C, C>(State, core::PTK_ProSilver);
+    } else if constexpr (FT == FeatureType::FT_MyProBishop) {
+        return processPiece<C, C>(State, core::PTK_ProBishop);
+    } else if constexpr (FT == FeatureType::FT_MyProRook) {
+        return processPiece<C, C>(State, core::PTK_ProRook);
+    } else if constexpr (FT == FeatureType::FT_MyBishopAndProBishop) {
+        return processPiece<C, C>(State, core::PTK_Bishop,
+                                  core::PTK_ProBishop);
+    } else if constexpr (FT == FeatureType::FT_MyRookAndProRook) {
+        return processPiece<C, C>(State, core::PTK_Rook, core::PTK_ProRook);
+    } else if constexpr (FT == FeatureType::FT_OpPawn) {
+        return processPiece<C, ~C>(State, core::PTK_Pawn);
+    } else if constexpr (FT == FeatureType::FT_OpLance) {
+        return processPiece<C, ~C>(State, core::PTK_Lance);
+    } else if constexpr (FT == FeatureType::FT_OpKnight) {
+        return processPiece<C, ~C>(State, core::PTK_Knight);
+    } else if constexpr (FT == FeatureType::FT_OpSilver) {
+        return processPiece<C, ~C>(State, core::PTK_Silver);
+    } else if constexpr (FT == FeatureType::FT_OpGold) {
+        return processPiece<C, ~C>(State, core::PTK_Gold);
+    } else if constexpr (FT == FeatureType::FT_OpKing) {
+        return processPiece<C, ~C>(State, core::PTK_King);
+    } else if constexpr (FT == FeatureType::FT_OpBishop) {
+        return processPiece<C, ~C>(State, core::PTK_Bishop);
+    } else if constexpr (FT == FeatureType::FT_OpRook) {
+        return processPiece<C, ~C>(State, core::PTK_Rook);
+    } else if constexpr (FT == FeatureType::FT_OpProPawn) {
+        return processPiece<C, ~C>(State, core::PTK_ProPawn);
+    } else if constexpr (FT == FeatureType::FT_OpProLance) {
+        return processPiece<C, ~C>(State, core::PTK_ProLance);
+    } else if constexpr (FT == FeatureType::FT_OpProKnight) {
+        return processPiece<C, ~C>(State, core::PTK_ProKnight);
+    } else if constexpr (FT == FeatureType::FT_OpProSilver) {
+        return processPiece<C, ~C>(State, core::PTK_ProSilver);
+    } else if constexpr (FT == FeatureType::FT_OpProBishop) {
+        return processPiece<C, ~C>(State, core::PTK_ProBishop);
+    } else if constexpr (FT == FeatureType::FT_OpProRook) {
+        return processPiece<C, ~C>(State, core::PTK_ProRook);
+    } else if constexpr (FT == FeatureType::FT_OpBishopAndProBishop) {
+        return processPiece<C, ~C>(State, core::PTK_Bishop,
+                                   core::PTK_ProBishop);
+    } else if constexpr (FT == FeatureType::FT_OpRookAndProRook) {
+        return processPiece<C, ~C>(State, core::PTK_Rook, core::PTK_ProRook);
+    } else if constexpr (FT == FeatureType::FT_MyStandPawn1) {
+        return processStand<C>(State, core::PTK_Pawn, 1);
+    } else if constexpr (FT == FeatureType::FT_MyStandPawn2) {
+        return processStand<C>(State, core::PTK_Pawn, 2);
+    } else if constexpr (FT == FeatureType::FT_MyStandPawn3) {
+        return processStand<C>(State, core::PTK_Pawn, 3);
+    } else if constexpr (FT == FeatureType::FT_MyStandPawn4) {
+        return processStand<C>(State, core::PTK_Pawn, 4);
+    } else if constexpr (FT == FeatureType::FT_MyStandPawn5) {
+        return processStand<C>(State, core::PTK_Pawn, 5);
+    } else if constexpr (FT == FeatureType::FT_MyStandPawn6) {
+        return processStand<C>(State, core::PTK_Pawn, 6);
+    } else if constexpr (FT == FeatureType::FT_MyStandPawn7) {
+        return processStand<C>(State, core::PTK_Pawn, 7);
+    } else if constexpr (FT == FeatureType::FT_MyStandPawn8) {
+        return processStand<C>(State, core::PTK_Pawn, 8);
+    } else if constexpr (FT == FeatureType::FT_MyStandPawn9) {
+        return processStand<C>(State, core::PTK_Pawn, 9);
+    } else if constexpr (FT == FeatureType::FT_MyStandLance1) {
+        return processStand<C>(State, core::PTK_Lance, 1);
+    } else if constexpr (FT == FeatureType::FT_MyStandLance2) {
+        return processStand<C>(State, core::PTK_Lance, 2);
+    } else if constexpr (FT == FeatureType::FT_MyStandLance3) {
+        return processStand<C>(State, core::PTK_Lance, 3);
+    } else if constexpr (FT == FeatureType::FT_MyStandLance4) {
+        return processStand<C>(State, core::PTK_Lance, 4);
+    } else if constexpr (FT == FeatureType::FT_MyStandKnight1) {
+        return processStand<C>(State, core::PTK_Knight, 1);
+    } else if constexpr (FT == FeatureType::FT_MyStandKnight2) {
+        return processStand<C>(State, core::PTK_Knight, 2);
+    } else if constexpr (FT == FeatureType::FT_MyStandKnight3) {
+        return processStand<C>(State, core::PTK_Knight, 3);
+    } else if constexpr (FT == FeatureType::FT_MyStandKnight4) {
+        return processStand<C>(State, core::PTK_Knight, 4);
+    } else if constexpr (FT == FeatureType::FT_MyStandSilver1) {
+        return processStand<C>(State, core::PTK_Silver, 1);
+    } else if constexpr (FT == FeatureType::FT_MyStandSilver2) {
+        return processStand<C>(State, core::PTK_Silver, 2);
+    } else if constexpr (FT == FeatureType::FT_MyStandSilver3) {
+        return processStand<C>(State, core::PTK_Silver, 3);
+    } else if constexpr (FT == FeatureType::FT_MyStandSilver4) {
+        return processStand<C>(State, core::PTK_Silver, 4);
+    } else if constexpr (FT == FeatureType::FT_MyStandGold1) {
+        return processStand<C>(State, core::PTK_Gold, 1);
+    } else if constexpr (FT == FeatureType::FT_MyStandGold2) {
+        return processStand<C>(State, core::PTK_Gold, 2);
+    } else if constexpr (FT == FeatureType::FT_MyStandGold3) {
+        return processStand<C>(State, core::PTK_Gold, 3);
+    } else if constexpr (FT == FeatureType::FT_MyStandGold4) {
+        return processStand<C>(State, core::PTK_Gold, 4);
+    } else if constexpr (FT == FeatureType::FT_MyStandBishop1) {
+        return processStand<C>(State, core::PTK_Bishop, 1);
+    } else if constexpr (FT == FeatureType::FT_MyStandBishop2) {
+        return processStand<C>(State, core::PTK_Bishop, 2);
+    } else if constexpr (FT == FeatureType::FT_MyStandRook1) {
+        return processStand<C>(State, core::PTK_Rook, 1);
+    } else if constexpr (FT == FeatureType::FT_MyStandRook2) {
+        return processStand<C>(State, core::PTK_Rook, 2);
+    } else if constexpr (FT == FeatureType::FT_OpStandPawn1) {
+        return processStand<~C>(State, core::PTK_Pawn, 1);
+    } else if constexpr (FT == FeatureType::FT_OpStandPawn2) {
+        return processStand<~C>(State, core::PTK_Pawn, 2);
+    } else if constexpr (FT == FeatureType::FT_OpStandPawn3) {
+        return processStand<~C>(State, core::PTK_Pawn, 3);
+    } else if constexpr (FT == FeatureType::FT_OpStandPawn4) {
+        return processStand<~C>(State, core::PTK_Pawn, 4);
+    } else if constexpr (FT == FeatureType::FT_OpStandPawn5) {
+        return processStand<~C>(State, core::PTK_Pawn, 5);
+    } else if constexpr (FT == FeatureType::FT_OpStandPawn6) {
+        return processStand<~C>(State, core::PTK_Pawn, 6);
+    } else if constexpr (FT == FeatureType::FT_OpStandPawn7) {
+        return processStand<~C>(State, core::PTK_Pawn, 7);
+    } else if constexpr (FT == FeatureType::FT_OpStandPawn8) {
+        return processStand<~C>(State, core::PTK_Pawn, 8);
+    } else if constexpr (FT == FeatureType::FT_OpStandPawn9) {
+        return processStand<~C>(State, core::PTK_Pawn, 9);
+    } else if constexpr (FT == FeatureType::FT_OpStandLance1) {
+        return processStand<~C>(State, core::PTK_Lance, 1);
+    } else if constexpr (FT == FeatureType::FT_OpStandLance2) {
+        return processStand<~C>(State, core::PTK_Lance, 2);
+    } else if constexpr (FT == FeatureType::FT_OpStandLance3) {
+        return processStand<~C>(State, core::PTK_Lance, 3);
+    } else if constexpr (FT == FeatureType::FT_OpStandLance4) {
+        return processStand<~C>(State, core::PTK_Lance, 4);
+    } else if constexpr (FT == FeatureType::FT_OpStandKnight1) {
+        return processStand<~C>(State, core::PTK_Knight, 1);
+    } else if constexpr (FT == FeatureType::FT_OpStandKnight2) {
+        return processStand<~C>(State, core::PTK_Knight, 2);
+    } else if constexpr (FT == FeatureType::FT_OpStandKnight3) {
+        return processStand<~C>(State, core::PTK_Knight, 3);
+    } else if constexpr (FT == FeatureType::FT_OpStandKnight4) {
+        return processStand<~C>(State, core::PTK_Knight, 4);
+    } else if constexpr (FT == FeatureType::FT_OpStandSilver1) {
+        return processStand<~C>(State, core::PTK_Silver, 1);
+    } else if constexpr (FT == FeatureType::FT_OpStandSilver2) {
+        return processStand<~C>(State, core::PTK_Silver, 2);
+    } else if constexpr (FT == FeatureType::FT_OpStandSilver3) {
+        return processStand<~C>(State, core::PTK_Silver, 3);
+    } else if constexpr (FT == FeatureType::FT_OpStandSilver4) {
+        return processStand<~C>(State, core::PTK_Silver, 4);
+    } else if constexpr (FT == FeatureType::FT_OpStandGold1) {
+        return processStand<~C>(State, core::PTK_Gold, 1);
+    } else if constexpr (FT == FeatureType::FT_OpStandGold2) {
+        return processStand<~C>(State, core::PTK_Gold, 2);
+    } else if constexpr (FT == FeatureType::FT_OpStandGold3) {
+        return processStand<~C>(State, core::PTK_Gold, 3);
+    } else if constexpr (FT == FeatureType::FT_OpStandGold4) {
+        return processStand<~C>(State, core::PTK_Gold, 4);
+    } else if constexpr (FT == FeatureType::FT_OpStandBishop1) {
+        return processStand<~C>(State, core::PTK_Bishop, 1);
+    } else if constexpr (FT == FeatureType::FT_OpStandBishop2) {
+        return processStand<~C>(State, core::PTK_Bishop, 2);
+    } else if constexpr (FT == FeatureType::FT_OpStandRook1) {
+        return processStand<~C>(State, core::PTK_Rook, 1);
+    } else if constexpr (FT == FeatureType::FT_OpStandRook2) {
+        return processStand<~C>(State, core::PTK_Rook, 2);
+    } else if constexpr (FT == FeatureType::FT_RuleDeclare27) {
+        return processRule<core::EndingRule::ER_Declare27>(Config);
+    } else if constexpr (FT == FeatureType::FT_RuleDraw24) {
+        return processRule<core::EndingRule::ER_Draw24>(Config);
+    } else if constexpr (FT == FeatureType::FT_RuleTrying) {
+        return processRule<core::EndingRule::ER_Trying>(Config);
+    } else if constexpr (FT == FeatureType::FT_MyDrawValue) {
+        return processDrawValue<C>(Config);
+    } else if constexpr (FT == FeatureType::FT_OpDrawValue) {
+        return processDrawValue<~C>(Config);
+    } else if constexpr (FT == FeatureType::FT_MyDeclarationScore) {
+        return processDeclarationScore<C>(State);
+    } else if constexpr (FT == FeatureType::FT_OpDeclarationScore) {
+        return processDeclarationScore<~C>(State);
+    } else if constexpr (FT == FeatureType::FT_MyPieceScore) {
+        return processPieceScore<C>(State);
+    } else if constexpr (FT == FeatureType::FT_OpPieceScore) {
+        return processPieceScore<~C>(State);
+    } else if constexpr (FT == FeatureType::FT_MyAttack) {
+        return processAttack<C, C>(State);
+    } else if constexpr (FT == FeatureType::FT_OpAttack) {
+        return processAttack<C, ~C>(State);
+    } else if constexpr (FT == FeatureType::FT_MyDeclarationRemaining) {
+        return processDeclarationRemaining<C>(State);
+    } else if constexpr (FT == FeatureType::FT_OpDeclarationRemaining) {
+        return processDeclarationRemaining<~C>(State);
+    } else {
+        // A trick for check if `FeatureType` is handled in
+        // constexpr-if blocks above.
+        // https://stackoverflow.com/a/64354296
+        []<bool Flag = false>() {
+            static_assert(Flag, "Unhandled FeatureType");
+        }();
+    }
+}
+
 struct FeatureStack {
     virtual ~FeatureStack() {
     }
@@ -196,239 +433,7 @@ struct FeatureStackComptime : FeatureStack {
     template <core::Color C, FeatureType HeadType, FeatureType... TailType>
     static void process(const core::State& State,
                         const core::StateConfig& Config, FeatureBitboard* FB) {
-        if constexpr (HeadType == FeatureType::FT_Black) {
-            *FB = processIsBlackTurn<C>();
-        } else if constexpr (HeadType == FeatureType::FT_White) {
-            *FB = processIsWhiteTurn<C>();
-        } else if constexpr (HeadType == FeatureType::FT_Check) {
-            *FB = processCheck(State);
-        } else if constexpr (HeadType == FeatureType::FT_NoMyPawnFile) {
-            *FB = processNoPawnFile<C, C>(State);
-        } else if constexpr (HeadType == FeatureType::FT_NoOpPawnFile) {
-            *FB = processNoPawnFile<C, ~C>(State);
-        } else if constexpr (HeadType == FeatureType::FT_Progress) {
-            *FB = processProgress(State, Config);
-        } else if constexpr (HeadType == FeatureType::FT_ProgressUnit) {
-            *FB = processProgressUnit(Config);
-        } else if constexpr (HeadType == FeatureType::FT_MyPawn) {
-            *FB = processPiece<C, C>(State, core::PTK_Pawn);
-        } else if constexpr (HeadType == FeatureType::FT_MyLance) {
-            *FB = processPiece<C, C>(State, core::PTK_Lance);
-        } else if constexpr (HeadType == FeatureType::FT_MyKnight) {
-            *FB = processPiece<C, C>(State, core::PTK_Knight);
-        } else if constexpr (HeadType == FeatureType::FT_MySilver) {
-            *FB = processPiece<C, C>(State, core::PTK_Silver);
-        } else if constexpr (HeadType == FeatureType::FT_MyGold) {
-            *FB = processPiece<C, C>(State, core::PTK_Gold);
-        } else if constexpr (HeadType == FeatureType::FT_MyKing) {
-            *FB = processPiece<C, C>(State, core::PTK_King);
-        } else if constexpr (HeadType == FeatureType::FT_MyBishop) {
-            *FB = processPiece<C, C>(State, core::PTK_Bishop);
-        } else if constexpr (HeadType == FeatureType::FT_MyRook) {
-            *FB = processPiece<C, C>(State, core::PTK_Rook);
-        } else if constexpr (HeadType == FeatureType::FT_MyProPawn) {
-            *FB = processPiece<C, C>(State, core::PTK_ProPawn);
-        } else if constexpr (HeadType == FeatureType::FT_MyProLance) {
-            *FB = processPiece<C, C>(State, core::PTK_ProLance);
-        } else if constexpr (HeadType == FeatureType::FT_MyProKnight) {
-            *FB = processPiece<C, C>(State, core::PTK_ProKnight);
-        } else if constexpr (HeadType == FeatureType::FT_MyProSilver) {
-            *FB = processPiece<C, C>(State, core::PTK_ProSilver);
-        } else if constexpr (HeadType == FeatureType::FT_MyProBishop) {
-            *FB = processPiece<C, C>(State, core::PTK_ProBishop);
-        } else if constexpr (HeadType == FeatureType::FT_MyProRook) {
-            *FB = processPiece<C, C>(State, core::PTK_ProRook);
-        } else if constexpr (HeadType == FeatureType::FT_MyBishopAndProBishop) {
-            *FB = processPiece<C, C>(State, core::PTK_Bishop,
-                                     core::PTK_ProBishop);
-        } else if constexpr (HeadType == FeatureType::FT_MyRookAndProRook) {
-            *FB = processPiece<C, C>(State, core::PTK_Rook, core::PTK_ProRook);
-        } else if constexpr (HeadType == FeatureType::FT_OpPawn) {
-            *FB = processPiece<C, ~C>(State, core::PTK_Pawn);
-        } else if constexpr (HeadType == FeatureType::FT_OpLance) {
-            *FB = processPiece<C, ~C>(State, core::PTK_Lance);
-        } else if constexpr (HeadType == FeatureType::FT_OpKnight) {
-            *FB = processPiece<C, ~C>(State, core::PTK_Knight);
-        } else if constexpr (HeadType == FeatureType::FT_OpSilver) {
-            *FB = processPiece<C, ~C>(State, core::PTK_Silver);
-        } else if constexpr (HeadType == FeatureType::FT_OpGold) {
-            *FB = processPiece<C, ~C>(State, core::PTK_Gold);
-        } else if constexpr (HeadType == FeatureType::FT_OpKing) {
-            *FB = processPiece<C, ~C>(State, core::PTK_King);
-        } else if constexpr (HeadType == FeatureType::FT_OpBishop) {
-            *FB = processPiece<C, ~C>(State, core::PTK_Bishop);
-        } else if constexpr (HeadType == FeatureType::FT_OpRook) {
-            *FB = processPiece<C, ~C>(State, core::PTK_Rook);
-        } else if constexpr (HeadType == FeatureType::FT_OpProPawn) {
-            *FB = processPiece<C, ~C>(State, core::PTK_ProPawn);
-        } else if constexpr (HeadType == FeatureType::FT_OpProLance) {
-            *FB = processPiece<C, ~C>(State, core::PTK_ProLance);
-        } else if constexpr (HeadType == FeatureType::FT_OpProKnight) {
-            *FB = processPiece<C, ~C>(State, core::PTK_ProKnight);
-        } else if constexpr (HeadType == FeatureType::FT_OpProSilver) {
-            *FB = processPiece<C, ~C>(State, core::PTK_ProSilver);
-        } else if constexpr (HeadType == FeatureType::FT_OpProBishop) {
-            *FB = processPiece<C, ~C>(State, core::PTK_ProBishop);
-        } else if constexpr (HeadType == FeatureType::FT_OpProRook) {
-            *FB = processPiece<C, ~C>(State, core::PTK_ProRook);
-        } else if constexpr (HeadType == FeatureType::FT_OpBishopAndProBishop) {
-            *FB = processPiece<C, ~C>(State, core::PTK_Bishop,
-                                      core::PTK_ProBishop);
-        } else if constexpr (HeadType == FeatureType::FT_OpRookAndProRook) {
-            *FB = processPiece<C, ~C>(State, core::PTK_Rook, core::PTK_ProRook);
-        } else if constexpr (HeadType == FeatureType::FT_MyStandPawn1) {
-            *FB = processStand<C>(State, core::PTK_Pawn, 1);
-        } else if constexpr (HeadType == FeatureType::FT_MyStandPawn2) {
-            *FB = processStand<C>(State, core::PTK_Pawn, 2);
-        } else if constexpr (HeadType == FeatureType::FT_MyStandPawn3) {
-            *FB = processStand<C>(State, core::PTK_Pawn, 3);
-        } else if constexpr (HeadType == FeatureType::FT_MyStandPawn4) {
-            *FB = processStand<C>(State, core::PTK_Pawn, 4);
-        } else if constexpr (HeadType == FeatureType::FT_MyStandPawn5) {
-            *FB = processStand<C>(State, core::PTK_Pawn, 5);
-        } else if constexpr (HeadType == FeatureType::FT_MyStandPawn6) {
-            *FB = processStand<C>(State, core::PTK_Pawn, 6);
-        } else if constexpr (HeadType == FeatureType::FT_MyStandPawn7) {
-            *FB = processStand<C>(State, core::PTK_Pawn, 7);
-        } else if constexpr (HeadType == FeatureType::FT_MyStandPawn8) {
-            *FB = processStand<C>(State, core::PTK_Pawn, 8);
-        } else if constexpr (HeadType == FeatureType::FT_MyStandPawn9) {
-            *FB = processStand<C>(State, core::PTK_Pawn, 9);
-        } else if constexpr (HeadType == FeatureType::FT_MyStandLance1) {
-            *FB = processStand<C>(State, core::PTK_Lance, 1);
-        } else if constexpr (HeadType == FeatureType::FT_MyStandLance2) {
-            *FB = processStand<C>(State, core::PTK_Lance, 2);
-        } else if constexpr (HeadType == FeatureType::FT_MyStandLance3) {
-            *FB = processStand<C>(State, core::PTK_Lance, 3);
-        } else if constexpr (HeadType == FeatureType::FT_MyStandLance4) {
-            *FB = processStand<C>(State, core::PTK_Lance, 4);
-        } else if constexpr (HeadType == FeatureType::FT_MyStandKnight1) {
-            *FB = processStand<C>(State, core::PTK_Knight, 1);
-        } else if constexpr (HeadType == FeatureType::FT_MyStandKnight2) {
-            *FB = processStand<C>(State, core::PTK_Knight, 2);
-        } else if constexpr (HeadType == FeatureType::FT_MyStandKnight3) {
-            *FB = processStand<C>(State, core::PTK_Knight, 3);
-        } else if constexpr (HeadType == FeatureType::FT_MyStandKnight4) {
-            *FB = processStand<C>(State, core::PTK_Knight, 4);
-        } else if constexpr (HeadType == FeatureType::FT_MyStandSilver1) {
-            *FB = processStand<C>(State, core::PTK_Silver, 1);
-        } else if constexpr (HeadType == FeatureType::FT_MyStandSilver2) {
-            *FB = processStand<C>(State, core::PTK_Silver, 2);
-        } else if constexpr (HeadType == FeatureType::FT_MyStandSilver3) {
-            *FB = processStand<C>(State, core::PTK_Silver, 3);
-        } else if constexpr (HeadType == FeatureType::FT_MyStandSilver4) {
-            *FB = processStand<C>(State, core::PTK_Silver, 4);
-        } else if constexpr (HeadType == FeatureType::FT_MyStandGold1) {
-            *FB = processStand<C>(State, core::PTK_Gold, 1);
-        } else if constexpr (HeadType == FeatureType::FT_MyStandGold2) {
-            *FB = processStand<C>(State, core::PTK_Gold, 2);
-        } else if constexpr (HeadType == FeatureType::FT_MyStandGold3) {
-            *FB = processStand<C>(State, core::PTK_Gold, 3);
-        } else if constexpr (HeadType == FeatureType::FT_MyStandGold4) {
-            *FB = processStand<C>(State, core::PTK_Gold, 4);
-        } else if constexpr (HeadType == FeatureType::FT_MyStandBishop1) {
-            *FB = processStand<C>(State, core::PTK_Bishop, 1);
-        } else if constexpr (HeadType == FeatureType::FT_MyStandBishop2) {
-            *FB = processStand<C>(State, core::PTK_Bishop, 2);
-        } else if constexpr (HeadType == FeatureType::FT_MyStandRook1) {
-            *FB = processStand<C>(State, core::PTK_Rook, 1);
-        } else if constexpr (HeadType == FeatureType::FT_MyStandRook2) {
-            *FB = processStand<C>(State, core::PTK_Rook, 2);
-        } else if constexpr (HeadType == FeatureType::FT_OpStandPawn1) {
-            *FB = processStand<~C>(State, core::PTK_Pawn, 1);
-        } else if constexpr (HeadType == FeatureType::FT_OpStandPawn2) {
-            *FB = processStand<~C>(State, core::PTK_Pawn, 2);
-        } else if constexpr (HeadType == FeatureType::FT_OpStandPawn3) {
-            *FB = processStand<~C>(State, core::PTK_Pawn, 3);
-        } else if constexpr (HeadType == FeatureType::FT_OpStandPawn4) {
-            *FB = processStand<~C>(State, core::PTK_Pawn, 4);
-        } else if constexpr (HeadType == FeatureType::FT_OpStandPawn5) {
-            *FB = processStand<~C>(State, core::PTK_Pawn, 5);
-        } else if constexpr (HeadType == FeatureType::FT_OpStandPawn6) {
-            *FB = processStand<~C>(State, core::PTK_Pawn, 6);
-        } else if constexpr (HeadType == FeatureType::FT_OpStandPawn7) {
-            *FB = processStand<~C>(State, core::PTK_Pawn, 7);
-        } else if constexpr (HeadType == FeatureType::FT_OpStandPawn8) {
-            *FB = processStand<~C>(State, core::PTK_Pawn, 8);
-        } else if constexpr (HeadType == FeatureType::FT_OpStandPawn9) {
-            *FB = processStand<~C>(State, core::PTK_Pawn, 9);
-        } else if constexpr (HeadType == FeatureType::FT_OpStandLance1) {
-            *FB = processStand<~C>(State, core::PTK_Lance, 1);
-        } else if constexpr (HeadType == FeatureType::FT_OpStandLance2) {
-            *FB = processStand<~C>(State, core::PTK_Lance, 2);
-        } else if constexpr (HeadType == FeatureType::FT_OpStandLance3) {
-            *FB = processStand<~C>(State, core::PTK_Lance, 3);
-        } else if constexpr (HeadType == FeatureType::FT_OpStandLance4) {
-            *FB = processStand<~C>(State, core::PTK_Lance, 4);
-        } else if constexpr (HeadType == FeatureType::FT_OpStandKnight1) {
-            *FB = processStand<~C>(State, core::PTK_Knight, 1);
-        } else if constexpr (HeadType == FeatureType::FT_OpStandKnight2) {
-            *FB = processStand<~C>(State, core::PTK_Knight, 2);
-        } else if constexpr (HeadType == FeatureType::FT_OpStandKnight3) {
-            *FB = processStand<~C>(State, core::PTK_Knight, 3);
-        } else if constexpr (HeadType == FeatureType::FT_OpStandKnight4) {
-            *FB = processStand<~C>(State, core::PTK_Knight, 4);
-        } else if constexpr (HeadType == FeatureType::FT_OpStandSilver1) {
-            *FB = processStand<~C>(State, core::PTK_Silver, 1);
-        } else if constexpr (HeadType == FeatureType::FT_OpStandSilver2) {
-            *FB = processStand<~C>(State, core::PTK_Silver, 2);
-        } else if constexpr (HeadType == FeatureType::FT_OpStandSilver3) {
-            *FB = processStand<~C>(State, core::PTK_Silver, 3);
-        } else if constexpr (HeadType == FeatureType::FT_OpStandSilver4) {
-            *FB = processStand<~C>(State, core::PTK_Silver, 4);
-        } else if constexpr (HeadType == FeatureType::FT_OpStandGold1) {
-            *FB = processStand<~C>(State, core::PTK_Gold, 1);
-        } else if constexpr (HeadType == FeatureType::FT_OpStandGold2) {
-            *FB = processStand<~C>(State, core::PTK_Gold, 2);
-        } else if constexpr (HeadType == FeatureType::FT_OpStandGold3) {
-            *FB = processStand<~C>(State, core::PTK_Gold, 3);
-        } else if constexpr (HeadType == FeatureType::FT_OpStandGold4) {
-            *FB = processStand<~C>(State, core::PTK_Gold, 4);
-        } else if constexpr (HeadType == FeatureType::FT_OpStandBishop1) {
-            *FB = processStand<~C>(State, core::PTK_Bishop, 1);
-        } else if constexpr (HeadType == FeatureType::FT_OpStandBishop2) {
-            *FB = processStand<~C>(State, core::PTK_Bishop, 2);
-        } else if constexpr (HeadType == FeatureType::FT_OpStandRook1) {
-            *FB = processStand<~C>(State, core::PTK_Rook, 1);
-        } else if constexpr (HeadType == FeatureType::FT_OpStandRook2) {
-            *FB = processStand<~C>(State, core::PTK_Rook, 2);
-        } else if constexpr (HeadType == FeatureType::FT_RuleDeclare27) {
-            *FB = processRule<core::EndingRule::ER_Declare27>(Config);
-        } else if constexpr (HeadType == FeatureType::FT_RuleDraw24) {
-            *FB = processRule<core::EndingRule::ER_Draw24>(Config);
-        } else if constexpr (HeadType == FeatureType::FT_RuleTrying) {
-            *FB = processRule<core::EndingRule::ER_Trying>(Config);
-        } else if constexpr (HeadType == FeatureType::FT_MyDrawValue) {
-            *FB = processDrawValue<C>(Config);
-        } else if constexpr (HeadType == FeatureType::FT_OpDrawValue) {
-            *FB = processDrawValue<~C>(Config);
-        } else if constexpr (HeadType == FeatureType::FT_MyDeclarationScore) {
-            *FB = processDeclarationScore<C>(State);
-        } else if constexpr (HeadType == FeatureType::FT_OpDeclarationScore) {
-            *FB = processDeclarationScore<~C>(State);
-        } else if constexpr (HeadType == FeatureType::FT_MyPieceScore) {
-            *FB = processPieceScore<C>(State);
-        } else if constexpr (HeadType == FeatureType::FT_OpPieceScore) {
-            *FB = processPieceScore<~C>(State);
-        } else if constexpr (HeadType == FeatureType::FT_MyAttack) {
-            *FB = processAttack<C, C>(State);
-        } else if constexpr (HeadType == FeatureType::FT_OpAttack) {
-            *FB = processAttack<C, ~C>(State);
-        } else if constexpr (HeadType ==
-                             FeatureType::FT_MyDeclarationRemaining) {
-            *FB = processDeclarationRemaining<C>(State);
-        } else if constexpr (HeadType ==
-                             FeatureType::FT_OpDeclarationRemaining) {
-            *FB = processDeclarationRemaining<~C>(State);
-        } else {
-            // A trick for check if `FeatureType` is handled in
-            // constexpr-if blocks above.
-            // https://stackoverflow.com/a/64354296
-            []<bool Flag = false>() {
-                static_assert(Flag, "Unhandled FeatureType");
-            }();
-        }
-
+        *FB = processFeature<C, HeadType>(State, Config);
         process<C, TailType...>(State, Config, FB + 1);
     }
 
