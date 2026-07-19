@@ -57,12 +57,12 @@ var NAVTREEINDEX =
 [
 "annotated.html",
 "classnshogi_1_1ml_1_1utils_1_1PermutationGenerator.html",
-"featuretype_8h.html#abce888ea1742cbf42378e26c43e4a125af0c4d4ab163ae5ca4f54909e6e09e05e",
-"namespacenshogi_1_1core.html#a4fc4e1258dfdd1f019167d58c1d7a6c1a87754ce9cc6ac5770907270b82b20320",
-"namespacenshogi_1_1ml.html#abce888ea1742cbf42378e26c43e4a125a3b5c82b520cd14f9f8e42909cc96ce55",
-"structnshogi_1_1core_1_1Move32.html#a3032912089141c2678a9d8599f8651d7",
-"structnshogi_1_1ml_1_1SimpleTeacher.html#a3f82730887ab6285996d0911a1d8d8cd",
-"types_8h.html#ab77af5da8f4d8145e4925bd412b1b205af399afc91faee04303ebac34e38dda16"
+"featuretype_8h.html#abce888ea1742cbf42378e26c43e4a125aed63e7dad48dfd06bf631beb71ef5631",
+"namespacenshogi_1_1core.html#a4fc4e1258dfdd1f019167d58c1d7a6c1a86c99f0d296e63df7acf0dab7a2eccb7",
+"namespacenshogi_1_1ml.html#abce888ea1742cbf42378e26c43e4a125a34bf47d2b441cdc4110bdeb3e877b52a",
+"structnshogi_1_1core_1_1Move32.html#a25a0cbbfe3ac1398654b33e1baf556d5",
+"structnshogi_1_1ml_1_1SimpleTeacher.html#a267baddeb83bffdda0869f85c25caba2",
+"types_8h.html#ab77af5da8f4d8145e4925bd412b1b205a7d17911d2cbd51f346d333974b063af1"
 ];
 
 var SYNCONMSG = 'click to disable panel synchronisation';

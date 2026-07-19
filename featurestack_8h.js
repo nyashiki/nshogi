@@ -8,6 +8,7 @@ var featurestack_8h =
     [ "processDeclarationRemaining", "featurestack_8h.html#a46f719d0f6b760c8d6a1506537b530c7", null ],
     [ "processDeclarationScore", "featurestack_8h.html#aff813fc91e71619c16b6a3e15b0ce567", null ],
     [ "processDrawValue", "featurestack_8h.html#abd517dcd6d9b7a300d5375ac7235291c", null ],
+    [ "processFeature", "featurestack_8h.html#aa1ccf0f9bd8c69d95d44a56fac73d128", null ],
     [ "processIsBlackTurn", "featurestack_8h.html#a398da8120d07846dea0dc07ca64cb377", null ],
     [ "processIsWhiteTurn", "featurestack_8h.html#a98e3f04cd6386610818bc5dc47ae38bd", null ],
     [ "processNoPawnFile", "featurestack_8h.html#aa13c3f07d71323d688f8324d5b1039fd", null ],

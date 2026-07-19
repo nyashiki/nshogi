@@ -110,6 +110,7 @@ var featuretype_8h =
       [ "FT_MyAttack", "featuretype_8h.html#abce888ea1742cbf42378e26c43e4a125a68de3682a8562f10b331b0cb2c9999c6", null ],
       [ "FT_OpAttack", "featuretype_8h.html#abce888ea1742cbf42378e26c43e4a125a9689fc9aeec55c0d11cb6abce2e8eae2", null ],
       [ "FT_MyDeclarationRemaining", "featuretype_8h.html#abce888ea1742cbf42378e26c43e4a125a5f19e430ca7c03c0f04e46db75d040a9", null ],
-      [ "FT_OpDeclarationRemaining", "featuretype_8h.html#abce888ea1742cbf42378e26c43e4a125a7e05f045b3d18dd55230f9cf4e9fadaa", null ]
+      [ "FT_OpDeclarationRemaining", "featuretype_8h.html#abce888ea1742cbf42378e26c43e4a125a7e05f045b3d18dd55230f9cf4e9fadaa", null ],
+      [ "NumFeatureType", "featuretype_8h.html#abce888ea1742cbf42378e26c43e4a125a86cdcec0334e0a313993b23c813aa838", null ]
     ] ]
 ];

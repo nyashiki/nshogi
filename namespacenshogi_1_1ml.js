@@ -131,7 +131,8 @@ var namespacenshogi_1_1ml =
       [ "FT_MyAttack", "namespacenshogi_1_1ml.html#abce888ea1742cbf42378e26c43e4a125a68de3682a8562f10b331b0cb2c9999c6", null ],
       [ "FT_OpAttack", "namespacenshogi_1_1ml.html#abce888ea1742cbf42378e26c43e4a125a9689fc9aeec55c0d11cb6abce2e8eae2", null ],
       [ "FT_MyDeclarationRemaining", "namespacenshogi_1_1ml.html#abce888ea1742cbf42378e26c43e4a125a5f19e430ca7c03c0f04e46db75d040a9", null ],
-      [ "FT_OpDeclarationRemaining", "namespacenshogi_1_1ml.html#abce888ea1742cbf42378e26c43e4a125a7e05f045b3d18dd55230f9cf4e9fadaa", null ]
+      [ "FT_OpDeclarationRemaining", "namespacenshogi_1_1ml.html#abce888ea1742cbf42378e26c43e4a125a7e05f045b3d18dd55230f9cf4e9fadaa", null ],
+      [ "NumFeatureType", "namespacenshogi_1_1ml.html#abce888ea1742cbf42378e26c43e4a125a86cdcec0334e0a313993b23c813aa838", null ]
     ] ],
     [ "FeatureBitboard::extract< core::IterateOrder::ESWN >", "namespacenshogi_1_1ml.html#a469da1bc8675e3db67663fae70b06f24", null ],
     [ "FeatureBitboard::extract< core::IterateOrder::NWSE >", "namespacenshogi_1_1ml.html#aa4f1112dba0c0d5797da2cc956dd1679", null ],
@@ -158,6 +159,7 @@ var namespacenshogi_1_1ml =
     [ "processDrawValue", "namespacenshogi_1_1ml.html#abd517dcd6d9b7a300d5375ac7235291c", null ],
     [ "processDrawValue< core::Black >", "namespacenshogi_1_1ml.html#adcb8ba202ed37aa47331357dfa3242d2", null ],
     [ "processDrawValue< core::White >", "namespacenshogi_1_1ml.html#ae220eb15ac86210a0a89d3b596d456d1", null ],
+    [ "processFeature", "namespacenshogi_1_1ml.html#aa1ccf0f9bd8c69d95d44a56fac73d128", null ],
     [ "processIsBlackTurn", "namespacenshogi_1_1ml.html#a398da8120d07846dea0dc07ca64cb377", null ],
     [ "processIsBlackTurn< core::Black >", "namespacenshogi_1_1ml.html#ac5ccc7df724970ce874e51f1a8c89854", null ],
     [ "processIsBlackTurn< core::White >", "namespacenshogi_1_1ml.html#a7d43876efc73e5b39e8f997ce96174e5", null ],
