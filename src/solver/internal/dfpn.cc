@@ -92,8 +92,7 @@ void SolverImpl::storeNodeToTT(core::internal::StateImpl* S, uint64_t Depth,
                                              : S->getPosition().getStand<~C>();
     const uint64_t PositionHash = S->getBoardHash();
     const std::size_t Index =
-        (((PositionHash + 2 * Depth) << 1) |
-         static_cast<uint64_t>(Attacking)) %
+        (((PositionHash + 2 * Depth) << 1) | static_cast<uint64_t>(Attacking)) %
         NodeTTSize;
 
     const std::size_t DeleteIndex =
@@ -160,8 +159,7 @@ DfPnValue SolverImpl::loadNodeFromTT(core::internal::StateImpl* S,
                                              : S->getPosition().getStand<~C>();
     const uint64_t PositionHash = S->getBoardHash();
     const std::size_t Index =
-        (((PositionHash + 2 * Depth) << 1) |
-         static_cast<uint64_t>(Attacking)) %
+        (((PositionHash + 2 * Depth) << 1) | static_cast<uint64_t>(Attacking)) %
         NodeTTSize;
 
     for (std::size_t I = 0; I < DfPnNodeTTBundle::BundleSize; ++I) {
@@ -193,9 +191,8 @@ DfPnValue SolverImpl::loadNodeFromTT(core::internal::StateImpl* S,
 }
 
 template <bool Attacking>
-void SolverImpl::storeEdgeToTT(core::internal::StateImpl* S,
-                               core::Move32 Move, uint64_t Depth,
-                               const DfPnValue& Value) {
+void SolverImpl::storeEdgeToTT(core::internal::StateImpl* S, core::Move32 Move,
+                               uint64_t Depth, const DfPnValue& Value) {
     const uint64_t SourceHash = S->getHash();
     const uint64_t EdgeHash =
         SourceHash ^ static_cast<uint64_t>(core::Move16(Move).value());
@@ -213,8 +210,8 @@ void SolverImpl::storeEdgeToTT(core::internal::StateImpl* S,
         if (Entry->generation() != Generation) {
             Entry->setSourceHash(SourceHash);
             Entry->setMove(Move);
-            Entry->setProofNumberAndNodeCacheable(
-                (uint16_t)Value.ProofNumber, Value.NodeCacheable);
+            Entry->setProofNumberAndNodeCacheable((uint16_t)Value.ProofNumber,
+                                                  Value.NodeCacheable);
             Entry->setDisproofNumber((uint16_t)Value.DisproofNumber);
             Entry->setGeneration(Generation);
             return;
@@ -234,8 +231,8 @@ void SolverImpl::storeEdgeToTT(core::internal::StateImpl* S,
         }
 
         if (Entry->isSameEdge(SourceHash, Move)) {
-            Entry->setProofNumberAndNodeCacheable(
-                (uint16_t)Value.ProofNumber, Value.NodeCacheable);
+            Entry->setProofNumberAndNodeCacheable((uint16_t)Value.ProofNumber,
+                                                  Value.NodeCacheable);
             Entry->setDisproofNumber((uint16_t)Value.DisproofNumber);
             return;
         }
@@ -283,8 +280,8 @@ DfPnValue SolverImpl::loadEdgeFromTT(core::internal::StateImpl* S,
 template <core::Color C, bool Attacking, bool WilyPromote>
 core::Move32 SolverImpl::search(core::internal::StateImpl* S, uint64_t Depth,
                                 DfPnValue* IncomingEdgeValue,
-                                DfPnValue* Threshold,
-                                uint64_t MaxNodeCount, uint64_t MaxDepth) {
+                                DfPnValue* Threshold, uint64_t MaxNodeCount,
+                                uint64_t MaxDepth) {
     ++SearchedNodeCount;
 
     // Step 1: check terminal.
@@ -365,8 +362,7 @@ core::Move32 SolverImpl::search(core::internal::StateImpl* S, uint64_t Depth,
                     const auto ChildRepetitionStatus = S->getRepetitionStatus();
                     if (ChildRepetitionStatus !=
                         core::RepetitionStatus::NoRepetition) {
-                        EdgeValue =
-                            DfPnValue(DfPnValue::Infinity, 0, false);
+                        EdgeValue = DfPnValue(DfPnValue::Infinity, 0, false);
                     } else {
                         const auto NextMoves =
                             core::internal::MoveGeneratorInternal::
@@ -379,8 +375,8 @@ core::Move32 SolverImpl::search(core::internal::StateImpl* S, uint64_t Depth,
                                 EdgeValue = DfPnValue(DfPnValue::Infinity, 0);
                             } else {
                                 EdgeValue = DfPnValue(0, DfPnValue::Infinity);
-                                storeNodeToTT<~C, !Attacking>(
-                                    S, Depth + 1, EdgeValue);
+                                storeNodeToTT<~C, !Attacking>(S, Depth + 1,
+                                                              EdgeValue);
                             }
                         } else {
                             uint32_t InitialProofNumber = 0;
@@ -413,9 +409,9 @@ core::Move32 SolverImpl::search(core::internal::StateImpl* S, uint64_t Depth,
                 SumDisproof += EdgeValue.DisproofNumber;
             }
             SumDisproof = std::min(DfPnValue::Infinity, SumDisproof);
-            const bool NodeCacheable =
-                (MinProof == 0) ? BestEdgeValue.NodeCacheable
-                                : AllEdgesCacheable;
+            const bool NodeCacheable = (MinProof == 0)
+                                           ? BestEdgeValue.NodeCacheable
+                                           : AllEdgesCacheable;
             NodeValue = DfPnValue(MinProof, SumDisproof, NodeCacheable);
             storeNodeToTT<C, Attacking>(S, Depth, NodeValue);
 
@@ -487,9 +483,9 @@ core::Move32 SolverImpl::search(core::internal::StateImpl* S, uint64_t Depth,
                 }
             }
             SumProof = std::min(DfPnValue::Infinity, SumProof);
-            const bool NodeCacheable =
-                (MinDisproof == 0) ? BestEdgeValue.NodeCacheable
-                                   : AllEdgesCacheable;
+            const bool NodeCacheable = (MinDisproof == 0)
+                                           ? BestEdgeValue.NodeCacheable
+                                           : AllEdgesCacheable;
             NodeValue = DfPnValue(SumProof, MinDisproof, NodeCacheable);
             storeNodeToTT<C, Attacking>(S, Depth, NodeValue);
 
@@ -554,8 +550,8 @@ std::vector<core::Move32> SolverImpl::findPV(core::internal::StateImpl* S,
         S->doMove<C>(Move);
         if (!IsEdgeFound) {
             bool IsNodeFound;
-            EdgeValue = loadNodeFromTT<~C, !Attacking>(S, Depth + 1,
-                                                       &IsNodeFound);
+            EdgeValue =
+                loadNodeFromTT<~C, !Attacking>(S, Depth + 1, &IsNodeFound);
             if (!IsNodeFound) {
                 S->undoMove<~C>();
                 continue;

@@ -168,8 +168,7 @@ struct DfPnEdgeTTEntry {
     }
 
     void setProofNumberAndNodeCacheable(uint16_t Proof, bool Cacheable) {
-        ProofNumberAndFlags =
-            Proof | (Cacheable ? 0 : NOT_NODE_CACHEABLE_BIT);
+        ProofNumberAndFlags = Proof | (Cacheable ? 0 : NOT_NODE_CACHEABLE_BIT);
     }
 
     void setDisproofNumber(uint16_t Disproof) {
