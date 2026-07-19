@@ -464,10 +464,11 @@ struct alignas(16) Bitboard {
     }
 
     // Returns, in both lanes, all ones when the selected lane is zero and
-    // zero otherwise.
+    // zero otherwise. Note that "all ones" means all 128 bits, unlike
+    // AllBB() which covers only the 81 board squares.
     template <bool High>
     [[nodiscard]] inline __attribute__((always_inline)) Bitboard
-    getLaneZeroMask() const noexcept {
+    getAllOnesIfLaneEmpty() const noexcept {
 #if defined(USE_SSE41)
         const __m128i IsZero = _mm_cmpeq_epi64(Bitboard_, _mm_setzero_si128());
         return _mm_shuffle_epi32(IsZero, High ? 0xEE : 0x44);
@@ -518,18 +519,6 @@ struct alignas(16) Bitboard {
         assert(High > 0);
 
         return static_cast<Square>(63 + countTrailingZero(High));
-    }
-
-    inline __attribute__((always_inline)) Bitboard
-    pickUpMostSignificantBB() const noexcept {
-        uint64_t High = getPrimitive<true>();
-
-        if (High > 0) {
-            return SquareBB[63 + (63 - std::countl_zero(High))];
-        }
-
-        uint64_t Low = getPrimitive<false>();
-        return SquareBB[63 - std::countl_zero(Low)];
     }
 
     inline __attribute__((always_inline)) Square popOne() noexcept {
@@ -776,39 +765,6 @@ inline Bitboard getStepAttackBB(PieceTypeKind Type, Square From) noexcept {
     }
 }
 
-template <Color C>
-inline Bitboard getLanceAttackBB(Square Sq,
-                                 const Bitboard& OccupiedBB) noexcept {
-    if (Bitboard::FurthermostBB<C>().isSet(Sq)) {
-        return bitboard::Bitboard::ZeroBB();
-    }
-
-    if constexpr (C == Black) {
-        auto Temp = OccupiedBB ^ (OccupiedBB.subtract(SquareBB[Sq + North]));
-        return Temp & ForwardBB[Sq];
-    } else {
-        auto Temp = (BackwardBB[Sq] & (OccupiedBB | RankBB[RankI]))
-                        .pickUpMostSignificantBB();
-        return SquareBB[Sq].subtract(Temp);
-    }
-}
-
-inline Bitboard getLanceAttackBB(Color C, Square Sq,
-                                 const Bitboard& OccupiedBB) noexcept {
-    if (Bitboard::FurthermostBB(C).isSet(Sq)) {
-        return Bitboard::ZeroBB();
-    }
-
-    if (C == Black) {
-        auto Temp = OccupiedBB ^ (OccupiedBB.subtract(SquareBB[Sq + North]));
-        return Temp & ForwardBB[Sq];
-    } else {
-        auto Temp = (BackwardBB[Sq] & (OccupiedBB | RankBB[RankI]))
-                        .pickUpMostSignificantBB();
-        return SquareBB[Sq].subtract(Temp);
-    }
-}
-
 // Computes the attacked squares along a ray whose squares ascend in bit
 // position as the ray leaves its origin square. Within each lane the same
 // sweep as the black lance is used: subtracting one flips exactly the bits
@@ -827,7 +783,7 @@ getAscendingRayAttackBB(const Bitboard& OccupiedBB,
         (OccupiedOnRayBB ^ OccupiedOnRayBB.subtract(Bitboard(1, 1))) & RayBB;
 
     if constexpr (CrossesLanes) {
-        return AttackBB & (OccupiedOnRayBB.getLaneZeroMask<false>() |
+        return AttackBB & (OccupiedOnRayBB.getAllOnesIfLaneEmpty<false>() |
                            Bitboard(0, ~0ULL));
     }
 
@@ -849,6 +805,8 @@ getDescendingRayAttackBB(const Bitboard& OccupiedBB,
                          const Bitboard& RayBB) noexcept {
     const Bitboard OccupiedOnRayBB = OccupiedBB & RayBB;
 
+    // Smear the blockers downward so that every ray square below a
+    // blocker gets filled.
     Bitboard SmearBB = OccupiedOnRayBB;
     SmearBB |= SmearBB.getRightShiftEpi64<StepBits>();
     SmearBB |= SmearBB.getRightShiftEpi64<2 * StepBits>();
@@ -857,11 +815,46 @@ getDescendingRayAttackBB(const Bitboard& OccupiedBB,
         SmearBB.getRightShiftEpi64<StepBits>().andNot(RayBB);
 
     if constexpr (CrossesLanes) {
-        return AttackBB & (OccupiedOnRayBB.getLaneZeroMask<true>() |
+        // The smear does not propagate across the lane border, so if the
+        // high lane has a blocker, keep the high lane only.
+        return AttackBB & (OccupiedOnRayBB.getAllOnesIfLaneEmpty<true>() |
                            Bitboard(~0ULL, 0));
     }
 
     return AttackBB;
+}
+
+template <Color C>
+inline Bitboard getLanceAttackBB(Square Sq,
+                                 const Bitboard& OccupiedBB) noexcept {
+    if constexpr (C == Black) {
+        if (Bitboard::FurthermostBB<C>().isSet(Sq)) {
+            return bitboard::Bitboard::ZeroBB();
+        }
+
+        auto Temp = OccupiedBB ^ (OccupiedBB.subtract(SquareBB[Sq + North]));
+        return Temp & ForwardBB[Sq];
+    } else {
+        // No guard for the furthermost rank: BackwardBB[Sq] is empty there
+        // and the ray sweep returns the empty bitboard by itself.
+        return getDescendingRayAttackBB<-South, false>(OccupiedBB,
+                                                       BackwardBB[Sq]);
+    }
+}
+
+inline Bitboard getLanceAttackBB(Color C, Square Sq,
+                                 const Bitboard& OccupiedBB) noexcept {
+    if (C == Black) {
+        if (Bitboard::FurthermostBB(C).isSet(Sq)) {
+            return Bitboard::ZeroBB();
+        }
+
+        auto Temp = OccupiedBB ^ (OccupiedBB.subtract(SquareBB[Sq + North]));
+        return Temp & ForwardBB[Sq];
+    } else {
+        return getDescendingRayAttackBB<-South, false>(OccupiedBB,
+                                                       BackwardBB[Sq]);
+    }
 }
 
 template <PieceTypeKind Type>
