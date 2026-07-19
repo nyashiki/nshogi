@@ -13,6 +13,7 @@
 #include "common.h"
 #include "utils.h"
 
+#include <random>
 #include <unistd.h>
 
 TEST(Bitboard, ZeroBB) {
@@ -67,6 +68,104 @@ TEST(Bitboard, Shift) {
     TEST_ASSERT_EQ(SquareBB[Sq7F].getRightShiftEpi64<1>(), SquareBB[Sq7G]);
     TEST_ASSERT_EQ(SquareBB[Sq7G].getLeftShiftEpi64(1), SquareBB[Sq7F]);
     TEST_ASSERT_EQ(SquareBB[Sq7F].getRightShiftEpi64(1), SquareBB[Sq7G]);
+}
+
+namespace {
+
+nshogi::core::internal::bitboard::Bitboard computeSliderAttackNaive(
+    nshogi::core::Square Sq,
+    const nshogi::core::internal::bitboard::Bitboard& OccupiedBB,
+    const int (&FileSteps)[4], const int (&RankSteps)[4]) {
+    using namespace nshogi::core;
+    using nshogi::core::internal::bitboard::Bitboard;
+    using nshogi::core::internal::bitboard::SquareBB;
+
+    Bitboard AttackBB = Bitboard::ZeroBB();
+
+    for (int D = 0; D < 4; ++D) {
+        int F = (int)squareToFile(Sq) + FileSteps[D];
+        int R = (int)squareToRank(Sq) + RankSteps[D];
+
+        while (0 <= F && F < (int)NumFiles && 0 <= R && R < (int)NumRanks) {
+            const Square To = makeSquare((Rank)R, (File)F);
+            AttackBB |= SquareBB[To];
+
+            if (OccupiedBB.isSet(To)) {
+                break;
+            }
+
+            F += FileSteps[D];
+            R += RankSteps[D];
+        }
+    }
+
+    return AttackBB;
+}
+
+nshogi::core::internal::bitboard::Bitboard
+generateRandomOccupancy(std::mt19937_64& Mt) {
+    return nshogi::core::internal::bitboard::Bitboard(
+        Mt() & 0x3ffffULL, Mt() & 0x7fffffffffffffffULL);
+}
+
+} // namespace
+
+TEST(Bitboard, BishopAttack) {
+    using namespace nshogi::core;
+    using namespace nshogi::core::internal::bitboard;
+
+    const int FileSteps[4] = {1, 1, -1, -1};
+    const int RankSteps[4] = {1, -1, 1, -1};
+
+    std::mt19937_64 Mt(0x20260712ULL);
+
+    for (Square Sq : Squares) {
+        for (int I = 0; I < 1000; ++I) {
+            Bitboard OccupiedBB = (I == 0)   ? Bitboard::ZeroBB()
+                                  : (I == 1) ? Bitboard::AllBB()
+                                             : generateRandomOccupancy(Mt);
+            if (I % 2 == 0) {
+                OccupiedBB |= SquareBB[Sq];
+            }
+
+            const Bitboard ExpectedBB =
+                computeSliderAttackNaive(Sq, OccupiedBB, FileSteps, RankSteps);
+
+            TEST_ASSERT_EQ(getBishopAttackBB<PTK_Bishop>(Sq, OccupiedBB),
+                           ExpectedBB);
+            TEST_ASSERT_EQ(getBishopAttackBB<PTK_ProBishop>(Sq, OccupiedBB),
+                           ExpectedBB | KingAttackBB[Sq]);
+        }
+    }
+}
+
+TEST(Bitboard, RookAttack) {
+    using namespace nshogi::core;
+    using namespace nshogi::core::internal::bitboard;
+
+    const int FileSteps[4] = {1, -1, 0, 0};
+    const int RankSteps[4] = {0, 0, 1, -1};
+
+    std::mt19937_64 Mt(0x20260712ULL);
+
+    for (Square Sq : Squares) {
+        for (int I = 0; I < 1000; ++I) {
+            Bitboard OccupiedBB = (I == 0)   ? Bitboard::ZeroBB()
+                                  : (I == 1) ? Bitboard::AllBB()
+                                             : generateRandomOccupancy(Mt);
+            if (I % 2 == 0) {
+                OccupiedBB |= SquareBB[Sq];
+            }
+
+            const Bitboard ExpectedBB =
+                computeSliderAttackNaive(Sq, OccupiedBB, FileSteps, RankSteps);
+
+            TEST_ASSERT_EQ(getRookAttackBB<PTK_Rook>(Sq, OccupiedBB),
+                           ExpectedBB);
+            TEST_ASSERT_EQ(getRookAttackBB<PTK_ProRook>(Sq, OccupiedBB),
+                           ExpectedBB | KingAttackBB[Sq]);
+        }
+    }
 }
 
 TEST(Bitboard, Print) {

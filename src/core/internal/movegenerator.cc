@@ -18,6 +18,10 @@ namespace {
 
 using namespace internal::bitboard;
 
+// Upper bound of the bishops and rooks one side can have on the board:
+// the standard piece set contains two bishops and two rooks in total.
+constexpr std::size_t SliderAttackCacheSize = 4;
+
 template <Color C, bool Capture, bool WilyPromote>
 inline Move32*
 generateOnBoardOneStepPawnMovesImpl(const StateImpl& S,
@@ -491,20 +495,36 @@ generateOnBoardLanceMovesImpl(const StateImpl& S, Move32* __restrict Moves,
     return Moves;
 }
 
+// The capture pass (Capture == true) computes the attacks of each bishop
+// and stores them through `AttackCache`; the no-capture pass that follows
+// with the same occupancy replays them instead of recomputing. Both passes
+// enumerate the pieces in the same order, so a single cursor suffices.
 template <Color C, PieceTypeKind Type, bool Capture, bool WilyPromote>
-inline Move32*
-generateOnBoardBishopMovesImpl(const StateImpl& S, Move32* __restrict Moves,
-                               const Bitboard& TargetSquares,
-                               const Bitboard& OccupiedBB) noexcept {
+inline Move32* generateOnBoardBishopMovesImpl(const StateImpl& S,
+                                              Move32* __restrict Moves,
+                                              const Bitboard& TargetSquares,
+                                              const Bitboard& OccupiedBB,
+                                              Bitboard*& AttackCache) noexcept {
     static_assert(Type == PTK_Bishop || Type == PTK_ProBishop,
                   "Type should be PTK_Bishop or PTK_ProBishop.");
+
+    const auto LoadAttackBB = [&](Square From) {
+        if constexpr (Capture) {
+            const Bitboard AttackBB = getBishopAttackBB<Type>(From, OccupiedBB);
+            *AttackCache++ = AttackBB;
+            return AttackBB;
+        } else {
+            // The capture pass runs first, so this piece's attacks have
+            // already been computed and stored; just read them back.
+            return *AttackCache++;
+        }
+    };
 
     const Bitboard FromBB = S.getBitboard<C, Type>();
     (FromBB & S.getDefendingOpponentSliderBB<C>()).forEach([&](Square From) {
         const bool IsPromotableFrom = PromotableBB[C].isSet(From);
 
-        const Bitboard ToBB = getBishopAttackBB<Type>(From, OccupiedBB) &
-                              TargetSquares &
+        const Bitboard ToBB = LoadAttackBB(From) & TargetSquares &
                               LineBB[From][S.getKingSquare<C>()];
 
         if constexpr (Type == PTK_Bishop) {
@@ -560,8 +580,7 @@ generateOnBoardBishopMovesImpl(const StateImpl& S, Move32* __restrict Moves,
         [&](Square From) {
             const bool IsPromotableFrom = PromotableBB[C].isSet(From);
 
-            const Bitboard ToBB =
-                getBishopAttackBB<Type>(From, OccupiedBB) & TargetSquares;
+            const Bitboard ToBB = LoadAttackBB(From) & TargetSquares;
 
             if constexpr (Type == PTK_Bishop) {
                 const Bitboard PromotableToBB =
@@ -617,20 +636,33 @@ generateOnBoardBishopMovesImpl(const StateImpl& S, Move32* __restrict Moves,
     return Moves;
 }
 
+// See the comment on generateOnBoardBishopMovesImpl() about `AttackCache`.
 template <Color C, PieceTypeKind Type, bool Capture, bool WilyPromote>
-inline Move32*
-generateOnBoardRookMovesImpl(const StateImpl& S, Move32* __restrict Moves,
-                             const Bitboard& TargetSquares,
-                             const Bitboard& OccupiedBB) noexcept {
+inline Move32* generateOnBoardRookMovesImpl(const StateImpl& S,
+                                            Move32* __restrict Moves,
+                                            const Bitboard& TargetSquares,
+                                            const Bitboard& OccupiedBB,
+                                            Bitboard*& AttackCache) noexcept {
     static_assert(Type == PTK_Rook || Type == PTK_ProRook,
                   "Type should be PTK_Rook or PTK_ProRook.");
+
+    const auto LoadAttackBB = [&](Square From) {
+        if constexpr (Capture) {
+            const Bitboard AttackBB = getRookAttackBB<Type>(From, OccupiedBB);
+            *AttackCache++ = AttackBB;
+            return AttackBB;
+        } else {
+            // The capture pass runs first, so this piece's attacks have
+            // already been computed and stored; just read them back.
+            return *AttackCache++;
+        }
+    };
 
     const Bitboard FromBB = S.getBitboard<C, Type>();
     (FromBB & S.getDefendingOpponentSliderBB<C>()).forEach([&](Square From) {
         const bool IsPromotableFrom = PromotableBB[C].isSet(From);
 
-        const Bitboard ToBB = getRookAttackBB<Type>(From, OccupiedBB) &
-                              TargetSquares &
+        const Bitboard ToBB = LoadAttackBB(From) & TargetSquares &
                               LineBB[From][S.getKingSquare<C>()];
 
         if constexpr (Type == PTK_Rook) {
@@ -686,8 +718,7 @@ generateOnBoardRookMovesImpl(const StateImpl& S, Move32* __restrict Moves,
         [&](Square From) {
             const bool IsPromotableFrom = PromotableBB[C].isSet(From);
 
-            const Bitboard ToBB =
-                getRookAttackBB<Type>(From, OccupiedBB) & TargetSquares;
+            const Bitboard ToBB = LoadAttackBB(From) & TargetSquares;
 
             if constexpr (Type == PTK_Rook) {
                 const Bitboard PromotableToBB =
@@ -2121,22 +2152,27 @@ inline Move32* generateOnBoardSliderCheckMovesImpl(
     return Moves;
 }
 
+// `AttackCache` must point to storage for the bishop/rook attack bitboards
+// of side `C` (SliderAttackCacheSize entries). The capture pass fills it
+// and the following no-capture pass, called with the same state and
+// occupancy, consumes it.
 template <Color C, bool Capture, bool WilyPromote>
-inline Move32*
-generateOnBoardSliderMovesImpl(const StateImpl& S, Move32* __restrict Moves,
-                               const Bitboard& TargetSquares,
-                               const Bitboard& OccupiedBB) noexcept {
+inline Move32* generateOnBoardSliderMovesImpl(const StateImpl& S,
+                                              Move32* __restrict Moves,
+                                              const Bitboard& TargetSquares,
+                                              const Bitboard& OccupiedBB,
+                                              Bitboard* AttackCache) noexcept {
     Moves = generateOnBoardLanceMovesImpl<C, Capture, WilyPromote>(
         S, Moves, TargetSquares, OccupiedBB);
     Moves =
         generateOnBoardBishopMovesImpl<C, PTK_ProBishop, Capture, WilyPromote>(
-            S, Moves, TargetSquares, OccupiedBB);
+            S, Moves, TargetSquares, OccupiedBB, AttackCache);
     Moves = generateOnBoardBishopMovesImpl<C, PTK_Bishop, Capture, WilyPromote>(
-        S, Moves, TargetSquares, OccupiedBB);
+        S, Moves, TargetSquares, OccupiedBB, AttackCache);
     Moves = generateOnBoardRookMovesImpl<C, PTK_ProRook, Capture, WilyPromote>(
-        S, Moves, TargetSquares, OccupiedBB);
+        S, Moves, TargetSquares, OccupiedBB, AttackCache);
     Moves = generateOnBoardRookMovesImpl<C, PTK_Rook, Capture, WilyPromote>(
-        S, Moves, TargetSquares, OccupiedBB);
+        S, Moves, TargetSquares, OccupiedBB, AttackCache);
 
     return Moves;
 }
@@ -2169,8 +2205,12 @@ inline Move32* generateLegalEvasionMovesImpl(
     Moves =
         generateOnBoardOneStepGoldKindsMovesImpl<C, true>(S, Moves, CheckerBB);
 
+    assert((S.getBitboard<C, PTK_Bishop>() | S.getBitboard<C, PTK_ProBishop>() |
+            S.getBitboard<C, PTK_Rook>() | S.getBitboard<C, PTK_ProRook>())
+               .popCount() <= SliderAttackCacheSize);
+    Bitboard SliderAttackCache[SliderAttackCacheSize];
     Moves = generateOnBoardSliderMovesImpl<C, true, WilyPromote>(
-        S, Moves, CheckerBB, OccupiedBB);
+        S, Moves, CheckerBB, OccupiedBB, SliderAttackCache);
 
     const Square CheckerSq = CheckerBB.getOne();
     const Bitboard BetweenBB = getBetweenBB(S.getKingSquare<C>(), CheckerSq);
@@ -2184,7 +2224,7 @@ inline Move32* generateLegalEvasionMovesImpl(
         Moves = generateOnBoardOneStepMovesImpl<C, false, WilyPromote>(
             S, Moves, BetweenBB);
         Moves = generateOnBoardSliderMovesImpl<C, false, WilyPromote>(
-            S, Moves, BetweenBB, OccupiedBB);
+            S, Moves, BetweenBB, OccupiedBB, SliderAttackCache);
     }
 
     // Dropping a piece (a.k.a. aigoma).
@@ -2203,8 +2243,12 @@ inline Move32* generateLegalMovesImpl(const StateImpl& S,
     // Captures.
     Moves = generateOnBoardOneStepMovesImpl<C, true, WilyPromote>(S, Moves,
                                                                   OpponentBB);
+    assert((S.getBitboard<C, PTK_Bishop>() | S.getBitboard<C, PTK_ProBishop>() |
+            S.getBitboard<C, PTK_Rook>() | S.getBitboard<C, PTK_ProRook>())
+               .popCount() <= SliderAttackCacheSize);
+    Bitboard SliderAttackCache[SliderAttackCacheSize];
     Moves = generateOnBoardSliderMovesImpl<C, true, WilyPromote>(
-        S, Moves, OpponentBB, OccupiedBB);
+        S, Moves, OpponentBB, OccupiedBB, SliderAttackCache);
 
     if constexpr (!CaptureOnly) {
         const Bitboard EmptyBB = ~OccupiedBB;
@@ -2215,7 +2259,7 @@ inline Move32* generateLegalMovesImpl(const StateImpl& S,
         Moves = generateOnBoardOneStepMovesImpl<C, false, WilyPromote>(S, Moves,
                                                                        EmptyBB);
         Moves = generateOnBoardSliderMovesImpl<C, false, WilyPromote>(
-            S, Moves, EmptyBB, OccupiedBB);
+            S, Moves, EmptyBB, OccupiedBB, SliderAttackCache);
     }
 
     return Moves;
