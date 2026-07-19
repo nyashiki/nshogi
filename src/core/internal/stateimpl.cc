@@ -678,10 +678,9 @@ int32_t StateImpl::computeSEEImpl(const Move32 Move,
                                   const int32_t* const PieceValues,
                                   const int32_t Threshold) const noexcept {
     assert(!Move.isNone() && !Move.isNull());
-    assert(!Move.drop());
-    assert(Move.capturePieceType() != PTK_Empty);
-    assert(getPieceType(getPosition().pieceOn(Move.to())) ==
-           Move.capturePieceType());
+
+    const bool IsDrop = Move.drop();
+    const bool IsCapture = Move.capturePieceType() != PTK_Empty;
 
     const StepHelper* CurrentStepHelper = &Helper.getCurrentStepHelper();
 
@@ -691,7 +690,9 @@ int32_t StateImpl::computeSEEImpl(const Move32 Move,
     int32_t Gains[64];
 
     // The exchange starts with the given move, which is assumed to be legal.
-    Gains[0] = PieceValues[Move.capturePieceType()];
+    // A non-capture (a drop or a quiet board move) captures nothing: the
+    // exchange value consists only of what the opponent wins back on To.
+    Gains[0] = IsCapture ? PieceValues[Move.capturePieceType()] : 0;
 
     PieceTypeKind TargetType = Move.pieceType();
     if (Move.promote()) {
@@ -724,16 +725,20 @@ int32_t StateImpl::computeSEEImpl(const Move32 Move,
 
     bitboard::Bitboard BBs[2] = {getBitboard(Black), getBitboard(White)};
 
-    // My piece must exist.
-    assert(BBs[C].isSet(Move.from()));
-    // The opponent's piece must exist.
-    assert(BBs[~C].isSet(Move.to()));
-
     // Move my piece. Only From squares get vacated during the exchange:
-    // To remains occupied all the time, so its ownership is not tracked.
-    BBs[C].toggleBit(Move.from());
+    // To remains occupied all the time (a non-capture occupies it with
+    // this very move), so its ownership is not tracked.
+    if (!IsDrop) {
+        // My piece must exist.
+        assert(BBs[C].isSet(Move.from()));
+        BBs[C].toggleBit(Move.from());
+    }
+    if (IsCapture) {
+        // The opponent's piece must exist.
+        assert(BBs[~C].isSet(Move.to()));
+        BBs[~C].toggleBit(Move.to());
+    }
     BBs[C].toggleBit(Move.to());
-    BBs[~C].toggleBit(Move.to());
 
     bitboard::Bitboard OccupiedBB = BBs[Black] | BBs[White];
 
@@ -744,12 +749,19 @@ int32_t StateImpl::computeSEEImpl(const Move32 Move,
 
     // When a capture delivers a discovered check, capturing on To cannot
     // resolve the check because To never lies on the discovered line
-    // (To has been occupied since the root position, so a line containing
-    // To would have had two blockers and would not have been recorded).
-    // Hence the only possible recapture is by the king. A direct check,
-    // on the other hand, is always resolved by capturing the checker on To
-    // and needs no special handling.
+    // (for a capture, To has been occupied since the root position, so a
+    // line containing To would have had two blockers and would not have
+    // been recorded). Hence the only possible recapture is by the king.
+    // A direct check, on the other hand, is always resolved by capturing
+    // the checker on To and needs no special handling.
+    // When the first move is a non-capture, To was empty at the root and a
+    // recorded line may pass through To; the piece sitting on To keeps such
+    // a line blocked, so the test below can produce a false positive. That
+    // only suppresses a legal recapture and cuts the exchange short: the
+    // SEE value can only be overestimated by it, never underestimated.
+    // A drop vacates no square and cannot deliver a discovered check.
     bool OnlyKingCanCapture =
+        !IsDrop &&
         seeGivesDiscoveredCheck(C, Move.from(), BBs[C], CurrentStepHelper);
 
     C = ~C;

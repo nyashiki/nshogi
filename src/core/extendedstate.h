@@ -65,9 +65,11 @@ class ExtendedState : public State {
     /// `ExtendedState.ComputeSEEMatchesSmallestMoveIteration` tolerates
     /// a mismatch).
     ///
-    /// @param Move The move to evaluate. It must be a legal capture move
-    /// (a board move that captures an opponent's piece) in the current
-    /// position.
+    /// @param Move The move to evaluate. It must be a legal move in the
+    /// current position. Non-captures are allowed: for a quiet board move
+    /// or a drop the exchange value consists only of what the opponent
+    /// wins back on the destination square (so the value is never
+    /// positive unless the move promotes).
     /// @param PieceValues An array of piece values used for the SEE
     /// calculation. The array should be indexed by `PieceTypeKind` and contain
     /// the values of each piece type (i.e., `PieceValues[PTK_Pawn]` should give
@@ -91,9 +93,8 @@ class ExtendedState : public State {
     /// decisions in a search). All the notes on `computeSEE()` apply to
     /// this function as well.
     ///
-    /// @param Move The move to evaluate. It must be a legal capture move
-    /// (a board move that captures an opponent's piece) in the current
-    /// position.
+    /// @param Move The move to evaluate. It must be a legal move in the
+    /// current position (non-captures are allowed, see `computeSEE()`).
     /// @param PieceValues An array of piece values used for the SEE
     /// calculation. See `computeSEE()` for the requirements.
     /// @param Threshold The threshold to compare the SEE value against.

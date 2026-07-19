@@ -1233,6 +1233,91 @@ TEST(ExtendedState, ComputeSEEGEMatchesComputeSEE) {
     }
 }
 
+TEST(ExtendedState, ComputeSEEDropHandmade1) {
+    // A silver dropped on a square attacked by a pawn and defended by
+    // nothing just hangs: SEE = -(silver).
+    const std::string Sfen = "k8/9/9/4p4/9/9/9/9/8K b S 1";
+    nshogi::core::ExtendedState State =
+        nshogi::io::sfen::StateBuilder::newState(Sfen);
+
+    const auto Move =
+        nshogi::io::sfen::sfenToMove32(State.getPosition(), "S*5e");
+    TEST_ASSERT_EQ(-SEEValue[nshogi::core::PTK_Silver],
+                   State.computeSEE(Move, SEEValue));
+}
+
+TEST(ExtendedState, ComputeSEEDropHandmade2) {
+    // The same drop but defended by an own pawn: the opponent wins the
+    // silver, the pawn wins the opponent's pawn back.
+    const std::string Sfen = "k8/9/9/4p4/9/4P4/9/9/8K b S 1";
+    nshogi::core::ExtendedState State =
+        nshogi::io::sfen::StateBuilder::newState(Sfen);
+
+    const auto Move =
+        nshogi::io::sfen::sfenToMove32(State.getPosition(), "S*5e");
+
+    const int32_t Expected =
+        -SEEValue[nshogi::core::PTK_Silver] + SEEValue[nshogi::core::PTK_Pawn];
+    const int32_t SEE = State.computeSEE(Move, SEEValue);
+    TEST_ASSERT_EQ(Expected, SEE);
+
+    TEST_ASSERT_TRUE(State.computeSEEGE(Move, SEEValue, SEE));
+    TEST_ASSERT_FALSE(State.computeSEEGE(Move, SEEValue, SEE + 1));
+}
+
+TEST(ExtendedState, ComputeSEEQuietHandmade1) {
+    // A rook moved to a square attacked by a pawn and defended by
+    // nothing just hangs: SEE = -(rook).
+    const std::string Sfen = "k8/9/9/4p4/9/9/9/4R4/8K b - 1";
+    nshogi::core::ExtendedState State =
+        nshogi::io::sfen::StateBuilder::newState(Sfen);
+
+    const auto Move =
+        nshogi::io::sfen::sfenToMove32(State.getPosition(), "5h5e");
+    TEST_ASSERT_EQ(-SEEValue[nshogi::core::PTK_Rook],
+                   State.computeSEE(Move, SEEValue));
+}
+
+TEST(ExtendedState, ComputeSEEGEMatchesComputeSEEAllMoves) {
+    // The same consistency test as above, but over every legal move
+    // (drops and quiet board moves included).
+    const int N = 50;
+    std::mt19937_64 mt(20260713);
+
+    for (int I = 0; I < N; ++I) {
+        nshogi::core::ExtendedState State =
+            nshogi::core::StateBuilder::getInitialState();
+
+        for (uint16_t Ply = 0; Ply < 512; ++Ply) {
+            const auto Moves =
+                nshogi::core::MoveGenerator::generateLegalMoves(State);
+
+            if (Moves.size() == 0) {
+                break;
+            }
+
+            for (const auto& Move : Moves) {
+                const int32_t SEE = State.computeSEE(Move, SEEValue);
+
+                const int32_t RandomThreshold =
+                    static_cast<int32_t>(mt() % 4001) - 2000;
+                const int32_t Thresholds[] = {
+                    SEE - 1, SEE, SEE + 1, -1000, 0, 1000, RandomThreshold,
+                };
+
+                for (const int32_t Threshold : Thresholds) {
+                    TEST_ASSERT_EQ(
+                        State.computeSEEGE(Move, SEEValue, Threshold),
+                        SEE >= Threshold);
+                }
+            }
+
+            const auto RandomMove = Moves[mt() % Moves.size()];
+            State.doMove(RandomMove);
+        }
+    }
+}
+
 TEST(ExtendedState, ComputeSEEMatchesSmallestMoveIteration) {
     const int N = 1000;
     std::mt19937_64 mt(20260610);
