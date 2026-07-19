@@ -118,8 +118,7 @@ FeatureBitboard processFeature(const core::State& State,
     } else if constexpr (FT == FeatureType::FT_MyProRook) {
         return processPiece<C, C>(State, core::PTK_ProRook);
     } else if constexpr (FT == FeatureType::FT_MyBishopAndProBishop) {
-        return processPiece<C, C>(State, core::PTK_Bishop,
-                                  core::PTK_ProBishop);
+        return processPiece<C, C>(State, core::PTK_Bishop, core::PTK_ProBishop);
     } else if constexpr (FT == FeatureType::FT_MyRookAndProRook) {
         return processPiece<C, C>(State, core::PTK_Rook, core::PTK_ProRook);
     } else if constexpr (FT == FeatureType::FT_OpPawn) {

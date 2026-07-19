@@ -890,10 +890,10 @@ std::vector<nshogi::ml::FeatureType> allFeatureTypes() {
 using AllFeatureStackComptime = nshogi::ml::FeatureStackComptime<
     nshogi::ml::FeatureType::FT_Black, nshogi::ml::FeatureType::FT_White,
     nshogi::ml::FeatureType::FT_MyPawn, nshogi::ml::FeatureType::FT_MyLance,
-    nshogi::ml::FeatureType::FT_MyKnight,
-    nshogi::ml::FeatureType::FT_MySilver, nshogi::ml::FeatureType::FT_MyGold,
-    nshogi::ml::FeatureType::FT_MyKing, nshogi::ml::FeatureType::FT_MyBishop,
-    nshogi::ml::FeatureType::FT_MyRook, nshogi::ml::FeatureType::FT_MyProPawn,
+    nshogi::ml::FeatureType::FT_MyKnight, nshogi::ml::FeatureType::FT_MySilver,
+    nshogi::ml::FeatureType::FT_MyGold, nshogi::ml::FeatureType::FT_MyKing,
+    nshogi::ml::FeatureType::FT_MyBishop, nshogi::ml::FeatureType::FT_MyRook,
+    nshogi::ml::FeatureType::FT_MyProPawn,
     nshogi::ml::FeatureType::FT_MyProLance,
     nshogi::ml::FeatureType::FT_MyProKnight,
     nshogi::ml::FeatureType::FT_MyProSilver,
@@ -902,10 +902,10 @@ using AllFeatureStackComptime = nshogi::ml::FeatureStackComptime<
     nshogi::ml::FeatureType::FT_MyBishopAndProBishop,
     nshogi::ml::FeatureType::FT_MyRookAndProRook,
     nshogi::ml::FeatureType::FT_OpPawn, nshogi::ml::FeatureType::FT_OpLance,
-    nshogi::ml::FeatureType::FT_OpKnight,
-    nshogi::ml::FeatureType::FT_OpSilver, nshogi::ml::FeatureType::FT_OpGold,
-    nshogi::ml::FeatureType::FT_OpKing, nshogi::ml::FeatureType::FT_OpBishop,
-    nshogi::ml::FeatureType::FT_OpRook, nshogi::ml::FeatureType::FT_OpProPawn,
+    nshogi::ml::FeatureType::FT_OpKnight, nshogi::ml::FeatureType::FT_OpSilver,
+    nshogi::ml::FeatureType::FT_OpGold, nshogi::ml::FeatureType::FT_OpKing,
+    nshogi::ml::FeatureType::FT_OpBishop, nshogi::ml::FeatureType::FT_OpRook,
+    nshogi::ml::FeatureType::FT_OpProPawn,
     nshogi::ml::FeatureType::FT_OpProLance,
     nshogi::ml::FeatureType::FT_OpProKnight,
     nshogi::ml::FeatureType::FT_OpProSilver,
@@ -970,8 +970,7 @@ using AllFeatureStackComptime = nshogi::ml::FeatureStackComptime<
     nshogi::ml::FeatureType::FT_OpStandBishop1,
     nshogi::ml::FeatureType::FT_OpStandBishop2,
     nshogi::ml::FeatureType::FT_OpStandRook1,
-    nshogi::ml::FeatureType::FT_OpStandRook2,
-    nshogi::ml::FeatureType::FT_Check,
+    nshogi::ml::FeatureType::FT_OpStandRook2, nshogi::ml::FeatureType::FT_Check,
     nshogi::ml::FeatureType::FT_NoMyPawnFile,
     nshogi::ml::FeatureType::FT_NoOpPawnFile,
     nshogi::ml::FeatureType::FT_Progress,
@@ -985,23 +984,21 @@ using AllFeatureStackComptime = nshogi::ml::FeatureStackComptime<
     nshogi::ml::FeatureType::FT_OpDeclarationScore,
     nshogi::ml::FeatureType::FT_MyPieceScore,
     nshogi::ml::FeatureType::FT_OpPieceScore,
-    nshogi::ml::FeatureType::FT_MyAttack,
-    nshogi::ml::FeatureType::FT_OpAttack,
+    nshogi::ml::FeatureType::FT_MyAttack, nshogi::ml::FeatureType::FT_OpAttack,
     nshogi::ml::FeatureType::FT_MyDeclarationRemaining,
     nshogi::ml::FeatureType::FT_OpDeclarationRemaining>;
 
-static_assert(AllFeatureStackComptime::size() ==
-                  static_cast<std::size_t>(
-                      nshogi::ml::FeatureType::NumFeatureType),
-              "AllFeatureStackComptime must enumerate every FeatureType");
+static_assert(
+    AllFeatureStackComptime::size() ==
+        static_cast<std::size_t>(nshogi::ml::FeatureType::NumFeatureType),
+    "AllFeatureStackComptime must enumerate every FeatureType");
 
 void checkEqualComptimeAndRuntimeAllTypes(
     const nshogi::core::State& State, const nshogi::core::StateConfig& Config) {
     const auto Types = allFeatureTypes();
 
     const AllFeatureStackComptime FeaturesComptime(State, Config);
-    const nshogi::ml::FeatureStackRuntime FeaturesRuntime(Types, State,
-                                                          Config);
+    const nshogi::ml::FeatureStackRuntime FeaturesRuntime(Types, State, Config);
 
     TEST_ASSERT_EQ(FeaturesRuntime.size(), Types.size());
 
