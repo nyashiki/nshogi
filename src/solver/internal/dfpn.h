@@ -55,23 +55,23 @@ struct DfPnValue {
 struct DfPnNodeTTEntry {
  public:
     uint64_t positionHash() const {
-        return DataU64[1] & HASH_MASK;
+        return PositionData & HASH_MASK;
     }
 
     core::Stands standsAttacking() const {
-        return static_cast<core::Stands>(DataU32[0]);
+        return static_cast<core::Stands>(StandsAttackingValue);
     }
 
     uint16_t proofNumber() const {
-        return DataU16[2];
+        return ProofNumberValue;
     }
 
     uint16_t disproofNumber() const {
-        return DataU16[3];
+        return DisproofNumberValue;
     }
 
     uint16_t generation() const {
-        return static_cast<uint16_t>(DataU64[1] >> HASH_BITS);
+        return static_cast<uint16_t>(PositionData >> HASH_BITS);
     }
 
     bool isSamePosition(uint64_t Hash) const {
@@ -79,29 +79,33 @@ struct DfPnNodeTTEntry {
     }
 
     void setPositionHash(uint64_t Hash) {
-        const uint64_t CurrentGeneration = DataU64[1] & GENERATION_MASK;
-        DataU64[1] = CurrentGeneration | (Hash >> (64 - HASH_BITS));
+        const uint64_t CurrentGeneration = PositionData & GENERATION_MASK;
+        PositionData = CurrentGeneration | (Hash >> (64 - HASH_BITS));
     }
 
     void setStandsAttacking(core::Stands Stands) {
-        DataU32[0] = static_cast<uint32_t>(Stands);
+        StandsAttackingValue = static_cast<uint32_t>(Stands);
     }
 
     void setProofNumber(uint16_t Proof) {
-        DataU16[2] = Proof;
+        ProofNumberValue = Proof;
     }
 
     void setDisproofNumber(uint16_t Disproof) {
-        DataU16[3] = Disproof;
+        DisproofNumberValue = Disproof;
     }
 
     void setGeneration(uint16_t NewGeneration) {
-        const uint64_t Hash = DataU64[1] & HASH_MASK;
-        DataU64[1] = (static_cast<uint64_t>(NewGeneration) << HASH_BITS) | Hash;
+        const uint64_t Hash = PositionData & HASH_MASK;
+        PositionData =
+            (static_cast<uint64_t>(NewGeneration) << HASH_BITS) | Hash;
     }
 
     void reset() {
-        DataU64[1] = 0;
+        StandsAttackingValue = 0;
+        ProofNumberValue = 0;
+        DisproofNumberValue = 0;
+        PositionData = 0;
     }
 
  private:
@@ -109,11 +113,10 @@ struct DfPnNodeTTEntry {
     static constexpr uint64_t HASH_MASK = (1ULL << HASH_BITS) - 1ULL;
     static constexpr uint64_t GENERATION_MASK = ~HASH_MASK;
 
-    union {
-        uint64_t DataU64[2];
-        uint32_t DataU32[4];
-        uint16_t DataU16[8];
-    };
+    uint32_t StandsAttackingValue;
+    uint16_t ProofNumberValue;
+    uint16_t DisproofNumberValue;
+    uint64_t PositionData;
 };
 
 // sizeof(DfPnNodeTTBundle) == 256 byte.
