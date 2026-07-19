@@ -296,7 +296,7 @@ Additional Inherited Members</h2></td></tr>
 <dl class="section note"><dt>Note</dt><dd>This function knows only the slider lines that are effective at the current position. A slider line toward either king that is blocked by two or more pieces at the current position may become an effective pin or check line during the exchange once the blocking pieces leave their squares; such lines are not taken into account. Therefore, when an exchange makes such a line effective, this function may not return the correct value (this is exactly the condition under which the equivalence test <code>ExtendedState.ComputeSEEMatchesSmallestMoveIteration</code> tolerates a mismatch).</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">Move</td><td>The move to evaluate. It must be a legal capture move (a board move that captures an opponent's piece) in the current position. </td></tr>
+    <tr><td class="paramname">Move</td><td>The move to evaluate. It must be a legal move in the current position. Non-captures are allowed: for a quiet board move or a drop the exchange value consists only of what the opponent wins back on the destination square (so the value is never positive unless the move promotes). </td></tr>
     <tr><td class="paramname">PieceValues</td><td>An array of piece values used for the SEE calculation. The array should be indexed by <code>PieceTypeKind</code> and contain the values of each piece type (i.e., <code>PieceValues[PTK_Pawn]</code> should give the value of a pawn). The promoted piece types must not be valued less than their corresponding raw piece types.</td></tr>
   </table>
   </dd>
@@ -349,7 +349,7 @@ Additional Inherited Members</h2></td></tr>
 <p >This function is equivalent to <code>computeSEE(Move, PieceValues) &gt;= Threshold</code>, but it stops simulating the exchange as soon as the outcome of the comparison is decided, so it can be faster than computing the exact SEE value when only the comparison result is needed (e.g. for pruning decisions in a search). All the notes on <code><a class="el" href="classnshogi_1_1core_1_1ExtendedState.html#ad912a65743982fcd2bc14ff56a3574ef" title="Compute the Static Exchange Evaluation (SEE) for a given move.">computeSEE()</a></code> apply to this function as well.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">Move</td><td>The move to evaluate. It must be a legal capture move (a board move that captures an opponent's piece) in the current position. </td></tr>
+    <tr><td class="paramname">Move</td><td>The move to evaluate. It must be a legal move in the current position (non-captures are allowed, see <code><a class="el" href="classnshogi_1_1core_1_1ExtendedState.html#ad912a65743982fcd2bc14ff56a3574ef" title="Compute the Static Exchange Evaluation (SEE) for a given move.">computeSEE()</a></code>). </td></tr>
     <tr><td class="paramname">PieceValues</td><td>An array of piece values used for the SEE calculation. See <code><a class="el" href="classnshogi_1_1core_1_1ExtendedState.html#ad912a65743982fcd2bc14ff56a3574ef" title="Compute the Static Exchange Evaluation (SEE) for a given move.">computeSEE()</a></code> for the requirements. </td></tr>
     <tr><td class="paramname">Threshold</td><td>The threshold to compare the SEE value against.</td></tr>
   </table>
