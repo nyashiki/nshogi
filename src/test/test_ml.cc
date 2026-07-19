@@ -875,6 +875,144 @@ void checkEqualComptimeAndRuntime(const nshogi::core::State& State,
     }
 }
 
+std::vector<nshogi::ml::FeatureType> allFeatureTypes() {
+    std::vector<nshogi::ml::FeatureType> Types;
+    for (std::size_t I = 0;
+         I < static_cast<std::size_t>(nshogi::ml::FeatureType::NumFeatureType);
+         ++I) {
+        Types.push_back(static_cast<nshogi::ml::FeatureType>(I));
+    }
+    return Types;
+}
+
+// Every feature type in enum order, so that comptime and runtime stacks
+// can be compared exhaustively.
+using AllFeatureStackComptime = nshogi::ml::FeatureStackComptime<
+    nshogi::ml::FeatureType::FT_Black, nshogi::ml::FeatureType::FT_White,
+    nshogi::ml::FeatureType::FT_MyPawn, nshogi::ml::FeatureType::FT_MyLance,
+    nshogi::ml::FeatureType::FT_MyKnight, nshogi::ml::FeatureType::FT_MySilver,
+    nshogi::ml::FeatureType::FT_MyGold, nshogi::ml::FeatureType::FT_MyKing,
+    nshogi::ml::FeatureType::FT_MyBishop, nshogi::ml::FeatureType::FT_MyRook,
+    nshogi::ml::FeatureType::FT_MyProPawn,
+    nshogi::ml::FeatureType::FT_MyProLance,
+    nshogi::ml::FeatureType::FT_MyProKnight,
+    nshogi::ml::FeatureType::FT_MyProSilver,
+    nshogi::ml::FeatureType::FT_MyProBishop,
+    nshogi::ml::FeatureType::FT_MyProRook,
+    nshogi::ml::FeatureType::FT_MyBishopAndProBishop,
+    nshogi::ml::FeatureType::FT_MyRookAndProRook,
+    nshogi::ml::FeatureType::FT_OpPawn, nshogi::ml::FeatureType::FT_OpLance,
+    nshogi::ml::FeatureType::FT_OpKnight, nshogi::ml::FeatureType::FT_OpSilver,
+    nshogi::ml::FeatureType::FT_OpGold, nshogi::ml::FeatureType::FT_OpKing,
+    nshogi::ml::FeatureType::FT_OpBishop, nshogi::ml::FeatureType::FT_OpRook,
+    nshogi::ml::FeatureType::FT_OpProPawn,
+    nshogi::ml::FeatureType::FT_OpProLance,
+    nshogi::ml::FeatureType::FT_OpProKnight,
+    nshogi::ml::FeatureType::FT_OpProSilver,
+    nshogi::ml::FeatureType::FT_OpProBishop,
+    nshogi::ml::FeatureType::FT_OpProRook,
+    nshogi::ml::FeatureType::FT_OpBishopAndProBishop,
+    nshogi::ml::FeatureType::FT_OpRookAndProRook,
+    nshogi::ml::FeatureType::FT_MyStandPawn1,
+    nshogi::ml::FeatureType::FT_MyStandPawn2,
+    nshogi::ml::FeatureType::FT_MyStandPawn3,
+    nshogi::ml::FeatureType::FT_MyStandPawn4,
+    nshogi::ml::FeatureType::FT_MyStandPawn5,
+    nshogi::ml::FeatureType::FT_MyStandPawn6,
+    nshogi::ml::FeatureType::FT_MyStandPawn7,
+    nshogi::ml::FeatureType::FT_MyStandPawn8,
+    nshogi::ml::FeatureType::FT_MyStandPawn9,
+    nshogi::ml::FeatureType::FT_MyStandLance1,
+    nshogi::ml::FeatureType::FT_MyStandLance2,
+    nshogi::ml::FeatureType::FT_MyStandLance3,
+    nshogi::ml::FeatureType::FT_MyStandLance4,
+    nshogi::ml::FeatureType::FT_MyStandKnight1,
+    nshogi::ml::FeatureType::FT_MyStandKnight2,
+    nshogi::ml::FeatureType::FT_MyStandKnight3,
+    nshogi::ml::FeatureType::FT_MyStandKnight4,
+    nshogi::ml::FeatureType::FT_MyStandSilver1,
+    nshogi::ml::FeatureType::FT_MyStandSilver2,
+    nshogi::ml::FeatureType::FT_MyStandSilver3,
+    nshogi::ml::FeatureType::FT_MyStandSilver4,
+    nshogi::ml::FeatureType::FT_MyStandGold1,
+    nshogi::ml::FeatureType::FT_MyStandGold2,
+    nshogi::ml::FeatureType::FT_MyStandGold3,
+    nshogi::ml::FeatureType::FT_MyStandGold4,
+    nshogi::ml::FeatureType::FT_MyStandBishop1,
+    nshogi::ml::FeatureType::FT_MyStandBishop2,
+    nshogi::ml::FeatureType::FT_MyStandRook1,
+    nshogi::ml::FeatureType::FT_MyStandRook2,
+    nshogi::ml::FeatureType::FT_OpStandPawn1,
+    nshogi::ml::FeatureType::FT_OpStandPawn2,
+    nshogi::ml::FeatureType::FT_OpStandPawn3,
+    nshogi::ml::FeatureType::FT_OpStandPawn4,
+    nshogi::ml::FeatureType::FT_OpStandPawn5,
+    nshogi::ml::FeatureType::FT_OpStandPawn6,
+    nshogi::ml::FeatureType::FT_OpStandPawn7,
+    nshogi::ml::FeatureType::FT_OpStandPawn8,
+    nshogi::ml::FeatureType::FT_OpStandPawn9,
+    nshogi::ml::FeatureType::FT_OpStandLance1,
+    nshogi::ml::FeatureType::FT_OpStandLance2,
+    nshogi::ml::FeatureType::FT_OpStandLance3,
+    nshogi::ml::FeatureType::FT_OpStandLance4,
+    nshogi::ml::FeatureType::FT_OpStandKnight1,
+    nshogi::ml::FeatureType::FT_OpStandKnight2,
+    nshogi::ml::FeatureType::FT_OpStandKnight3,
+    nshogi::ml::FeatureType::FT_OpStandKnight4,
+    nshogi::ml::FeatureType::FT_OpStandSilver1,
+    nshogi::ml::FeatureType::FT_OpStandSilver2,
+    nshogi::ml::FeatureType::FT_OpStandSilver3,
+    nshogi::ml::FeatureType::FT_OpStandSilver4,
+    nshogi::ml::FeatureType::FT_OpStandGold1,
+    nshogi::ml::FeatureType::FT_OpStandGold2,
+    nshogi::ml::FeatureType::FT_OpStandGold3,
+    nshogi::ml::FeatureType::FT_OpStandGold4,
+    nshogi::ml::FeatureType::FT_OpStandBishop1,
+    nshogi::ml::FeatureType::FT_OpStandBishop2,
+    nshogi::ml::FeatureType::FT_OpStandRook1,
+    nshogi::ml::FeatureType::FT_OpStandRook2, nshogi::ml::FeatureType::FT_Check,
+    nshogi::ml::FeatureType::FT_NoMyPawnFile,
+    nshogi::ml::FeatureType::FT_NoOpPawnFile,
+    nshogi::ml::FeatureType::FT_Progress,
+    nshogi::ml::FeatureType::FT_ProgressUnit,
+    nshogi::ml::FeatureType::FT_RuleDeclare27,
+    nshogi::ml::FeatureType::FT_RuleDraw24,
+    nshogi::ml::FeatureType::FT_RuleTrying,
+    nshogi::ml::FeatureType::FT_MyDrawValue,
+    nshogi::ml::FeatureType::FT_OpDrawValue,
+    nshogi::ml::FeatureType::FT_MyDeclarationScore,
+    nshogi::ml::FeatureType::FT_OpDeclarationScore,
+    nshogi::ml::FeatureType::FT_MyPieceScore,
+    nshogi::ml::FeatureType::FT_OpPieceScore,
+    nshogi::ml::FeatureType::FT_MyAttack, nshogi::ml::FeatureType::FT_OpAttack,
+    nshogi::ml::FeatureType::FT_MyDeclarationRemaining,
+    nshogi::ml::FeatureType::FT_OpDeclarationRemaining>;
+
+static_assert(
+    AllFeatureStackComptime::size() ==
+        static_cast<std::size_t>(nshogi::ml::FeatureType::NumFeatureType),
+    "AllFeatureStackComptime must enumerate every FeatureType");
+
+void checkEqualComptimeAndRuntimeAllTypes(
+    const nshogi::core::State& State, const nshogi::core::StateConfig& Config) {
+    const auto Types = allFeatureTypes();
+
+    const AllFeatureStackComptime FeaturesComptime(State, Config);
+    const nshogi::ml::FeatureStackRuntime FeaturesRuntime(Types, State, Config);
+
+    TEST_ASSERT_EQ(FeaturesRuntime.size(), Types.size());
+
+    for (std::size_t I = 0; I < Types.size(); ++I) {
+        TEST_ASSERT_EQ(FeaturesComptime.get(I).getValue(),
+                       FeaturesRuntime.get(I).getValue());
+        TEST_ASSERT_EQ(
+            FeatureBitboardUtil::getBitboard(FeaturesComptime.get(I)),
+            FeatureBitboardUtil::getBitboard(FeaturesRuntime.get(I)));
+        TEST_ASSERT_EQ(FeaturesComptime.get(I).isRotated(),
+                       FeaturesRuntime.get(I).isRotated());
+    }
+}
+
 } // namespace
 
 TEST(ML, FeatureType) {
@@ -991,6 +1129,7 @@ TEST(ML, FeatureType) {
 
         checkFeatureType(State, Config);
         checkFeatureTypeRuntime(State, Config);
+        checkEqualComptimeAndRuntimeAllTypes(State, Config);
     }
 }
 
@@ -1018,6 +1157,7 @@ TEST(ML, FeatureTypeRandom) {
             State.doMove(NextMove);
 
             checkEqualComptimeAndRuntime(State, Config);
+            checkEqualComptimeAndRuntimeAllTypes(State, Config);
         }
     }
 }
