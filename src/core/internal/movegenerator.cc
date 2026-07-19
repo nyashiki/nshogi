@@ -500,11 +500,11 @@ generateOnBoardLanceMovesImpl(const StateImpl& S, Move32* __restrict Moves,
 // with the same occupancy replays them instead of recomputing. Both passes
 // enumerate the pieces in the same order, so a single cursor suffices.
 template <Color C, PieceTypeKind Type, bool Capture, bool WilyPromote>
-inline Move32*
-generateOnBoardBishopMovesImpl(const StateImpl& S, Move32* __restrict Moves,
-                               const Bitboard& TargetSquares,
-                               const Bitboard& OccupiedBB,
-                               Bitboard*& AttackCache) noexcept {
+inline Move32* generateOnBoardBishopMovesImpl(const StateImpl& S,
+                                              Move32* __restrict Moves,
+                                              const Bitboard& TargetSquares,
+                                              const Bitboard& OccupiedBB,
+                                              Bitboard*& AttackCache) noexcept {
     static_assert(Type == PTK_Bishop || Type == PTK_ProBishop,
                   "Type should be PTK_Bishop or PTK_ProBishop.");
 
@@ -638,11 +638,11 @@ generateOnBoardBishopMovesImpl(const StateImpl& S, Move32* __restrict Moves,
 
 // See the comment on generateOnBoardBishopMovesImpl() about `AttackCache`.
 template <Color C, PieceTypeKind Type, bool Capture, bool WilyPromote>
-inline Move32*
-generateOnBoardRookMovesImpl(const StateImpl& S, Move32* __restrict Moves,
-                             const Bitboard& TargetSquares,
-                             const Bitboard& OccupiedBB,
-                             Bitboard*& AttackCache) noexcept {
+inline Move32* generateOnBoardRookMovesImpl(const StateImpl& S,
+                                            Move32* __restrict Moves,
+                                            const Bitboard& TargetSquares,
+                                            const Bitboard& OccupiedBB,
+                                            Bitboard*& AttackCache) noexcept {
     static_assert(Type == PTK_Rook || Type == PTK_ProRook,
                   "Type should be PTK_Rook or PTK_ProRook.");
 
@@ -2157,11 +2157,11 @@ inline Move32* generateOnBoardSliderCheckMovesImpl(
 // and the following no-capture pass, called with the same state and
 // occupancy, consumes it.
 template <Color C, bool Capture, bool WilyPromote>
-inline Move32*
-generateOnBoardSliderMovesImpl(const StateImpl& S, Move32* __restrict Moves,
-                               const Bitboard& TargetSquares,
-                               const Bitboard& OccupiedBB,
-                               Bitboard* AttackCache) noexcept {
+inline Move32* generateOnBoardSliderMovesImpl(const StateImpl& S,
+                                              Move32* __restrict Moves,
+                                              const Bitboard& TargetSquares,
+                                              const Bitboard& OccupiedBB,
+                                              Bitboard* AttackCache) noexcept {
     Moves = generateOnBoardLanceMovesImpl<C, Capture, WilyPromote>(
         S, Moves, TargetSquares, OccupiedBB);
     Moves =

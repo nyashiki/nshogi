@@ -775,9 +775,8 @@ inline Bitboard getStepAttackBB(PieceTypeKind Type, Square From) noexcept {
 // the lane border, the high lane contributes only when the low lane has
 // no blocker.
 template <bool CrossesLanes>
-inline __attribute__((always_inline)) Bitboard
-getAscendingRayAttackBB(const Bitboard& OccupiedBB,
-                        const Bitboard& RayBB) noexcept {
+inline __attribute__((always_inline)) Bitboard getAscendingRayAttackBB(
+    const Bitboard& OccupiedBB, const Bitboard& RayBB) noexcept {
     const Bitboard OccupiedOnRayBB = OccupiedBB & RayBB;
     const Bitboard AttackBB =
         (OccupiedOnRayBB ^ OccupiedOnRayBB.subtract(Bitboard(1, 1))) & RayBB;
@@ -800,9 +799,8 @@ getAscendingRayAttackBB(const Bitboard& OccupiedBB,
 // attacked part of the ray. The high lane holds the part of the ray closer
 // to the origin here.
 template <int StepBits, bool CrossesLanes>
-inline __attribute__((always_inline)) Bitboard
-getDescendingRayAttackBB(const Bitboard& OccupiedBB,
-                         const Bitboard& RayBB) noexcept {
+inline __attribute__((always_inline)) Bitboard getDescendingRayAttackBB(
+    const Bitboard& OccupiedBB, const Bitboard& RayBB) noexcept {
     const Bitboard OccupiedOnRayBB = OccupiedBB & RayBB;
 
     // Smear the blockers downward so that every ray square below a

@@ -372,7 +372,6 @@ void initializeCrossStepAttacks() {
     }
 }
 
-
 void initializeLineBB() {
     std::memset(static_cast<void*>(LineBB), 0, sizeof(LineBB));
 
