@@ -1256,8 +1256,8 @@ TEST(ExtendedState, ComputeSEEDropHandmade2) {
     const auto Move =
         nshogi::io::sfen::sfenToMove32(State.getPosition(), "S*5e");
 
-    const int32_t Expected = -SEEValue[nshogi::core::PTK_Silver] +
-                             SEEValue[nshogi::core::PTK_Pawn];
+    const int32_t Expected =
+        -SEEValue[nshogi::core::PTK_Silver] + SEEValue[nshogi::core::PTK_Pawn];
     const int32_t SEE = State.computeSEE(Move, SEEValue);
     TEST_ASSERT_EQ(Expected, SEE);
 
