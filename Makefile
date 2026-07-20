@@ -43,7 +43,10 @@ ifeq ($(BUILD), debug)
 	PYTHON_CXX_FLAGS = $(CXX_FLAGS)
 	OPTIM = -g3
 else
-	CXX_FLAGS = -std=c++20 -Wall -Wextra -Wconversion -Wpedantic -Wshadow -fomit-frame-pointer -fno-stack-protector -flto -DNDEBUG -pipe
+	# -falign-functions=64: pin every function to a cache-line boundary so
+	# that unrelated code-size changes do not shift the alignment of hot
+	# loops between two builds under comparison.
+	CXX_FLAGS = -std=c++20 -Wall -Wextra -Wconversion -Wpedantic -Wshadow -fomit-frame-pointer -fno-stack-protector -falign-functions=64 -flto -DNDEBUG -pipe
 	# CXX_FLAGS = -std=c++20 -Wall -Wextra -Wconversion -Wpedantic -Wshadow -fno-omit-frame-pointer -flto -pipe
 	PYTHON_CXX_FLAGS = -std=c++20 -Wall -Wextra -Wconversion -Wpedantic -Wshadow -fomit-frame-pointer -fno-stack-protector -flto -DNDEBUG -pipe
 	OPTIM = -O3 -ffast-math
