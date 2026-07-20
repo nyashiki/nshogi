@@ -19,6 +19,60 @@ namespace nshogi {
 namespace core {
 namespace internal {
 
+// One directional Kogge-Stone flood: extends GeneratorBB over PropagateBB
+// squares along the direction of `Shift` bits, by doubling steps of
+// 1 + 2 + 4 (a ray is at most eight squares long). PropagateBB must
+// exclude every square a ray cannot pass through: the occupied squares
+// and, when the direction has one, its edge rank; the caller also removes
+// the edge rank from GeneratorBB so that no shift can wrap into a
+// neighboring file. Shifting the flood one more step yields the attacks.
+
+template <int Shift>
+inline bitboard::Bitboard
+koggeStoneRightSi128(bitboard::Bitboard GeneratorBB,
+                     bitboard::Bitboard PropagateBB) noexcept {
+    GeneratorBB |= PropagateBB & GeneratorBB.getRightShiftSi128<Shift>();
+    PropagateBB &= PropagateBB.getRightShiftSi128<Shift>();
+    GeneratorBB |= PropagateBB & GeneratorBB.getRightShiftSi128<2 * Shift>();
+    PropagateBB &= PropagateBB.getRightShiftSi128<2 * Shift>();
+    GeneratorBB |= PropagateBB & GeneratorBB.getRightShiftSi128<4 * Shift>();
+    return GeneratorBB;
+}
+
+template <int Shift>
+inline bitboard::Bitboard
+koggeStoneLeftSi128(bitboard::Bitboard GeneratorBB,
+                    bitboard::Bitboard PropagateBB) noexcept {
+    GeneratorBB |= PropagateBB & GeneratorBB.getLeftShiftSi128<Shift>();
+    PropagateBB &= PropagateBB.getLeftShiftSi128<Shift>();
+    GeneratorBB |= PropagateBB & GeneratorBB.getLeftShiftSi128<2 * Shift>();
+    PropagateBB &= PropagateBB.getLeftShiftSi128<2 * Shift>();
+    GeneratorBB |= PropagateBB & GeneratorBB.getLeftShiftSi128<4 * Shift>();
+    return GeneratorBB;
+}
+
+inline bitboard::Bitboard
+koggeStoneRightEpi64(bitboard::Bitboard GeneratorBB,
+                     bitboard::Bitboard PropagateBB) noexcept {
+    GeneratorBB |= PropagateBB & GeneratorBB.getRightShiftEpi64<1>();
+    PropagateBB &= PropagateBB.getRightShiftEpi64<1>();
+    GeneratorBB |= PropagateBB & GeneratorBB.getRightShiftEpi64<2>();
+    PropagateBB &= PropagateBB.getRightShiftEpi64<2>();
+    GeneratorBB |= PropagateBB & GeneratorBB.getRightShiftEpi64<4>();
+    return GeneratorBB;
+}
+
+inline bitboard::Bitboard
+koggeStoneLeftEpi64(bitboard::Bitboard GeneratorBB,
+                    bitboard::Bitboard PropagateBB) noexcept {
+    GeneratorBB |= PropagateBB & GeneratorBB.getLeftShiftEpi64<1>();
+    PropagateBB &= PropagateBB.getLeftShiftEpi64<1>();
+    GeneratorBB |= PropagateBB & GeneratorBB.getLeftShiftEpi64<2>();
+    PropagateBB &= PropagateBB.getLeftShiftEpi64<2>();
+    GeneratorBB |= PropagateBB & GeneratorBB.getLeftShiftEpi64<4>();
+    return GeneratorBB;
+}
+
 class StateImpl {
  public:
     StateImpl() = delete;
@@ -470,7 +524,7 @@ class StateImpl {
         return StepAttackBB;
     }
 
-    /// Compute Sliders' attacks by Dumb7fill algorithm.
+    /// Compute Sliders' attacks by the Kogge-Stone algorithm.
     template <Color C>
     bitboard::Bitboard
     getSliderAttackBB(Square ExcludeSq = SqInvalid,
@@ -502,64 +556,30 @@ class StateImpl {
         const bitboard::Bitboard NotRankIAndEmptyBB =
             bitboard::RankBB[RankI].andNot(EmptyBB);
 
-        bitboard::Bitboard GeneratorBB;
-        bitboard::Bitboard TempBB;
-
         if (!BishopBB.isZero()) {
-            // clang-format off
-            GeneratorBB = BishopBB;
-            SliderAttackBB |= GeneratorBB = bitboard::RankBB[RankA].andNot(GeneratorBB).getRightShiftSi128<8>();
-            SliderAttackBB |= GeneratorBB = (GeneratorBB & NotRankAAndEmptyBB).getRightShiftSi128<8>();
-            SliderAttackBB |= GeneratorBB = (GeneratorBB & NotRankAAndEmptyBB).getRightShiftSi128<8>();
-            SliderAttackBB |= GeneratorBB = (GeneratorBB & NotRankAAndEmptyBB).getRightShiftSi128<8>();
+            // The generators are pre-masked by the edge rank of each
+            // direction so that no shift can wrap into a neighboring file.
+            const bitboard::Bitboard NoRankABishopBB =
+                bitboard::RankBB[RankA].andNot(BishopBB);
+            const bitboard::Bitboard NoRankIBishopBB =
+                bitboard::RankBB[RankI].andNot(BishopBB);
 
-            TempBB = GeneratorBB & NotRankAAndEmptyBB;
-            if (!TempBB.isZero()) {
-                SliderAttackBB |= GeneratorBB = TempBB.getRightShiftSi128<8>();
-                SliderAttackBB |= GeneratorBB = (GeneratorBB & NotRankAAndEmptyBB).getRightShiftSi128<8>();
-                SliderAttackBB |= GeneratorBB = (GeneratorBB & NotRankAAndEmptyBB).getRightShiftSi128<8>();
-                SliderAttackBB |= GeneratorBB = (GeneratorBB & NotRankAAndEmptyBB).getRightShiftSi128<8>();
-            }
-
-            GeneratorBB = BishopBB;
-            SliderAttackBB |= GeneratorBB = bitboard::RankBB[RankI].andNot(GeneratorBB).getRightShiftSi128<10>();
-            SliderAttackBB |= GeneratorBB = (GeneratorBB & NotRankIAndEmptyBB).getRightShiftSi128<10>();
-            SliderAttackBB |= GeneratorBB = (GeneratorBB & NotRankIAndEmptyBB).getRightShiftSi128<10>();
-            SliderAttackBB |= GeneratorBB = (GeneratorBB & NotRankIAndEmptyBB).getRightShiftSi128<10>();
-            TempBB = GeneratorBB & NotRankIAndEmptyBB;
-            if (!TempBB.isZero()) {
-                SliderAttackBB |= GeneratorBB = TempBB.getRightShiftSi128<10>();
-                SliderAttackBB |= GeneratorBB = (GeneratorBB & NotRankIAndEmptyBB).getRightShiftSi128<10>();
-                SliderAttackBB |= GeneratorBB = (GeneratorBB & NotRankIAndEmptyBB).getRightShiftSi128<10>();
-                SliderAttackBB |= GeneratorBB = (GeneratorBB & NotRankIAndEmptyBB).getRightShiftSi128<10>();
-            }
-
-            GeneratorBB = BishopBB;
-            SliderAttackBB |= GeneratorBB = bitboard::RankBB[RankI].andNot(GeneratorBB).getLeftShiftSi128<8>();
-            SliderAttackBB |= GeneratorBB = (GeneratorBB & NotRankIAndEmptyBB).getLeftShiftSi128<8>();
-            SliderAttackBB |= GeneratorBB = (GeneratorBB & NotRankIAndEmptyBB).getLeftShiftSi128<8>();
-            SliderAttackBB |= GeneratorBB = (GeneratorBB & NotRankIAndEmptyBB).getLeftShiftSi128<8>();
-            TempBB = GeneratorBB & NotRankIAndEmptyBB;
-            if (!TempBB.isZero()) {
-                SliderAttackBB |= GeneratorBB = TempBB.getLeftShiftSi128<8>();
-                SliderAttackBB |= GeneratorBB = (GeneratorBB & NotRankIAndEmptyBB).getLeftShiftSi128<8>();
-                SliderAttackBB |= GeneratorBB = (GeneratorBB & NotRankIAndEmptyBB).getLeftShiftSi128<8>();
-                SliderAttackBB |= GeneratorBB = (GeneratorBB & NotRankIAndEmptyBB).getLeftShiftSi128<8>();
-            }
-
-            GeneratorBB = BishopBB;
-            SliderAttackBB |= GeneratorBB = bitboard::RankBB[RankA].andNot(GeneratorBB).getLeftShiftSi128<10>();
-            SliderAttackBB |= GeneratorBB = (GeneratorBB & NotRankAAndEmptyBB).getLeftShiftSi128<10>();
-            SliderAttackBB |= GeneratorBB = (GeneratorBB & NotRankAAndEmptyBB).getLeftShiftSi128<10>();
-            SliderAttackBB |= GeneratorBB = (GeneratorBB & NotRankAAndEmptyBB).getLeftShiftSi128<10>();
-            TempBB = GeneratorBB & NotRankAAndEmptyBB;
-            if (!TempBB.isZero()) {
-                SliderAttackBB |= GeneratorBB = TempBB.getLeftShiftSi128<10>();
-                SliderAttackBB |= GeneratorBB = (GeneratorBB & NotRankAAndEmptyBB).getLeftShiftSi128<10>();
-                SliderAttackBB |= GeneratorBB = (GeneratorBB & NotRankAAndEmptyBB).getLeftShiftSi128<10>();
-                SliderAttackBB |= GeneratorBB = (GeneratorBB & NotRankAAndEmptyBB).getLeftShiftSi128<10>();
-            }
-            // clang-format on
+            // NorthEast.
+            SliderAttackBB |=
+                koggeStoneRightSi128<8>(NoRankABishopBB, NotRankAAndEmptyBB)
+                    .getRightShiftSi128<8>();
+            // SouthEast.
+            SliderAttackBB |=
+                koggeStoneRightSi128<10>(NoRankIBishopBB, NotRankIAndEmptyBB)
+                    .getRightShiftSi128<10>();
+            // SouthWest.
+            SliderAttackBB |=
+                koggeStoneLeftSi128<8>(NoRankIBishopBB, NotRankIAndEmptyBB)
+                    .getLeftShiftSi128<8>();
+            // NorthWest.
+            SliderAttackBB |=
+                koggeStoneLeftSi128<10>(NoRankABishopBB, NotRankAAndEmptyBB)
+                    .getLeftShiftSi128<10>();
         }
 
         const bitboard::Bitboard RookBB =
@@ -581,74 +601,34 @@ class StateImpl {
             (C == White) ? (RookBB | LanceBB) : RookBB;
 
         if (!ForwardBB.isZero()) {
-            GeneratorBB = ForwardBB;
-
-            // clang-format off
-            SliderAttackBB |= GeneratorBB = bitboard::RankBB[RankA].andNot(GeneratorBB).getLeftShiftEpi64<1>();
-            SliderAttackBB |= GeneratorBB = (GeneratorBB & NotRankAAndEmptyBB).getLeftShiftEpi64<1>();
-            SliderAttackBB |= GeneratorBB = (GeneratorBB & NotRankAAndEmptyBB).getLeftShiftEpi64<1>();
-            SliderAttackBB |= GeneratorBB = (GeneratorBB & NotRankAAndEmptyBB).getLeftShiftEpi64<1>();
-            TempBB = GeneratorBB & NotRankAAndEmptyBB;
-            if (!TempBB.isZero()) {
-                SliderAttackBB |= GeneratorBB = TempBB.getLeftShiftEpi64<1>();
-                SliderAttackBB |= GeneratorBB = (GeneratorBB & NotRankAAndEmptyBB).getLeftShiftEpi64<1>();
-                SliderAttackBB |= GeneratorBB = (GeneratorBB & NotRankAAndEmptyBB).getLeftShiftEpi64<1>();
-                SliderAttackBB |= GeneratorBB = (GeneratorBB & NotRankAAndEmptyBB).getLeftShiftEpi64<1>();
-            }
-            // clang-format on
+            // North.
+            SliderAttackBB |=
+                koggeStoneLeftEpi64(bitboard::RankBB[RankA].andNot(ForwardBB),
+                                    NotRankAAndEmptyBB)
+                    .getLeftShiftEpi64<1>();
         }
 
         if (!BackwardBB.isZero()) {
-            GeneratorBB = BackwardBB;
-
-            // clang-format off
-            SliderAttackBB |= GeneratorBB = bitboard::RankBB[RankI].andNot(GeneratorBB).getRightShiftEpi64<1>();
-            SliderAttackBB |= GeneratorBB = (GeneratorBB & NotRankIAndEmptyBB).getRightShiftEpi64<1>();
-            SliderAttackBB |= GeneratorBB = (GeneratorBB & NotRankIAndEmptyBB).getRightShiftEpi64<1>();
-            SliderAttackBB |= GeneratorBB = (GeneratorBB & NotRankIAndEmptyBB).getRightShiftEpi64<1>();
-            TempBB = GeneratorBB & NotRankIAndEmptyBB;
-            if (!TempBB.isZero()) {
-                SliderAttackBB |= GeneratorBB = TempBB.getRightShiftEpi64<1>();
-                SliderAttackBB |= GeneratorBB = (GeneratorBB & NotRankIAndEmptyBB).getRightShiftEpi64<1>();
-                SliderAttackBB |= GeneratorBB = (GeneratorBB & NotRankIAndEmptyBB).getRightShiftEpi64<1>();
-                SliderAttackBB |= GeneratorBB = (GeneratorBB & NotRankIAndEmptyBB).getRightShiftEpi64<1>();
-            }
-            // clang-format on
+            // South.
+            SliderAttackBB |=
+                koggeStoneRightEpi64(bitboard::RankBB[RankI].andNot(BackwardBB),
+                                     NotRankIAndEmptyBB)
+                    .getRightShiftEpi64<1>();
         }
 
         if (!RookBB.isZero()) {
-            // clang-format off
-            GeneratorBB = RookBB;
-            SliderAttackBB |= GeneratorBB = GeneratorBB.getRightShiftSi128<9>();
-            SliderAttackBB |= GeneratorBB = (GeneratorBB & EmptyBB).getRightShiftSi128<9>();
-            SliderAttackBB |= GeneratorBB = (GeneratorBB & EmptyBB).getRightShiftSi128<9>();
-            SliderAttackBB |= GeneratorBB = (GeneratorBB & EmptyBB).getRightShiftSi128<9>();
-            TempBB = GeneratorBB & EmptyBB;
-            if (!TempBB.isZero()) {
-                SliderAttackBB |= GeneratorBB = TempBB.getRightShiftSi128<9>();
-                SliderAttackBB |= GeneratorBB = (GeneratorBB & EmptyBB).getRightShiftSi128<9>();
-                SliderAttackBB |= GeneratorBB = (GeneratorBB & EmptyBB).getRightShiftSi128<9>();
-                SliderAttackBB |= GeneratorBB = (GeneratorBB & EmptyBB).getRightShiftSi128<9>();
-            }
-            // clang-format on
-
-            // clang-format off
-            GeneratorBB = RookBB;
-            SliderAttackBB |= GeneratorBB = GeneratorBB.getLeftShiftSi128<9>();
-            SliderAttackBB |= GeneratorBB = (GeneratorBB & EmptyBB).getLeftShiftSi128<9>();
-            SliderAttackBB |= GeneratorBB = (GeneratorBB & EmptyBB).getLeftShiftSi128<9>();
-            SliderAttackBB |= GeneratorBB = (GeneratorBB & EmptyBB).getLeftShiftSi128<9>();
-            TempBB = GeneratorBB & EmptyBB;
-            if (!TempBB.isZero()) {
-                SliderAttackBB |= GeneratorBB = TempBB.getLeftShiftSi128<9>();
-                SliderAttackBB |= GeneratorBB = (GeneratorBB & EmptyBB).getLeftShiftSi128<9>();
-                SliderAttackBB |= GeneratorBB = (GeneratorBB & EmptyBB).getLeftShiftSi128<9>();
-                SliderAttackBB |= GeneratorBB = (GeneratorBB & EmptyBB).getLeftShiftSi128<9>();
-            }
-            // clang-format on
+            // East and West. A rank has no edge rank to wrap over, so the
+            // generators need no pre-mask.
+            SliderAttackBB |= koggeStoneRightSi128<9>(RookBB, EmptyBB)
+                                  .getRightShiftSi128<9>();
+            SliderAttackBB |=
+                koggeStoneLeftSi128<9>(RookBB, EmptyBB).getLeftShiftSi128<9>();
         }
 
-        return SliderAttackBB;
+        // The final one-step shifts may spill outside the board (the spare
+        // low-lane bit and the bits above the last square), so trim the
+        // result to the board.
+        return SliderAttackBB & bitboard::Bitboard::AllBB();
     }
 
     template <Color C>
