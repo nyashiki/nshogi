@@ -73,6 +73,103 @@ koggeStoneLeftEpi64(bitboard::Bitboard GeneratorBB,
     return GeneratorBB;
 }
 
+#if defined(USE_AVX2)
+
+// AVX2 variants that flood two directions at once, one direction per
+// 128-bit half of a 256-bit register. `ShiftN`/`FunnelN` describe the
+// direction placed in half N: the shift width in bits, and whether the
+// shift funnels over the 63/18-bit lane border of a bitboard (see
+// getRightShiftSi128(); the one-bit rank-wise step never leaves its
+// lane, so it must not funnel). A funnel-free half kills the carry with
+// a saturating shift count of 64.
+
+template <int Shift0, bool Funnel0, int Shift1, bool Funnel1>
+inline __attribute__((always_inline)) __m256i
+getRightShiftPair(__m256i X) noexcept {
+    const __m256i MainCounts =
+        _mm256_set_epi64x(Shift1, Shift1, Shift0, Shift0);
+    const __m256i CarryCounts = _mm256_set_epi64x(
+        Funnel1 ? 63 - Shift1 : 64, Funnel1 ? 63 - Shift1 : 64,
+        Funnel0 ? 63 - Shift0 : 64, Funnel0 ? 63 - Shift0 : 64);
+    return _mm256_or_si256(
+        _mm256_srlv_epi64(X, MainCounts),
+        _mm256_sllv_epi64(_mm256_srli_si256(X, 8), CarryCounts));
+}
+
+template <int Shift0, bool Funnel0, int Shift1, bool Funnel1>
+inline __attribute__((always_inline)) __m256i
+getLeftShiftPair(__m256i X) noexcept {
+    const __m256i MainCounts =
+        _mm256_set_epi64x(Shift1, Shift1, Shift0, Shift0);
+    const __m256i CarryCounts = _mm256_set_epi64x(
+        Funnel1 ? 63 - Shift1 : 64, Funnel1 ? 63 - Shift1 : 64,
+        Funnel0 ? 63 - Shift0 : 64, Funnel0 ? 63 - Shift0 : 64);
+    return _mm256_or_si256(
+        _mm256_sllv_epi64(X, MainCounts),
+        _mm256_srlv_epi64(_mm256_slli_si256(X, 8), CarryCounts));
+}
+
+// The paired counterparts of the koggeStone*() helpers above. Unlike
+// them, these shift the flood one more step and return the attacks.
+
+template <int Shift0, bool Funnel0, int Shift1, bool Funnel1>
+inline __attribute__((always_inline)) __m256i
+koggeStoneRightPairAttack(__m256i GeneratorBB, __m256i PropagateBB) noexcept {
+    GeneratorBB = _mm256_or_si256(
+        GeneratorBB,
+        _mm256_and_si256(
+            PropagateBB,
+            getRightShiftPair<Shift0, Funnel0, Shift1, Funnel1>(GeneratorBB)));
+    PropagateBB = _mm256_and_si256(
+        PropagateBB,
+        getRightShiftPair<Shift0, Funnel0, Shift1, Funnel1>(PropagateBB));
+    GeneratorBB = _mm256_or_si256(
+        GeneratorBB,
+        _mm256_and_si256(PropagateBB,
+                         getRightShiftPair<2 * Shift0, Funnel0, 2 * Shift1,
+                                           Funnel1>(GeneratorBB)));
+    PropagateBB = _mm256_and_si256(
+        PropagateBB,
+        getRightShiftPair<2 * Shift0, Funnel0, 2 * Shift1, Funnel1>(
+            PropagateBB));
+    GeneratorBB = _mm256_or_si256(
+        GeneratorBB,
+        _mm256_and_si256(PropagateBB,
+                         getRightShiftPair<4 * Shift0, Funnel0, 4 * Shift1,
+                                           Funnel1>(GeneratorBB)));
+    return getRightShiftPair<Shift0, Funnel0, Shift1, Funnel1>(GeneratorBB);
+}
+
+template <int Shift0, bool Funnel0, int Shift1, bool Funnel1>
+inline __attribute__((always_inline)) __m256i
+koggeStoneLeftPairAttack(__m256i GeneratorBB, __m256i PropagateBB) noexcept {
+    GeneratorBB = _mm256_or_si256(
+        GeneratorBB,
+        _mm256_and_si256(
+            PropagateBB,
+            getLeftShiftPair<Shift0, Funnel0, Shift1, Funnel1>(GeneratorBB)));
+    PropagateBB = _mm256_and_si256(
+        PropagateBB,
+        getLeftShiftPair<Shift0, Funnel0, Shift1, Funnel1>(PropagateBB));
+    GeneratorBB = _mm256_or_si256(
+        GeneratorBB,
+        _mm256_and_si256(PropagateBB,
+                         getLeftShiftPair<2 * Shift0, Funnel0, 2 * Shift1,
+                                          Funnel1>(GeneratorBB)));
+    PropagateBB = _mm256_and_si256(
+        PropagateBB,
+        getLeftShiftPair<2 * Shift0, Funnel0, 2 * Shift1, Funnel1>(
+            PropagateBB));
+    GeneratorBB = _mm256_or_si256(
+        GeneratorBB,
+        _mm256_and_si256(PropagateBB,
+                         getLeftShiftPair<4 * Shift0, Funnel0, 4 * Shift1,
+                                          Funnel1>(GeneratorBB)));
+    return getLeftShiftPair<Shift0, Funnel0, Shift1, Funnel1>(GeneratorBB);
+}
+
+#endif
+
 class StateImpl {
  public:
     StateImpl() = delete;
@@ -540,7 +637,11 @@ class StateImpl {
                 ? ~OccupiedBB
                 : (~OccupiedBB | bitboard::SquareBB[ExcludeSq]);
 
+#if defined(USE_AVX2)
+        __m256i AttackPairBB = _mm256_setzero_si256();
+#else
         bitboard::Bitboard SliderAttackBB = bitboard::Bitboard::ZeroBB();
+#endif
 
         // Bishops.
         const bitboard::Bitboard BishopBB =
@@ -564,6 +665,24 @@ class StateImpl {
             const bitboard::Bitboard NoRankIBishopBB =
                 bitboard::RankBB[RankI].andNot(BishopBB);
 
+#if defined(USE_AVX2)
+            // NorthEast (low half) and SouthEast (high half).
+            AttackPairBB = _mm256_or_si256(
+                AttackPairBB,
+                koggeStoneRightPairAttack<8, true, 10, true>(
+                    _mm256_set_m128i(NoRankIBishopBB.getRaw(),
+                                     NoRankABishopBB.getRaw()),
+                    _mm256_set_m128i(NotRankIAndEmptyBB.getRaw(),
+                                     NotRankAAndEmptyBB.getRaw())));
+            // SouthWest (low half) and NorthWest (high half).
+            AttackPairBB = _mm256_or_si256(
+                AttackPairBB,
+                koggeStoneLeftPairAttack<8, true, 10, true>(
+                    _mm256_set_m128i(NoRankABishopBB.getRaw(),
+                                     NoRankIBishopBB.getRaw()),
+                    _mm256_set_m128i(NotRankAAndEmptyBB.getRaw(),
+                                     NotRankIAndEmptyBB.getRaw())));
+#else
             // NorthEast.
             SliderAttackBB |=
                 koggeStoneRightSi128<8>(NoRankABishopBB, NotRankAAndEmptyBB)
@@ -580,6 +699,7 @@ class StateImpl {
             SliderAttackBB |=
                 koggeStoneLeftSi128<10>(NoRankABishopBB, NotRankAAndEmptyBB)
                     .getLeftShiftSi128<10>();
+#endif
         }
 
         const bitboard::Bitboard RookBB =
@@ -600,6 +720,38 @@ class StateImpl {
         const bitboard::Bitboard BackwardBB =
             (C == White) ? (RookBB | LanceBB) : RookBB;
 
+#if defined(USE_AVX2)
+        // ForwardBB and BackwardBB always contain RookBB, so one gate
+        // covers both halves of each pair. A rank has no edge rank to wrap
+        // over, so the east and west generators need no pre-mask.
+        if (!BackwardBB.isZero()) {
+            // East (low half) and South (high half).
+            AttackPairBB = _mm256_or_si256(
+                AttackPairBB,
+                koggeStoneRightPairAttack<9, true, 1, false>(
+                    _mm256_set_m128i(
+                        bitboard::RankBB[RankI].andNot(BackwardBB).getRaw(),
+                        RookBB.getRaw()),
+                    _mm256_set_m128i(NotRankIAndEmptyBB.getRaw(),
+                                     EmptyBB.getRaw())));
+        }
+
+        if (!ForwardBB.isZero()) {
+            // West (low half) and North (high half).
+            AttackPairBB = _mm256_or_si256(
+                AttackPairBB,
+                koggeStoneLeftPairAttack<9, true, 1, false>(
+                    _mm256_set_m128i(
+                        bitboard::RankBB[RankA].andNot(ForwardBB).getRaw(),
+                        RookBB.getRaw()),
+                    _mm256_set_m128i(NotRankAAndEmptyBB.getRaw(),
+                                     EmptyBB.getRaw())));
+        }
+
+        const bitboard::Bitboard SliderAttackBB(
+            _mm_or_si128(_mm256_castsi256_si128(AttackPairBB),
+                         _mm256_extracti128_si256(AttackPairBB, 1)));
+#else
         if (!ForwardBB.isZero()) {
             // North.
             SliderAttackBB |=
@@ -624,6 +776,7 @@ class StateImpl {
             SliderAttackBB |=
                 koggeStoneLeftSi128<9>(RookBB, EmptyBB).getLeftShiftSi128<9>();
         }
+#endif
 
         // The final one-step shifts may spill outside the board (the spare
         // low-lane bit and the bits above the last square), so trim the
