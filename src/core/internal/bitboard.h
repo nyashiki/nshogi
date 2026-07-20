@@ -878,9 +878,8 @@ getAscendingRayPairAttack(__m256i Occupied2, __m256i Ray2) noexcept {
 
     const __m256i LaneIsZero =
         _mm256_cmpeq_epi64(OccupiedOnRay, _mm256_setzero_si256());
-    const __m256i Gate =
-        _mm256_or_si256(_mm256_shuffle_epi32(LaneIsZero, 0x44),
-                        _mm256_set_epi64x(0, -1, 0, -1));
+    const __m256i Gate = _mm256_or_si256(_mm256_shuffle_epi32(LaneIsZero, 0x44),
+                                         _mm256_set_epi64x(0, -1, 0, -1));
     return _mm256_and_si256(Attack, Gate);
 }
 
@@ -891,12 +890,10 @@ inline __attribute__((always_inline)) __m256i
 getDescendingRayPairAttack(__m256i Occupied2, __m256i Ray2) noexcept {
     const __m256i Step1 =
         _mm256_set_epi64x(StepBits1, StepBits1, StepBits0, StepBits0);
-    const __m256i Step2 =
-        _mm256_set_epi64x(2 * StepBits1, 2 * StepBits1, 2 * StepBits0,
-                          2 * StepBits0);
-    const __m256i Step4 =
-        _mm256_set_epi64x(4 * StepBits1, 4 * StepBits1, 4 * StepBits0,
-                          4 * StepBits0);
+    const __m256i Step2 = _mm256_set_epi64x(2 * StepBits1, 2 * StepBits1,
+                                            2 * StepBits0, 2 * StepBits0);
+    const __m256i Step4 = _mm256_set_epi64x(4 * StepBits1, 4 * StepBits1,
+                                            4 * StepBits0, 4 * StepBits0);
 
     const __m256i OccupiedOnRay = _mm256_and_si256(Occupied2, Ray2);
     __m256i Smear = OccupiedOnRay;
@@ -908,9 +905,8 @@ getDescendingRayPairAttack(__m256i Occupied2, __m256i Ray2) noexcept {
 
     const __m256i LaneIsZero =
         _mm256_cmpeq_epi64(OccupiedOnRay, _mm256_setzero_si256());
-    const __m256i Gate =
-        _mm256_or_si256(_mm256_shuffle_epi32(LaneIsZero, 0xEE),
-                        _mm256_set_epi64x(-1, 0, -1, 0));
+    const __m256i Gate = _mm256_or_si256(_mm256_shuffle_epi32(LaneIsZero, 0xEE),
+                                         _mm256_set_epi64x(-1, 0, -1, 0));
     return _mm256_and_si256(Attack, Gate);
 }
 

@@ -125,18 +125,20 @@ koggeStoneRightPairAttack(__m256i GeneratorBB, __m256i PropagateBB) noexcept {
         getRightShiftPair<Shift0, Funnel0, Shift1, Funnel1>(PropagateBB));
     GeneratorBB = _mm256_or_si256(
         GeneratorBB,
-        _mm256_and_si256(PropagateBB,
-                         getRightShiftPair<2 * Shift0, Funnel0, 2 * Shift1,
-                                           Funnel1>(GeneratorBB)));
+        _mm256_and_si256(
+            PropagateBB,
+            getRightShiftPair<2 * Shift0, Funnel0, 2 * Shift1, Funnel1>(
+                GeneratorBB)));
     PropagateBB = _mm256_and_si256(
         PropagateBB,
         getRightShiftPair<2 * Shift0, Funnel0, 2 * Shift1, Funnel1>(
             PropagateBB));
     GeneratorBB = _mm256_or_si256(
         GeneratorBB,
-        _mm256_and_si256(PropagateBB,
-                         getRightShiftPair<4 * Shift0, Funnel0, 4 * Shift1,
-                                           Funnel1>(GeneratorBB)));
+        _mm256_and_si256(
+            PropagateBB,
+            getRightShiftPair<4 * Shift0, Funnel0, 4 * Shift1, Funnel1>(
+                GeneratorBB)));
     return getRightShiftPair<Shift0, Funnel0, Shift1, Funnel1>(GeneratorBB);
 }
 
@@ -153,18 +155,19 @@ koggeStoneLeftPairAttack(__m256i GeneratorBB, __m256i PropagateBB) noexcept {
         getLeftShiftPair<Shift0, Funnel0, Shift1, Funnel1>(PropagateBB));
     GeneratorBB = _mm256_or_si256(
         GeneratorBB,
-        _mm256_and_si256(PropagateBB,
-                         getLeftShiftPair<2 * Shift0, Funnel0, 2 * Shift1,
-                                          Funnel1>(GeneratorBB)));
+        _mm256_and_si256(
+            PropagateBB,
+            getLeftShiftPair<2 * Shift0, Funnel0, 2 * Shift1, Funnel1>(
+                GeneratorBB)));
     PropagateBB = _mm256_and_si256(
-        PropagateBB,
-        getLeftShiftPair<2 * Shift0, Funnel0, 2 * Shift1, Funnel1>(
-            PropagateBB));
+        PropagateBB, getLeftShiftPair<2 * Shift0, Funnel0, 2 * Shift1, Funnel1>(
+                         PropagateBB));
     GeneratorBB = _mm256_or_si256(
         GeneratorBB,
-        _mm256_and_si256(PropagateBB,
-                         getLeftShiftPair<4 * Shift0, Funnel0, 4 * Shift1,
-                                          Funnel1>(GeneratorBB)));
+        _mm256_and_si256(
+            PropagateBB,
+            getLeftShiftPair<4 * Shift0, Funnel0, 4 * Shift1, Funnel1>(
+                GeneratorBB)));
     return getLeftShiftPair<Shift0, Funnel0, Shift1, Funnel1>(GeneratorBB);
 }
 
