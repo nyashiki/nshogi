@@ -855,6 +855,73 @@ inline Bitboard getLanceAttackBB(Color C, Square Sq,
     }
 }
 
+#if defined(USE_AVX2)
+
+// AVX2 variants that resolve two rays at once, one ray in each 128-bit
+// half of a 256-bit register. The ray pairs are laid out adjacently in
+// BishopRay/RookRay so that one aligned 256-bit load fetches both. The
+// lane gate is applied to both halves unconditionally: for a ray that
+// stays within one 64-bit lane the gated (far) side of the ray is empty,
+// so the gate is a no-op there.
+
+inline __attribute__((always_inline)) __m256i
+loadRayPair(const Bitboard* RayPair) noexcept {
+    return _mm256_load_si256(reinterpret_cast<const __m256i*>(RayPair));
+}
+
+inline __attribute__((always_inline)) __m256i
+getAscendingRayPairAttack(__m256i Occupied2, __m256i Ray2) noexcept {
+    const __m256i OccupiedOnRay = _mm256_and_si256(Occupied2, Ray2);
+    const __m256i Swept = _mm256_xor_si256(
+        OccupiedOnRay, _mm256_sub_epi64(OccupiedOnRay, _mm256_set1_epi64x(1)));
+    const __m256i Attack = _mm256_and_si256(Swept, Ray2);
+
+    const __m256i LaneIsZero =
+        _mm256_cmpeq_epi64(OccupiedOnRay, _mm256_setzero_si256());
+    const __m256i Gate =
+        _mm256_or_si256(_mm256_shuffle_epi32(LaneIsZero, 0x44),
+                        _mm256_set_epi64x(0, -1, 0, -1));
+    return _mm256_and_si256(Attack, Gate);
+}
+
+// `StepBits0` applies to the ray in the low 128-bit half, `StepBits1` to
+// the one in the high half.
+template <int StepBits0, int StepBits1>
+inline __attribute__((always_inline)) __m256i
+getDescendingRayPairAttack(__m256i Occupied2, __m256i Ray2) noexcept {
+    const __m256i Step1 =
+        _mm256_set_epi64x(StepBits1, StepBits1, StepBits0, StepBits0);
+    const __m256i Step2 =
+        _mm256_set_epi64x(2 * StepBits1, 2 * StepBits1, 2 * StepBits0,
+                          2 * StepBits0);
+    const __m256i Step4 =
+        _mm256_set_epi64x(4 * StepBits1, 4 * StepBits1, 4 * StepBits0,
+                          4 * StepBits0);
+
+    const __m256i OccupiedOnRay = _mm256_and_si256(Occupied2, Ray2);
+    __m256i Smear = OccupiedOnRay;
+    Smear = _mm256_or_si256(Smear, _mm256_srlv_epi64(Smear, Step1));
+    Smear = _mm256_or_si256(Smear, _mm256_srlv_epi64(Smear, Step2));
+    Smear = _mm256_or_si256(Smear, _mm256_srlv_epi64(Smear, Step4));
+    const __m256i Attack =
+        _mm256_andnot_si256(_mm256_srlv_epi64(Smear, Step1), Ray2);
+
+    const __m256i LaneIsZero =
+        _mm256_cmpeq_epi64(OccupiedOnRay, _mm256_setzero_si256());
+    const __m256i Gate =
+        _mm256_or_si256(_mm256_shuffle_epi32(LaneIsZero, 0xEE),
+                        _mm256_set_epi64x(-1, 0, -1, 0));
+    return _mm256_and_si256(Attack, Gate);
+}
+
+inline __attribute__((always_inline)) Bitboard
+mergeRayPair(__m256i Attack2) noexcept {
+    return Bitboard(_mm_or_si128(_mm256_castsi256_si128(Attack2),
+                                 _mm256_extracti128_si256(Attack2, 1)));
+}
+
+#endif
+
 template <PieceTypeKind Type>
 inline Bitboard getBishopAttackBB(Square Sq,
                                   const Bitboard& OccupiedBB) noexcept {
@@ -864,6 +931,13 @@ inline Bitboard getBishopAttackBB(Square Sq,
 
     const BishopRay& Rays = BishopRayBB[Sq];
 
+#if defined(USE_AVX2)
+    const __m256i Occupied2 = _mm256_broadcastsi128_si256(OccupiedBB.getRaw());
+    const Bitboard AttackBB = mergeRayPair(_mm256_or_si256(
+        getAscendingRayPairAttack(Occupied2, loadRayPair(&Rays.NorthWest)),
+        getDescendingRayPairAttack<-NorthEast, -SouthEast>(
+            Occupied2, loadRayPair(&Rays.NorthEast))));
+#else
     // The step of each descending ray is the bit-position distance of its
     // consecutive squares within one lane, i.e. the negated direction.
     const Bitboard AttackBB =
@@ -873,6 +947,7 @@ inline Bitboard getBishopAttackBB(Square Sq,
                                                     Rays.NorthEast) |
          getDescendingRayAttackBB<-SouthEast, true>(OccupiedBB,
                                                     Rays.SouthEast));
+#endif
 
     if constexpr (Type == PTK_ProBishop) {
         return AttackBB | KingAttackBB[Sq];
@@ -890,6 +965,13 @@ inline Bitboard getRookAttackBB(Square Sq,
 
     const RookRay& Rays = RookRayBB[Sq];
 
+#if defined(USE_AVX2)
+    const __m256i Occupied2 = _mm256_broadcastsi128_si256(OccupiedBB.getRaw());
+    const Bitboard AttackBB = mergeRayPair(_mm256_or_si256(
+        getAscendingRayPairAttack(Occupied2, loadRayPair(&Rays.North)),
+        getDescendingRayPairAttack<-South, -East>(Occupied2,
+                                                  loadRayPair(&Rays.South))));
+#else
     // A file never crosses the lane border, so the north and south rays
     // skip the lane gate.
     const Bitboard AttackBB =
@@ -897,6 +979,7 @@ inline Bitboard getRookAttackBB(Square Sq,
          getAscendingRayAttackBB<true>(OccupiedBB, Rays.West)) |
         (getDescendingRayAttackBB<-South, false>(OccupiedBB, Rays.South) |
          getDescendingRayAttackBB<-East, true>(OccupiedBB, Rays.East));
+#endif
 
     if constexpr (Type == PTK_ProRook) {
         return AttackBB | KingAttackBB[Sq];
