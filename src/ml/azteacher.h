@@ -30,8 +30,8 @@ struct AZTeacher {
 
  public:
     AZTeacher();
-
     AZTeacher(const AZTeacher& T);
+    AZTeacher& operator=(const AZTeacher& T);
 
     bool checkSanity(int Level) const;
 
@@ -53,6 +53,10 @@ struct AZTeacher {
 
     // The other helpers.
     bool Declared;
+
+    float V; // Evaluation output (e.g., value head).
+    float Q; // Search result.
+    uint16_t GamePly;
 
     /// Generate completely random noisy data.
     /// This function is for test.

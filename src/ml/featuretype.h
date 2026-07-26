@@ -54,6 +54,8 @@ enum class FeatureType {
     FT_MyAttack, FT_OpAttack,
 
     FT_MyDeclarationRemaining, FT_OpDeclarationRemaining,
+
+    NumFeatureType,
 };
 // clang-format on
 

@@ -20,7 +20,7 @@ namespace io {
 namespace internal {
 namespace bitboard {
 
-void print(const core::internal::bitboard::Bitboard& BB) {
+inline void print(const core::internal::bitboard::Bitboard& BB) {
     auto SquareIt = core::SquareIterator<core::IterateOrder::NWSE>();
 
     for (auto It = SquareIt.begin(); It != SquareIt.end(); ++It) {

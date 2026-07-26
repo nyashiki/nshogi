@@ -71,17 +71,16 @@ int mlApiMoveToIndex(const nshogi_state_t* CState, nshogi_move_t CMove) {
 } // namespace
 
 nshogi_ml_api_t* c_api::ml::getApi() {
-    static bool Initialized = false;
-    static nshogi_ml_api_t Api;
+    static nshogi_ml_api_t Api = [] {
+        nshogi_ml_api_t A;
 
-    if (!Initialized) {
-        Api.makeFeatureVector = mlApiMakeFeatureVector;
-        Api.makeFeatureVectorWithOption = mlApiMakeFeatureVectorWithOption;
-        Api.moveToIndex = mlApiMoveToIndex;
-        Api.moveToIndexWithOption = mlApiMoveToIndexWithOption;
+        A.makeFeatureVector = mlApiMakeFeatureVector;
+        A.makeFeatureVectorWithOption = mlApiMakeFeatureVectorWithOption;
+        A.moveToIndex = mlApiMoveToIndex;
+        A.moveToIndexWithOption = mlApiMoveToIndexWithOption;
 
-        Initialized = true;
-    }
+        return A;
+    }();
 
     return &Api;
 }

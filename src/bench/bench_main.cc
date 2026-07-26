@@ -12,6 +12,7 @@
 
 void benchMoveGeneration(const nshogi::core::State&);
 // void benchMoveGenerationInternal(const nshogi::core::internal::StateImpl&);
+void benchMoveGenerationSet(const std::vector<nshogi::core::State>&);
 void benchMate1ply(const std::vector<nshogi::core::State>&);
 void benchPerft(int Ply);
 
@@ -95,6 +96,31 @@ int main() {
             "R8/2K1S1SSk/4B4/9/9/9/9/9/1L1L1L3 b RBGSNLP3g3n17p 1");
         runCountBench("Movegeneration max-moves# position", benchMoveGeneration,
                       N, State);
+    }
+
+    {
+        // Unlike the fixed single-position benches above, this sweeps a
+        // deterministic random-game position set, so that code-alignment
+        // luck and fully-warmed branch predictors do not dominate a
+        // comparison between two builds.
+        std::mt19937_64 Mt(20260720);
+        std::vector<nshogi::core::State> States;
+        for (int Game = 0; Game < 100; ++Game) {
+            nshogi::core::State State =
+                nshogi::io::sfen::StateBuilder::getInitialState();
+            for (int Ply = 0; Ply < 256; ++Ply) {
+                const auto Moves =
+                    nshogi::core::MoveGenerator::generateLegalMoves(State);
+                if (Moves.size() == 0) {
+                    break;
+                }
+                State.doMove(Moves[Mt() % Moves.size()]);
+                States.push_back(State.clone());
+            }
+        }
+
+        runCountBench("Movegeneration position set", benchMoveGenerationSet,
+                      200, States);
     }
 
     // {

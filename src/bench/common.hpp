@@ -9,6 +9,15 @@
 namespace nshogi {
 namespace bench {
 
+// Escape barrier: forces `Value` to be materialized so that the compiler
+// cannot elide the computation that produced it, without qualifying the
+// object itself as volatile (which could pessimize inlined callees and
+// make the bench measure code that production builds never run).
+template <typename T>
+inline void doNotOptimize(const T& Value) noexcept {
+    asm volatile("" : : "r,m"(Value) : "memory");
+}
+
 struct BenchResult {
     std::string Name;
     double MilliSeconds;

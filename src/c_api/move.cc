@@ -59,24 +59,23 @@ nshogi_move_t moveApiWinMove() {
 } // namespace
 
 nshogi_move_api_t* c_api::move::getApi() {
-    static bool Initialized = false;
-    static nshogi_move_api_t Api;
+    static nshogi_move_api_t Api = [] {
+        nshogi_move_api_t A;
 
-    if (!Initialized) {
-        Api.to = moveApiTo;
-        Api.from = moveApiFrom;
-        Api.drop = moveApiDrop;
-        Api.promote = moveApiPromote;
-        Api.pieceType = moveApiPieceType;
-        Api.capturePieceType = moveApiCapturePieceType;
-        Api.isNone = moveApiIsNone;
-        Api.isWin = moveApiIsWin;
+        A.to = moveApiTo;
+        A.from = moveApiFrom;
+        A.drop = moveApiDrop;
+        A.promote = moveApiPromote;
+        A.pieceType = moveApiPieceType;
+        A.capturePieceType = moveApiCapturePieceType;
+        A.isNone = moveApiIsNone;
+        A.isWin = moveApiIsWin;
 
-        Api.noneMove = moveApiNoneMove;
-        Api.winMove = moveApiWinMove;
+        A.noneMove = moveApiNoneMove;
+        A.winMove = moveApiWinMove;
 
-        Initialized = true;
-    }
+        return A;
+    }();
 
     return &Api;
 }

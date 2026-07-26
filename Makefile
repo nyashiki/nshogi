@@ -31,25 +31,20 @@ BENCH_TARGET := $(OBJDIR)/bin/nshogi_bench
 INCLUDES :=
 LINKS :=
 
-PYTHON ?= python3
-PYTHON_CONFIG ?= python3-config
-PYTHON_INCLUDES := $(shell $(PYTHON_CONFIG) --includes) $(shell $(PYTHON) -m pybind11 --includes)
-PYTHON_LINKS := $(shell $(PYTHON_CONFIG) --ldflags) -Wl,-undefined,dynamic_lookup
-PYTHON_TARGET := $(OBJDIR)/lib/nshogi$(shell $(PYTHON_CONFIG) --extension-suffix)
-
 ifeq ($(BUILD), debug)
 	# CXX_FLAGS = -std=c++2b -Wall -Wextra -Wconversion -Wpedantic -Wshadow -fno-omit-frame-pointer -fsanitize=address -pipe
 	CXX_FLAGS = -std=c++2b -Wall -Wextra -Wconversion -Wpedantic -Wshadow -fno-omit-frame-pointer -pipe
-	PYTHON_CXX_FLAGS = $(CXX_FLAGS)
 	OPTIM = -g3
 else
-	CXX_FLAGS = -std=c++20 -Wall -Wextra -Wconversion -Wpedantic -Wshadow -fomit-frame-pointer -fno-stack-protector -fno-rtti -flto -DNDEBUG -pipe
+	# -falign-functions=64: pin every function to a cache-line boundary so
+	# that unrelated code-size changes do not shift the alignment of hot
+	# loops between two builds under comparison.
+	CXX_FLAGS = -std=c++20 -Wall -Wextra -Wconversion -Wpedantic -Wshadow -fomit-frame-pointer -fno-stack-protector -falign-functions=64 -flto -DNDEBUG -pipe
 	# CXX_FLAGS = -std=c++20 -Wall -Wextra -Wconversion -Wpedantic -Wshadow -fno-omit-frame-pointer -flto -pipe
-	PYTHON_CXX_FLAGS = -std=c++20 -Wall -Wextra -Wconversion -Wpedantic -Wshadow -fomit-frame-pointer -fno-stack-protector -flto -DNDEBUG -pipe
 	OPTIM = -O3 -ffast-math
 endif
 
-SOURCES :=                                 \
+SOURCES :=                             \
 	src/buildinfo/capability.cc        \
 	src/core/initializer.cc            \
 	src/core/position.cc               \
@@ -73,9 +68,13 @@ SOURCES :=                                 \
 	src/ml/azteacher.cc                \
 	src/ml/featurebitboard.cc          \
 	src/ml/featurestack.cc             \
+    src/ml/ka.cc                       \
+    src/ml/p.cc                        \
 	src/ml/simpleteacher.cc            \
+	src/ml/teacheraggregator.cc        \
 	src/ml/teacherloader.cc            \
 	src/ml/teacherwriter.cc            \
+    src/ml/batchedteacherloader.cc     \
     src/ml/utils.cc                    \
 	src/io/huffman.cc                  \
 	src/io/sfen.cc                     \
@@ -89,37 +88,34 @@ SOURCES :=                                 \
     src/c_api/ml.cc                    \
     src/c_api/io.cc
 
-TEST_SOURCES :=                         \
+TEST_SOURCES :=                     \
 	src/test/test_main.cc           \
-	src/test/test_types.cc 		\
+	src/test/test_types.cc 	      	\
 	src/test/test_bitboard.cc       \
 	src/test/test_position.cc       \
 	src/test/test_state.cc          \
 	src/test/test_movegeneration.cc \
 	src/test/test_squareiterator.cc \
 	src/test/test_utils.cc          \
-	src/test/test_csa.cc		\
+	src/test/test_csa.cc	    	\
 	src/test/test_sfen.cc           \
 	src/test/test_huffman.cc     	\
-	src/test/test_solver.cc		\
+	src/test/test_solver.cc	    	\
 	src/test/test_ml.cc             \
     src/test/test_capi.cc
 
-BENCH_SOURCES :=                          \
+BENCH_SOURCES :=                      \
 	src/bench/bench_main.cc           \
 	src/bench/bench_movegeneration.cc \
 	src/bench/bench_mate1ply.cc       \
-	src/bench/bench_perft.cc
-
-PYTHON_SOURCES :=          \
-	src/python/bind.cc
+	src/bench/bench_perft.cc          \
+	src/bench/bench_see.cc
 
 OBJECTS = $(patsubst %.cc,$(OBJDIR)/%.o,$(SOURCES))
 TEST_OBJECTS = $(patsubst %.cc,$(OBJDIR)/%.o,$(TEST_SOURCES))
 BENCH_OBJECTS = $(patsubst %.cc,$(OBJDIR)/%.o,$(BENCH_SOURCES))
-PYTHON_OBJECTS = $(patsubst %.cc,$(OBJDIR)/%.o,$(PYTHON_SOURCES))
 
-DEPENDINGS = $(patsubst %.cc,$(OBJDIR)/%.d,$(SOURCES))
+DEPENDINGS = $(patsubst %.cc,$(OBJDIR)/%.d,$(SOURCES) $(TEST_SOURCES) $(BENCH_SOURCES))
 
 GENERIC ?= 0
 ARCH_FLAGS :=
@@ -153,12 +149,6 @@ else
     endif
 endif
 
-PEXT ?= 1
-
-ifeq ($(PEXT),1)
-	CXX_FLAGS += -DUSE_PEXT
-endif
-
 ifneq ($(MAKECMDGOALS),clean)
     -include $(DEPENDINGS)
 endif
@@ -179,10 +169,6 @@ $(BENCH_OBJECTS): $(OBJDIR)/%.o: %.cc Makefile
 	@[ -d $(dir $@) ] || mkdir -p $(dir $@)
 	$(CXX) -c -o $@ $(OPTIM) $(ARCH_FLAGS) $(CXX_FLAGS) $(INCLUDES) $<
 
-$(PYTHON_OBJECTS): $(OBJDIR)/%.o: %.cc Makefile
-	@[ -d $(dir $@) ] || mkdir -p $(dir $@)
-	$(CXX) -c -o $@ $(OPTIM) $(ARCH_FLAGS) $(PYTHON_CXX_FLAGS) $(INCLUDES) $(PYTHON_INCLUDES) -fPIC $<
-
 $(SHARED_TARGET): $(OBJECTS)
 	@[ -d $(dir $@) ] || mkdir -p $(dir $@)
 ifeq ($(shell uname), Darwin)
@@ -198,14 +184,6 @@ endif
 $(STATIC_TARGET): $(OBJECTS)
 	@[ -d $(dir $@) ] || mkdir -p $(dir $@)
 	ar rcs $@ $^
-
-$(PYTHON_TARGET): $(PYTHON_OBJECTS) $(STATIC_TARGET)
-	@[ -d $(dir $@) ] || mkdir -p $(dir $@)
-ifeq ($(shell uname), Darwin)
-	$(CXX) -shared -o $@ $(PYTHON_OBJECTS) $(STATIC_TARGET) $(OPTIM) $(ARCH_FLAGS) $(PYTHON_CXX_FLAGS) -fPIC $(LINKS) $(PYTHON_LINKS)
-else
-	$(CXX) -shared -o $@ $(PYTHON_OBJECTS) -Wl,--whole-archive $(STATIC_TARGET) -Wl,--no-whole-archive $(OPTIM) $(ARCH_FLAGS) $(PYTHON_CXX_FLAGS) -fPIC $(LINKS) $(PYTHON_LINKS)
-endif
 
 $(TEST_STATIC_TARGET): $(TEST_OBJECTS) $(STATIC_TARGET)
 	@[ -d $(dir $@) ] || mkdir -p $(dir $@)
@@ -260,18 +238,6 @@ runtest-static: test-static
 .PHONY: runtest-shared
 runtest-shared: test-shared
 	./$(TEST_SHARED_TARGET)
-
-.PHONY: python
-python: PYTHON_CXX_FLAGS += -DVERSION=\"$(VERSION)\"
-python: $(PYTHON_TARGET)
-
-.PHONY: install-python
-install-python: python
-	cp $(PYTHON_TARGET) $(shell python3 -c "import site; print(site.getsitepackages()[0])")
-
-.PHONY: runtest-python
-runtest-python: python
-	PYTHONPATH=$(OBJDIR)/lib/ python3 src/test/python/test.py
 
 .PHONY: runbench
 runbench: bench

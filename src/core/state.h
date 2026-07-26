@@ -143,6 +143,31 @@ class State {
     ///
     bool canDeclare() const noexcept;
 
+    ///
+    /// @brief Return true if the last move was a pawn drop.
+    ///
+    /// Note: Return false when called at the intiial position
+    /// (i.e., getPly() == 0).
+    ///
+    bool isLastMoveDroppingAPawn() const noexcept;
+
+    ///
+    /// @brief Check if a move is legal for the current player.
+    /// @param Move The move to be checked.
+    ///
+    bool isLegal(Move16 Move) const noexcept;
+
+    ///
+    /// @brief Check if a move is legal for the current player.
+    ///
+    /// This function checks same conditions as `isLegal(Move16)`,
+    /// but it also checks the validity of piece type and
+    /// capture piece type that are held in `Move32`.
+    ///
+    /// @param Move The move to be checked.
+    ///
+    bool isLegal(Move32 Move) const noexcept;
+
  protected:
     internal::StateImpl* Impl;
 

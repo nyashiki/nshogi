@@ -54,42 +54,25 @@ FeatureBitboard processCheck(const core::State& State) {
 
 template <core::Color MyColor, core::Color TargetColor>
 FeatureBitboard processNoPawnFile(const core::State& State) {
-    core::internal::ImmutableStateAdapter Adapter(State);
-    const core::internal::bitboard::Bitboard PawnBB =
-        Adapter->getBitboard<TargetColor, core::PTK_Pawn>();
-    core::internal::bitboard::Bitboard PawnExistFilesBB =
-        core::internal::bitboard::Bitboard::ZeroBB();
+    using core::internal::bitboard::Bitboard;
+    using core::internal::bitboard::RankBB;
 
-    if (!(PawnBB & core::internal::bitboard::FileBB[core::File1]).isZero()) {
-        PawnExistFilesBB |= core::internal::bitboard::FileBB[core::File1];
-    }
-    if (!(PawnBB & core::internal::bitboard::FileBB[core::File2]).isZero()) {
-        PawnExistFilesBB |= core::internal::bitboard::FileBB[core::File2];
-    }
-    if (!(PawnBB & core::internal::bitboard::FileBB[core::File3]).isZero()) {
-        PawnExistFilesBB |= core::internal::bitboard::FileBB[core::File3];
-    }
-    if (!(PawnBB & core::internal::bitboard::FileBB[core::File4]).isZero()) {
-        PawnExistFilesBB |= core::internal::bitboard::FileBB[core::File4];
-    }
-    if (!(PawnBB & core::internal::bitboard::FileBB[core::File5]).isZero()) {
-        PawnExistFilesBB |= core::internal::bitboard::FileBB[core::File5];
-    }
-    if (!(PawnBB & core::internal::bitboard::FileBB[core::File6]).isZero()) {
-        PawnExistFilesBB |= core::internal::bitboard::FileBB[core::File6];
-    }
-    if (!(PawnBB & core::internal::bitboard::FileBB[core::File7]).isZero()) {
-        PawnExistFilesBB |= core::internal::bitboard::FileBB[core::File7];
-    }
-    if (!(PawnBB & core::internal::bitboard::FileBB[core::File8]).isZero()) {
-        PawnExistFilesBB |= core::internal::bitboard::FileBB[core::File8];
-    }
-    if (!(PawnBB & core::internal::bitboard::FileBB[core::File9]).isZero()) {
-        PawnExistFilesBB |= core::internal::bitboard::FileBB[core::File9];
-    }
+    core::internal::ImmutableStateAdapter Adapter(State);
+    const Bitboard PawnBB = Adapter->getBitboard<TargetColor, core::PTK_Pawn>();
+
+    // Figure out files on which a pawn does not exist: subtracting PawnBB
+    // from the rank-A mask borrows through every file that contains a pawn,
+    // clearing its rank-A bit (the top bit of the file's 9-bit group).
+    const Bitboard Temp =
+        RankBB[core::RankA].subtract(PawnBB) & RankBB[core::RankA];
+
+    // Smear each surviving rank-A bit down its file: the subtraction fills
+    // ranks B..I, and OR-ing Temp back restores rank A.
+    const Bitboard NoPawnFilesBB =
+        Temp | Temp.subtract(Temp.getRightShiftEpi64<8>());
 
     return internal::FeatureBitboardUtil::makeFeatureBitboard(
-        ~PawnExistFilesBB, 1, MyColor == core::White);
+        NoPawnFilesBB, 1, MyColor == core::White);
 }
 
 template FeatureBitboard

@@ -11,6 +11,8 @@
 #include "internal/movegenerator.h"
 #include "internal/stateadapter.h"
 
+#include <cassert>
+
 namespace nshogi {
 namespace core {
 
@@ -37,6 +39,17 @@ MoveList MoveGenerator::generateLegalCheckMoves(const State& S) noexcept {
         *ImmutableStateAdapter(S).get());
 }
 
+template <Color C>
+Move32 MoveGenerator::generateLegalSmallestMove(const State& S,
+                                                Square To) noexcept {
+    // The destination square must be empty or occupied by an opponent's piece.
+    assert(S.getPosition().pieceOn(To) == PK_Empty ||
+           getColor(S.getPosition().pieceOn(To)) == ~S.getSideToMove());
+
+    return MoveGeneratorInternal::generateLegalSmallestMove<C>(
+        *ImmutableStateAdapter(S).get(), To);
+}
+
 template <bool WilyPromote>
 MoveList MoveGenerator::generateLegalCheckMoves(const State& S) noexcept {
     if (S.getSideToMove() == Black) {
@@ -58,6 +71,15 @@ MoveList MoveGenerator::generateLegalCaptureMoves(const State& S) noexcept {
         return generateLegalCaptureMoves<Black, WilyPromote>(S);
     } else {
         return generateLegalCaptureMoves<White, WilyPromote>(S);
+    }
+}
+
+Move32 MoveGenerator::generateLegalSmallestMove(const State& S,
+                                                Square To) noexcept {
+    if (S.getSideToMove() == Black) {
+        return generateLegalSmallestMove<Black>(S, To);
+    } else {
+        return generateLegalSmallestMove<White>(S, To);
     }
 }
 
@@ -102,6 +124,13 @@ template MoveList
 MoveGenerator::generateLegalCaptureMoves<false>(const State& S) noexcept;
 template MoveList
 MoveGenerator::generateLegalCaptureMoves<true>(const State& S) noexcept;
+
+template Move32
+MoveGenerator::generateLegalSmallestMove<Black>(const State& S,
+                                                Square To) noexcept;
+template Move32
+MoveGenerator::generateLegalSmallestMove<White>(const State& S,
+                                                Square To) noexcept;
 
 } // namespace core
 } // namespace nshogi

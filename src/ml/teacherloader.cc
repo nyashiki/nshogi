@@ -13,27 +13,119 @@
 #include "simpleteacher.h"
 
 #include <cstdint>
-#include <fstream>
 #include <iostream>
 #include <random>
+
+#ifdef __linux__
+
+// Use mmap() in Linux instead of ifstream to avoid overhead.
+#include <fcntl.h>
+#include <sys/mman.h>
+#include <sys/stat.h>
+#include <unistd.h>
+
+#endif
+
+#ifdef __APPLE__
+
+// For getpid().
+#include <sys/types.h>
+#include <unistd.h>
+
+#endif
 
 namespace nshogi {
 namespace ml {
 
 template <typename TeacherType>
 TeacherLoaderForFixedSizeTeacher<TeacherType>::TeacherLoaderForFixedSizeTeacher(
-    const std::string& TeacherPath, bool Shuffle)
+    const std::string& TeacherPath, bool Shuffle, int32_t FileVersion)
     : Path(TeacherPath)
-    , ShuffleEnabled(Shuffle) {
-    std::ifstream Ifs(Path, std::ios::in | std::ios::binary);
+    , ShuffleEnabled(Shuffle)
+    , Version(FileVersion)
+    , FileSize(0)
+    , MappedFile(nullptr) {
 
+    ensureOpen();
+
+    if (ShuffleEnabled) {
+        std::random_device RD;
+        PG = std::make_unique<utils::PermutationGenerator>(RD(), NumTeachers);
+    }
+}
+
+template <typename TeacherType>
+TeacherLoaderForFixedSizeTeacher<
+    TeacherType>::~TeacherLoaderForFixedSizeTeacher() {
+#ifdef __linux__
+    if (MappedFile != nullptr) {
+        ::munmap(MappedFile, FileSize);
+        MappedFile = nullptr;
+    }
+#endif
+}
+
+template <typename TeacherType>
+std::size_t TeacherLoaderForFixedSizeTeacher<TeacherType>::size() const {
+    return NumTeachers;
+}
+
+template <typename TeacherType>
+void TeacherLoaderForFixedSizeTeacher<TeacherType>::ensureOpen() {
+#ifdef __linux__
+    if (MappedFile != nullptr) {
+        return;
+    }
+
+    const int FileDescriptor = ::open(Path.c_str(), O_RDONLY);
+    if (FileDescriptor < 0) {
+        throw std::runtime_error("File not found.");
+    }
+
+    struct stat Stat {};
+    if (::fstat(FileDescriptor, &Stat) < 0) {
+        ::close(FileDescriptor);
+        throw std::runtime_error("Failed to get file size.");
+    }
+
+    FileSize = static_cast<std::size_t>(Stat.st_size);
+    if (FileSize == 0) {
+        ::close(FileDescriptor);
+        throw std::runtime_error("File is empty.");
+    }
+
+    MappedFile =
+        ::mmap(nullptr, FileSize, PROT_READ, MAP_PRIVATE, FileDescriptor, 0);
+    ::close(FileDescriptor);
+
+    if (MappedFile == MAP_FAILED) {
+        throw std::runtime_error("Failed to map file.");
+    }
+
+    io::file::load<TeacherType>(static_cast<const char*>(MappedFile), Version,
+                                &TeacherSizeUnit);
+#else
+    const pid_t CurrentPid = getpid();
+
+    if (Ifs.is_open() && CurrentPid == OpenPid) {
+        return;
+    }
+
+    if (Ifs.is_open()) {
+        Ifs.close();
+    }
+
+    Ifs.clear();
+    Ifs.open(Path, std::ios::in | std::ios::binary);
     if (!Ifs) {
         throw std::runtime_error("File not found.");
     }
 
+    OpenPid = CurrentPid;
+
     // Load one teacher entry so that we can determine
     // the size of one teacher binary.
-    [[maybe_unused]] TeacherType T = io::file::load<TeacherType>(Ifs);
+    [[maybe_unused]] TeacherType T = io::file::load<TeacherType>(Ifs, Version);
 
     TeacherSizeUnit = (std::size_t)Ifs.tellg();
 
@@ -41,7 +133,8 @@ TeacherLoaderForFixedSizeTeacher<TeacherType>::TeacherLoaderForFixedSizeTeacher(
     // Hence now we can compute the number of
     // teacher entries that the file has.
     Ifs.seekg(0, std::ios_base::end);
-    const std::size_t FileSize = (std::size_t)Ifs.tellg();
+    FileSize = (std::size_t)Ifs.tellg();
+#endif
 
     if (FileSize % TeacherSizeUnit != 0) {
         std::cout << "FileSize: " << FileSize << std::endl;
@@ -52,35 +145,60 @@ TeacherLoaderForFixedSizeTeacher<TeacherType>::TeacherLoaderForFixedSizeTeacher(
     }
 
     NumTeachers = FileSize / TeacherSizeUnit;
-
-    if (ShuffleEnabled) {
-        std::random_device RD;
-        PG = std::make_unique<utils::PermutationGenerator>(RD(), NumTeachers);
-    }
 }
 
 template <typename TeacherType>
-std::size_t TeacherLoaderForFixedSizeTeacher<TeacherType>::size() const {
-    return NumTeachers;
-}
-
-template <typename TeacherType>
-TeacherType TeacherLoaderForFixedSizeTeacher<TeacherType>::operator[](
-    std::size_t Index) const {
+TeacherType
+TeacherLoaderForFixedSizeTeacher<TeacherType>::operator[](std::size_t Index) {
     if (ShuffleEnabled) {
         Index = (*PG)(Index);
     }
-
     assert(Index < NumTeachers);
 
-    std::ifstream Ifs(Path, std::ios::in | std::ios::binary);
+#ifdef __linux__
+    // Since MappedFile can be read after fork(),
+    // we can skip ensureOpen() in Linux.
+#else
+    ensureOpen();
+#endif
 
+#ifdef __linux__
+    TeacherType T = io::file::load<TeacherType>(
+        static_cast<const char*>(MappedFile) + Index * TeacherSizeUnit,
+        Version);
+#else
+    Ifs.clear();
     Ifs.seekg((long)(Index * TeacherSizeUnit), std::ios_base::beg);
-
-    TeacherType T = io::file::load<TeacherType>(Ifs);
+    TeacherType T = io::file::load<TeacherType>(Ifs, Version);
+#endif
 
     return T;
 }
+
+template <>
+void TeacherLoaderForFixedSizeTeacher<SimpleTeacher>::loadAt(
+    SimpleTeacher* Dest, std::size_t Index) {
+    if (ShuffleEnabled) {
+        Index = (*PG)(Index);
+    }
+    assert(Index < NumTeachers);
+
+#ifdef __linux__
+    // Same in operator[], we can skip ensureOpen() in Linux.
+#else
+    ensureOpen();
+#endif
+
+#ifdef __linux__
+    io::file::simple_teacher::loadAt(
+        Dest, static_cast<const char*>(MappedFile) + Index * TeacherSizeUnit,
+        Version);
+#else
+    Ifs.clear();
+    Ifs.seekg((long)(Index * TeacherSizeUnit), std::ios_base::beg);
+    io::file::simple_teacher::loadAt(Dest, Ifs, Version);
+#endif
+};
 
 template class TeacherLoaderForFixedSizeTeacher<AZTeacher>;
 

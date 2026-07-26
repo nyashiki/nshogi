@@ -164,28 +164,27 @@ int32_t ioApiPositionToCSA(char* Dest, int32_t MaxLength,
 } // namespace
 
 nshogi_io_api_t* c_api::io::getApi() {
-    static bool Initialized = false;
-    static nshogi_io_api_t Api;
+    static nshogi_io_api_t Api = [] {
+        nshogi_io_api_t A;
 
-    if (!Initialized) {
-        Api.canCreateStateFromSfen = ioApiCanCreateStateFromSfen;
-        Api.canCreateMoveFromSfen = ioApiCanCreateMoveFromSfen;
-        Api.createStateFromSfen = ioApiCreateStateFromSfen;
-        Api.createMoveFromSfen = ioApiCreateMoveFromSfen;
-        Api.moveToSfen = ioApiMoveToSfen;
-        Api.stateToSfen = ioApiStateToSfen;
-        Api.positionToSfen = ioApiPositionToSfen;
+        A.canCreateStateFromSfen = ioApiCanCreateStateFromSfen;
+        A.canCreateMoveFromSfen = ioApiCanCreateMoveFromSfen;
+        A.createStateFromSfen = ioApiCreateStateFromSfen;
+        A.createMoveFromSfen = ioApiCreateMoveFromSfen;
+        A.moveToSfen = ioApiMoveToSfen;
+        A.stateToSfen = ioApiStateToSfen;
+        A.positionToSfen = ioApiPositionToSfen;
 
-        Api.canCreateStateFromCSA = ioApiCanCreateStateFromCSA;
-        Api.canCreateMoveFromCSA = ioApiCanCreateMoveFromCSA;
-        Api.createStateFromCSA = ioApiCreateStateFromCSA;
-        Api.createMoveFromCSA = ioApiCreateMoveFromCSA;
-        Api.moveToCSA = ioApiMoveToCSA;
-        Api.stateToCSA = ioApiStateToCSA;
-        Api.positionToCSA = ioApiPositionToCSA;
+        A.canCreateStateFromCSA = ioApiCanCreateStateFromCSA;
+        A.canCreateMoveFromCSA = ioApiCanCreateMoveFromCSA;
+        A.createStateFromCSA = ioApiCreateStateFromCSA;
+        A.createMoveFromCSA = ioApiCreateMoveFromCSA;
+        A.moveToCSA = ioApiMoveToCSA;
+        A.stateToCSA = ioApiStateToCSA;
+        A.positionToCSA = ioApiPositionToCSA;
 
-        Initialized = true;
-    }
+        return A;
+    }();
 
     return &Api;
 }

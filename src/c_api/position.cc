@@ -43,16 +43,15 @@ uint8_t positionApiGetStandCount(const nshogi_position_t* CPosition,
 } // namespace
 
 nshogi_position_api_t* c_api::position::getApi() {
-    static bool Initialized = false;
-    static nshogi_position_api_t Api;
+    static nshogi_position_api_t Api = [] {
+        nshogi_position_api_t A;
 
-    if (!Initialized) {
-        Api.getSideToMove = positionApiGetSideToMove;
-        Api.pieceOn = positionApiPieceOn;
-        Api.getStandCount = positionApiGetStandCount;
+        A.getSideToMove = positionApiGetSideToMove;
+        A.pieceOn = positionApiPieceOn;
+        A.getStandCount = positionApiGetStandCount;
 
-        Initialized = true;
-    }
+        return A;
+    }();
 
     return &Api;
 }

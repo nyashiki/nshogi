@@ -68,6 +68,11 @@ static constexpr PieceTypeKind PieceTypes[] = {
 };
 
 inline constexpr PieceTypeKind promotePieceType(PieceTypeKind Pt) noexcept {
+    // The XOR-based implementation only yields a valid promoted piece type
+    // for the promotable, not-yet-promoted piece types (Pawn .. Rook).
+    // Applying it to PTK_Gold, PTK_King, or an already-promoted type
+    // produces a bogus value.
+    assert(Pt >= PTK_Pawn && Pt <= PTK_Rook);
     return (PieceTypeKind)(Pt ^ 0b1000);
 }
 
@@ -82,6 +87,8 @@ enum PieceKind : uint8_t {
     PK_BlackProPawn =  9, PK_BlackProLance = 10, PK_BlackProKnight = 11, PK_BlackProSilver = 12, PK_BlackProBishop = 13, PK_BlackProRook = 14,
     PK_WhitePawn    = 17, PK_WhiteLance    = 18, PK_WhiteKnight    = 19, PK_WhiteSilver    = 20, PK_WhiteBishop    = 21, PK_WhiteRook    = 22, PK_WhiteGold = 23, PK_WhiteKing = 24,
     PK_WhiteProPawn = 25, PK_WhiteProLance = 26, PK_WhiteProKnight = 27, PK_WhiteProSilver = 28, PK_WhiteProBishop = 29, PK_WhiteProRook = 30,
+
+    NumPieceKind = 31,
 };
 // clang-format on
 
@@ -120,6 +127,10 @@ inline PieceKind makePiece(Color C, PieceTypeKind Pt) noexcept {
     }
 
     return makePiece<Color::White>(Pt);
+}
+
+inline PieceKind getInversed(PieceKind P) noexcept {
+    return (PieceKind)(P ^ 0b10000);
 }
 
 // clang-format off
@@ -269,10 +280,8 @@ inline constexpr Rank squareToRank(Square Sq) noexcept {
 };
 // clang-format on
 
-namespace {
-
 /// Relative direction from `Sq1` to `Sq2`.
-static constexpr auto DirectionDataInternal =
+inline constexpr auto DirectionDataInternal =
     []() -> std::pair<std::array<std::array<Direction, NumSquares>, NumSquares>,
                       std::array<std::array<uint8_t, NumSquares>, NumSquares>> {
     std::array<std::array<Direction, NumSquares>, NumSquares> Directions = {};
@@ -283,6 +292,7 @@ static constexpr auto DirectionDataInternal =
         for (Square Sq2 : Squares) {
             if (Sq1 == Sq2) {
                 Directions[(std::size_t)Sq1][(std::size_t)Sq2] = (Direction)0;
+                continue;
             }
 
             const Rank R1 = squareToRank(Sq1);
@@ -330,11 +340,9 @@ static constexpr auto DirectionDataInternal =
     return {Directions, SerializedDirections};
 }();
 
-} // namespace
-
-static constexpr std::array<std::array<Direction, NumSquares>, NumSquares>
+inline constexpr std::array<std::array<Direction, NumSquares>, NumSquares>
     SquareDirection = DirectionDataInternal.first;
-static constexpr std::array<std::array<uint8_t, NumSquares>, NumSquares>
+inline constexpr std::array<std::array<uint8_t, NumSquares>, NumSquares>
     SquareSerializedDirection = DirectionDataInternal.second;
 
 enum Stands : uint32_t { NumStandKinds = 8 };
@@ -624,7 +632,7 @@ struct Move16 {
     constexpr Move16() noexcept = default;
 
     explicit constexpr Move16(Move32 M) noexcept
-        : C_(M.C_ & 0xffff) {
+        : C_(M.C_ & 0x7fff) {
     }
 
     constexpr Move16(const Move16& M) noexcept = default;

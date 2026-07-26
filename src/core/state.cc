@@ -122,5 +122,25 @@ bool State::canDeclare() const noexcept {
     return Impl->canDeclare();
 }
 
+bool State::isLastMoveDroppingAPawn() const noexcept {
+    return Impl->isLastMoveDroppingAPawn();
+}
+
+bool State::isLegal(Move16 Move) const noexcept {
+    if (getSideToMove() == Black) {
+        return Impl->isLegal<Black>(Move);
+    } else {
+        return Impl->isLegal<White>(Move);
+    }
+}
+
+bool State::isLegal(Move32 Move) const noexcept {
+    if (getSideToMove() == Black) {
+        return Impl->isLegal<Black>(Move);
+    } else {
+        return Impl->isLegal<White>(Move);
+    }
+}
+
 } // namespace core
 } // namespace nshogi

@@ -11,6 +11,7 @@
 #define NSHOGI_ML_MATH_H
 
 #include <algorithm>
+#include <cassert>
 #include <cmath>
 #include <cstddef>
 
@@ -20,6 +21,9 @@ namespace math {
 
 template <typename DType>
 void softmax_(DType* X, std::size_t N, DType Temperature = 1.0) {
+    assert(N > 0);
+    assert(Temperature != 0);
+
     const DType MaxValue = *std::max_element(X, X + N);
     DType Sum = 0;
 

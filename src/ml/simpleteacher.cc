@@ -18,7 +18,16 @@ namespace nshogi {
 namespace ml {
 
 SimpleTeacher::SimpleTeacher()
-    : HuffmanCode(core::HuffmanCode::zero()) {
+    : HuffmanCode(core::HuffmanCode::zero())
+    , Ply(0)
+    , MaxPly(256)
+    , DrawValues{0.5f, 0.5f}
+    , NextMove(core::Move16::MoveNone())
+    , Winner(core::NoColor)
+    , V(0.0f)
+    , Q(0.0f)
+    , GamePly(0)
+    , Declared(false) {
 }
 
 SimpleTeacher::SimpleTeacher(const SimpleTeacher& ST)
@@ -27,7 +36,32 @@ SimpleTeacher::SimpleTeacher(const SimpleTeacher& ST)
     , MaxPly(ST.MaxPly)
     , DrawValues{ST.DrawValues[0], ST.DrawValues[1]}
     , NextMove(ST.NextMove)
-    , Winner(ST.Winner) {
+    , Winner(ST.Winner)
+    , V(ST.V)
+    , Q(ST.Q)
+    , GamePly(ST.GamePly)
+    , Declared(ST.Declared) {
+}
+
+SimpleTeacher& SimpleTeacher::operator=(const SimpleTeacher& ST) {
+    if (this != &ST) {
+        HuffmanCode = ST.HuffmanCode;
+        Ply = ST.Ply;
+        MaxPly = ST.MaxPly;
+        DrawValues[0] = ST.DrawValues[0];
+        DrawValues[1] = ST.DrawValues[1];
+        NextMove = ST.NextMove;
+        Winner = ST.Winner;
+        V = ST.V;
+        Q = ST.Q;
+        GamePly = ST.GamePly;
+        Declared = ST.Declared;
+    }
+    return *this;
+}
+
+const core::HuffmanCode& SimpleTeacher::getHuffmanCode() const {
+    return HuffmanCode;
 }
 
 core::Position SimpleTeacher::getPosition() const {
@@ -58,6 +92,22 @@ core::Color SimpleTeacher::getWinner() const {
     return Winner;
 }
 
+float SimpleTeacher::v() const {
+    return V;
+}
+
+float SimpleTeacher::q() const {
+    return Q;
+}
+
+uint16_t SimpleTeacher::gamePly() const {
+    return GamePly;
+}
+
+bool SimpleTeacher::declared() const {
+    return Declared;
+}
+
 SimpleTeacher& SimpleTeacher::setState(const core::State& State) {
     HuffmanCode = core::HuffmanCode::encode(State.getPosition());
     Ply = State.getPly();
@@ -81,11 +131,32 @@ SimpleTeacher& SimpleTeacher::setWinner(core::Color C) {
     return *this;
 }
 
+SimpleTeacher& SimpleTeacher::setV(float Value) {
+    V = Value;
+    return *this;
+}
+
+SimpleTeacher& SimpleTeacher::setQ(float QValue) {
+    Q = QValue;
+    return *this;
+}
+
+SimpleTeacher& SimpleTeacher::setGamePly(uint16_t PlyValue) {
+    GamePly = PlyValue;
+    return *this;
+}
+
+SimpleTeacher& SimpleTeacher::setDeclared(bool DeclaredValue) {
+    Declared = DeclaredValue;
+    return *this;
+}
+
 bool SimpleTeacher::equals(const SimpleTeacher& ST) const {
     return HuffmanCode == ST.HuffmanCode && Ply == ST.Ply &&
            MaxPly == ST.MaxPly && DrawValues[0] == ST.DrawValues[0] &&
            DrawValues[1] == ST.DrawValues[1] && NextMove == ST.NextMove &&
-           Winner == ST.Winner;
+           Winner == ST.Winner && V == ST.V && Q == ST.Q &&
+           GamePly == ST.GamePly && Declared == ST.Declared;
 }
 
 void SimpleTeacher::corruptMyself() {
@@ -104,6 +175,11 @@ void SimpleTeacher::corruptMyself() {
 
     NextMove = core::Move16::fromValue((uint16_t)Mt());
     Winner = (core::Color)Mt();
+
+    V = std::bit_cast<float>((int32_t)Mt());
+    Q = std::bit_cast<float>((int32_t)Mt());
+    GamePly = (uint16_t)Mt();
+    Declared = (bool)(Mt() % 2);
 }
 
 } // namespace ml
