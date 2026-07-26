@@ -30,7 +30,7 @@ Type `make [CXX=<CXX>] [<SSE INSTRUCTION>=1] [PREFIX=<PREFIX>] install` in your 
 
 #### Python module
 
-Type `make [CXX=<CXX>] [<SSE INSTRUCTION>=1] install-python` in your terminal, where:
+Type `[CXX=<CXX>] [<SSE INSTRUCTION>=1] pip install .` in your terminal, where:
 
 - `<CXX>` is a C++ compiler.
 - `<SSE INSTRUCTION>` is one of the {SSE, SSE41, SSE42, AVX, AVX2}, depends on the instructions your CPU supports.

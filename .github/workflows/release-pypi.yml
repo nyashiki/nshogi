@@ -31,7 +31,7 @@ jobs:
             yum update -y || true
             yum install -y clang
           CIBW_ENVIRONMENT: |
-            GENERIC=1
+            GENERIC=1 CC=clang CXX=clang++
         run: |
           python -m cibuildwheel --output-dir wheelhouse
 
