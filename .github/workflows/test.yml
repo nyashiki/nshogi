@@ -24,12 +24,12 @@ jobs:
       with:
         toolchain: stable
         override: true
-    - name: install libraries
-      if: runner.os == 'Linux'
-      run: pip3 install pybind11 numpy
-    - name: install libraries
-      if: runner.os == 'macOS'
-      run: brew install pybind11 numpy
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.13"
+    - name: install python libraries
+      run: python -m pip install --upgrade pip numpy
     - name: make library
       working-directory: ${{ env.working-directory }}
       run: make $SIMD=1 libnshogi
@@ -42,9 +42,12 @@ jobs:
     - name: test the shared library
       working-directory: ${{ env.working-directory }}
       run: make $SIMD=1 runtest-shared
+    - name: install Python library
+      working-directory: ${{ env.working-directory }}
+      run: python -m pip install .
     - name: test Python library
       working-directory: ${{ env.working-directory }}
-      run: make runtest-python
+      run: python src/test/python/test.py
     - name: test Rust library
       working-directory: rust
       run: cargo test --release

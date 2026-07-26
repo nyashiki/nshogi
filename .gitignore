@@ -4,6 +4,11 @@ build
 *.a
 libnshogi_test*
 
+# Python packaging
+dist/
+wheelhouse/
+*.egg-info/
+
 # llvm-cov
 cov_html/
 default.profraw
