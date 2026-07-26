@@ -19,6 +19,11 @@ ROOT = pathlib.Path(__file__).parent.resolve()
 
 SOURCES = [
     "src/python/bind.cc",
+    "src/python/core.cc",
+    "src/python/solver.cc",
+    "src/python/io.cc",
+    "src/python/feature.cc",
+    "src/python/teacher.cc",
     "src/buildinfo/capability.cc",
     "src/core/initializer.cc",
     "src/core/position.cc",
