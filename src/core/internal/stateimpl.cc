@@ -235,8 +235,6 @@ inline void StateImpl::undoMove() {
 
         Helper.ColorBB[~C].toggleBit(To);
         Helper.TypeBB[Type].toggleBit(To);
-
-        HashValue.update<~C>(Type, To);
     } else { // Move a piece on the board, which means not a dropping move.
         const PieceTypeKind CaptureType = PrevMove.capturePieceType();
         const PieceTypeKind Type = PrevMove.pieceType();
@@ -249,8 +247,6 @@ inline void StateImpl::undoMove() {
 
             Helper.ColorBB[C].toggleBit(To);
             Helper.TypeBB[CaptureType].toggleBit(To);
-
-            HashValue.update<C>(CaptureType, To);
         }
 
         Helper.ColorBB[~C].toggleBit(To);
@@ -258,24 +254,21 @@ inline void StateImpl::undoMove() {
             const PieceTypeKind PromotedType = promotePieceType(Type);
 
             Helper.TypeBB[PromotedType].toggleBit(To);
-            HashValue.update<~C>(PromotedType, To);
         } else {
             Helper.TypeBB[Type].toggleBit(To);
-            HashValue.update<~C>(Type, To);
         }
 
         Pos.putPiece(From, makePiece<~C>(Type));
         Helper.TypeBB[Type].toggleBit(From);
         Helper.ColorBB[~C].toggleBit(From);
 
-        HashValue.update<~C>(Type, From);
-
         if (Type == PTK_King) {
             Helper.KingSquare[~C] = From;
         }
     }
 
-    HashValue.updateColor();
+    // The previous step already stores the board hash, including the turn.
+    HashValue.setValue(Helper.getCurrentStepHelper().BoardHash);
 
     assert((getBitboard<Black>() & getBitboard<White>()).isZero());
 }
