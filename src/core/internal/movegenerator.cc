@@ -9,6 +9,7 @@
 
 #include "movegenerator.h"
 #include "bitboard.h"
+#include <array>
 
 namespace nshogi {
 namespace core {
@@ -22,12 +23,128 @@ using namespace internal::bitboard;
 // the standard piece set contains two bishops and two rooks in total.
 constexpr std::size_t SliderAttackCacheSize = 4;
 
+#if defined(USE_AVX2) || defined(USE_NEON)
+
+// The six non-pawn hand kinds have only 64 possible presence masks.
+struct DroppingMovePack {
+    alignas(32) std::array<uint32_t, 8> Moves{};
+    unsigned Count = 0;
+};
+
+constexpr auto DroppingMovePacks = [] {
+    constexpr PieceTypeKind Types[] = {
+        PTK_Silver, PTK_Gold, PTK_Bishop, PTK_Rook, PTK_Lance, PTK_Knight};
+    std::array<DroppingMovePack, 64> Packs{};
+    for (unsigned Mask = 0; Mask < Packs.size(); ++Mask) {
+        for (unsigned I = 0; I < 6; ++I) {
+            if ((Mask & (1U << I)) != 0) {
+                Packs[Mask].Moves[Packs[Mask].Count++] =
+                    Move32::droppingMove(static_cast<Square>(0), Types[I])
+                        .value();
+            }
+        }
+    }
+    return Packs;
+}();
+
+#endif
+
+// Sliding attacks from the opposing king, shared by all check-move phases.
+struct CheckAttackCache {
+    Bitboard Bishop;
+    Bitboard Rook;
+    Bitboard Lance;
+    Bitboard King;
+
+    template <PieceTypeKind Type>
+    Bitboard getBishop() const noexcept {
+        if constexpr (Type == PTK_ProBishop) {
+            return Bishop | King;
+        }
+        return Bishop;
+    }
+
+    template <PieceTypeKind Type>
+    Bitboard getRook() const noexcept {
+        if constexpr (Type == PTK_ProRook) {
+            return Rook | King;
+        }
+        return Rook;
+    }
+};
+
+template <Color C, PieceTypeKind Type, bool Capture, bool WilyPromote>
+inline Move32* emitBoardMoves(const StateImpl& S, Move32* __restrict Moves,
+                              Square From, const Bitboard& ToBB) noexcept {
+    const PieceTypeKind ActualType =
+        Type == PTK_Gold ? getPieceType(S.getPosition().pieceOn(From)) : Type;
+    const auto Append = [&](Square To, bool Promote) {
+        const PieceTypeKind Captured =
+            Capture ? getPieceType(S.getPosition().pieceOn(To)) : PTK_Empty;
+        *Moves++ =
+            Promote ? Move32::boardPromotingMove(From, To, ActualType, Captured)
+                    : Move32::boardMove(From, To, ActualType, Captured);
+    };
+    if constexpr (Type == PTK_Lance) {
+        ToBB.forEach([&](Square To) {
+            if (PromotableBB[C].isSet(To)) {
+                Append(To, true);
+            }
+
+            if constexpr (WilyPromote) {
+                if (!FirstAndSecondFurthestBB[C].isSet(To)) {
+                    Append(To, false);
+                }
+            } else {
+                if (!Bitboard::FurthermostBB<C>().isSet(To)) {
+                    Append(To, false);
+                }
+            }
+        });
+    } else if constexpr (Type == PTK_Bishop || Type == PTK_Rook) {
+        const Bitboard PromoteTo = PromotableBB[C].isSet(From)
+            ? ToBB : (ToBB & PromotableBB[C]);
+
+        PromoteTo.forEach([&](Square To) {
+            Append(To, true);
+
+            if constexpr (!WilyPromote) {
+                Append(To, false);
+            }
+        });
+        PromoteTo.andNot(ToBB).forEach([&](Square To) { Append(To, false); });
+    } else {
+        const Bitboard NormalTo = Type == PTK_Knight
+            ? FirstAndSecondFurthestBB[C].andNot(ToBB) : ToBB;
+
+        NormalTo.forEach([&](Square To) {
+            Append(To, false);
+        });
+
+        if constexpr (Type == PTK_Knight || Type == PTK_Silver) {
+            const Bitboard PromoteTo = PromotableBB[C].isSet(From)
+                ? ToBB : (ToBB & PromotableBB[C]);
+
+            PromoteTo.forEach([&](Square To) {
+                Append(To, true);
+            });
+        }
+    }
+    return Moves;
+}
+
 template <Color C, bool Capture, bool WilyPromote>
 inline Move32*
 generateOnBoardOneStepPawnMovesImpl(const StateImpl& S,
                                     Move32* __restrict Moves,
                                     const Bitboard& TargetSquares) noexcept {
     Bitboard ToBB = S.getBitboard<C, PTK_Pawn>();
+    const Bitboard PinnedPawns = ToBB & S.getDefendingOpponentSliderBB<C>();
+    if (!PinnedPawns.isZero()) {
+        // A pinned pawn can move only along the file of its king.
+        ToBB = PinnedPawns.andNot(ToBB) |
+               (PinnedPawns & FileBB[squareToFile(S.getKingSquare<C>())]);
+    }
 
     if constexpr (C == Black) {
         ToBB = ToBB.getLeftShiftEpi64<1>();
@@ -39,21 +156,6 @@ generateOnBoardOneStepPawnMovesImpl(const StateImpl& S,
 
     (ToBB & PromotableBB[C]).forEach([&](Square To) {
         const Square From = (C == Black) ? (To + South) : (To + North);
-
-        const bool IsDefendingPiece =
-            S.getDefendingOpponentSliderBB<C>().isSet(From);
-
-        // If this pawn is defending a slider piece along a diagonal or
-        // horizontal, this pawn cannot move.
-        if (IsDefendingPiece) {
-            const std::size_t KingSq = (std::size_t)S.getKingSquare<C>();
-            if (SquareDirection[(std::size_t)From][KingSq] !=
-                    Direction::North &&
-                SquareDirection[(std::size_t)From][KingSq] !=
-                    Direction::South) {
-                return;
-            }
-        }
 
         if constexpr (Capture) {
             const PieceTypeKind CaptureType =
@@ -79,21 +181,6 @@ generateOnBoardOneStepPawnMovesImpl(const StateImpl& S,
     });
 
     PromotableBB[C].andNot(ToBB).forEach([&](Square To) {
-        const Square From = (C == Black) ? (To + South) : (To + North);
-
-        const bool IsDefendingPiece =
-            S.getDefendingOpponentSliderBB<C>().isSet(From);
-
-        if (IsDefendingPiece) {
-            const std::size_t KingSq = (std::size_t)S.getKingSquare<C>();
-            if (SquareDirection[(std::size_t)From][KingSq] !=
-                    Direction::North &&
-                SquareDirection[(std::size_t)From][KingSq] !=
-                    Direction::South) {
-                return;
-            }
-        }
-
         if constexpr (C == Black) {
             if constexpr (Capture) {
                 const PieceTypeKind CaptureType =
@@ -125,46 +212,17 @@ inline Move32* generateOnBoardOneStepGoldKindsMovesImpl(
     const Bitboard FromBB =
         (S.getBitboard<PTK_Gold>() | S.getBitboard<PTK_ProPawn>() |
          S.getBitboard<PTK_ProLance>() | S.getBitboard<PTK_ProKnight>() |
-         S.getBitboard<PTK_ProSilver>()) &
-        S.getBitboard<C>();
-
-    (FromBB & S.getDefendingOpponentSliderBB<C>()).forEach([&](Square From) {
-        const PieceTypeKind FromPieceType =
-            getPieceType(S.getPosition().pieceOn(From));
-
-        const Bitboard ToBB = TargetSquares & getAttackBB<C, PTK_Gold>(From) &
-                              LineBB[From][S.getKingSquare<C>()];
-        ToBB.forEach([&](Square To) {
-            if constexpr (Capture) {
-                const PieceTypeKind CaptureType =
-                    getPieceType(S.getPosition().pieceOn(To));
-                *Moves++ =
-                    Move32::boardMove(From, To, FromPieceType, CaptureType);
-            } else {
-                *Moves++ = Move32::boardMove(From, To, FromPieceType);
-            }
-        });
-    });
-
+         S.getBitboard<PTK_ProSilver>()) & S.getBitboard<C>();
+    const auto Emit = [&](Square From, bool Pinned) {
+        Bitboard ToBB = TargetSquares & getAttackBB<C, PTK_Gold>(From);
+        if (Pinned) {
+            ToBB &= LineBB[From][S.getKingSquare<C>()];
+        }
+        Moves = emitBoardMoves<C, PTK_Gold, Capture, true>(S, Moves, From, ToBB);
+    };
+    (FromBB & S.getDefendingOpponentSliderBB<C>()).forEach([&](Square From) { Emit(From, true); });
     S.getDefendingOpponentSliderBB<C>().andNot(FromBB).forEach(
-        [&](Square From) {
-            const PieceTypeKind FromPieceType =
-                getPieceType(S.getPosition().pieceOn(From));
-
-            const Bitboard ToBB =
-                TargetSquares & getAttackBB<C, PTK_Gold>(From);
-            ToBB.forEach([&](Square To) {
-                if constexpr (Capture) {
-                    const PieceTypeKind CaptureType =
-                        getPieceType(S.getPosition().pieceOn(To));
-                    *Moves++ =
-                        Move32::boardMove(From, To, FromPieceType, CaptureType);
-                } else {
-                    *Moves++ = Move32::boardMove(From, To, FromPieceType);
-                }
-            });
-        });
-
+        [&](Square From) { Emit(From, false); });
     return Moves;
 }
 
@@ -172,167 +230,45 @@ template <Color C, PieceTypeKind Type, bool Capture>
 inline Move32*
 generateOnBoardOneStepMovesImpl(const StateImpl& S, Move32* __restrict Moves,
                                 const Bitboard& TargetSquares) noexcept {
-    static_assert(Type != PTK_Pawn,
-                  "Pawn moves are handled in another function. "
-                  "Do not use this function for pawns.");
-    static_assert(
-        Type != PTK_Bishop,
-        "Bishop moves are handled in another function. Do not use this "
-        "function for bishops.");
-    static_assert(Type != PTK_Rook,
-                  "Rook moves are handled in another function. "
-                  "Do not use this function for rooks.");
-
-    // Extracting the bitboard for pieces of specified color and type.
-    const Bitboard FromBB = S.getBitboard<C, Type>();
-
-    // Note: if a knight is defending a slider piece, it cannot move anywhere.
-    if constexpr (Type != PTK_Knight) {
-        (FromBB & S.getDefendingOpponentSliderBB<C>())
-            .forEach([&](Square From) {
-                assert(checkRange(From));
-
-                const Bitboard ToBB =
-                    (Type == PTK_King)
-                        ? TargetSquares & getAttackBB<C, Type>(From)
-                        : (TargetSquares & getAttackBB<C, Type>(From) &
-                           LineBB[From][S.getKingSquare<C>()]);
-
-                // No promotion only.
-                ToBB.forEach([&](Square To) {
-                    if constexpr (Type == PTK_King) {
-                        if (S.isAttacked<C>(To, From)) {
-                            return;
-                        }
-                    }
-
-                    if constexpr (Capture) {
-                        const PieceTypeKind CaptureType =
-                            getPieceType(S.getPosition().pieceOn(To));
-                        *Moves++ =
-                            Move32::boardMove(From, To, Type, CaptureType);
-                    } else {
-                        *Moves++ = Move32::boardMove(From, To, Type);
-                    }
-                });
-
-                // Promotion only.
-                if constexpr (Type != PTK_King && Type != PTK_Gold &&
-                              !isPromoted(Type)) {
-                    const Bitboard PromotableToBB =
-                        PromotableBB[C].isSet(From) ? ToBB
-                                                    : (ToBB & PromotableBB[C]);
-
-                    PromotableToBB.forEach([&](Square To) {
-                        if constexpr (Type == PTK_King) {
-                            if (S.isAttacked<C>(To, From)) {
-                                return;
-                            }
-                        }
-
-                        // Handling regular promotion cases for all piece types.
-                        if constexpr (Type != PTK_King) {
-                            if constexpr (!isPromoted(Type) &&
-                                          Type != PTK_Gold) {
-                                if constexpr (Capture) {
-                                    const PieceTypeKind CaptureType =
-                                        getPieceType(
-                                            S.getPosition().pieceOn(To));
-                                    *Moves++ = Move32::boardPromotingMove(
-                                        From, To, Type, CaptureType);
-                                } else {
-                                    *Moves++ = Move32::boardPromotingMove(
-                                        From, To, Type);
-                                }
-                            }
-                        }
-                    });
-                }
-            });
-    }
-
-    S.getDefendingOpponentSliderBB<C>().andNot(FromBB).forEach(
-        [&](Square From) {
-            assert(checkRange(From));
-
-            const Bitboard ToBB = TargetSquares & getAttackBB<C, Type>(From);
-
-            // No promotion only.
-            if constexpr (Type == PTK_Knight) {
-                FirstAndSecondFurthestBB[C].andNot(ToBB).forEach(
-                    [&](Square To) {
-                        if constexpr (Capture) {
-                            const PieceTypeKind CaptureType =
-                                getPieceType(S.getPosition().pieceOn(To));
-                            *Moves++ =
-                                Move32::boardMove(From, To, Type, CaptureType);
-                        } else {
-                            *Moves++ = Move32::boardMove(From, To, Type);
-                        }
-                    });
-            } else {
-                ToBB.forEach([&](Square To) {
-                    if constexpr (Type == PTK_King) {
-                        if (S.isAttacked<C>(To, From)) {
-                            return;
-                        }
-                    }
-
-                    if constexpr (Capture) {
-                        const PieceTypeKind CaptureType =
-                            getPieceType(S.getPosition().pieceOn(To));
-                        *Moves++ =
-                            Move32::boardMove(From, To, Type, CaptureType);
-                    } else {
-                        *Moves++ = Move32::boardMove(From, To, Type);
-                    }
-                });
+    if constexpr (Type == PTK_King) {
+        const Square From = S.getKingSquare<C>();
+        if (From == SqInvalid) {
+            return Moves;
+        }
+        const Bitboard ToBB = TargetSquares & getAttackBB<C, PTK_King>(From);
+        const Bitboard OccupiedBB = SquareBB[From].andNot(
+            S.getBitboard<Black>() | S.getBitboard<White>());
+        ToBB.forEach([&](Square To) {
+            if (S.isAttackedByOneStep<C>(To) ||
+                S.isAttackedBySlider<C>(To, OccupiedBB)) {
+                return;
             }
-
-            // Promotion only.
-            if constexpr (Type != PTK_King && Type != PTK_Gold &&
-                          !isPromoted(Type)) {
-                const Bitboard PromotableToBB = PromotableBB[C].isSet(From)
-                                                    ? ToBB
-                                                    : (ToBB & PromotableBB[C]);
-
-                PromotableToBB.forEach([&](Square To) {
-                    if constexpr (Type == PTK_King) {
-                        if (S.isAttacked<C>(To, From)) {
-                            return;
-                        }
-                    }
-
-                    // Handling regular promotion cases for all piece types.
-                    if constexpr (Type != PTK_King) {
-                        if constexpr (Type == PTK_Knight) {
-                            if constexpr (Capture) {
-                                const PieceTypeKind CaptureType =
-                                    getPieceType(S.getPosition().pieceOn(To));
-                                *Moves++ = Move32::boardPromotingMove(
-                                    From, To, Type, CaptureType);
-                            } else {
-                                *Moves++ =
-                                    Move32::boardPromotingMove(From, To, Type);
-                            }
-                        } else if constexpr (!isPromoted(Type) &&
-                                             Type != PTK_Gold) {
-                            if constexpr (Capture) {
-                                const PieceTypeKind CaptureType =
-                                    getPieceType(S.getPosition().pieceOn(To));
-                                *Moves++ = Move32::boardPromotingMove(
-                                    From, To, Type, CaptureType);
-                            } else {
-                                *Moves++ =
-                                    Move32::boardPromotingMove(From, To, Type);
-                            }
-                        }
-                    }
-                });
+            if constexpr (Capture) {
+                *Moves++ = Move32::boardMove(
+                    From, To, PTK_King,
+                    getPieceType(S.getPosition().pieceOn(To)));
+            } else {
+                *Moves++ = Move32::boardMove(From, To, PTK_King);
             }
         });
+        return Moves;
+    }
 
-    // Return the pointer to the next empty slot in the Moves array.
+    static_assert(Type == PTK_King || Type == PTK_Knight || Type == PTK_Silver);
+    const Bitboard FromBB = S.getBitboard<C, Type>();
+    const auto Emit = [&](Square From, bool Pinned) {
+        Bitboard ToBB = TargetSquares & getAttackBB<C, Type>(From);
+        if (Pinned) {
+            ToBB &= LineBB[From][S.getKingSquare<C>()];
+        }
+        Moves = emitBoardMoves<C, Type, Capture, true>(S, Moves, From, ToBB);
+    };
+    if constexpr (Type != PTK_Knight) {
+        (FromBB & S.getDefendingOpponentSliderBB<C>()).forEach(
+            [&](Square From) { Emit(From, true); });
+    }
+    S.getDefendingOpponentSliderBB<C>().andNot(FromBB).forEach(
+        [&](Square From) { Emit(From, false); });
     return Moves;
 }
 
@@ -341,157 +277,19 @@ inline Move32*
 generateOnBoardLanceMovesImpl(const StateImpl& S, Move32* __restrict Moves,
                               const Bitboard& TargetSquares,
                               const Bitboard& OccupiedBB) noexcept {
-    // Note: using bitboard `and` operations that divide into cases
-    // of promotion and non-promotion is slower, so here we do not
-    // do that and check if the destination square is promotable
-    // or not inside the loop.
-
     const Bitboard FromBB = S.getBitboard<C, PTK_Lance>();
-    (FromBB & S.getDefendingOpponentSliderBB<C>()).forEach([&](Square From) {
-        const Bitboard ToBB = getLanceAttackBB<C>(From, OccupiedBB) &
-                              TargetSquares &
-                              LineBB[From][S.getKingSquare<C>()];
-
-        ToBB.forEach([&](Square To) {
-            if constexpr (WilyPromote) {
-                if (FirstAndSecondFurthestBB[C].isSet(To)) {
-                    if constexpr (Capture) {
-                        const PieceTypeKind CaptureType =
-                            getPieceType(S.getPosition().pieceOn(To));
-                        *Moves++ = Move32::boardPromotingMove(
-                            From, To, PTK_Lance, CaptureType);
-                    } else {
-                        *Moves++ =
-                            Move32::boardPromotingMove(From, To, PTK_Lance);
-                    }
-                    return;
-                }
-
-                if (PromotableBB[C].isSet(To)) {
-                    if constexpr (Capture) {
-                        const PieceTypeKind CaptureType =
-                            getPieceType(S.getPosition().pieceOn(To));
-                        *Moves++ = Move32::boardPromotingMove(
-                            From, To, PTK_Lance, CaptureType);
-                    } else {
-                        *Moves++ =
-                            Move32::boardPromotingMove(From, To, PTK_Lance);
-                    }
-                }
-
-                if constexpr (Capture) {
-                    const PieceTypeKind CaptureType =
-                        getPieceType(S.getPosition().pieceOn(To));
-                    *Moves++ =
-                        Move32::boardMove(From, To, PTK_Lance, CaptureType);
-                } else {
-                    *Moves++ = Move32::boardMove(From, To, PTK_Lance);
-                }
-            } else {
-                if (PromotableBB[C].isSet(To)) {
-                    // If the move starts or ends on a promotable square,
-                    // promote the piece.
-                    if constexpr (Capture) {
-                        const PieceTypeKind CaptureType =
-                            getPieceType(S.getPosition().pieceOn(To));
-                        *Moves++ = Move32::boardPromotingMove(
-                            From, To, PTK_Lance, CaptureType);
-                    } else {
-                        *Moves++ =
-                            Move32::boardPromotingMove(From, To, PTK_Lance);
-                    }
-                }
-
-                // Add a non-promoting move.
-                if (!Bitboard::FurthermostBB<C>().isSet(To)) {
-                    // Filter out going the furthermost squares without
-                    // promotion, because it violates the No-Unmovable-Pieces
-                    // rule.
-                    if constexpr (Capture) {
-                        const PieceTypeKind CaptureType =
-                            getPieceType(S.getPosition().pieceOn(To));
-                        *Moves++ =
-                            Move32::boardMove(From, To, PTK_Lance, CaptureType);
-                    } else {
-                        *Moves++ = Move32::boardMove(From, To, PTK_Lance);
-                    }
-                }
-            }
-        });
-    });
-
+    const auto Emit = [&](Square From, bool Pinned) {
+        Bitboard ToBB = getLanceAttackBB<C>(From, OccupiedBB) & TargetSquares;
+        if (Pinned) {
+            ToBB &= LineBB[From][S.getKingSquare<C>()];
+        }
+        Moves = emitBoardMoves<C, PTK_Lance, Capture, WilyPromote>(
+            S, Moves, From, ToBB);
+    };
+    (FromBB & S.getDefendingOpponentSliderBB<C>()).forEach(
+        [&](Square From) { Emit(From, true); });
     S.getDefendingOpponentSliderBB<C>().andNot(FromBB).forEach(
-        [&](Square From) {
-            const Bitboard ToBB =
-                getLanceAttackBB<C>(From, OccupiedBB) & TargetSquares;
-            ToBB.forEach([&](Square To) {
-                if constexpr (WilyPromote) {
-                    if (FirstAndSecondFurthestBB[C].isSet(To)) {
-                        if constexpr (Capture) {
-                            const PieceTypeKind CaptureType =
-                                getPieceType(S.getPosition().pieceOn(To));
-                            *Moves++ = Move32::boardPromotingMove(
-                                From, To, PTK_Lance, CaptureType);
-                        } else {
-                            *Moves++ =
-                                Move32::boardPromotingMove(From, To, PTK_Lance);
-                        }
-                        return;
-                    }
-
-                    if (PromotableBB[C].isSet(To)) {
-                        if constexpr (Capture) {
-                            const PieceTypeKind CaptureType =
-                                getPieceType(S.getPosition().pieceOn(To));
-                            *Moves++ = Move32::boardPromotingMove(
-                                From, To, PTK_Lance, CaptureType);
-                        } else {
-                            *Moves++ =
-                                Move32::boardPromotingMove(From, To, PTK_Lance);
-                        }
-                    }
-
-                    if constexpr (Capture) {
-                        const PieceTypeKind CaptureType =
-                            getPieceType(S.getPosition().pieceOn(To));
-                        *Moves++ =
-                            Move32::boardMove(From, To, PTK_Lance, CaptureType);
-                    } else {
-                        *Moves++ = Move32::boardMove(From, To, PTK_Lance);
-                    }
-                } else {
-                    if (PromotableBB[C].isSet(To)) {
-                        // If the move starts or ends on a promotable square,
-                        // promote the piece.
-                        if constexpr (Capture) {
-                            const PieceTypeKind CaptureType =
-                                getPieceType(S.getPosition().pieceOn(To));
-                            *Moves++ = Move32::boardPromotingMove(
-                                From, To, PTK_Lance, CaptureType);
-                        } else {
-                            *Moves++ =
-                                Move32::boardPromotingMove(From, To, PTK_Lance);
-                        }
-                    }
-
-                    // Add a non-promoting move.
-                    if (!Bitboard::FurthermostBB<C>().isSet(To)) {
-                        // Filter out going the furthermost squares without
-                        // promotion, because it violates the
-                        // No-Unmovable-Pieces rule.
-                        if constexpr (Capture) {
-                            const PieceTypeKind CaptureType =
-                                getPieceType(S.getPosition().pieceOn(To));
-                            *Moves++ = Move32::boardMove(From, To, PTK_Lance,
-                                                         CaptureType);
-                        } else {
-                            *Moves++ = Move32::boardMove(From, To, PTK_Lance);
-                        }
-                    }
-                }
-            });
-        });
-
+        [&](Square From) { Emit(From, false); });
     return Moves;
 }
 
@@ -505,134 +303,28 @@ inline Move32* generateOnBoardBishopMovesImpl(const StateImpl& S,
                                               const Bitboard& TargetSquares,
                                               const Bitboard& OccupiedBB,
                                               Bitboard*& AttackCache) noexcept {
-    static_assert(Type == PTK_Bishop || Type == PTK_ProBishop,
-                  "Type should be PTK_Bishop or PTK_ProBishop.");
-
     const auto LoadAttackBB = [&](Square From) {
         if constexpr (Capture) {
             const Bitboard AttackBB = getBishopAttackBB<Type>(From, OccupiedBB);
             *AttackCache++ = AttackBB;
             return AttackBB;
         } else {
-            // The capture pass runs first, so this piece's attacks have
-            // already been computed and stored; just read them back.
             return *AttackCache++;
         }
     };
-
     const Bitboard FromBB = S.getBitboard<C, Type>();
-    (FromBB & S.getDefendingOpponentSliderBB<C>()).forEach([&](Square From) {
-        const bool IsPromotableFrom = PromotableBB[C].isSet(From);
-
-        const Bitboard ToBB = LoadAttackBB(From) & TargetSquares &
-                              LineBB[From][S.getKingSquare<C>()];
-
-        if constexpr (Type == PTK_Bishop) {
-            const Bitboard PromotableToBB =
-                IsPromotableFrom ? ToBB : (ToBB & PromotableBB[C]);
-
-            PromotableToBB.forEach([&](Square To) {
-                if constexpr (Capture) {
-                    const PieceTypeKind CaptureType =
-                        getPieceType(S.getPosition().pieceOn(To));
-                    *Moves++ =
-                        Move32::boardPromotingMove(From, To, Type, CaptureType);
-                } else {
-                    *Moves++ = Move32::boardPromotingMove(From, To, Type);
-                }
-
-                if constexpr (!WilyPromote) {
-                    if constexpr (Capture) {
-                        const PieceTypeKind CaptureType =
-                            getPieceType(S.getPosition().pieceOn(To));
-                        *Moves++ =
-                            Move32::boardMove(From, To, Type, CaptureType);
-                    } else {
-                        *Moves++ = Move32::boardMove(From, To, Type);
-                    }
-                }
-            });
-
-            PromotableToBB.andNot(ToBB).forEach([&](Square To) {
-                if constexpr (Capture) {
-                    const PieceTypeKind CaptureType =
-                        getPieceType(S.getPosition().pieceOn(To));
-                    *Moves++ = Move32::boardMove(From, To, Type, CaptureType);
-                } else {
-                    *Moves++ = Move32::boardMove(From, To, Type);
-                }
-            });
-        } else {
-            ToBB.forEach([&](Square To) {
-                // Add a non-promoting move.
-                if constexpr (Capture) {
-                    const PieceTypeKind CaptureType =
-                        getPieceType(S.getPosition().pieceOn(To));
-                    *Moves++ = Move32::boardMove(From, To, Type, CaptureType);
-                } else {
-                    *Moves++ = Move32::boardMove(From, To, Type);
-                }
-            });
+    const auto Emit = [&](Square From, bool Pinned) {
+        Bitboard ToBB = LoadAttackBB(From) & TargetSquares;
+        if (Pinned) {
+            ToBB &= LineBB[From][S.getKingSquare<C>()];
         }
-    });
-
+        Moves = emitBoardMoves<C, Type, Capture, WilyPromote>(
+            S, Moves, From, ToBB);
+    };
+    (FromBB & S.getDefendingOpponentSliderBB<C>()).forEach(
+        [&](Square From) { Emit(From, true); });
     S.getDefendingOpponentSliderBB<C>().andNot(FromBB).forEach(
-        [&](Square From) {
-            const bool IsPromotableFrom = PromotableBB[C].isSet(From);
-
-            const Bitboard ToBB = LoadAttackBB(From) & TargetSquares;
-
-            if constexpr (Type == PTK_Bishop) {
-                const Bitboard PromotableToBB =
-                    IsPromotableFrom ? ToBB : (ToBB & PromotableBB[C]);
-
-                PromotableToBB.forEach([&](Square To) {
-                    if constexpr (Capture) {
-                        const PieceTypeKind CaptureType =
-                            getPieceType(S.getPosition().pieceOn(To));
-                        *Moves++ = Move32::boardPromotingMove(From, To, Type,
-                                                              CaptureType);
-                    } else {
-                        *Moves++ = Move32::boardPromotingMove(From, To, Type);
-                    }
-
-                    if constexpr (!WilyPromote) {
-                        if constexpr (Capture) {
-                            const PieceTypeKind CaptureType =
-                                getPieceType(S.getPosition().pieceOn(To));
-                            *Moves++ =
-                                Move32::boardMove(From, To, Type, CaptureType);
-                        } else {
-                            *Moves++ = Move32::boardMove(From, To, Type);
-                        }
-                    }
-                });
-
-                PromotableToBB.andNot(ToBB).forEach([&](Square To) {
-                    if constexpr (Capture) {
-                        const PieceTypeKind CaptureType =
-                            getPieceType(S.getPosition().pieceOn(To));
-                        *Moves++ =
-                            Move32::boardMove(From, To, Type, CaptureType);
-                    } else {
-                        *Moves++ = Move32::boardMove(From, To, Type);
-                    }
-                });
-            } else {
-                ToBB.forEach([&](Square To) {
-                    // Add a non-promoting move.
-                    if constexpr (Capture) {
-                        const PieceTypeKind CaptureType =
-                            getPieceType(S.getPosition().pieceOn(To));
-                        *Moves++ =
-                            Move32::boardMove(From, To, Type, CaptureType);
-                    } else {
-                        *Moves++ = Move32::boardMove(From, To, Type);
-                    }
-                });
-            }
-        });
-
+        [&](Square From) { Emit(From, false); });
     return Moves;
 }
 
@@ -643,135 +335,28 @@ inline Move32* generateOnBoardRookMovesImpl(const StateImpl& S,
                                             const Bitboard& TargetSquares,
                                             const Bitboard& OccupiedBB,
                                             Bitboard*& AttackCache) noexcept {
-    static_assert(Type == PTK_Rook || Type == PTK_ProRook,
-                  "Type should be PTK_Rook or PTK_ProRook.");
-
     const auto LoadAttackBB = [&](Square From) {
         if constexpr (Capture) {
             const Bitboard AttackBB = getRookAttackBB<Type>(From, OccupiedBB);
             *AttackCache++ = AttackBB;
             return AttackBB;
         } else {
-            // The capture pass runs first, so this piece's attacks have
-            // already been computed and stored; just read them back.
             return *AttackCache++;
         }
     };
-
     const Bitboard FromBB = S.getBitboard<C, Type>();
-    (FromBB & S.getDefendingOpponentSliderBB<C>()).forEach([&](Square From) {
-        const bool IsPromotableFrom = PromotableBB[C].isSet(From);
-
-        const Bitboard ToBB = LoadAttackBB(From) & TargetSquares &
-                              LineBB[From][S.getKingSquare<C>()];
-
-        if constexpr (Type == PTK_Rook) {
-            const Bitboard PromotableToBB =
-                IsPromotableFrom ? ToBB : (ToBB & PromotableBB[C]);
-
-            PromotableToBB.forEach([&](Square To) {
-                if constexpr (Capture) {
-                    const PieceTypeKind CaptureType =
-                        getPieceType(S.getPosition().pieceOn(To));
-                    *Moves++ =
-                        Move32::boardPromotingMove(From, To, Type, CaptureType);
-                } else {
-                    *Moves++ = Move32::boardPromotingMove(From, To, Type);
-                }
-
-                if constexpr (!WilyPromote) {
-                    if constexpr (Capture) {
-                        const PieceTypeKind CaptureType =
-                            getPieceType(S.getPosition().pieceOn(To));
-                        *Moves++ =
-                            Move32::boardMove(From, To, Type, CaptureType);
-                    } else {
-                        *Moves++ = Move32::boardMove(From, To, Type);
-                    }
-                }
-            });
-
-            PromotableToBB.andNot(ToBB).forEach([&](Square To) {
-                if constexpr (Capture) {
-                    const PieceTypeKind CaptureType =
-                        getPieceType(S.getPosition().pieceOn(To));
-                    *Moves++ = Move32::boardMove(From, To, Type, CaptureType);
-                } else {
-                    *Moves++ = Move32::boardMove(From, To, Type);
-                }
-            });
-        } else {
-            ToBB.forEach([&](Square To) {
-                // Add a non-promoting move.
-                if constexpr (Capture) {
-                    const PieceTypeKind CaptureType =
-                        getPieceType(S.getPosition().pieceOn(To));
-                    *Moves++ = Move32::boardMove(From, To, Type, CaptureType);
-                } else {
-                    *Moves++ = Move32::boardMove(From, To, Type);
-                }
-            });
+    const auto Emit = [&](Square From, bool Pinned) {
+        Bitboard ToBB = LoadAttackBB(From) & TargetSquares;
+        if (Pinned) {
+            ToBB &= LineBB[From][S.getKingSquare<C>()];
         }
-    });
-
+        Moves = emitBoardMoves<C, Type, Capture, WilyPromote>(
+            S, Moves, From, ToBB);
+    };
+    (FromBB & S.getDefendingOpponentSliderBB<C>()).forEach(
+        [&](Square From) { Emit(From, true); });
     S.getDefendingOpponentSliderBB<C>().andNot(FromBB).forEach(
-        [&](Square From) {
-            const bool IsPromotableFrom = PromotableBB[C].isSet(From);
-
-            const Bitboard ToBB = LoadAttackBB(From) & TargetSquares;
-
-            if constexpr (Type == PTK_Rook) {
-                const Bitboard PromotableToBB =
-                    IsPromotableFrom ? ToBB : (ToBB & PromotableBB[C]);
-
-                PromotableToBB.forEach([&](Square To) {
-                    if constexpr (Capture) {
-                        const PieceTypeKind CaptureType =
-                            getPieceType(S.getPosition().pieceOn(To));
-                        *Moves++ = Move32::boardPromotingMove(From, To, Type,
-                                                              CaptureType);
-                    } else {
-                        *Moves++ = Move32::boardPromotingMove(From, To, Type);
-                    }
-
-                    if constexpr (!WilyPromote) {
-                        if constexpr (Capture) {
-                            const PieceTypeKind CaptureType =
-                                getPieceType(S.getPosition().pieceOn(To));
-                            *Moves++ =
-                                Move32::boardMove(From, To, Type, CaptureType);
-                        } else {
-                            *Moves++ = Move32::boardMove(From, To, Type);
-                        }
-                    }
-                });
-
-                PromotableToBB.andNot(ToBB).forEach([&](Square To) {
-                    // Add a non-promoting move.
-                    if constexpr (Capture) {
-                        const PieceTypeKind CaptureType =
-                            getPieceType(S.getPosition().pieceOn(To));
-                        *Moves++ =
-                            Move32::boardMove(From, To, Type, CaptureType);
-                    } else {
-                        *Moves++ = Move32::boardMove(From, To, Type);
-                    }
-                });
-            } else {
-                ToBB.forEach([&](Square To) {
-                    // Add a non-promoting move.
-                    if constexpr (Capture) {
-                        const PieceTypeKind CaptureType =
-                            getPieceType(S.getPosition().pieceOn(To));
-                        *Moves++ =
-                            Move32::boardMove(From, To, Type, CaptureType);
-                    } else {
-                        *Moves++ = Move32::boardMove(From, To, Type);
-                    }
-                });
-            }
-        });
-
+        [&](Square From) { Emit(From, false); });
     return Moves;
 }
 
@@ -813,36 +398,21 @@ generateDroppingMovesImplAVX2(const StateImpl& S, Move32* __restrict List,
     const bool BishopExists = getStandCount<PTK_Bishop>(St) > 0;
     const bool RookExists = getStandCount<PTK_Rook>(St) > 0;
 
-    alignas(32) uint32_t Pack32[8] = {};
-
-    int MoveCount = 0;
-
-    if (SilverExists) {
-        Pack32[MoveCount] = Move32::droppingMove((Square)0, PTK_Silver).value();
-        ++MoveCount;
-    }
-    if (GoldExists) {
-        Pack32[MoveCount] = Move32::droppingMove((Square)0, PTK_Gold).value();
-        ++MoveCount;
-    }
-    if (BishopExists) {
-        Pack32[MoveCount] = Move32::droppingMove((Square)0, PTK_Bishop).value();
-        ++MoveCount;
-    }
-    if (RookExists) {
-        Pack32[MoveCount] = Move32::droppingMove((Square)0, PTK_Rook).value();
-        ++MoveCount;
-    }
-    if (LanceExists) {
-        Pack32[MoveCount] = Move32::droppingMove((Square)0, PTK_Lance).value();
-        ++MoveCount;
-    }
-    if (KnightExists) {
-        Pack32[MoveCount] = Move32::droppingMove((Square)0, PTK_Knight).value();
-        ++MoveCount;
-    }
+    const unsigned Mask = static_cast<unsigned>(SilverExists) |
+        (static_cast<unsigned>(GoldExists) << 1) |
+        (static_cast<unsigned>(BishopExists) << 2) |
+        (static_cast<unsigned>(RookExists) << 3) |
+        (static_cast<unsigned>(LanceExists) << 4) |
+        (static_cast<unsigned>(KnightExists) << 5);
+    const auto& Pack = DroppingMovePacks[Mask];
+    const uint32_t* Pack32 = Pack.Moves.data();
+    int MoveCount = static_cast<int>(Pack.Count);
 
     const __m256i Pack256 = _mm256_load_si256((const __m256i*)Pack32);
+
+    if (MoveCount == 0) {
+        return List;
+    }
 
     /* if (Stands exist) */ {
         const Bitboard ToBB = FirstAndSecondFurthestBB[C].andNot(TargetSquares);
@@ -860,6 +430,10 @@ generateDroppingMovesImplAVX2(const StateImpl& S, Move32* __restrict List,
             --MoveCount;
         }
 
+        if (MoveCount == 0) {
+            return List;
+        }
+
         const Bitboard ToBB = TargetSquares & Bitboard::SecondFurthestBB<C>();
         ToBB.forEach([&](Square To) {
             const __m256i Tos = _mm256_set1_epi32((int)To);
@@ -875,6 +449,10 @@ generateDroppingMovesImplAVX2(const StateImpl& S, Move32* __restrict List,
         }
 
         const __m128i Pack128 = _mm256_castsi256_si128(Pack256);
+
+        if (MoveCount == 0) {
+            return List;
+        }
 
         const Bitboard ToBB = TargetSquares & Bitboard::FurthermostBB<C>();
         ToBB.forEach([&](Square To) {
@@ -926,33 +504,18 @@ generateDroppingMovesImplNeon(const StateImpl& S, Move32* __restrict List,
     const bool BishopExists = getStandCount<PTK_Bishop>(St) > 0;
     const bool RookExists = getStandCount<PTK_Rook>(St) > 0;
 
-    alignas(32) uint32_t Pack32[8] = {};
+    const unsigned Mask = static_cast<unsigned>(SilverExists) |
+        (static_cast<unsigned>(GoldExists) << 1) |
+        (static_cast<unsigned>(BishopExists) << 2) |
+        (static_cast<unsigned>(RookExists) << 3) |
+        (static_cast<unsigned>(LanceExists) << 4) |
+        (static_cast<unsigned>(KnightExists) << 5);
+    const auto& Pack = DroppingMovePacks[Mask];
+    const uint32_t* Pack32 = Pack.Moves.data();
+    int MoveCount = static_cast<int>(Pack.Count);
 
-    int MoveCount = 0;
-
-    if (SilverExists) {
-        Pack32[MoveCount] = Move32::droppingMove((Square)0, PTK_Silver).value();
-        ++MoveCount;
-    }
-    if (GoldExists) {
-        Pack32[MoveCount] = Move32::droppingMove((Square)0, PTK_Gold).value();
-        ++MoveCount;
-    }
-    if (BishopExists) {
-        Pack32[MoveCount] = Move32::droppingMove((Square)0, PTK_Bishop).value();
-        ++MoveCount;
-    }
-    if (RookExists) {
-        Pack32[MoveCount] = Move32::droppingMove((Square)0, PTK_Rook).value();
-        ++MoveCount;
-    }
-    if (LanceExists) {
-        Pack32[MoveCount] = Move32::droppingMove((Square)0, PTK_Lance).value();
-        ++MoveCount;
-    }
-    if (KnightExists) {
-        Pack32[MoveCount] = Move32::droppingMove((Square)0, PTK_Knight).value();
-        ++MoveCount;
+    if (MoveCount == 0) {
+        return List;
     }
 
     /* if (Stands exist) */ {
@@ -988,6 +551,10 @@ generateDroppingMovesImplNeon(const StateImpl& S, Move32* __restrict List,
             --MoveCount;
         }
 
+        if (MoveCount == 0) {
+            return List;
+        }
+
         const Bitboard ToBB = TargetSquares & Bitboard::SecondFurthestBB<C>();
 
         if (MoveCount <= 4) {
@@ -1018,6 +585,10 @@ generateDroppingMovesImplNeon(const StateImpl& S, Move32* __restrict List,
     {
         if (LanceExists) {
             --MoveCount;
+        }
+
+        if (MoveCount == 0) {
+            return List;
         }
 
         const Bitboard ToBB = TargetSquares & Bitboard::FurthermostBB<C>();
@@ -1423,7 +994,25 @@ inline Move32* generateOnBoardOneStepNoPromoteCheckMovesImpl(
         return Moves;
     }
 
-    const Bitboard FromBB = S.getBitboard<C, Type>() & SourceFilter;
+    Bitboard FromBB = S.getBitboard<C, Type>() & SourceFilter;
+    if constexpr (!Pinned) {
+        const Bitboard CheckSquares =
+            getAttackBB<~C, Type>(S.getKingSquare<~C>()) & TargetBB;
+        if (CheckSquares.isZero()) {
+            return Moves;
+        }
+        if constexpr (Type == PTK_Pawn) {
+            if constexpr (C == Black) {
+                FromBB &= RankBB[RankI]
+                              .andNot(CheckSquares)
+                              .getRightShiftEpi64<1>();
+            } else {
+                FromBB &= RankBB[RankA]
+                              .andNot(CheckSquares)
+                              .getLeftShiftEpi64<1>();
+            }
+        }
+    }
 
     if constexpr (Type != PTK_Knight) {
         (FromBB & S.getDefendingOpponentSliderBB<C>())
@@ -1501,6 +1090,11 @@ template <Color C, bool Capture, bool Pinned>
 inline Move32* generateOnBoardOneStepNoPromoteCheckGoldKindsMovesImpl(
     const StateImpl& S, Move32* __restrict Moves, const Bitboard& TargetBB,
     const Bitboard& SourceFilter) noexcept {
+    if constexpr (!Pinned) {
+        if ((TargetBB & getAttackBB<~C, PTK_Gold>(S.getKingSquare<~C>())).isZero()) {
+            return Moves;
+        }
+    }
     const Bitboard FromBB =
         S.getBitboard<C>() & SourceFilter &
         (S.getBitboard<PTK_Gold>() | S.getBitboard<PTK_ProPawn>() |
@@ -1556,7 +1150,8 @@ inline Move32* generateOnBoardOneStepNoPromoteCheckGoldKindsMovesImpl(
 template <Color C, bool Capture, bool WilyPromote, bool Pinned>
 inline Move32* generateOnBoardLanceNoPromoteCheckMovesImpl(
     const StateImpl& S, Move32* __restrict Moves, const Bitboard& TargetBB,
-    const Bitboard& OccupiedBB, const Bitboard& SourceFilter) noexcept {
+    const Bitboard& OccupiedBB, const Bitboard& SourceFilter,
+    const CheckAttackCache& CheckAttacks) noexcept {
     constexpr PieceTypeKind Type = PTK_Lance;
 
     if ((S.getBitboard<C, Type>() & SourceFilter).isZero()) {
@@ -1567,7 +1162,7 @@ inline Move32* generateOnBoardLanceNoPromoteCheckMovesImpl(
     (FromBB & S.getDefendingOpponentSliderBB<C>()).forEach([&](Square From) {
         Bitboard TargetBB2 =
             (Pinned) ? ~LineBB[From][S.getKingSquare<~C>()]
-                     : getLanceAttackBB<~C>(S.getKingSquare<~C>(), OccupiedBB);
+                     : CheckAttacks.Lance;
 
         if constexpr (WilyPromote) {
             TargetBB2 = FirstAndSecondFurthestBB[C].andNot(TargetBB2);
@@ -1594,7 +1189,7 @@ inline Move32* generateOnBoardLanceNoPromoteCheckMovesImpl(
             Bitboard TargetBB2 =
                 (Pinned)
                     ? ~LineBB[From][S.getKingSquare<~C>()]
-                    : getLanceAttackBB<~C>(S.getKingSquare<~C>(), OccupiedBB);
+                    : CheckAttacks.Lance;
 
             if constexpr (WilyPromote) {
                 TargetBB2 = FirstAndSecondFurthestBB[C].andNot(TargetBB2);
@@ -1622,7 +1217,8 @@ template <Color C, PieceTypeKind Type, bool Capture, bool Pinned,
           bool WilyPromote>
 inline Move32* generateOnBoardBishopNoPromoteCheckMovesImpl(
     const StateImpl& S, Move32* __restrict Moves, const Bitboard& TargetBB,
-    const Bitboard& OccupiedBB, const Bitboard& SourceFilter) noexcept {
+    const Bitboard& OccupiedBB, const Bitboard& SourceFilter,
+    const CheckAttackCache& CheckAttacks) noexcept {
     static_assert(
         Type == PTK_Bishop || Type == PTK_ProBishop,
         "Only PTK_Bishop or PTK_ProBishop can be processed in this function.");
@@ -1644,10 +1240,10 @@ inline Move32* generateOnBoardBishopNoPromoteCheckMovesImpl(
         if constexpr (Pinned) {
             TargetBB2 =
                 ~LineBB[From][S.getKingSquare<~C>()] |
-                getBishopAttackBB<Type>(S.getKingSquare<~C>(), OccupiedBB);
+                CheckAttacks.getBishop<Type>();
         } else {
             TargetBB2 =
-                getBishopAttackBB<Type>(S.getKingSquare<~C>(), OccupiedBB);
+                CheckAttacks.getBishop<Type>();
         }
         TargetBB2 =
             TargetBB2 & getBishopAttackBB<Type>(From, OccupiedBB) & TargetBB;
@@ -1681,10 +1277,10 @@ inline Move32* generateOnBoardBishopNoPromoteCheckMovesImpl(
             if constexpr (Pinned) {
                 TargetBB2 =
                     ~LineBB[From][S.getKingSquare<~C>()] |
-                    getBishopAttackBB<Type>(S.getKingSquare<~C>(), OccupiedBB);
+                    CheckAttacks.getBishop<Type>();
             } else {
                 TargetBB2 =
-                    getBishopAttackBB<Type>(S.getKingSquare<~C>(), OccupiedBB);
+                    CheckAttacks.getBishop<Type>();
             }
             TargetBB2 = TargetBB2 & getBishopAttackBB<Type>(From, OccupiedBB) &
                         TargetBB;
@@ -1711,7 +1307,8 @@ template <Color C, PieceTypeKind Type, bool Capture, bool Pinned,
           bool WilyPromote>
 inline Move32* generateOnBoardRookNoPromoteCheckMovesImpl(
     const StateImpl& S, Move32* __restrict Moves, const Bitboard& TargetBB,
-    const Bitboard& OccupiedBB, const Bitboard& SourceFilter) noexcept {
+    const Bitboard& OccupiedBB, const Bitboard& SourceFilter,
+    const CheckAttackCache& CheckAttacks) noexcept {
     static_assert(
         Type == PTK_Rook || Type == PTK_ProRook,
         "Only PTK_Rook or PTK_ProRook can be processed in this function.");
@@ -1733,10 +1330,10 @@ inline Move32* generateOnBoardRookNoPromoteCheckMovesImpl(
         if constexpr (Pinned) {
             TargetBB2 =
                 ~LineBB[From][S.getKingSquare<~C>()] |
-                getRookAttackBB<Type>(S.getKingSquare<~C>(), OccupiedBB);
+                CheckAttacks.getRook<Type>();
         } else {
             TargetBB2 =
-                getRookAttackBB<Type>(S.getKingSquare<~C>(), OccupiedBB);
+                CheckAttacks.getRook<Type>();
         }
         TargetBB2 =
             TargetBB2 & getRookAttackBB<Type>(From, OccupiedBB) & TargetBB;
@@ -1770,10 +1367,10 @@ inline Move32* generateOnBoardRookNoPromoteCheckMovesImpl(
             if constexpr (Pinned) {
                 TargetBB2 =
                     ~LineBB[From][S.getKingSquare<~C>()] |
-                    getRookAttackBB<Type>(S.getKingSquare<~C>(), OccupiedBB);
+                    CheckAttacks.getRook<Type>();
             } else {
                 TargetBB2 =
-                    getRookAttackBB<Type>(S.getKingSquare<~C>(), OccupiedBB);
+                    CheckAttacks.getRook<Type>();
             }
             TargetBB2 =
                 TargetBB2 & getRookAttackBB<Type>(From, OccupiedBB) & TargetBB;
@@ -1928,7 +1525,8 @@ inline Move32* generateOnBoardLancePromoteCheckMovesImpl(
 template <Color C, bool Capture, bool Pinned>
 inline Move32* generateOnBoardBishopPromoteCheckMovesImpl(
     const StateImpl& S, Move32* __restrict Moves, const Bitboard& TargetBB,
-    const Bitboard& OccupiedBB, const Bitboard& SourceFilter) noexcept {
+    const Bitboard& OccupiedBB, const Bitboard& SourceFilter,
+    const CheckAttackCache& CheckAttacks) noexcept {
     constexpr PieceTypeKind Type = PTK_Bishop;
 
     if ((S.getBitboard<C, Type>() & SourceFilter).isZero()) {
@@ -1940,10 +1538,10 @@ inline Move32* generateOnBoardBishopPromoteCheckMovesImpl(
         Bitboard TargetBB2 =
             (Pinned
                  ? (~LineBB[From][S.getKingSquare<~C>()] |
-                    getBishopAttackBB<Type>(S.getKingSquare<~C>(), OccupiedBB) |
-                    getAttackBB<~C, PTK_King>(S.getKingSquare<~C>()))
-                 : (getBishopAttackBB<Type>(S.getKingSquare<~C>(), OccupiedBB) |
-                    getAttackBB<~C, PTK_King>(S.getKingSquare<~C>()))) &
+                    CheckAttacks.getBishop<Type>() |
+                    CheckAttacks.King)
+                 : (CheckAttacks.getBishop<Type>() |
+                    CheckAttacks.King)) &
             getBishopAttackBB<Type>(From, OccupiedBB) & TargetBB;
 
         if (!PromotableBB[C].isSet(From)) {
@@ -1967,12 +1565,10 @@ inline Move32* generateOnBoardBishopPromoteCheckMovesImpl(
         [&](Square From) {
             Bitboard TargetBB2 =
                 (Pinned ? (~LineBB[From][S.getKingSquare<~C>()] |
-                           getBishopAttackBB<Type>(S.getKingSquare<~C>(),
-                                                   OccupiedBB) |
-                           getAttackBB<~C, PTK_King>(S.getKingSquare<~C>()))
-                        : (getBishopAttackBB<Type>(S.getKingSquare<~C>(),
-                                                   OccupiedBB) |
-                           getAttackBB<~C, PTK_King>(S.getKingSquare<~C>()))) &
+                           CheckAttacks.getBishop<Type>() |
+                           CheckAttacks.King)
+                        : (CheckAttacks.getBishop<Type>() |
+                           CheckAttacks.King)) &
                 getBishopAttackBB<Type>(From, OccupiedBB) & TargetBB;
 
             if (!PromotableBB[C].isSet(From)) {
@@ -1997,7 +1593,8 @@ inline Move32* generateOnBoardBishopPromoteCheckMovesImpl(
 template <Color C, bool Capture, bool Pinned>
 inline Move32* generateOnBoardRookPromoteCheckMovesImpl(
     const StateImpl& S, Move32* __restrict Moves, const Bitboard& TargetBB,
-    const Bitboard& OccupiedBB, const Bitboard& SourceFilter) noexcept {
+    const Bitboard& OccupiedBB, const Bitboard& SourceFilter,
+    const CheckAttackCache& CheckAttacks) noexcept {
     constexpr PieceTypeKind Type = PTK_Rook;
 
     if ((S.getBitboard<C, Type>() & SourceFilter).isZero()) {
@@ -2009,10 +1606,10 @@ inline Move32* generateOnBoardRookPromoteCheckMovesImpl(
         Bitboard TargetBB2 =
             (Pinned
                  ? (~LineBB[From][S.getKingSquare<~C>()] |
-                    getRookAttackBB<Type>(S.getKingSquare<~C>(), OccupiedBB) |
-                    getAttackBB<~C, PTK_King>(S.getKingSquare<~C>()))
-                 : (getRookAttackBB<Type>(S.getKingSquare<~C>(), OccupiedBB) |
-                    getAttackBB<~C, PTK_King>(S.getKingSquare<~C>()))) &
+                    CheckAttacks.getRook<Type>() |
+                    CheckAttacks.King)
+                 : (CheckAttacks.getRook<Type>() |
+                    CheckAttacks.King)) &
             getRookAttackBB<Type>(From, OccupiedBB) & TargetBB;
 
         if (!PromotableBB[C].isSet(From)) {
@@ -2036,12 +1633,10 @@ inline Move32* generateOnBoardRookPromoteCheckMovesImpl(
         [&](Square From) {
             Bitboard TargetBB2 =
                 (Pinned ? (~LineBB[From][S.getKingSquare<~C>()] |
-                           getRookAttackBB<Type>(S.getKingSquare<~C>(),
-                                                 OccupiedBB) |
-                           getAttackBB<~C, PTK_King>(S.getKingSquare<~C>()))
-                        : (getRookAttackBB<Type>(S.getKingSquare<~C>(),
-                                                 OccupiedBB) |
-                           getAttackBB<~C, PTK_King>(S.getKingSquare<~C>()))) &
+                           CheckAttacks.getRook<Type>() |
+                           CheckAttacks.King)
+                        : (CheckAttacks.getRook<Type>() |
+                           CheckAttacks.King)) &
                 getRookAttackBB<Type>(From, OccupiedBB) & TargetBB;
 
             if (!PromotableBB[C].isSet(From)) {
@@ -2086,7 +1681,12 @@ template <Color C, bool Capture, bool Pinned, bool WilyPromote,
 inline Move32* generateOnBoardOneStepCheckMovesImpl(
     const StateImpl& S, Move32* __restrict Moves, const Bitboard& TargetBB,
     const Bitboard& FromMask) noexcept {
-    if constexpr (!SkipKing) {
+    if (TargetBB.isZero()) {
+        return Moves;
+    }
+
+    // A king can give check only by uncovering a friendly slider.
+    if constexpr (!SkipKing && Pinned) {
         Moves =
             generateOnBoardOneStepNoPromoteCheckMovesImpl<C, PTK_King, Capture,
                                                           Pinned, WilyPromote>(
@@ -2124,30 +1724,35 @@ inline Move32* generateOnBoardOneStepCheckMovesImpl(
 template <Color C, bool Capture, bool Pinned, bool WilyPromote>
 inline Move32* generateOnBoardSliderCheckMovesImpl(
     const StateImpl& S, Move32* __restrict Moves, const Bitboard& TargetBB,
-    const Bitboard& OccupiedBB, const Bitboard& FromMask) noexcept {
+    const Bitboard& OccupiedBB, const Bitboard& FromMask,
+    const CheckAttackCache& CheckAttacks) noexcept {
+    if (TargetBB.isZero()) {
+        return Moves;
+    }
+
     Moves = generateOnBoardLanceNoPromoteCheckMovesImpl<C, Capture, WilyPromote,
                                                         Pinned>(
-        S, Moves, TargetBB, OccupiedBB, FromMask);
+        S, Moves, TargetBB, OccupiedBB, FromMask, CheckAttacks);
     Moves = generateOnBoardBishopNoPromoteCheckMovesImpl<C, PTK_Bishop, Capture,
                                                          Pinned, WilyPromote>(
-        S, Moves, TargetBB, OccupiedBB, FromMask);
+        S, Moves, TargetBB, OccupiedBB, FromMask, CheckAttacks);
     Moves =
         generateOnBoardBishopNoPromoteCheckMovesImpl<C, PTK_ProBishop, Capture,
                                                      Pinned, WilyPromote>(
-            S, Moves, TargetBB, OccupiedBB, FromMask);
+            S, Moves, TargetBB, OccupiedBB, FromMask, CheckAttacks);
     Moves = generateOnBoardRookNoPromoteCheckMovesImpl<C, PTK_Rook, Capture,
                                                        Pinned, WilyPromote>(
-        S, Moves, TargetBB, OccupiedBB, FromMask);
+        S, Moves, TargetBB, OccupiedBB, FromMask, CheckAttacks);
     Moves = generateOnBoardRookNoPromoteCheckMovesImpl<C, PTK_ProRook, Capture,
                                                        Pinned, WilyPromote>(
-        S, Moves, TargetBB, OccupiedBB, FromMask);
+        S, Moves, TargetBB, OccupiedBB, FromMask, CheckAttacks);
 
     Moves = generateOnBoardLancePromoteCheckMovesImpl<C, Capture, Pinned>(
         S, Moves, TargetBB, OccupiedBB, FromMask);
     Moves = generateOnBoardBishopPromoteCheckMovesImpl<C, Capture, Pinned>(
-        S, Moves, TargetBB, OccupiedBB, FromMask);
+        S, Moves, TargetBB, OccupiedBB, FromMask, CheckAttacks);
     Moves = generateOnBoardRookPromoteCheckMovesImpl<C, Capture, Pinned>(
-        S, Moves, TargetBB, OccupiedBB, FromMask);
+        S, Moves, TargetBB, OccupiedBB, FromMask, CheckAttacks);
 
     return Moves;
 }
@@ -2174,6 +1779,41 @@ inline Move32* generateOnBoardSliderMovesImpl(const StateImpl& S,
     Moves = generateOnBoardRookMovesImpl<C, PTK_Rook, Capture, WilyPromote>(
         S, Moves, TargetSquares, OccupiedBB, AttackCache);
 
+    return Moves;
+}
+
+template <Color C, PieceTypeKind Type, bool WilyPromote>
+inline Move32* generateBoardMoves(const StateImpl& S, Move32* Moves,
+                                  const Bitboard& TargetBB,
+                                  const Bitboard& OccupiedBB) noexcept {
+    const Bitboard FromBB = Type == PTK_Gold
+        ? ((S.getBitboard<PTK_Gold>() | S.getBitboard<PTK_ProPawn>() |
+            S.getBitboard<PTK_ProLance>() | S.getBitboard<PTK_ProKnight>() |
+            S.getBitboard<PTK_ProSilver>()) & S.getBitboard<C>())
+        : S.getBitboard<C, Type>();
+    const auto Attacks = [&](Square From) {
+        if constexpr (Type == PTK_Lance) {
+            return getLanceAttackBB<C>(From, OccupiedBB);
+        } else if constexpr (Type == PTK_Bishop || Type == PTK_ProBishop) {
+            return getBishopAttackBB<Type>(From, OccupiedBB);
+        } else if constexpr (Type == PTK_Rook || Type == PTK_ProRook) {
+            return getRookAttackBB<Type>(From, OccupiedBB);
+        } else {
+            return getAttackBB<C, Type>(From);
+        }
+    };
+    const auto Emit = [&](Square From, const Bitboard& AttacksBB) {
+        Moves = emitBoardMoves<C, Type, true, WilyPromote>(
+            S, Moves, From, AttacksBB & TargetBB);
+    };
+    if constexpr (Type != PTK_Knight) {
+        (FromBB & S.getDefendingOpponentSliderBB<C>()).forEach([&](Square From) {
+            Emit(From, Attacks(From) & LineBB[From][S.getKingSquare<C>()]);
+        });
+    }
+    S.getDefendingOpponentSliderBB<C>().andNot(FromBB).forEach([&](Square From) {
+        Emit(From, Attacks(From));
+    });
     return Moves;
 }
 
@@ -2240,6 +1880,33 @@ inline Move32* generateLegalMovesImpl(const StateImpl& S,
                                       Move32* __restrict Moves,
                                       const Bitboard& OpponentBB,
                                       const Bitboard& OccupiedBB) noexcept {
+    if constexpr (!CaptureOnly) {
+        // Emit captures and quiets together, directly into the output list.
+        // The capture-capable emitters also accept empty target squares.
+        const Bitboard TargetBB = ~S.getBitboard<C>();
+        Moves = generateOnBoardOneStepPawnMovesImpl<C, true, WilyPromote>(
+            S, Moves, TargetBB);
+        Moves = generateBoardMoves<C, PTK_Knight, WilyPromote>(
+            S, Moves, TargetBB, OccupiedBB);
+        Moves = generateBoardMoves<C, PTK_Silver, WilyPromote>(
+            S, Moves, TargetBB, OccupiedBB);
+        Moves = generateOnBoardOneStepMovesImpl<C, PTK_King, true>(
+            S, Moves, TargetBB);
+        Moves = generateBoardMoves<C, PTK_Gold, WilyPromote>(
+            S, Moves, TargetBB, OccupiedBB);
+        Moves = generateBoardMoves<C, PTK_Lance, WilyPromote>(
+            S, Moves, TargetBB, OccupiedBB);
+        Moves = generateBoardMoves<C, PTK_ProBishop, WilyPromote>(
+            S, Moves, TargetBB, OccupiedBB);
+        Moves = generateBoardMoves<C, PTK_Bishop, WilyPromote>(
+            S, Moves, TargetBB, OccupiedBB);
+        Moves = generateBoardMoves<C, PTK_ProRook, WilyPromote>(
+            S, Moves, TargetBB, OccupiedBB);
+        Moves = generateBoardMoves<C, PTK_Rook, WilyPromote>(
+            S, Moves, TargetBB, OccupiedBB);
+        return generateDroppingMovesImpl<C>(S, Moves, ~OccupiedBB);
+    }
+
     // Captures.
     Moves = generateOnBoardOneStepMovesImpl<C, true, WilyPromote>(S, Moves,
                                                                   OpponentBB);
@@ -2249,18 +1916,6 @@ inline Move32* generateLegalMovesImpl(const StateImpl& S,
     Bitboard SliderAttackCache[SliderAttackCacheSize];
     Moves = generateOnBoardSliderMovesImpl<C, true, WilyPromote>(
         S, Moves, OpponentBB, OccupiedBB, SliderAttackCache);
-
-    if constexpr (!CaptureOnly) {
-        const Bitboard EmptyBB = ~OccupiedBB;
-        // Droppings.
-        Moves = generateDroppingMovesImpl<C>(S, Moves, EmptyBB);
-
-        // No captures.
-        Moves = generateOnBoardOneStepMovesImpl<C, false, WilyPromote>(S, Moves,
-                                                                       EmptyBB);
-        Moves = generateOnBoardSliderMovesImpl<C, false, WilyPromote>(
-            S, Moves, EmptyBB, OccupiedBB, SliderAttackCache);
-    }
 
     return Moves;
 }
@@ -2304,7 +1959,8 @@ inline Move32* generateLegalCheckMovesImpl(const StateImpl& S,
     const Bitboard OccupiedBB = BlackBB | WhiteBB;
     const Bitboard EmptyBB = ~OccupiedBB;
     const Bitboard CheckerBB = S.getCheckerBB();
-    const Bitboard PinnedBB = S.getDefendingOpponentSliderBB<~C>();
+    const Bitboard PinnedBB =
+        S.getDefendingOpponentSliderBB<~C>() & S.getBitboard<C>();
     const Bitboard NoPinnedBB = ~PinnedBB;
 
     if (CheckerBB.popCount() >= 2) {
@@ -2325,6 +1981,21 @@ inline Move32* generateLegalCheckMovesImpl(const StateImpl& S,
 
         return Moves;
     }
+
+    const Square OpponentKing = S.getKingSquare<~C>();
+    const CheckAttackCache CheckAttacks{
+        ((S.getBitboard<PTK_Bishop>() | S.getBitboard<PTK_ProBishop>()) &
+         S.getBitboard<C>()).isZero()
+            ? Bitboard::ZeroBB()
+            : getBishopAttackBB<PTK_Bishop>(OpponentKing, OccupiedBB),
+        ((S.getBitboard<PTK_Rook>() | S.getBitboard<PTK_ProRook>()) &
+         S.getBitboard<C>()).isZero()
+            ? Bitboard::ZeroBB()
+            : getRookAttackBB<PTK_Rook>(OpponentKing, OccupiedBB),
+        S.getBitboard<C, PTK_Lance>().isZero()
+            ? Bitboard::ZeroBB()
+            : getLanceAttackBB<~C>(OpponentKing, OccupiedBB),
+        getAttackBB<~C, PTK_King>(OpponentKing)};
 
     const bool PinnedExists = !PinnedBB.isZero();
     const Stands St = S.getPosition().getStand<C>();
@@ -2371,10 +2042,10 @@ inline Move32* generateLegalCheckMovesImpl(const StateImpl& S,
 
             Moves = generateOnBoardSliderCheckMovesImpl<C, false, true,
                                                         WilyPromote>(
-                S, Moves, CheckerMyKingBetweenBB, OccupiedBB, PinnedBB);
+                S, Moves, CheckerMyKingBetweenBB, OccupiedBB, PinnedBB, CheckAttacks);
             Moves =
                 generateOnBoardSliderCheckMovesImpl<C, true, true, WilyPromote>(
-                    S, Moves, CheckerBB, OccupiedBB, PinnedBB);
+                    S, Moves, CheckerBB, OccupiedBB, PinnedBB, CheckAttacks);
         }
 
         Moves =
@@ -2385,10 +2056,10 @@ inline Move32* generateLegalCheckMovesImpl(const StateImpl& S,
                 S, Moves, CheckerBB, NoPinnedBB);
         Moves =
             generateOnBoardSliderCheckMovesImpl<C, false, false, WilyPromote>(
-                S, Moves, CheckerMyKingBetweenBB, OccupiedBB, NoPinnedBB);
+                S, Moves, CheckerMyKingBetweenBB, OccupiedBB, NoPinnedBB, CheckAttacks);
         Moves =
             generateOnBoardSliderCheckMovesImpl<C, true, false, WilyPromote>(
-                S, Moves, CheckerBB, OccupiedBB, NoPinnedBB);
+                S, Moves, CheckerBB, OccupiedBB, NoPinnedBB, CheckAttacks);
     } else {
         if (St != 0) {
             Moves = generateDroppingStepCheckMovesImpl<C>(S, Moves, EmptyBB);
@@ -2405,10 +2076,10 @@ inline Move32* generateLegalCheckMovesImpl(const StateImpl& S,
                 S, Moves, S.getBitboard<~C>(), PinnedBB);
             Moves = generateOnBoardSliderCheckMovesImpl<C, false, true,
                                                         WilyPromote>(
-                S, Moves, EmptyBB, OccupiedBB, PinnedBB);
+                S, Moves, EmptyBB, OccupiedBB, PinnedBB, CheckAttacks);
             Moves =
                 generateOnBoardSliderCheckMovesImpl<C, true, true, WilyPromote>(
-                    S, Moves, S.getBitboard<~C>(), OccupiedBB, PinnedBB);
+                    S, Moves, S.getBitboard<~C>(), OccupiedBB, PinnedBB, CheckAttacks);
         }
 
         Moves =
@@ -2419,10 +2090,10 @@ inline Move32* generateLegalCheckMovesImpl(const StateImpl& S,
                 S, Moves, S.getBitboard<~C>(), NoPinnedBB);
         Moves =
             generateOnBoardSliderCheckMovesImpl<C, false, false, WilyPromote>(
-                S, Moves, EmptyBB, OccupiedBB, NoPinnedBB);
+                S, Moves, EmptyBB, OccupiedBB, NoPinnedBB, CheckAttacks);
         Moves =
             generateOnBoardSliderCheckMovesImpl<C, true, false, WilyPromote>(
-                S, Moves, S.getBitboard<~C>(), OccupiedBB, NoPinnedBB);
+                S, Moves, S.getBitboard<~C>(), OccupiedBB, NoPinnedBB, CheckAttacks);
     }
 
     return Moves;
