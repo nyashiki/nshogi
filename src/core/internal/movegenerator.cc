@@ -25,6 +25,19 @@ constexpr std::size_t SliderAttackCacheSize = 4;
 
 #if defined(USE_AVX2) || defined(USE_NEON)
 
+inline constexpr unsigned getDroppingMoveMask(Stands St) noexcept {
+    // Each count field has a zero guard bit immediately above it.
+    // Adding all ones to each non-pawn field carries into that bit iff
+    // the count is nonzero. No carry propagates past the guard bit.
+    constexpr uint32_t CountMask = 0x06ddddc0U;
+    constexpr uint32_t GuardMask = 0x09222200U;
+    const uint32_t Present = (St + CountMask) & GuardMask;
+    // Pack silver, gold, bishop, rook, lance, knight into bits 0..5.
+    return ((Present >> 17) & 1U) | ((Present >> 20) & 2U) |
+           ((Present >> 22) & 4U) | ((Present >> 24) & 8U) |
+           ((Present >> 5) & 16U) | ((Present >> 8) & 32U);
+}
+
 // The six non-pawn hand kinds have only 64 possible presence masks.
 struct DroppingMovePack {
     alignas(32) std::array<uint32_t, 8> Moves{};
@@ -391,19 +404,9 @@ generateDroppingMovesImplAVX2(const StateImpl& S, Move32* __restrict List,
         });
     }
 
-    const bool LanceExists = getStandCount<PTK_Lance>(St) > 0;
-    const bool KnightExists = getStandCount<PTK_Knight>(St) > 0;
-    const bool SilverExists = getStandCount<PTK_Silver>(St) > 0;
-    const bool GoldExists = getStandCount<PTK_Gold>(St) > 0;
-    const bool BishopExists = getStandCount<PTK_Bishop>(St) > 0;
-    const bool RookExists = getStandCount<PTK_Rook>(St) > 0;
-
-    const unsigned Mask = static_cast<unsigned>(SilverExists) |
-        (static_cast<unsigned>(GoldExists) << 1) |
-        (static_cast<unsigned>(BishopExists) << 2) |
-        (static_cast<unsigned>(RookExists) << 3) |
-        (static_cast<unsigned>(LanceExists) << 4) |
-        (static_cast<unsigned>(KnightExists) << 5);
+    const unsigned Mask = getDroppingMoveMask(St);
+    const bool LanceExists = (Mask & (1U << 4)) != 0;
+    const bool KnightExists = (Mask & (1U << 5)) != 0;
     const auto& Pack = DroppingMovePacks[Mask];
     const uint32_t* Pack32 = Pack.Moves.data();
     int MoveCount = static_cast<int>(Pack.Count);
@@ -497,19 +500,9 @@ generateDroppingMovesImplNeon(const StateImpl& S, Move32* __restrict List,
         });
     }
 
-    const bool LanceExists = getStandCount<PTK_Lance>(St) > 0;
-    const bool KnightExists = getStandCount<PTK_Knight>(St) > 0;
-    const bool SilverExists = getStandCount<PTK_Silver>(St) > 0;
-    const bool GoldExists = getStandCount<PTK_Gold>(St) > 0;
-    const bool BishopExists = getStandCount<PTK_Bishop>(St) > 0;
-    const bool RookExists = getStandCount<PTK_Rook>(St) > 0;
-
-    const unsigned Mask = static_cast<unsigned>(SilverExists) |
-        (static_cast<unsigned>(GoldExists) << 1) |
-        (static_cast<unsigned>(BishopExists) << 2) |
-        (static_cast<unsigned>(RookExists) << 3) |
-        (static_cast<unsigned>(LanceExists) << 4) |
-        (static_cast<unsigned>(KnightExists) << 5);
+    const unsigned Mask = getDroppingMoveMask(St);
+    const bool LanceExists = (Mask & (1U << 4)) != 0;
+    const bool KnightExists = (Mask & (1U << 5)) != 0;
     const auto& Pack = DroppingMovePacks[Mask];
     const uint32_t* Pack32 = Pack.Moves.data();
     int MoveCount = static_cast<int>(Pack.Count);
