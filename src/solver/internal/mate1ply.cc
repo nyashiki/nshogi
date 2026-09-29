@@ -52,9 +52,9 @@ void addOrigins(CheckOrigins& Origins) {
         }
         while (!ToBB.isZero()) {
             const Square ToSq = ToBB.popOne();
-            Bitboard FromBB = getStepAttackBB<~C>(Type, ToSq) |
-                             getSliderAttackBB<~C>(Type, ToSq,
-                                                   Bitboard::ZeroBB());
+            Bitboard FromBB =
+                getStepAttackBB<~C>(Type, ToSq) |
+                getSliderAttackBB<~C>(Type, ToSq, Bitboard::ZeroBB());
             if constexpr (Promote) {
                 if (!PromotableBB[C].isSet(ToSq)) {
                     FromBB &= PromotableBB[C];
@@ -84,8 +84,8 @@ const CheckOrigins& checkOrigins() {
         using namespace core;
         using namespace core::internal::bitboard;
         for (Square KingSq : Squares) {
-            Bitboard TargetsBB = KingAttackBB[KingSq] |
-                                 getAttackBB<~C, PTK_Knight>(KingSq);
+            Bitboard TargetsBB =
+                KingAttackBB[KingSq] | getAttackBB<~C, PTK_Knight>(KingSq);
             while (!TargetsBB.isZero()) {
                 const Square Sq = TargetsBB.popOne();
                 Result.Bishops[KingSq] |= DiagBB[Sq];
@@ -113,9 +113,9 @@ const CheckOrigins& checkOrigins() {
 // Attacks outside the checking and escape squares are irrelevant. Skip
 // sliders whose rays cannot reach any of those squares.
 template <core::Color C, core::Color MateC>
-core::internal::bitboard::Bitboard sliderAttacks(
-    const core::internal::StateImpl& S, core::Square KingSq,
-    core::Square VirtualSq = core::SqInvalid) {
+core::internal::bitboard::Bitboard
+sliderAttacks(const core::internal::StateImpl& S, core::Square KingSq,
+              core::Square VirtualSq = core::SqInvalid) {
     using namespace core;
     using namespace core::internal::bitboard;
     const auto& Origins = checkOrigins<MateC>();
@@ -124,12 +124,14 @@ core::internal::bitboard::Bitboard sliderAttacks(
         OccupiedBB |= SquareBB[VirtualSq];
     }
     Bitboard Result = Bitboard::ZeroBB();
-    Bitboard BishopsBB = Origins.Bishops[KingSq] & S.getBitboard<C>() &
+    Bitboard BishopsBB =
+        Origins.Bishops[KingSq] & S.getBitboard<C>() &
         (S.getBitboard<PTK_Bishop>() | S.getBitboard<PTK_ProBishop>());
     while (!BishopsBB.isZero()) {
         Result |= getBishopAttackBB<PTK_Bishop>(BishopsBB.popOne(), OccupiedBB);
     }
-    Bitboard RooksBB = Origins.Rooks[KingSq] & S.getBitboard<C>() &
+    Bitboard RooksBB =
+        Origins.Rooks[KingSq] & S.getBitboard<C>() &
         (S.getBitboard<PTK_Rook>() | S.getBitboard<PTK_ProRook>());
     while (!RooksBB.isZero()) {
         Result |= getRookAttackBB<PTK_Rook>(RooksBB.popOne(), OccupiedBB);
@@ -157,8 +159,8 @@ bool covers(const core::internal::StateImpl& S,
         S.getBitboard<PTK_Gold>() | S.getBitboard<PTK_ProPawn>() |
         S.getBitboard<PTK_ProLance>() | S.getBitboard<PTK_ProKnight>() |
         S.getBitboard<PTK_ProSilver>();
-    const Bitboard BishopsBB =
-        PiecesBB & (S.getBitboard<PTK_Bishop>() | S.getBitboard<PTK_ProBishop>());
+    const Bitboard BishopsBB = PiecesBB & (S.getBitboard<PTK_Bishop>() |
+                                           S.getBitboard<PTK_ProBishop>());
     const Bitboard RooksBB =
         PiecesBB & (S.getBitboard<PTK_Rook>() | S.getBitboard<PTK_ProRook>());
     const Bitboard LancesBB = PiecesBB & S.getBitboard<PTK_Lance>();
@@ -177,8 +179,8 @@ bool covers(const core::internal::StateImpl& S,
             continue;
         }
         Bitboard SlidersBB = (DiagBB[Sq] & BishopsBB) |
-                            (CrossBB[Sq] & RooksBB) |
-                            (getForwardBB<~C>(Sq) & LancesBB);
+                             (CrossBB[Sq] & RooksBB) |
+                             (getForwardBB<~C>(Sq) & LancesBB);
         bool Attacked = false;
         while (!SlidersBB.isZero()) {
             const Square SliderSq = SlidersBB.popOne();
@@ -284,12 +286,13 @@ core::Move32 checkmateByDrop(
 
         // A drop can only block existing attacks, never uncover new ones.
         if (isEvadable<~C>(OpKingSq, NewAttackBB | StepOrSliderAttackBB,
-                          S.getBitboard<~C>())) {
+                           S.getBitboard<~C>())) {
             continue;
         }
-        NewAttackBB |= (SliderAttackBB.isSet(ToSq))
-            ? (StepAttackBB | sliderAttacks<C, C>(S, OpKingSq, ToSq))
-            : StepOrSliderAttackBB;
+        NewAttackBB |=
+            (SliderAttackBB.isSet(ToSq))
+                ? (StepAttackBB | sliderAttacks<C, C>(S, OpKingSq, ToSq))
+                : StepOrSliderAttackBB;
 
         if (!isEvadable<~C>(OpKingSq, NewAttackBB, S.getBitboard<~C>())) {
             return core::Move32::droppingMove(ToSq, Type);
@@ -442,15 +445,15 @@ checkmateByOneStepMove(const core::internal::StateImpl& S,
             }
 
             core::internal::bitboard::Bitboard RequiredBB =
-                (S.getBitboard<~C>() | NewAttackedBB).andNot(
-                    core::internal::bitboard::KingAttackBB[OpKingSq]);
+                (S.getBitboard<~C>() | NewAttackedBB)
+                    .andNot(core::internal::bitboard::KingAttackBB[OpKingSq]);
             if constexpr (Type != core::PTK_Knight || Promote) {
                 RequiredBB |=
                     core::internal::bitboard::SquareBB[PossiblyCheckmateToSq];
             }
             const core::internal::bitboard::Bitboard PostOccupiedBB =
-                (OccupiedBB ^ core::internal::bitboard::SquareBB
-                                  [PossiblyCheckmateFromSq]) |
+                (OccupiedBB ^
+                 core::internal::bitboard::SquareBB[PossiblyCheckmateFromSq]) |
                 core::internal::bitboard::SquareBB[PossiblyCheckmateToSq];
             if (covers<C>(S, RequiredBB, PostOccupiedBB,
                           PossiblyCheckmateFromSq)) {
@@ -736,18 +739,23 @@ checkmateBySliderMove(const core::internal::StateImpl& S,
         // There are few sliders. Filter their rays first, then inspect
         // blockers only for origins on a ray to this checking square.
         if constexpr (Type == core::PTK_Lance) {
-            PossiblyCheckmateFromBB = FromBB &
-                core::internal::bitboard::getForwardBB<~C>(PossiblyCheckmateToSq);
+            PossiblyCheckmateFromBB =
+                FromBB & core::internal::bitboard::getForwardBB<~C>(
+                             PossiblyCheckmateToSq);
         } else if constexpr (Type == core::PTK_Bishop ||
                              Type == core::PTK_ProBishop) {
-            PossiblyCheckmateFromBB = FromBB &
+            PossiblyCheckmateFromBB =
+                FromBB &
                 core::internal::bitboard::DiagBB[PossiblyCheckmateToSq];
         } else {
-            PossiblyCheckmateFromBB = FromBB &
+            PossiblyCheckmateFromBB =
+                FromBB &
                 core::internal::bitboard::CrossBB[PossiblyCheckmateToSq];
         }
-        if constexpr (Type == core::PTK_ProBishop || Type == core::PTK_ProRook) {
-            PossiblyCheckmateFromBB |= FromBB &
+        if constexpr (Type == core::PTK_ProBishop ||
+                      Type == core::PTK_ProRook) {
+            PossiblyCheckmateFromBB |=
+                FromBB &
                 core::internal::bitboard::KingAttackBB[PossiblyCheckmateToSq];
         }
 
@@ -768,7 +776,8 @@ checkmateBySliderMove(const core::internal::StateImpl& S,
 
             if (!(core::internal::bitboard::getBetweenBB(
                       PossiblyCheckmateFromSq, PossiblyCheckmateToSq) &
-                  OccupiedBB).isZero()) {
+                  OccupiedBB)
+                     .isZero()) {
                 continue;
             }
 
@@ -861,13 +870,13 @@ checkmateBySliderMove(const core::internal::StateImpl& S,
             }
 
             core::internal::bitboard::Bitboard RequiredBB =
-                (S.getBitboard<~C>() | NewAttackedBB).andNot(
-                    core::internal::bitboard::KingAttackBB[OpKingSq]);
+                (S.getBitboard<~C>() | NewAttackedBB)
+                    .andNot(core::internal::bitboard::KingAttackBB[OpKingSq]);
             RequiredBB |=
                 core::internal::bitboard::SquareBB[PossiblyCheckmateToSq];
             const core::internal::bitboard::Bitboard PostOccupiedBB =
-                (OccupiedBB ^ core::internal::bitboard::SquareBB
-                                  [PossiblyCheckmateFromSq]) |
+                (OccupiedBB ^
+                 core::internal::bitboard::SquareBB[PossiblyCheckmateFromSq]) |
                 core::internal::bitboard::SquareBB[PossiblyCheckmateToSq];
             if (covers<C>(S, RequiredBB, PostOccupiedBB,
                           PossiblyCheckmateFromSq)) {
@@ -1109,7 +1118,9 @@ core::Move32 solve(const core::internal::StateImpl& S) {
         core::internal::bitboard::KingAttackBB[OpKingSq] | KnightToBB;
     // A board move must already attack its destination. Adjacent drops
     // need support as well; only a knight drop can mate without support.
-    if (S.getBitboard<C>().andNot(TargetsBB & MyStepOrSliderAttackBB).isZero() &&
+    if (S.getBitboard<C>()
+            .andNot(TargetsBB & MyStepOrSliderAttackBB)
+            .isZero() &&
         (core::getStandCount<core::PTK_Knight>(St) == 0 ||
          OccupiedBB.andNot(KnightToBB).isZero())) {
         return core::Move32::MoveNone();
@@ -1153,7 +1164,8 @@ core::Move32 solve(const core::internal::StateImpl& S) {
     const core::internal::bitboard::Bitboard OpOccupiedAndNotOpAttackBB =
         OpAttackBB.andNot(S.getBitboard<~C>() & TargetsBB);
     if (((EmptyAndNotOpAttackBB | OpOccupiedAndNotOpAttackBB) &
-         MyStepOrSliderAttackBB).isZero()) {
+         MyStepOrSliderAttackBB)
+            .isZero()) {
         return core::Move32::MoveNone();
     }
     const core::internal::bitboard::Bitboard NotPinnedBB =

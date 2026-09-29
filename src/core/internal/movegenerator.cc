@@ -45,8 +45,8 @@ struct DroppingMovePack {
 };
 
 constexpr auto DroppingMovePacks = [] {
-    constexpr PieceTypeKind Types[] = {
-        PTK_Silver, PTK_Gold, PTK_Bishop, PTK_Rook, PTK_Lance, PTK_Knight};
+    constexpr PieceTypeKind Types[] = {PTK_Silver, PTK_Gold,  PTK_Bishop,
+                                       PTK_Rook,   PTK_Lance, PTK_Knight};
     std::array<DroppingMovePack, 64> Packs{};
     for (unsigned Mask = 0; Mask < Packs.size(); ++Mask) {
         for (unsigned I = 0; I < 6; ++I) {
@@ -115,8 +115,8 @@ inline Move32* emitBoardMoves(const StateImpl& S, Move32* __restrict Moves,
             }
         });
     } else if constexpr (Type == PTK_Bishop || Type == PTK_Rook) {
-        const Bitboard PromoteTo = PromotableBB[C].isSet(From)
-            ? ToBB : (ToBB & PromotableBB[C]);
+        const Bitboard PromoteTo =
+            PromotableBB[C].isSet(From) ? ToBB : (ToBB & PromotableBB[C]);
 
         PromoteTo.forEach([&](Square To) {
             Append(To, true);
@@ -128,19 +128,16 @@ inline Move32* emitBoardMoves(const StateImpl& S, Move32* __restrict Moves,
         PromoteTo.andNot(ToBB).forEach([&](Square To) { Append(To, false); });
     } else {
         const Bitboard NormalTo = Type == PTK_Knight
-            ? FirstAndSecondFurthestBB[C].andNot(ToBB) : ToBB;
+                                      ? FirstAndSecondFurthestBB[C].andNot(ToBB)
+                                      : ToBB;
 
-        NormalTo.forEach([&](Square To) {
-            Append(To, false);
-        });
+        NormalTo.forEach([&](Square To) { Append(To, false); });
 
         if constexpr (Type == PTK_Knight || Type == PTK_Silver) {
-            const Bitboard PromoteTo = PromotableBB[C].isSet(From)
-                ? ToBB : (ToBB & PromotableBB[C]);
+            const Bitboard PromoteTo =
+                PromotableBB[C].isSet(From) ? ToBB : (ToBB & PromotableBB[C]);
 
-            PromoteTo.forEach([&](Square To) {
-                Append(To, true);
-            });
+            PromoteTo.forEach([&](Square To) { Append(To, true); });
         }
     }
     return Moves;
@@ -225,15 +222,19 @@ inline Move32* generateOnBoardOneStepGoldKindsMovesImpl(
     const Bitboard FromBB =
         (S.getBitboard<PTK_Gold>() | S.getBitboard<PTK_ProPawn>() |
          S.getBitboard<PTK_ProLance>() | S.getBitboard<PTK_ProKnight>() |
-         S.getBitboard<PTK_ProSilver>()) & S.getBitboard<C>();
+         S.getBitboard<PTK_ProSilver>()) &
+        S.getBitboard<C>();
     const auto Emit = [&](Square From, bool Pinned) {
         Bitboard ToBB = TargetSquares & getAttackBB<C, PTK_Gold>(From);
         if (Pinned) {
             ToBB &= LineBB[From][S.getKingSquare<C>()];
         }
-        Moves = emitBoardMoves<C, PTK_Gold, Capture, true>(S, Moves, From, ToBB);
+        Moves =
+            emitBoardMoves<C, PTK_Gold, Capture, true>(S, Moves, From, ToBB);
     };
-    (FromBB & S.getDefendingOpponentSliderBB<C>()).forEach([&](Square From) { Emit(From, true); });
+    (FromBB & S.getDefendingOpponentSliderBB<C>()).forEach([&](Square From) {
+        Emit(From, true);
+    });
     S.getDefendingOpponentSliderBB<C>().andNot(FromBB).forEach(
         [&](Square From) { Emit(From, false); });
     return Moves;
@@ -277,8 +278,8 @@ generateOnBoardOneStepMovesImpl(const StateImpl& S, Move32* __restrict Moves,
         Moves = emitBoardMoves<C, Type, Capture, true>(S, Moves, From, ToBB);
     };
     if constexpr (Type != PTK_Knight) {
-        (FromBB & S.getDefendingOpponentSliderBB<C>()).forEach(
-            [&](Square From) { Emit(From, true); });
+        (FromBB & S.getDefendingOpponentSliderBB<C>())
+            .forEach([&](Square From) { Emit(From, true); });
     }
     S.getDefendingOpponentSliderBB<C>().andNot(FromBB).forEach(
         [&](Square From) { Emit(From, false); });
@@ -296,11 +297,12 @@ generateOnBoardLanceMovesImpl(const StateImpl& S, Move32* __restrict Moves,
         if (Pinned) {
             ToBB &= LineBB[From][S.getKingSquare<C>()];
         }
-        Moves = emitBoardMoves<C, PTK_Lance, Capture, WilyPromote>(
-            S, Moves, From, ToBB);
+        Moves = emitBoardMoves<C, PTK_Lance, Capture, WilyPromote>(S, Moves,
+                                                                   From, ToBB);
     };
-    (FromBB & S.getDefendingOpponentSliderBB<C>()).forEach(
-        [&](Square From) { Emit(From, true); });
+    (FromBB & S.getDefendingOpponentSliderBB<C>()).forEach([&](Square From) {
+        Emit(From, true);
+    });
     S.getDefendingOpponentSliderBB<C>().andNot(FromBB).forEach(
         [&](Square From) { Emit(From, false); });
     return Moves;
@@ -331,11 +333,12 @@ inline Move32* generateOnBoardBishopMovesImpl(const StateImpl& S,
         if (Pinned) {
             ToBB &= LineBB[From][S.getKingSquare<C>()];
         }
-        Moves = emitBoardMoves<C, Type, Capture, WilyPromote>(
-            S, Moves, From, ToBB);
+        Moves =
+            emitBoardMoves<C, Type, Capture, WilyPromote>(S, Moves, From, ToBB);
     };
-    (FromBB & S.getDefendingOpponentSliderBB<C>()).forEach(
-        [&](Square From) { Emit(From, true); });
+    (FromBB & S.getDefendingOpponentSliderBB<C>()).forEach([&](Square From) {
+        Emit(From, true);
+    });
     S.getDefendingOpponentSliderBB<C>().andNot(FromBB).forEach(
         [&](Square From) { Emit(From, false); });
     return Moves;
@@ -363,11 +366,12 @@ inline Move32* generateOnBoardRookMovesImpl(const StateImpl& S,
         if (Pinned) {
             ToBB &= LineBB[From][S.getKingSquare<C>()];
         }
-        Moves = emitBoardMoves<C, Type, Capture, WilyPromote>(
-            S, Moves, From, ToBB);
+        Moves =
+            emitBoardMoves<C, Type, Capture, WilyPromote>(S, Moves, From, ToBB);
     };
-    (FromBB & S.getDefendingOpponentSliderBB<C>()).forEach(
-        [&](Square From) { Emit(From, true); });
+    (FromBB & S.getDefendingOpponentSliderBB<C>()).forEach([&](Square From) {
+        Emit(From, true);
+    });
     S.getDefendingOpponentSliderBB<C>().andNot(FromBB).forEach(
         [&](Square From) { Emit(From, false); });
     return Moves;
@@ -996,13 +1000,11 @@ inline Move32* generateOnBoardOneStepNoPromoteCheckMovesImpl(
         }
         if constexpr (Type == PTK_Pawn) {
             if constexpr (C == Black) {
-                FromBB &= RankBB[RankI]
-                              .andNot(CheckSquares)
-                              .getRightShiftEpi64<1>();
+                FromBB &=
+                    RankBB[RankI].andNot(CheckSquares).getRightShiftEpi64<1>();
             } else {
-                FromBB &= RankBB[RankA]
-                              .andNot(CheckSquares)
-                              .getLeftShiftEpi64<1>();
+                FromBB &=
+                    RankBB[RankA].andNot(CheckSquares).getLeftShiftEpi64<1>();
             }
         }
     }
@@ -1084,7 +1086,8 @@ inline Move32* generateOnBoardOneStepNoPromoteCheckGoldKindsMovesImpl(
     const StateImpl& S, Move32* __restrict Moves, const Bitboard& TargetBB,
     const Bitboard& SourceFilter) noexcept {
     if constexpr (!Pinned) {
-        if ((TargetBB & getAttackBB<~C, PTK_Gold>(S.getKingSquare<~C>())).isZero()) {
+        if ((TargetBB & getAttackBB<~C, PTK_Gold>(S.getKingSquare<~C>()))
+                .isZero()) {
             return Moves;
         }
     }
@@ -1153,9 +1156,8 @@ inline Move32* generateOnBoardLanceNoPromoteCheckMovesImpl(
 
     const Bitboard FromBB = S.getBitboard<C, Type>() & SourceFilter;
     (FromBB & S.getDefendingOpponentSliderBB<C>()).forEach([&](Square From) {
-        Bitboard TargetBB2 =
-            (Pinned) ? ~LineBB[From][S.getKingSquare<~C>()]
-                     : CheckAttacks.Lance;
+        Bitboard TargetBB2 = (Pinned) ? ~LineBB[From][S.getKingSquare<~C>()]
+                                      : CheckAttacks.Lance;
 
         if constexpr (WilyPromote) {
             TargetBB2 = FirstAndSecondFurthestBB[C].andNot(TargetBB2);
@@ -1179,10 +1181,8 @@ inline Move32* generateOnBoardLanceNoPromoteCheckMovesImpl(
 
     S.getDefendingOpponentSliderBB<C>().andNot(FromBB).forEach(
         [&](Square From) {
-            Bitboard TargetBB2 =
-                (Pinned)
-                    ? ~LineBB[From][S.getKingSquare<~C>()]
-                    : CheckAttacks.Lance;
+            Bitboard TargetBB2 = (Pinned) ? ~LineBB[From][S.getKingSquare<~C>()]
+                                          : CheckAttacks.Lance;
 
             if constexpr (WilyPromote) {
                 TargetBB2 = FirstAndSecondFurthestBB[C].andNot(TargetBB2);
@@ -1231,12 +1231,10 @@ inline Move32* generateOnBoardBishopNoPromoteCheckMovesImpl(
         Bitboard TargetBB2;
 
         if constexpr (Pinned) {
-            TargetBB2 =
-                ~LineBB[From][S.getKingSquare<~C>()] |
-                CheckAttacks.getBishop<Type>();
+            TargetBB2 = ~LineBB[From][S.getKingSquare<~C>()] |
+                        CheckAttacks.getBishop<Type>();
         } else {
-            TargetBB2 =
-                CheckAttacks.getBishop<Type>();
+            TargetBB2 = CheckAttacks.getBishop<Type>();
         }
         TargetBB2 =
             TargetBB2 & getBishopAttackBB<Type>(From, OccupiedBB) & TargetBB;
@@ -1268,12 +1266,10 @@ inline Move32* generateOnBoardBishopNoPromoteCheckMovesImpl(
             Bitboard TargetBB2;
 
             if constexpr (Pinned) {
-                TargetBB2 =
-                    ~LineBB[From][S.getKingSquare<~C>()] |
-                    CheckAttacks.getBishop<Type>();
+                TargetBB2 = ~LineBB[From][S.getKingSquare<~C>()] |
+                            CheckAttacks.getBishop<Type>();
             } else {
-                TargetBB2 =
-                    CheckAttacks.getBishop<Type>();
+                TargetBB2 = CheckAttacks.getBishop<Type>();
             }
             TargetBB2 = TargetBB2 & getBishopAttackBB<Type>(From, OccupiedBB) &
                         TargetBB;
@@ -1321,12 +1317,10 @@ inline Move32* generateOnBoardRookNoPromoteCheckMovesImpl(
         Bitboard TargetBB2;
 
         if constexpr (Pinned) {
-            TargetBB2 =
-                ~LineBB[From][S.getKingSquare<~C>()] |
-                CheckAttacks.getRook<Type>();
+            TargetBB2 = ~LineBB[From][S.getKingSquare<~C>()] |
+                        CheckAttacks.getRook<Type>();
         } else {
-            TargetBB2 =
-                CheckAttacks.getRook<Type>();
+            TargetBB2 = CheckAttacks.getRook<Type>();
         }
         TargetBB2 =
             TargetBB2 & getRookAttackBB<Type>(From, OccupiedBB) & TargetBB;
@@ -1358,12 +1352,10 @@ inline Move32* generateOnBoardRookNoPromoteCheckMovesImpl(
             Bitboard TargetBB2;
 
             if constexpr (Pinned) {
-                TargetBB2 =
-                    ~LineBB[From][S.getKingSquare<~C>()] |
-                    CheckAttacks.getRook<Type>();
+                TargetBB2 = ~LineBB[From][S.getKingSquare<~C>()] |
+                            CheckAttacks.getRook<Type>();
             } else {
-                TargetBB2 =
-                    CheckAttacks.getRook<Type>();
+                TargetBB2 = CheckAttacks.getRook<Type>();
             }
             TargetBB2 =
                 TargetBB2 & getRookAttackBB<Type>(From, OccupiedBB) & TargetBB;
@@ -1529,12 +1521,9 @@ inline Move32* generateOnBoardBishopPromoteCheckMovesImpl(
     const Bitboard FromBB = S.getBitboard<C, Type>() & SourceFilter;
     (FromBB & S.getDefendingOpponentSliderBB<C>()).forEach([&](Square From) {
         Bitboard TargetBB2 =
-            (Pinned
-                 ? (~LineBB[From][S.getKingSquare<~C>()] |
-                    CheckAttacks.getBishop<Type>() |
-                    CheckAttacks.King)
-                 : (CheckAttacks.getBishop<Type>() |
-                    CheckAttacks.King)) &
+            (Pinned ? (~LineBB[From][S.getKingSquare<~C>()] |
+                       CheckAttacks.getBishop<Type>() | CheckAttacks.King)
+                    : (CheckAttacks.getBishop<Type>() | CheckAttacks.King)) &
             getBishopAttackBB<Type>(From, OccupiedBB) & TargetBB;
 
         if (!PromotableBB[C].isSet(From)) {
@@ -1557,11 +1546,10 @@ inline Move32* generateOnBoardBishopPromoteCheckMovesImpl(
     S.getDefendingOpponentSliderBB<C>().andNot(FromBB).forEach(
         [&](Square From) {
             Bitboard TargetBB2 =
-                (Pinned ? (~LineBB[From][S.getKingSquare<~C>()] |
-                           CheckAttacks.getBishop<Type>() |
-                           CheckAttacks.King)
-                        : (CheckAttacks.getBishop<Type>() |
-                           CheckAttacks.King)) &
+                (Pinned
+                     ? (~LineBB[From][S.getKingSquare<~C>()] |
+                        CheckAttacks.getBishop<Type>() | CheckAttacks.King)
+                     : (CheckAttacks.getBishop<Type>() | CheckAttacks.King)) &
                 getBishopAttackBB<Type>(From, OccupiedBB) & TargetBB;
 
             if (!PromotableBB[C].isSet(From)) {
@@ -1597,12 +1585,9 @@ inline Move32* generateOnBoardRookPromoteCheckMovesImpl(
     const Bitboard FromBB = S.getBitboard<C, Type>() & SourceFilter;
     (FromBB & S.getDefendingOpponentSliderBB<C>()).forEach([&](Square From) {
         Bitboard TargetBB2 =
-            (Pinned
-                 ? (~LineBB[From][S.getKingSquare<~C>()] |
-                    CheckAttacks.getRook<Type>() |
-                    CheckAttacks.King)
-                 : (CheckAttacks.getRook<Type>() |
-                    CheckAttacks.King)) &
+            (Pinned ? (~LineBB[From][S.getKingSquare<~C>()] |
+                       CheckAttacks.getRook<Type>() | CheckAttacks.King)
+                    : (CheckAttacks.getRook<Type>() | CheckAttacks.King)) &
             getRookAttackBB<Type>(From, OccupiedBB) & TargetBB;
 
         if (!PromotableBB[C].isSet(From)) {
@@ -1626,10 +1611,8 @@ inline Move32* generateOnBoardRookPromoteCheckMovesImpl(
         [&](Square From) {
             Bitboard TargetBB2 =
                 (Pinned ? (~LineBB[From][S.getKingSquare<~C>()] |
-                           CheckAttacks.getRook<Type>() |
-                           CheckAttacks.King)
-                        : (CheckAttacks.getRook<Type>() |
-                           CheckAttacks.King)) &
+                           CheckAttacks.getRook<Type>() | CheckAttacks.King)
+                        : (CheckAttacks.getRook<Type>() | CheckAttacks.King)) &
                 getRookAttackBB<Type>(From, OccupiedBB) & TargetBB;
 
             if (!PromotableBB[C].isSet(From)) {
@@ -1779,11 +1762,13 @@ template <Color C, PieceTypeKind Type, bool WilyPromote>
 inline Move32* generateBoardMoves(const StateImpl& S, Move32* Moves,
                                   const Bitboard& TargetBB,
                                   const Bitboard& OccupiedBB) noexcept {
-    const Bitboard FromBB = Type == PTK_Gold
-        ? ((S.getBitboard<PTK_Gold>() | S.getBitboard<PTK_ProPawn>() |
-            S.getBitboard<PTK_ProLance>() | S.getBitboard<PTK_ProKnight>() |
-            S.getBitboard<PTK_ProSilver>()) & S.getBitboard<C>())
-        : S.getBitboard<C, Type>();
+    const Bitboard FromBB =
+        Type == PTK_Gold
+            ? ((S.getBitboard<PTK_Gold>() | S.getBitboard<PTK_ProPawn>() |
+                S.getBitboard<PTK_ProLance>() | S.getBitboard<PTK_ProKnight>() |
+                S.getBitboard<PTK_ProSilver>()) &
+               S.getBitboard<C>())
+            : S.getBitboard<C, Type>();
     const auto Attacks = [&](Square From) {
         if constexpr (Type == PTK_Lance) {
             return getLanceAttackBB<C>(From, OccupiedBB);
@@ -1800,13 +1785,13 @@ inline Move32* generateBoardMoves(const StateImpl& S, Move32* Moves,
             S, Moves, From, AttacksBB & TargetBB);
     };
     if constexpr (Type != PTK_Knight) {
-        (FromBB & S.getDefendingOpponentSliderBB<C>()).forEach([&](Square From) {
-            Emit(From, Attacks(From) & LineBB[From][S.getKingSquare<C>()]);
-        });
+        (FromBB & S.getDefendingOpponentSliderBB<C>())
+            .forEach([&](Square From) {
+                Emit(From, Attacks(From) & LineBB[From][S.getKingSquare<C>()]);
+            });
     }
-    S.getDefendingOpponentSliderBB<C>().andNot(FromBB).forEach([&](Square From) {
-        Emit(From, Attacks(From));
-    });
+    S.getDefendingOpponentSliderBB<C>().andNot(FromBB).forEach(
+        [&](Square From) { Emit(From, Attacks(From)); });
     return Moves;
 }
 
@@ -1883,10 +1868,10 @@ inline Move32* generateLegalMovesImpl(const StateImpl& S,
             S, Moves, TargetBB, OccupiedBB);
         Moves = generateBoardMoves<C, PTK_Silver, WilyPromote>(
             S, Moves, TargetBB, OccupiedBB);
-        Moves = generateOnBoardOneStepMovesImpl<C, PTK_King, true>(
-            S, Moves, TargetBB);
-        Moves = generateBoardMoves<C, PTK_Gold, WilyPromote>(
-            S, Moves, TargetBB, OccupiedBB);
+        Moves = generateOnBoardOneStepMovesImpl<C, PTK_King, true>(S, Moves,
+                                                                   TargetBB);
+        Moves = generateBoardMoves<C, PTK_Gold, WilyPromote>(S, Moves, TargetBB,
+                                                             OccupiedBB);
         Moves = generateBoardMoves<C, PTK_Lance, WilyPromote>(
             S, Moves, TargetBB, OccupiedBB);
         Moves = generateBoardMoves<C, PTK_ProBishop, WilyPromote>(
@@ -1895,8 +1880,8 @@ inline Move32* generateLegalMovesImpl(const StateImpl& S,
             S, Moves, TargetBB, OccupiedBB);
         Moves = generateBoardMoves<C, PTK_ProRook, WilyPromote>(
             S, Moves, TargetBB, OccupiedBB);
-        Moves = generateBoardMoves<C, PTK_Rook, WilyPromote>(
-            S, Moves, TargetBB, OccupiedBB);
+        Moves = generateBoardMoves<C, PTK_Rook, WilyPromote>(S, Moves, TargetBB,
+                                                             OccupiedBB);
         return generateDroppingMovesImpl<C>(S, Moves, ~OccupiedBB);
     }
 
@@ -1978,11 +1963,13 @@ inline Move32* generateLegalCheckMovesImpl(const StateImpl& S,
     const Square OpponentKing = S.getKingSquare<~C>();
     const CheckAttackCache CheckAttacks{
         ((S.getBitboard<PTK_Bishop>() | S.getBitboard<PTK_ProBishop>()) &
-         S.getBitboard<C>()).isZero()
+         S.getBitboard<C>())
+                .isZero()
             ? Bitboard::ZeroBB()
             : getBishopAttackBB<PTK_Bishop>(OpponentKing, OccupiedBB),
         ((S.getBitboard<PTK_Rook>() | S.getBitboard<PTK_ProRook>()) &
-         S.getBitboard<C>()).isZero()
+         S.getBitboard<C>())
+                .isZero()
             ? Bitboard::ZeroBB()
             : getRookAttackBB<PTK_Rook>(OpponentKing, OccupiedBB),
         S.getBitboard<C, PTK_Lance>().isZero()
@@ -2035,7 +2022,8 @@ inline Move32* generateLegalCheckMovesImpl(const StateImpl& S,
 
             Moves = generateOnBoardSliderCheckMovesImpl<C, false, true,
                                                         WilyPromote>(
-                S, Moves, CheckerMyKingBetweenBB, OccupiedBB, PinnedBB, CheckAttacks);
+                S, Moves, CheckerMyKingBetweenBB, OccupiedBB, PinnedBB,
+                CheckAttacks);
             Moves =
                 generateOnBoardSliderCheckMovesImpl<C, true, true, WilyPromote>(
                     S, Moves, CheckerBB, OccupiedBB, PinnedBB, CheckAttacks);
@@ -2049,7 +2037,8 @@ inline Move32* generateLegalCheckMovesImpl(const StateImpl& S,
                 S, Moves, CheckerBB, NoPinnedBB);
         Moves =
             generateOnBoardSliderCheckMovesImpl<C, false, false, WilyPromote>(
-                S, Moves, CheckerMyKingBetweenBB, OccupiedBB, NoPinnedBB, CheckAttacks);
+                S, Moves, CheckerMyKingBetweenBB, OccupiedBB, NoPinnedBB,
+                CheckAttacks);
         Moves =
             generateOnBoardSliderCheckMovesImpl<C, true, false, WilyPromote>(
                 S, Moves, CheckerBB, OccupiedBB, NoPinnedBB, CheckAttacks);
@@ -2072,7 +2061,8 @@ inline Move32* generateLegalCheckMovesImpl(const StateImpl& S,
                 S, Moves, EmptyBB, OccupiedBB, PinnedBB, CheckAttacks);
             Moves =
                 generateOnBoardSliderCheckMovesImpl<C, true, true, WilyPromote>(
-                    S, Moves, S.getBitboard<~C>(), OccupiedBB, PinnedBB, CheckAttacks);
+                    S, Moves, S.getBitboard<~C>(), OccupiedBB, PinnedBB,
+                    CheckAttacks);
         }
 
         Moves =
@@ -2086,7 +2076,8 @@ inline Move32* generateLegalCheckMovesImpl(const StateImpl& S,
                 S, Moves, EmptyBB, OccupiedBB, NoPinnedBB, CheckAttacks);
         Moves =
             generateOnBoardSliderCheckMovesImpl<C, true, false, WilyPromote>(
-                S, Moves, S.getBitboard<~C>(), OccupiedBB, NoPinnedBB, CheckAttacks);
+                S, Moves, S.getBitboard<~C>(), OccupiedBB, NoPinnedBB,
+                CheckAttacks);
     }
 
     return Moves;

@@ -32,7 +32,8 @@ void assertMateMove(nshogi::core::State& State, nshogi::core::Move32 Move) {
     State.doMove(Move);
     TEST_ASSERT_TRUE(State.isInCheck());
     TEST_ASSERT_TRUE(
-        nshogi::core::MoveGenerator::generateLegalMoves<false>(State).size() == 0);
+        nshogi::core::MoveGenerator::generateLegalMoves<false>(State).size() ==
+        0);
     State.undoMove();
     TEST_ASSERT_EQ(State.getHash(), Hash);
 }
@@ -242,9 +243,8 @@ TEST(Mate1Ply, Problems) {
 TEST(Mate1Ply, KnightDropWithoutOtherAttacks) {
     // A knight drop does not need support. All escape squares are occupied
     // by the defending side, so no existing attack near its king is needed.
-    for (const char* Sfen : {
-             "3lkl3/3npn3/9/9/9/9/9/9/4K4 b N 1",
-             "4k4/9/9/9/9/9/9/3NPN3/3LKL3 w n 1"}) {
+    for (const char* Sfen : {"3lkl3/3npn3/9/9/9/9/9/9/4K4 b N 1",
+                             "4k4/9/9/9/9/9/9/3NPN3/3LKL3 w n 1"}) {
         auto State = nshogi::io::sfen::StateBuilder::newState(Sfen);
         const auto Move = nshogi::solver::mate1ply::solve(State);
         TEST_ASSERT_FALSE(Move.isNone());
@@ -256,14 +256,14 @@ TEST(Mate1Ply, KnightDropWithoutOtherAttacks) {
 TEST(Mate1Ply, LanceChecksMustNotWrapAtEdges) {
     // A reverse white-lance attack from a king on 7a crosses unused bit 63.
     // That padding bit must not be interpreted as the real square 8i.
-    for (const char* Sfen : {
-             "p+PK+NG4/1+L+PR+BG+P1p/1G7/6+S2/4p2P1/PPp1+lp2L/1pkn1P1p1/"
-             "b2p2+r1S/+s+sg+n1+n1+p+p w Pl 1",
-             "G+LK+P2s2/+P+P+R2s1p1/2bP5/3pk2+B1/1p2sPP1R/4gp1SP/"
-             "Ng+p2N2N/L5+p1L/PP+p4NG w 2Pl 1",
-             // The reverse black-lance direction from 6i wraps to 5a.
-             "1+N1+P1G3/n+PPP2b1p/rNs1Lp1SR/3pP+S1PG/pp2plGp1/1+pp2+BP2/"
-             "9/1+ng2K2+l/1P+pk2+lS1 b - 1"}) {
+    for (const char* Sfen :
+         {"p+PK+NG4/1+L+PR+BG+P1p/1G7/6+S2/4p2P1/PPp1+lp2L/1pkn1P1p1/"
+          "b2p2+r1S/+s+sg+n1+n1+p+p w Pl 1",
+          "G+LK+P2s2/+P+P+R2s1p1/2bP5/3pk2+B1/1p2sPP1R/4gp1SP/"
+          "Ng+p2N2N/L5+p1L/PP+p4NG w 2Pl 1",
+          // The reverse black-lance direction from 6i wraps to 5a.
+          "1+N1+P1G3/n+PPP2b1p/rNs1Lp1SR/3pP+S1PG/pp2plGp1/1+pp2+BP2/"
+          "9/1+ng2K2+l/1P+pk2+lS1 b - 1"}) {
         auto State = nshogi::io::sfen::StateBuilder::newState(Sfen);
         TEST_ASSERT_TRUE(nshogi::solver::mate1ply::solve(State).isNone());
     }
@@ -277,8 +277,10 @@ TEST(Mate1Ply, RandomGamesReturnedMovesAreCheckmate) {
             const auto Move = nshogi::solver::mate1ply::solve(State);
             const auto ColorMove =
                 State.getSideToMove() == nshogi::core::Black
-                    ? nshogi::solver::mate1ply::solve<nshogi::core::Black>(State)
-                    : nshogi::solver::mate1ply::solve<nshogi::core::White>(State);
+                    ? nshogi::solver::mate1ply::solve<nshogi::core::Black>(
+                          State)
+                    : nshogi::solver::mate1ply::solve<nshogi::core::White>(
+                          State);
             TEST_ASSERT_TRUE(Move == ColorMove);
             if (!Move.isNone()) {
                 assertMateMove(State, Move);

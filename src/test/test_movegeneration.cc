@@ -373,13 +373,12 @@ TEST(MoveGeneration, ExtendedStateSameAfterDoNullAndUndoNull) {
 
 TEST(MoveGeneration, DroppingHandCombinations) {
     using namespace nshogi::core;
-    constexpr PieceTypeKind Types[] = {
-        PTK_Pawn, PTK_Lance, PTK_Knight, PTK_Silver,
-        PTK_Gold, PTK_Bishop, PTK_Rook};
-    const std::string Boards[] = {
-        "4k4/9/9/9/9/9/9/9/4K4",
-        "4k4/9/9/9/1P5p1/9/9/9/4K4",
-        "4k4/9/9/9/1p5P1/9/9/9/4K4"};
+    constexpr PieceTypeKind Types[] = {PTK_Pawn,   PTK_Lance, PTK_Knight,
+                                       PTK_Silver, PTK_Gold,  PTK_Bishop,
+                                       PTK_Rook};
+    const std::string Boards[] = {"4k4/9/9/9/9/9/9/9/4K4",
+                                  "4k4/9/9/9/1P5p1/9/9/9/4K4",
+                                  "4k4/9/9/9/1p5P1/9/9/9/4K4"};
 
     for (Color C : {Black, White}) {
         const std::string Symbols = C == Black ? "PLNSGBR" : "plnsgbr";
@@ -387,7 +386,8 @@ TEST(MoveGeneration, DroppingHandCombinations) {
             for (unsigned Mask = 0; Mask < 128; ++Mask) {
                 std::string Hand;
                 for (unsigned I = 0; I < 7; ++I) {
-                    if ((Mask & (1U << I)) != 0) Hand += Symbols[I];
+                    if ((Mask & (1U << I)) != 0)
+                        Hand += Symbols[I];
                 }
                 const auto State = nshogi::io::sfen::StateBuilder::newState(
                     Board + (C == Black ? " b " : " w ") +
@@ -395,17 +395,21 @@ TEST(MoveGeneration, DroppingHandCombinations) {
                 const auto& Pos = State.getPosition();
                 std::set<uint32_t> Expected;
                 for (unsigned I = 0; I < 7; ++I) {
-                    if ((Mask & (1U << I)) == 0) continue;
+                    if ((Mask & (1U << I)) == 0)
+                        continue;
                     const auto Type = Types[I];
                     for (int N = 0; N < NumSquares; ++N) {
                         const auto To = static_cast<Square>(N);
-                        if (Pos.pieceOn(To) != PK_Empty) continue;
+                        if (Pos.pieceOn(To) != PK_Empty)
+                            continue;
                         const Rank RankTo = squareToRank(To);
                         if ((Type == PTK_Pawn || Type == PTK_Lance ||
                              Type == PTK_Knight) &&
-                            RankTo == (C == Black ? RankA : RankI)) continue;
+                            RankTo == (C == Black ? RankA : RankI))
+                            continue;
                         if (Type == PTK_Knight &&
-                            RankTo == (C == Black ? RankB : RankH)) continue;
+                            RankTo == (C == Black ? RankB : RankH))
+                            continue;
                         bool DoublePawn = false;
                         if (Type == PTK_Pawn) {
                             for (int R = 0; R < NumRanks; ++R) {
@@ -416,14 +420,15 @@ TEST(MoveGeneration, DroppingHandCombinations) {
                             }
                         }
                         if (!DoublePawn) {
-                            Expected.insert(Move32::droppingMove(To, Type).value());
+                            Expected.insert(
+                                Move32::droppingMove(To, Type).value());
                         }
                     }
                 }
                 for (bool Wily : {false, true}) {
-                    const auto Moves = Wily
-                        ? MoveGenerator::generateLegalMoves<true>(State)
-                        : MoveGenerator::generateLegalMoves<false>(State);
+                    const auto Moves =
+                        Wily ? MoveGenerator::generateLegalMoves<true>(State)
+                             : MoveGenerator::generateLegalMoves<false>(State);
                     std::set<uint32_t> Actual;
                     std::size_t Count = 0;
                     for (const auto Move : Moves) {
