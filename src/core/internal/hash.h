@@ -41,6 +41,10 @@ struct Hash {
         Value ^= ColorHash;
     }
 
+    inline void setValue(HashValueType SavedValue) noexcept {
+        Value = SavedValue;
+    }
+
     inline HashValueType getValue() const noexcept {
         return Value;
     }
